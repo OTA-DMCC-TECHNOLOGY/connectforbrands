@@ -28,7 +28,7 @@ Implement everything in the ТЗ in the browser demo, with these honest simulati
 
 ## 3. Data model additions (in `S`, created by the core refactor agent; others use them)
 - `S.ota` — OTA data (ТЗ §3 "Данные OTA"): keys OTA_NAME, OTA_REGNO, OTA_LICENCE, OTA_TRN, OTA_ADDR, OTA_SIGNATORY, OTA_TITLE, OTA_BANK_* , OTA_CUSTOMS_CODE, OTA_VAT_{CC}, OTA_REP_{CC}, OTA_EMAIL_OPS/LEGAL/FIN/SUPPORT/PRIVACY, OTA_SUPPORT_HOURS. Empty = N/A automatically. Replaces `S.ourEnt`/`ENTITIES` for invoices.
-- `S.org.code` — partner code PPP (3 Latin letters, unique, reserved OTA/INV/TST; proposed from name, approved by OTA). Demo partner: GZR (GAZER LIMITED).
+- `S.org.code` — partner code PPP (3 Latin letters, unique, reserved OTA/INV/TST; proposed from name, approved by OTA). Demo partner: ARV (ARVELO LIMITED).
 - `S.org.lang2` — second document language ('ru' is the only approved translation now).
 - `S.form` — partner questionnaire: `{KEY:{value, status:'filled'|'empty'|'na', comment, by, at}}` for all keys in ТЗ §3 (P_NAME, P_FORM_EN/L2, P_COUNTRY, P_REGNO, P_TAXNO, P_ADDR_EN/L2, P_SIGNATORY, P_TITLE_EN/L2/L2_GEN, P_AUTHORITY (+file), LANG2, P_BRAND, P_PROGRAMME, P_TM_OWNER_IS_PARTNER, P_TM_*, P_DOMAIN (+DNS contact), P_LOGO, P_BRANDBOOK, P_EMAIL_OPS/LEGAL/FIN/SUPPORT, P_PHONE, P_BANK_* ) + per-country order params and Annex 1 devices. Only OTA can set 'na'; partner can only comment "no such data".
 - `S.priceLists[CC]` — versioned: `[{ver, from, to, key, tokens:{light:{12:..,24:..},...}, retained:{light,standard,premium}, fee}]`.

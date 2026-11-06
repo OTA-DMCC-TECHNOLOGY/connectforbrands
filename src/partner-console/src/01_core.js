@@ -224,7 +224,7 @@ function codeRegister(code){const g=gStore();g.codes=g.codes||[];if(!g.codes.inc
 /* ---------- state ---------- */
 function freshState(){return{v:3,lang:'uk',admin:false,clock:0,authed:false,
  user:null,           // {email,name} — the signed-in partner user (Partner Admin)
- org:null,            // {name,code:'GZR',codeStatus:'proposed'|'approved',lang2:'ru',country:'GB'(registration, drives VAT),countries:['UA','KZ'](Order Forms),regNo,taxId,address,
+ org:null,            // {name,code:'ARV',codeStatus:'proposed'|'approved',lang2:'ru',country:'GB'(registration, drives VAT),countries:['UA','KZ'](Order Forms),regNo,taxId,address,
                       //  signatory,title,phone,bank:{benef,iban,bank,bankAddr,swift,interSwift},delivery:{CC:{company,recipient,phone,address,city,importer}},
                       //  currency:'USD',prefix,commit:3000,minFirst,minNext,serials:{},createdAt}
  ota:otaSeed(),otaSeeded:!!legalDemo(), // OTA data keys (see OTA_KEYS); edited on the "OTA data" admin page

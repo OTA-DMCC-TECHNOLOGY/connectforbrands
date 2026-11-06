@@ -1,5 +1,5 @@
 # Template data notes (from the template extraction agent)
-- Files: legal_src/templates/{MPA,OF,TRT,SLA,BL,BOA,DPA,EUT,PN,SIM,RS,PF,SR,INV,CI}.json, keys.json (240 keys), gazer_values.json; generated src/modules/60_legal_templates.js (LEGAL_TPL, LEGAL_KEYS, LEGAL_DEMO_VALUES, onBoot loader into S.templates). Re-run: python3 tools/extract_templates.py (--check for checks only).
+- Files: legal_src/templates/{MPA,OF,TRT,SLA,BL,BOA,DPA,EUT,PN,SIM,RS,PF,SR,INV,CI}.json, keys.json (240 keys), demo_values.json; generated src/modules/60_legal_templates.js (LEGAL_TPL, LEGAL_KEYS, LEGAL_DEMO_VALUES, onBoot loader into S.templates). Re-run: python3 tools/extract_templates.py (--check for checks only).
 - Shape: {type, docNo, title:{en,ru}, ver:'T-<TYPE>-v3', effective, cls:'A'|'B'|'C', blocks:[{id, kind:'heading'|'clause'|'para'|'table'|'signature'|'annex', en, ru, cond?, rows?:[[{en,ru}]], bi?, rowCond?:{row:KEY}, repeat?:{row, list:'DEVICES'|'P_TM_LIST'}}]}. cls: A = 01/02/03/05A/05B/06/09; B = 04, 10–14; C = 07/08.
 - Block ids: clause number (MPA-1.2), TYPE-s<n> section headings, TYPE-h<n>, TYPE-p<n>/TYPE-s<sec>.p<n> paras, TYPE-t<n> tables, TYPE-sig<n>, TYPE-title, TYPE-ref.
 - bi:true → source cell was one string "EN / RU": render as `en / ru`.

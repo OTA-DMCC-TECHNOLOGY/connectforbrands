@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Extract the CONNECT FOR BRANDS v09 DOCX templates into tokenised, paragraph-level
-bilingual (EN | RU) JSON templates + key catalogue + GAZER demo values, generate
+bilingual (EN | RU) JSON templates + key catalogue + ARVELO demo values, generate
 src/modules/60_legal_templates.js, and run the verification suite.
 
 Usage:  python3 tools/extract_templates.py            (writes files, prints report)
@@ -18,7 +18,7 @@ Table cell:   {"en","ru"} ; "bi":true = the source cell was one bilingual string
               language-neutral (en == ru).
 
 Round-trip principle: every highlighted run of the DOCX and every OTA_* value is replaced
-by a token; substituting GAZER's values (with the placeholders the DOCX shows, e.g. "[ ]")
+by a token; substituting ARVELO's values (with the placeholders the DOCX shows, e.g. "[ ]")
 must reproduce the DOCX cell text exactly. A short list of "structured" replacements
 (choices / composite placeholders) and "additions" (ТЗ-mandated conditional fragments) is
 reported separately; those are verified by checking the rest of the text is identical.
@@ -125,28 +125,28 @@ def plain_nohl(cell):
 # --------------------------------------------------------------------------------------
 # Global value map for highlighted text (exact match) -> token
 HL_VALUES = {
-    'GAZER LIMITED': '{{P_NAME}}',
+    'ARVELO LIMITED': '{{P_NAME}}',
     'a private limited company incorporated in England and Wales': '{{P_FORM_EN}}',
     'частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе': '{{P_FORM_L2}}',
-    '08778057': '{{P_REGNO}}',
-    '17 Hanover Square, London, W1S 1BN, United Kingdom': '{{P_ADDR_EN}}',
-    '17 Hanover Square, London, W1S 1BN, Великобритания': '{{P_ADDR_L2}}',
+    '00012345': '{{P_REGNO}}',
+    '10 Demo Lane, London, N1 0AA, United Kingdom': '{{P_ADDR_EN}}',
+    '10 Demo Lane, London, N1 0AA, Великобритания': '{{P_ADDR_L2}}',
     'Director': '{{P_TITLE_EN}}',
     'Директор': '{{P_TITLE_L2}}',
     'директора': '{{P_TITLE_L2_GEN}}',
-    'Serhii Boiar': '{{P_SIGNATORY}}',
-    'GAZER CONNECT': '{{P_PROGRAMME}}',
-    'connect.gazer.com': '{{P_DOMAIN}}',
-    'GAZER': '{{P_BRAND}}',
-    'GB76REVO00996952368216': '{{P_BANK_IBAN}}',
-    'Revolut Ltd': '{{P_BANK_NAME}}',
-    '7 Westferry Circus, London, E14 4HD, United Kingdom': '{{P_BANK_ADDR}}',
-    'REVOGB21': '{{P_BANK_SWIFT}}',
-    'CHASGB2L': '{{P_BANK_INTERMEDIARY}}',
-    'GZR': '{{P_CODE}}',
-    'OTA-GZR-OF-UA-001-v1': '{{DOC_NO}}',
-    'OTA-GZR-OF-KZ-001-v1': '{{DOC_NO}}',
-    '[OTA*GAZERCONNECT]': '{{CARD_DESCRIPTOR}}',
+    'Daniel Hart': '{{P_SIGNATORY}}',
+    'ARVELO CONNECT': '{{P_PROGRAMME}}',
+    'connect.arvelo.example': '{{P_DOMAIN}}',
+    'ARVELO': '{{P_BRAND}}',
+    'GB29NWBK60161331926819': '{{P_BANK_IBAN}}',
+    'Demo Bank Ltd': '{{P_BANK_NAME}}',
+    '2 Demo Square, London, E1 0AA, United Kingdom': '{{P_BANK_ADDR}}',
+    'DEMOGB21': '{{P_BANK_SWIFT}}',
+    'DEMOGB2L': '{{P_BANK_INTERMEDIARY}}',
+    'ARV': '{{P_CODE}}',
+    'OTA-ARV-OF-UA-001-v1': '{{DOC_NO}}',
+    'OTA-ARV-OF-KZ-001-v1': '{{DOC_NO}}',
+    '[OTA*ARVELOCONNECT]': '{{CARD_DESCRIPTOR}}',
     '[1.0]': '{{DOC_VER}}',
     '[YYYY-NNNN]': '{{DOC_SEQ}}',
     '[YYYY-NNNNNN]': '{{DOC_SEQ}}',
@@ -188,9 +188,9 @@ ANY = '*'
 #       lit = allowed literal placeholder kept as text
 HL_RULES = [
     # --- document numbers / dates -------------------------------------------------------
-    R('MPA', 'OTA-GZR-MPA-001-v1', '{{DOC_NO}}'),
-    R(PKG, 'OTA-GZR-MPA-001-v1', '{{DOC_NO}}', before=r'(Ref\. |№ )$', label=r'^Document \d'),
-    R(ANY, 'OTA-GZR-MPA-001-v1', '{{DOC_NO_MPA}}'),
+    R('MPA', 'OTA-ARV-MPA-001-v1', '{{DOC_NO}}'),
+    R(PKG, 'OTA-ARV-MPA-001-v1', '{{DOC_NO}}', before=r'(Ref\. |№ )$', label=r'^Document \d'),
+    R(ANY, 'OTA-ARV-MPA-001-v1', '{{DOC_NO_MPA}}'),
     R('MPA', '[DATE / ДАТА]', '{{DATE}}'),
     R('OF', '[DATE / ДАТА]', '{{MPA_DATE}}'),
     R('OF', '[DATE]', '{{LAUNCH_DATE}}'), R('OF', '[ДАТА]', '{{LAUNCH_DATE}}'),
@@ -214,7 +214,7 @@ HL_RULES = [
     R('OF', '[1,000]', '{{INIT_SIMS}}', before=r'shipment.*: $'), R('OF', '[1 000]', '{{INIT_SIMS}}', before=r'SIM.*: $'),
     R('OF', '[300]', '{{INIT_TOKENS}}'),
     R('OF', '[3,000]', '{{ANNUAL_TARGET}}'), R('OF', '[3 000]', '{{ANNUAL_TARGET}}'),
-    R('OF', 'GAZER LIMITED', '{{P_BANK_BENEFICIARY}}', label=r'^Beneficiary'),
+    R('OF', 'ARVELO LIMITED', '{{P_BANK_BENEFICIARY}}', label=r'^Beneficiary'),
     R({'OF'}, B, '{{P_EMAIL_OPS}}', label=r'^Operations'),
     R({'OF'}, B, '{{P_EMAIL_LEGAL}}', label=r'^Legal notices'),
     R({'OF'}, B, '{{P_EMAIL_FIN}}', label=r'^Finance'),
@@ -316,7 +316,7 @@ HL_RULES = [
     R('CI', B, '{{CI_AMOUNT}}', label=r'^1$'),
     R('CI', B, '{{CI_VAT_AMOUNT}}', label=r'^\|VAT'),
     R('CI', B, '{{CI_TOTAL}}', label=r'^\|Total due'),
-    R('CI', 'GAZER LIMITED', '{{P_BANK_BENEFICIARY}}', label=r'^Beneficiary'),
+    R('CI', 'ARVELO LIMITED', '{{P_BANK_BENEFICIARY}}', label=r'^Beneficiary'),
 ]
 
 # Forced spans: matched on the original text (highlighted or not) before anything else.
@@ -328,7 +328,7 @@ FORCED = [
     R(ANY, 'privacy@example.com [confirm]', '{{OTA_EMAIL_PRIVACY}}'),
     R(ANY, 'privacy@example.com [подтвердить]', '{{OTA_EMAIL_PRIVACY}}'),
     # composite references
-    R('INV', 'OTA-GZR-OF-[CC-NNN-vN]', '{{DOC_NO_OF}}', kind='struct'),
+    R('INV', 'OTA-ARV-OF-[CC-NNN-vN]', '{{DOC_NO_OF}}', kind='struct'),
     # OTA signatory / title in prose
     R('MPA', 'represented by its Manager, Anna Petrova', 'represented by its {{OTA_TITLE_EN}}, {{OTA_SIGNATORY}}'),
     R('MPA', 'в лице менеджера Анны Петровой', 'в лице {{OTA_TITLE_L2_GEN}} {{OTA_SIGNATORY_L2_GEN}}'),
@@ -381,7 +381,7 @@ WRAPS = [
     (ANY, re.compile(r'\nIntermediary / банк-посредник: \{\{P_BANK_INTERMEDIARY\}\}'),
      '[[P_BANK_INTERMEDIARY|\nIntermediary / банк-посредник: {{P_BANK_INTERMEDIARY}}]]'),
 ]
-# Additions to tpl only (ТЗ §4 example; hidden for GAZER because P_TAXNO is N/A there) -> lawyer check
+# Additions to tpl only (ТЗ §4 example; hidden for ARVELO because P_TAXNO is N/A there) -> lawyer check
 ADDS = [
     ('MPA', 'en', 'company no. {{P_REGNO}}, address:', 'company no. {{P_REGNO}}[[P_TAXNO|, tax no. {{P_TAXNO}}]], address:'),
     ('MPA', 'ru', 'регистрационный № {{P_REGNO}}, адрес:', 'регистрационный № {{P_REGNO}}[[P_TAXNO|, налоговый № {{P_TAXNO}}]], адрес:'),
@@ -730,7 +730,7 @@ def build(typ, variant, path):
     return blocks, rt_blocks, orig_blocks
 
 # --------------------------------------------------------------------------------------
-# Partner Data Form (A) -> GAZER values
+# Partner Data Form (A) -> ARVELO values
 # --------------------------------------------------------------------------------------
 FORM_KEYS = {
     'Legal name / Полное наименование': ['P_NAME'],
@@ -960,7 +960,7 @@ for i, ln in enumerate(RS_D_LINES):
     k('RS_D_%s' % ln, 'Акт сверки D: %s' % RS_D_LAB[i], 'statement', req='optional', tz=False)
 
 # --------------------------------------------------------------------------------------
-# Values: GAZER (partner form), OTA seed, countries + round-trip placeholders
+# Values: ARVELO (partner form), OTA seed, countries + round-trip placeholders
 # --------------------------------------------------------------------------------------
 def demo_prices(key_usd, light_local, std_local, vat, fx):
     disc = {12: .10, 24: .20, 36: .30, 48: .35, 60: .40}
@@ -983,14 +983,14 @@ def make_values(form):
         if v is not None and v.startswith('['):
             v = None
         partner[key] = v
-    partner['P_ADDR_L2'] = '17 Hanover Square, London, W1S 1BN, Великобритания'   # from Doc 01 RU (form has EN only)
+    partner['P_ADDR_L2'] = '10 Demo Lane, London, N1 0AA, Великобритания'   # from Doc 01 RU (form has EN only)
     partner['P_TITLE_L2_GEN'] = 'директора'                                        # from Doc 01 RU
     partner['P_BANK_BENEFICIARY'] = partner['P_NAME']
     partner['P_COUNTRY'] = 'GB'                                                    # England and Wales
     partner['LANG2'] = 'ru' if form.get('LANG2') == 'Russian' else form.get('LANG2')
     partner['P_TM_OWNER_IS_PARTNER'] = None
-    partner['P_TM_LIST'] = [{'TM_MARK': 'GAZER (word / словесный)', 'TM_REGNO': None, 'TM_COUNTRIES': None, 'TM_CLASSES': None},
-                            {'TM_MARK': 'GAZER (logo / логотип)', 'TM_REGNO': None, 'TM_COUNTRIES': None, 'TM_CLASSES': None}]
+    partner['P_TM_LIST'] = [{'TM_MARK': 'ARVELO (word / словесный)', 'TM_REGNO': None, 'TM_COUNTRIES': None, 'TM_CLASSES': None},
+                            {'TM_MARK': 'ARVELO (logo / логотип)', 'TM_REGNO': None, 'TM_COUNTRIES': None, 'TM_CLASSES': None}]
     status = {}
     for kk, v in partner.items():
         status[kk] = 'filled' if v not in (None, '', []) else 'empty'
@@ -1009,7 +1009,7 @@ def make_values(form):
         'OTA_SUPPORT_HOURS': 'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',
         'OTA_CUSTOMS_CODE': None, 'OTA_VAT_UA': None, 'OTA_VAT_KZ': None, 'OTA_REP_UA': None, 'OTA_REP_KZ': None,
         'OTA_SUBPROC_EMAIL': None, 'OTA_SUBPROC_EMAIL_LOC': None,
-        'P_CODE': 'GZR', 'CARD_DESCRIPTOR': 'OTA*GAZERCONNECT',
+        'P_CODE': 'ARV', 'CARD_DESCRIPTOR': 'OTA*ARVELOCONNECT',
     }
     ua = dict(CC='UA', CC_NAME_EN='Ukraine', CC_NAME_L2='Украина', CC_NAME_UPPER_EN='UKRAINE', CC_NAME_UPPER_L2='УКРАИНА',
               CC_NAME_FULL_EN='Ukraine', CC_NAME_FULL_L2='Украина', CC_NAME_LOC_L2='Украине',
@@ -1017,18 +1017,18 @@ def make_values(form):
               CC_EXCLUSION_L2='за исключением временно оккупированных территорий',
               OF_EXCEPTIONS_EN=None, OF_EXCEPTIONS_L2=None, LAUNCH_DATE=None,
               INIT_SIMS=1000, INIT_KEYS=1000, INIT_TOKENS=300, ANNUAL_TARGET=3000, FEE_PCT=None,
-              DEVICES=[], DOC_NO='OTA-GZR-OF-UA-001-v1')
+              DEVICES=[], DOC_NO='OTA-ARV-OF-UA-001-v1')
     ua.update(demo_prices(9.85, 75, 99, 1.2, 45.0564))
     kz = dict(CC='KZ', CC_NAME_EN='Kazakhstan', CC_NAME_L2='Казахстан', CC_NAME_UPPER_EN='KAZAKHSTAN', CC_NAME_UPPER_L2='КАЗАХСТАН',
               CC_NAME_FULL_EN='Republic of Kazakhstan', CC_NAME_FULL_L2='Республика Казахстан', CC_NAME_LOC_L2='Казахстане',
               CC_EXCLUSION_EN=None, CC_EXCLUSION_L2=None,
               OF_EXCEPTIONS_EN=None, OF_EXCEPTIONS_L2=None, LAUNCH_DATE=None,
               INIT_SIMS=1000, INIT_KEYS=1000, INIT_TOKENS=300, ANNUAL_TARGET=3000, FEE_PCT=None,
-              DEVICES=[], DOC_NO='OTA-GZR-OF-KZ-001-v1')
+              DEVICES=[], DOC_NO='OTA-ARV-OF-KZ-001-v1')
     kz.update(demo_prices(9.40, 990, 1290, 1.16, 441.77))
-    system = {'LANG2_NAME_EN': 'Russian', 'LANG2_NAME_L2': 'русском', 'DOC_NO_MPA': 'OTA-GZR-MPA-001-v1',
-              'DOC_NO': {'MPA': 'OTA-GZR-MPA-001-v1', 'TRT': 'OTA-GZR-TRT-001-v1', 'SLA': 'OTA-GZR-SLA-001-v1', 'BL': 'OTA-GZR-BL-001-v1',
-                         'BOA': 'OTA-GZR-BOA-001', 'DPA': 'OTA-GZR-DPA-001-v1', 'SIM': 'OTA-GZR-SIM-001-v1'}}
+    system = {'LANG2_NAME_EN': 'Russian', 'LANG2_NAME_L2': 'русском', 'DOC_NO_MPA': 'OTA-ARV-MPA-001-v1',
+              'DOC_NO': {'MPA': 'OTA-ARV-MPA-001-v1', 'TRT': 'OTA-ARV-TRT-001-v1', 'SLA': 'OTA-ARV-SLA-001-v1', 'BL': 'OTA-ARV-BL-001-v1',
+                         'BOA': 'OTA-ARV-BOA-001', 'DPA': 'OTA-ARV-DPA-001-v1', 'SIM': 'OTA-ARV-SIM-001-v1'}}
     return {'partner': partner, 'status': status, 'ota': ota, 'countries': {'UA': ua, 'KZ': kz}, 'system': system}
 
 
@@ -1045,7 +1045,7 @@ RT_PLACEHOLDERS = {
         'OTA_EMAIL_OPS': 'ops@example.com [confirm]', 'OTA_EMAIL_LEGAL': 'legal@example.com [confirm]',
         'OTA_EMAIL_FIN': 'finance@example.com [confirm]', 'OTA_EMAIL_PRIVACY': 'privacy@example.com [confirm]',
         'OTA_SUBPROC_EMAIL': '[Email service provider / Почтовый сервис]', 'OTA_SUBPROC_EMAIL_LOC': B,
-        'CARD_DESCRIPTOR': '[OTA*GAZERCONNECT]', 'DOC_NO_MPA': 'OTA-GZR-MPA-001-v1', 'P_BANK_BENEFICIARY': 'GAZER LIMITED',
+        'CARD_DESCRIPTOR': '[OTA*ARVELOCONNECT]', 'DOC_NO_MPA': 'OTA-ARV-MPA-001-v1', 'P_BANK_BENEFICIARY': 'ARVELO LIMITED',
         'DOC_VER': '[1.0]', 'DATE': B, 'DUE_DATE': B, 'DOC_NO_OF': B, 'MPA_DATE': '[DATE / ДАТА]',
         'PRICE_KEY': B, 'INIT_TOKENS': '[300]', 'LAUNCH_DATE': '[DATE]', 'EFFECTIVE_DATE': '[DATE]',
         'EUT_LANGS': B, 'EUT_WITHDRAWAL': B, 'EUT_CONSUMER_AUTH': B, 'EUT_DP_AUTH': B, 'EUT_OTHER': B,
@@ -1074,7 +1074,7 @@ for v in ('OF-UA', 'OF-KZ'):
     RT_PLACEHOLDERS[v] = {'*': {kk: B for kk in K if kk.startswith(('TOK_', 'RET_'))}}
     RT_PLACEHOLDERS[v]['*'].update({'OF_EXCEPTIONS_EN': None, 'OF_EXCEPTIONS_L2': None})
 for t in ('TRT', 'SLA', 'BL', 'BOA', 'DPA', 'SIM'):
-    RT_PLACEHOLDERS.setdefault(t, {}).setdefault('*', {})['DOC_NO'] = 'OTA-GZR-MPA-001-v1'   # v09 DOCX shows the MPA ref
+    RT_PLACEHOLDERS.setdefault(t, {}).setdefault('*', {})['DOC_NO'] = 'OTA-ARV-MPA-001-v1'   # v09 DOCX shows the MPA ref
 
 
 def rt_lookup(values, variant, lang, key):
@@ -1259,9 +1259,9 @@ def main():
             json.dump(keys_list, f, ensure_ascii=False, indent=1)
         gv = dict(demo)
         gv['roundtrip'] = RT_PLACEHOLDERS
-        gv['_note'] = ('partner = GAZER values from A_Partner_Data_Form (null = "[ ]" in the form); '
+        gv['_note'] = ('partner = ARVELO values from A_Partner_Data_Form (null = "[ ]" in the form); '
                        'roundtrip = placeholders exactly as shown in the v09 DOCX, used only by the round-trip test.')
-        with open(os.path.join(OUT, 'gazer_values.json'), 'w') as f:
+        with open(os.path.join(OUT, 'demo_values.json'), 'w') as f:
             json.dump(gv, f, ensure_ascii=False, indent=1)
         with open(MODULE, 'w') as f:
             f.write(out_js)
@@ -1279,7 +1279,7 @@ def main():
     print('== Structured replacements (RT keeps source literal):')
     for s in sorted(set((v.split('-')[0], l, o, r) for v, l, o, r in STRUCT_LOG)):
         print('   ', s)
-    print('== Additions (tpl only, hidden for GAZER):', sorted(set(ADD_LOG)))
+    print('== Additions (tpl only, hidden for ARVELO):', sorted(set(ADD_LOG)))
     print('== (b) highlighted source strings still present literally in templates:', hl_left)
     print('== EN/L2 token discipline violations:', lang_viol)
     print('== Round-trip mismatches: %d' % len(rt_mismatch))

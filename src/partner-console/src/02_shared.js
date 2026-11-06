@@ -119,42 +119,42 @@ function shipReceive(h,r,at){const ts=at||iso(now());const n=clamp(r.received|0,
  for(let i=0;i<n;i++)S.sims.push({iccid:genIccid(h.iccidFrom+i),shipmentId:h.id,status:'stock',imei:null,modelId:null,plan:null,term:null,paidUntil:null,code:null,keyLotId:null,linked:false,lastSeen:null,reseller:null,events:[[ts,'in_stock']]});
  h.status='received';h.events.push(['received',ts]);audit('shipment.received',h.sr,{received:n,diff:h.qty-n,condition:h.receipt.condition});return n;}
 
-/* ---------- demo seed: a fully lived-in partner (GAZER LIMITED, code GZR) ---------- */
+/* ---------- demo seed: a fully lived-in partner (ARVELO LIMITED, code ARV) ---------- */
 function seedDemo(){
  const lang=S.lang;S=freshState();S.lang=lang;
  const n=now();const daysAgo=d=>iso(new Date(n.getTime()-d*864e5));
- S.authed=true;S.user={email:'olena.koval@gazer.example',name:'Olena Koval'};
- S.org={name:'GAZER LIMITED',code:'GZR',codeStatus:'approved',lang2:'ru',country:'GB',countries:['UA','KZ'],regNo:'08778057',taxId:'',
-  address:'17 Hanover Square, London, W1S 1BN, United Kingdom',signatory:'Serhii Boiar',title:'Director',opsName:'Andrii Melnyk',
-  bank:{benef:'GAZER LIMITED',iban:'GB76REVO00996952368216',bank:'Revolut Ltd',bankAddr:'7 Westferry Circus, London, E14 4HD, United Kingdom',swift:'REVOGB21',interSwift:'CHASGB2L'},
-  brand:'GAZER',programme:'GAZER CONNECT',domain:'connect.gazer.com',
-  delivery:{UA:{company:'GAZER LIMITED',recipient:'Olena Koval',phone:'',address:'Warehouse No. 1',city:'Kyiv',country:'UA',importer:'GAZER LIMITED'},
-   KZ:{company:'GAZER LIMITED',recipient:'Warehouse manager',phone:'',address:'Warehouse No. 2',city:'Almaty',country:'KZ',importer:'GAZER LIMITED'}},
+ S.authed=true;S.user={email:'maria.lind@arvelo.example',name:'Maria Lind'};
+ S.org={name:'ARVELO LIMITED',code:'ARV',codeStatus:'approved',lang2:'ru',country:'GB',countries:['UA','KZ'],regNo:'00012345',taxId:'',
+  address:'10 Demo Lane, London, N1 0AA, United Kingdom',signatory:'Daniel Hart',title:'Director',opsName:'Andrii Melnyk',
+  bank:{benef:'ARVELO LIMITED',iban:'GB29NWBK60161331926819',bank:'Demo Bank Ltd',bankAddr:'2 Demo Square, London, E1 0AA, United Kingdom',swift:'DEMOGB21',interSwift:'DEMOGB2L'},
+  brand:'ARVELO',programme:'ARVELO CONNECT',domain:'connect.arvelo.example',
+  delivery:{UA:{company:'ARVELO LIMITED',recipient:'Maria Lind',phone:'',address:'Warehouse No. 1',city:'Kyiv',country:'UA',importer:'ARVELO LIMITED'},
+   KZ:{company:'ARVELO LIMITED',recipient:'Warehouse manager',phone:'',address:'Warehouse No. 2',city:'Almaty',country:'KZ',importer:'ARVELO LIMITED'}},
   currency:'USD',prefix:'K02N5',createdAt:daysAgo(60),commit:3000,serials:{},phone:'',color:'#1F6FEB'};
- codeRegister('GZR');
+ codeRegister('ARV');
  S.actor='u_p_admin';S.ota=otaSeed();
  // questionnaire values from the Partner Data Form (legal module owns editing & review)
- const F=(v)=>({value:v,status:v?'filled':'empty',comment:'',by:'Olena Koval',at:daysAgo(58)});
- if(legalDemo()&&legalDemo().partner){const P=legalDemo().partner,ST=legalDemo().status||{};S.form={};Object.keys(P).forEach(k=>{S.form[k]={value:P[k],status:ST[k]||(P[k]==null?'empty':'filled'),comment:'',by:'Olena Koval',at:daysAgo(58)};});}else
- S.form={P_NAME:F('GAZER LIMITED'),P_FORM_EN:F('a private limited company incorporated in England and Wales'),P_FORM_L2:F('частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе'),
-  P_COUNTRY:F('GB'),P_REGNO:F('08778057'),P_TAXNO:F(''),P_ADDR_EN:F('17 Hanover Square, London, W1S 1BN, United Kingdom'),P_ADDR_L2:F(''),
-  P_SIGNATORY:F('Serhii Boiar'),P_TITLE_EN:F('Director'),P_TITLE_L2:F('Директор'),P_TITLE_L2_GEN:F('Директора'),P_AUTHORITY:F(''),LANG2:F('ru'),
-  P_BRAND:F('GAZER'),P_PROGRAMME:F('GAZER CONNECT'),P_TM_OWNER_IS_PARTNER:F(''),P_DOMAIN:F('connect.gazer.com'),
+ const F=(v)=>({value:v,status:v?'filled':'empty',comment:'',by:'Maria Lind',at:daysAgo(58)});
+ if(legalDemo()&&legalDemo().partner){const P=legalDemo().partner,ST=legalDemo().status||{};S.form={};Object.keys(P).forEach(k=>{S.form[k]={value:P[k],status:ST[k]||(P[k]==null?'empty':'filled'),comment:'',by:'Maria Lind',at:daysAgo(58)};});}else
+ S.form={P_NAME:F('ARVELO LIMITED'),P_FORM_EN:F('a private limited company incorporated in England and Wales'),P_FORM_L2:F('частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе'),
+  P_COUNTRY:F('GB'),P_REGNO:F('00012345'),P_TAXNO:F(''),P_ADDR_EN:F('10 Demo Lane, London, N1 0AA, United Kingdom'),P_ADDR_L2:F(''),
+  P_SIGNATORY:F('Daniel Hart'),P_TITLE_EN:F('Director'),P_TITLE_L2:F('Директор'),P_TITLE_L2_GEN:F('Директора'),P_AUTHORITY:F(''),LANG2:F('ru'),
+  P_BRAND:F('ARVELO'),P_PROGRAMME:F('ARVELO CONNECT'),P_TM_OWNER_IS_PARTNER:F(''),P_DOMAIN:F('connect.arvelo.example'),
   P_EMAIL_OPS:F(''),P_EMAIL_LEGAL:F(''),P_EMAIL_FIN:F(''),P_EMAIL_SUPPORT:F(''),P_PHONE:F(''),
-  P_BANK_BENEF:F('GAZER LIMITED'),P_BANK_IBAN:F('GB76REVO00996952368216'),P_BANK_NAME:F('Revolut Ltd'),P_BANK_ADDR:F('7 Westferry Circus, London, E14 4HD, United Kingdom'),P_BANK_SWIFT:F('REVOGB21'),P_BANK_INTER_SWIFT:F('CHASGB2L')};
+  P_BANK_BENEF:F('ARVELO LIMITED'),P_BANK_IBAN:F('GB29NWBK60161331926819'),P_BANK_NAME:F('Demo Bank Ltd'),P_BANK_ADDR:F('2 Demo Square, London, E1 0AA, United Kingdom'),P_BANK_SWIFT:F('DEMOGB21'),P_BANK_INTER_SWIFT:F('DEMOGB2L')};
  // per-country price lists (USD, net) seeded from the current wholesale (LEGAL_SPEC §1)
  S.priceLists={};const seedPL=(cc,d)=>{S.priceLists[cc]=[Object.assign({ver:1,from:daysAgo(d),to:null,createdAt:daysAgo(d),by:'Platform Admin',note:'',increase:false},plSeed(cc))];};
  seedPL('UA',60);seedPL('KZ',30);
  const tac={inv:'35867310',trk:'86541203',alm:'35299108',gsm:'86221704'};
  const mkImeis=(t,count,start)=>Array.from({length:count},(_,i)=>genImei(t,start+i));
  S.brands=[
-  {id:'b1',name:'GAZER',color:'#1F6FEB',domain:'connect.gazer.com',createdAt:daysAgo(58),categories:[
+  {id:'b1',name:'ARVELO',color:'#1F6FEB',domain:'connect.arvelo.example',createdAt:daysAgo(58),categories:[
    {id:'c1',name:'Гібридні інвертори',models:[
-    {id:'m1',name:'GAZER HX-5',sku:'HX5-48',plan:'std',planStatus:'approved',imei:mkImeis(tac.inv,1200,100000),createdAt:daysAgo(57)},
-    {id:'m2',name:'GAZER HX-8',sku:'HX8-48',plan:'std',planStatus:'approved',imei:mkImeis(tac.inv,400,200000),createdAt:daysAgo(40)}]},
+    {id:'m1',name:'ARVELO HX-5',sku:'HX5-48',plan:'std',planStatus:'approved',imei:mkImeis(tac.inv,1200,100000),createdAt:daysAgo(57)},
+    {id:'m2',name:'ARVELO HX-8',sku:'HX8-48',plan:'std',planStatus:'approved',imei:mkImeis(tac.inv,400,200000),createdAt:daysAgo(40)}]},
    {id:'c2',name:'GPS-трекери',models:[
-    {id:'m3',name:'GAZER Track T2',sku:'TT2',plan:'light',planStatus:'approved',imei:mkImeis(tac.trk,800,300000),createdAt:daysAgo(50)},
-    {id:'m4',name:'GAZER Track T3 Pro',sku:'TT3P',plan:null,planStatus:'review',imei:[],createdAt:daysAgo(2)}]}]},
+    {id:'m3',name:'ARVELO Track T2',sku:'TT2',plan:'light',planStatus:'approved',imei:mkImeis(tac.trk,800,300000),createdAt:daysAgo(50)},
+    {id:'m4',name:'ARVELO Track T3 Pro',sku:'TT3P',plan:null,planStatus:'review',imei:[],createdAt:daysAgo(2)}]}]},
   {id:'b2',name:'TEYES',color:'#D92D20',domain:'connect.teyes.ua',createdAt:daysAgo(30),categories:[
    {id:'c3',name:'Охоронні системи',models:[
     {id:'m5',name:'TEYES Guard A4',sku:'GA4',plan:'std',planStatus:'approved',imei:mkImeis(tac.alm,300,400000),createdAt:daysAgo(29)}]}]}];
@@ -171,7 +171,7 @@ function seedDemo(){
  // SIM shipment 1: received into custody
  const sh1=shipCreate({cc:'UA',qty:1000,iccidFrom:1,simType:'Industrial IoT SIM, 2FF/3FF/4FF',unitValue:0.4,dap:S.org.delivery.UA,importer:S.org.delivery.UA.importer,cartons:'2',gross:'7.5',net:'6.0',created:daysAgo(52)});
  shipAdvance(sh1,'shipped',{carrier:'DHL Express',waybill:'4917305528'},daysAgo(48));shipAdvance(sh1,'delivered',{},daysAgo(45));
- shipReceive(sh1,{received:1000,condition:'intact',storage:'Warehouse No. 1, Kyiv',person:'Olena Koval'},daysAgo(44));
+ shipReceive(sh1,{received:1000,condition:'intact',storage:'Warehouse No. 1, Kyiv',person:'Maria Lind'},daysAgo(44));
  placeOrders('UA',600,[['std',24,100]],'separate',12,11);
  // SIM shipment 2: in transit
  const sh2=shipCreate({cc:'UA',qty:500,iccidFrom:1001,simType:'Industrial IoT SIM, 2FF/3FF/4FF',unitValue:0.4,dap:S.org.delivery.UA,importer:S.org.delivery.UA.importer,cartons:'1',gross:'3.9',net:'3.0',created:daysAgo(3)});
@@ -201,7 +201,7 @@ function seedDemo(){
  activate('std',24,118);activate('light',24,61);activate('std',36,22);
  // deactivate the last 15 unused Standard·3y codes of r2
  let left=15;for(let i=S.codes.length-1;i>=0&&left>0;i--){const c=S.codes[i];if(c.reseller==='r2'&&c.status==='issued'){c.status='void';c.voidAt=daysAgo(5);left--;}}
- S.activity=[];log(t('c.demoLoaded'));audit('demo.seed','GZR',{});
+ S.activity=[];log(t('c.demoLoaded'));audit('demo.seed','ARV',{});
  HOOKS.seedDemo.forEach(f=>{try{f();}catch(e){console.error(e);}});
  save();}
 I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.vatWarnLog':'Рахунок {n}: партнер зареєстрований в ОАЕ — ПДВ 5%, перевірте разом із фінансовою службою OTA'},

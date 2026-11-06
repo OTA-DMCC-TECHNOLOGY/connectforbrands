@@ -952,20 +952,20 @@ Object.assign(FORM,{
  lg_pubAdd(f){if(!can('ota.release'))return;const d=formData(f);if(lg_st().pub.some(p=>p.type===d.type&&p.cc===d.cc&&p.lang===d.lang&&p.status==='current')){toast(t('lg.pub.exists'),'bad');return;}const p=lg_pubPublish(d.type,d.cc,d.lang,{});toast(t('lg.t.pub',{n:esc(p.number)}));rerender();},
 });
 
-/* ---------- demo seed: GZR questionnaire, signed package, one pending class-A and one class-B change ---------- */
+/* ---------- demo seed: ARV questionnaire, signed package, one pending class-A and one class-B change ---------- */
 function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const ago=d=>iso(new Date(n.getTime()-d*864e5));const F=S.form;
  const mark=()=>S.audit.length;const fix=(m,at,uidd)=>{const u=users().find(x=>x.id===uidd)||{};S.audit.slice(m).forEach(e=>{e.ts=at;if(u.id){e.actor=u.name;e.email=u.email;e.role=u.role;e.ip=lg_ip(u.role);}});};
- const set=(k,v,o)=>{F[k]=Object.assign({value:v,status:(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length))?'filled':'empty',comment:'',by:'Olena Koval',at:ago(60)},o||{});};
- S.org.signatoryEmail='serhii.boiar@gazer.example';
+ const set=(k,v,o)=>{F[k]=Object.assign({value:v,status:(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length))?'filled':'empty',comment:'',by:'Maria Lind',at:ago(60)},o||{});};
+ S.org.signatoryEmail='daniel.hart@arvelo.example';
  set('P_TAXNO',null,{status:'na',comment:'No VAT registration',naReason:'Partner has no VAT number (partner comment)',naBy:'Platform Admin',naAt:ago(59)});
  set('P_AUTHORITY','director');set('P_TM_OWNER_IS_PARTNER','yes',{by:'Platform Admin',at:ago(59)});
  // demo values (marked "demo" in the questionnaire): realistic shape, not real registrations
- const tml=(D&&D.partner&&D.partner.P_TM_LIST)||[{TM_MARK:'GAZER (word / словесный)'},{TM_MARK:'GAZER (logo / логотип)'}];const tmNo=['UK00003456789','UK00003456790'];
+ const tml=(D&&D.partner&&D.partner.P_TM_LIST)||[{TM_MARK:'ARVELO (word / словесный)'},{TM_MARK:'ARVELO (logo / логотип)'}];const tmNo=['UK00003456789','UK00003456790'];
  set('P_TM_LIST',tml.map((x,i)=>({TM_MARK:x.TM_MARK,TM_REGNO:x.TM_REGNO||(tmNo[i]||tmNo[0])+' (UKIPO)',TM_COUNTRIES:x.TM_COUNTRIES||'United Kingdom; Ukraine; Kazakhstan',TM_CLASSES:x.TM_CLASSES||'9, 38, 42'})),{demo:true});
- set('P_BRAND_RULES','Logo on white or #1F6FEB only, clear space = height of “G”; colours #1F6FEB / #101828; font Onest',{demo:true});
+ set('P_BRAND_RULES','Logo on white or #1F6FEB only, clear space = height of “A”; colours #1F6FEB / #101828; font Onest',{demo:true});
  S.ota.OTA_SUBPROC_EMAIL='Amazon Web Services EMEA SARL (Amazon SES)';S.ota.OTA_SUBPROC_EMAIL_LOC='Luxembourg (EU) / Люксембург (ЕС)';
- set('P_DNS_CONTACT','it@gazer.example');set('P_LOGO','gazer_logo_v1.svg');set('P_BRANDBOOK','gazer_brandbook_2026.pdf');set('P_BRAND_CONTACT','marketing@gazer.example');
- set('P_EMAIL_OPS','ops@gazer.example');set('P_EMAIL_LEGAL','legal@gazer.example');set('P_EMAIL_FIN','finance@gazer.example');set('P_EMAIL_SUPPORT','support@gazer.example');set('P_PHONE','[+44 …]');
+ set('P_DNS_CONTACT','it@arvelo.example');set('P_LOGO','arvelo_logo_v1.svg');set('P_BRANDBOOK','arvelo_brandbook_2026.pdf');set('P_BRAND_CONTACT','marketing@arvelo.example');
+ set('P_EMAIL_OPS','ops@arvelo.example');set('P_EMAIL_LEGAL','legal@arvelo.example');set('P_EMAIL_FIN','finance@arvelo.example');set('P_EMAIL_SUPPORT','support@arvelo.example');set('P_PHONE','[+44 …]');
  const devs=allModels().filter(x=>x.model.plan&&x.model.planStatus==='approved').map(x=>({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'rev. A',DEV_FW:'1.0',DEV_PLAN:PLAN_EN[x.model.plan],DEV_MB:x.model.plan==='light'?'5':'50',DEV_SIM:'Industrial IoT SIM (2FF/3FF/4FF)',ok:true}));
  orgCountries().forEach(cc=>{const C=(D&&D.countries&&D.countries[cc])||{};const dv=(S.org.delivery||{})[cc]||{};
   ['CC_NAME_L2','CC_NAME_FULL_EN','CC_NAME_FULL_L2','CC_NAME_LOC_L2','CC_EXCLUSION_EN','CC_EXCLUSION_L2'].forEach(k=>set(lg_ccKey(k,cc),C[k]==null?null:C[k],{by:'Platform Admin'}));
@@ -973,7 +973,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
   set(lg_ccKey('LAUNCH_DATE',cc),ago(57).slice(0,10));set(lg_ccKey('RETAIL_CUR',cc),(CC_META[cc]||{}).cur||'USD');set(lg_ccKey('DELIVERY_ADDR',cc),[dv.address,dv.city].filter(Boolean).join(', '));set(lg_ccKey('IMPORTER',cc),dv.importer||'');
   ['INIT_SIMS','INIT_KEYS','INIT_TOKENS','ANNUAL_TARGET'].forEach(k=>set(lg_ccKey(k,cc),String(C[k]!=null?C[k]:'')));set(lg_ccKey('DEVICES',cc),devs.map(x=>Object.assign({},x)));});
  lg_syncOrg();
- let m=mark();L.submitted={at:ago(60),by:'Olena Koval'};LG_KYC.forEach(k=>{L.kyc[k]={at:ago(59),by:'Platform Admin'};});L.review={at:ago(59),by:'Platform Admin'};
+ let m=mark();L.submitted={at:ago(60),by:'Maria Lind'};LG_KYC.forEach(k=>{L.kyc[k]={at:ago(59),by:'Platform Admin'};});L.review={at:ago(59),by:'Platform Admin'};
  const prevActor=S.actor;S.actor='u_ota_admin';
  lg_generate({at:ago(59)});const res=lg_issueDocs(lg_pkgDocs(),{at:ago(59),sync:true});fix(m,ago(59),'u_ota_admin');
  if(res&&res.ok){const es=res.ok.filter(d=>d.type!=='BOA');const us=users();const ps=us.find(u=>u.role==='p_sign'),ol=us.find(u=>u.role==='ota_legal');
@@ -1152,7 +1152,7 @@ en:{'lg.sec':'Documents','lg.otasec':'OTA · Legal','lg.nav.docs':'Documents','l
 'lg.cls.r.Adown.n':'price decrease','lg.cls.r.Adown.w':'New Order Form version in the partner’s favour','lg.cls.r.Adown.q':'Signature','lg.cls.r.Adown.t':'Right after signatures','lg.cls.r.Adown.m':'Old prices apply',
 'lg.cls.r.B.n':'non-critical','lg.cls.r.B.w':'Clarifications of 04, sub-processors (06), editorial edits, templates 10–14','lg.cls.r.B.q':'“Acknowledged” mark','lg.cls.r.B.t':'30 days','lg.cls.r.B.m':'Takes effect automatically, nothing blocked',
 'lg.cls.r.C.n':'public','lg.cls.r.C.w':'07, 08 for end users','lg.cls.r.C.q':'Partner notified','lg.cls.r.C.t':'Material — 30 days','lg.cls.r.C.m':'—',
-'lg.tp.ver':'Version','lg.tp.note':'Summary of changes','lg.tp.base':'Pack v09','lg.tp.st.draft':'draft','lg.tp.st.released':'released','lg.tp.edDraft':'Draft {v}','lg.tp.edNew':'New template version','lg.tp.block':'Clause','lg.tp.l2':'second language','lg.tp.ruH':'An empty translation stops generation (ТЗ §10.10 check).','lg.tp.effH':'Class A — no sooner than 30 days','lg.tp.notePh':'In short: what changed','lg.tp.saveDraft':'Save draft','lg.tp.saveNew':'Create new version','lg.tp.bump':'New version, same text',
+'lg.tp.ver':'Version','lg.tp.note':'Summary of changes','lg.tp.base':'Pack v09','lg.tp.st.draft':'draft','lg.tp.st.released':'released','lg.tp.edDraft':'Draft {v}','lg.tp.edNew':'New template version','lg.tp.block':'Clause','lg.tp.l2':'second language','lg.tp.ruH':'An empty translation stops generation (spec §10.10 check).','lg.tp.effH':'Class A — no sooner than 30 days','lg.tp.notePh':'In short: what changed','lg.tp.saveDraft':'Save draft','lg.tp.saveNew':'Create new version','lg.tp.bump':'New version, same text',
 'lg.tp.rel':'Release {v}','lg.tp.relOk':'Every paragraph is translated — generation checked.','lg.tp.affPub':'New public document versions to publish: {n}.','lg.tp.aff':'Documents in force affected: {n}. Each gets a new version with the same number.','lg.tp.preview':'Preview','lg.tp.issue':'Release',
 'lg.tp.edSub':'Current version {v}. The template is stored paragraph by paragraph: EN + a translation of every clause.','lg.tp.hist':'Version history','lg.tp.legalOnly':'Templates are edited by OTA Legal.','lg.tp.bumpNote':'New version, text unchanged','lg.tp.effPast':'The date can’t be in the past',
 'lg.pub.minor':'New version x.+1','lg.pub.major':'Material change +1.0','lg.pub.cur':'current','lg.pub.notified':'Partner notified','lg.pub.notifiedAt':'notified {d}','lg.pub.notify':'Mark “notified”','lg.pub.cc':'Country','lg.pub.add':'Publish',

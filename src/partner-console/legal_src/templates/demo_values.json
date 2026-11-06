@@ -1,21 +1,21 @@
 {
  "partner": {
-  "P_NAME": "GAZER LIMITED",
+  "P_NAME": "ARVELO LIMITED",
   "P_FORM_EN": "a private limited company incorporated in England and Wales",
   "P_FORM_L2": "частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе",
   "P_COUNTRY": "GB",
-  "P_REGNO": "08778057",
+  "P_REGNO": "00012345",
   "P_TAXNO": null,
-  "P_ADDR_EN": "17 Hanover Square, London, W1S 1BN, United Kingdom",
-  "P_ADDR_L2": "17 Hanover Square, London, W1S 1BN, Великобритания",
-  "P_SIGNATORY": "Serhii Boiar",
+  "P_ADDR_EN": "10 Demo Lane, London, N1 0AA, United Kingdom",
+  "P_ADDR_L2": "10 Demo Lane, London, N1 0AA, Великобритания",
+  "P_SIGNATORY": "Daniel Hart",
   "P_TITLE_EN": "Director",
   "P_TITLE_L2": "Директор",
   "P_TITLE_L2_GEN": "директора",
   "P_AUTHORITY": null,
   "LANG2": "ru",
-  "P_BRAND": "GAZER",
-  "P_PROGRAMME": "GAZER CONNECT",
+  "P_BRAND": "ARVELO",
+  "P_PROGRAMME": "ARVELO CONNECT",
   "P_TM_OWNER_IS_PARTNER": null,
   "P_TM_OWNER_NAME": null,
   "P_TM_OWNER_COUNTRY_EN": null,
@@ -30,19 +30,19 @@
   "P_TM_OWNER_TITLE": null,
   "P_TM_LIST": [
    {
-    "TM_MARK": "GAZER (word / словесный)",
+    "TM_MARK": "ARVELO (word / словесный)",
     "TM_REGNO": null,
     "TM_COUNTRIES": null,
     "TM_CLASSES": null
    },
    {
-    "TM_MARK": "GAZER (logo / логотип)",
+    "TM_MARK": "ARVELO (logo / логотип)",
     "TM_REGNO": null,
     "TM_COUNTRIES": null,
     "TM_CLASSES": null
    }
   ],
-  "P_DOMAIN": "connect.gazer.com",
+  "P_DOMAIN": "connect.arvelo.example",
   "P_DNS_CONTACT": null,
   "P_LOGO": null,
   "P_BRANDBOOK": null,
@@ -53,12 +53,12 @@
   "P_EMAIL_FIN": null,
   "P_EMAIL_SUPPORT": null,
   "P_PHONE": null,
-  "P_BANK_BENEFICIARY": "GAZER LIMITED",
-  "P_BANK_IBAN": "GB76REVO00996952368216",
-  "P_BANK_NAME": "Revolut Ltd",
-  "P_BANK_ADDR": "7 Westferry Circus, London, E14 4HD, United Kingdom",
-  "P_BANK_SWIFT": "REVOGB21",
-  "P_BANK_INTERMEDIARY": "CHASGB2L"
+  "P_BANK_BENEFICIARY": "ARVELO LIMITED",
+  "P_BANK_IBAN": "GB29NWBK60161331926819",
+  "P_BANK_NAME": "Demo Bank Ltd",
+  "P_BANK_ADDR": "2 Demo Square, London, E1 0AA, United Kingdom",
+  "P_BANK_SWIFT": "DEMOGB21",
+  "P_BANK_INTERMEDIARY": "DEMOGB2L"
  },
  "status": {
   "P_NAME": "filled",
@@ -138,8 +138,8 @@
   "OTA_REP_KZ": null,
   "OTA_SUBPROC_EMAIL": null,
   "OTA_SUBPROC_EMAIL_LOC": null,
-  "P_CODE": "GZR",
-  "CARD_DESCRIPTOR": "OTA*GAZERCONNECT"
+  "P_CODE": "ARV",
+  "CARD_DESCRIPTOR": "OTA*ARVELOCONNECT"
  },
  "countries": {
   "UA": {
@@ -162,7 +162,7 @@
    "ANNUAL_TARGET": 3000,
    "FEE_PCT": null,
    "DEVICES": [],
-   "DOC_NO": "OTA-GZR-OF-UA-001-v1",
+   "DOC_NO": "OTA-ARV-OF-UA-001-v1",
    "PRICE_KEY": "9.85",
    "TOK_LIGHT_12": "14.98",
    "TOK_LIGHT_24": "26.63",
@@ -203,7 +203,7 @@
    "ANNUAL_TARGET": 3000,
    "FEE_PCT": null,
    "DEVICES": [],
-   "DOC_NO": "OTA-GZR-OF-KZ-001-v1",
+   "DOC_NO": "OTA-ARV-OF-KZ-001-v1",
    "PRICE_KEY": "9.40",
    "TOK_LIGHT_12": "20.86",
    "TOK_LIGHT_24": "37.09",
@@ -228,15 +228,15 @@
  "system": {
   "LANG2_NAME_EN": "Russian",
   "LANG2_NAME_L2": "русском",
-  "DOC_NO_MPA": "OTA-GZR-MPA-001-v1",
+  "DOC_NO_MPA": "OTA-ARV-MPA-001-v1",
   "DOC_NO": {
-   "MPA": "OTA-GZR-MPA-001-v1",
-   "TRT": "OTA-GZR-TRT-001-v1",
-   "SLA": "OTA-GZR-SLA-001-v1",
-   "BL": "OTA-GZR-BL-001-v1",
-   "BOA": "OTA-GZR-BOA-001",
-   "DPA": "OTA-GZR-DPA-001-v1",
-   "SIM": "OTA-GZR-SIM-001-v1"
+   "MPA": "OTA-ARV-MPA-001-v1",
+   "TRT": "OTA-ARV-TRT-001-v1",
+   "SLA": "OTA-ARV-SLA-001-v1",
+   "BL": "OTA-ARV-BL-001-v1",
+   "BOA": "OTA-ARV-BOA-001",
+   "DPA": "OTA-ARV-DPA-001-v1",
+   "SIM": "OTA-ARV-SIM-001-v1"
   }
  },
  "roundtrip": {
@@ -268,9 +268,9 @@
     "OTA_EMAIL_PRIVACY": "privacy@example.com [confirm]",
     "OTA_SUBPROC_EMAIL": "[Email service provider / Почтовый сервис]",
     "OTA_SUBPROC_EMAIL_LOC": "[ ]",
-    "CARD_DESCRIPTOR": "[OTA*GAZERCONNECT]",
-    "DOC_NO_MPA": "OTA-GZR-MPA-001-v1",
-    "P_BANK_BENEFICIARY": "GAZER LIMITED",
+    "CARD_DESCRIPTOR": "[OTA*ARVELOCONNECT]",
+    "DOC_NO_MPA": "OTA-ARV-MPA-001-v1",
+    "P_BANK_BENEFICIARY": "ARVELO LIMITED",
     "DOC_VER": "[1.0]",
     "DATE": "[ ]",
     "DUE_DATE": "[ ]",
@@ -332,7 +332,7 @@
     "P_TM_OWNER_NAME": "[наименование правообладателя]"
    },
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   },
   "RS": {
@@ -421,29 +421,29 @@
   },
   "TRT": {
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   },
   "SLA": {
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   },
   "BL": {
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   },
   "DPA": {
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   },
   "SIM": {
    "*": {
-    "DOC_NO": "OTA-GZR-MPA-001-v1"
+    "DOC_NO": "OTA-ARV-MPA-001-v1"
    }
   }
  },
- "_note": "partner = GAZER values from A_Partner_Data_Form (null = \"[ ]\" in the form); roundtrip = placeholders exactly as shown in the v09 DOCX, used only by the round-trip test."
+ "_note": "partner = ARVELO values from A_Partner_Data_Form (null = \"[ ]\" in the form); roundtrip = placeholders exactly as shown in the v09 DOCX, used only by the round-trip test."
 }

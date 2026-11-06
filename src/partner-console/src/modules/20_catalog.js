@@ -155,7 +155,7 @@ function cat_swSync(v){$$('.cat_sw').forEach(b=>b.setAttribute('aria-pressed',St
 function cat_brandModal(b){cat_draft={logo:b?b.logo||null:null,domainTouched:!!b};
  const color=b?cat_color(b.color):CAT_PRESETS[0];
  const body=`<form id="cat_fb" data-form="cat_brand" class="stack" novalidate><input type="hidden" name="id" value="${b?esc(b.id):''}">
-  ${ui.field({id:'cat_name',label:t('cat.fName'),value:b?b.name:'',placeholder:'GAZER',hint:t('cat.fNameH'),attrs:'maxlength="40" autocomplete="off" required'})}
+  ${ui.field({id:'cat_name',label:t('cat.fName'),value:b?b.name:'',placeholder:'ARVELO',hint:t('cat.fNameH'),attrs:'maxlength="40" autocomplete="off" required'})}
   <div class="field"><span class="lbl" id="cat_colL">${t('cat.fColor')}</span><div class="row wrap g8"><input type="color" class="cat_col" id="cat_color" name="cat_color" value="${color}" aria-labelledby="cat_colL">
    ${CAT_PRESETS.map(p=>`<button type="button" class="cat_sw" style="background:${p}" data-act="cat_sw" data-arg="${p}" aria-label="${esc(t('cat.swatch',{c:p}))}" aria-pressed="${p.toLowerCase()===color.toLowerCase()}"></button>`).join('')}
    <span class="mono small muted" id="cat_colv">${color.toUpperCase()}</span></div></div>
@@ -220,7 +220,7 @@ FORM.cat_cat=f=>{clearErrs(f);const d=formData(f);const b=findBrand(d.bid);if(!b
 function cat_modelModal(b,m,catId){const opts=b.categories.map(c=>[c.id,c.name]).concat([['__new',t('cat.fNewCatOpt')]]);
  const sel=catId||(b.categories[0]?b.categories[0].id:'__new');
  const body=`<form id="cat_fm" data-form="cat_model" class="stack" novalidate><input type="hidden" name="bid" value="${esc(b.id)}"><input type="hidden" name="mid" value="${m?esc(m.id):''}">
-  <div class="grid2">${ui.field({id:'cat_mname',label:t('cat.fModel'),value:m?m.name:'',placeholder:'GAZER HX-5',attrs:'maxlength="60" autocomplete="off"'})}
+  <div class="grid2">${ui.field({id:'cat_mname',label:t('cat.fModel'),value:m?m.name:'',placeholder:'ARVELO HX-5',attrs:'maxlength="60" autocomplete="off"'})}
   ${ui.field({id:'cat_msku',label:'SKU',value:m?m.sku:'',placeholder:'HX5-48',mono:true,hint:t('cat.fSkuH'),attrs:'maxlength="40" autocomplete="off" spellcheck="false"'})}</div>
   ${ui.field({id:'cat_mcat',label:t('cat.category'),type:'select',options:opts,value:sel,attrs:'data-act="cat_catSel"'})}
   <div id="cat_newcatw" ${sel==='__new'?'':'hidden'}>${ui.field({id:'cat_mnewcat',label:t('cat.fCat'),placeholder:t('cat.fCatPh'),attrs:'maxlength="60" autocomplete="off"'})}</div>
@@ -385,7 +385,7 @@ HOOKS.seedDemo.push(()=>{const src={m1:'hx5_batch_01.csv',m2:'hx8_batch_01.csv',
 ['newBrand','Новий бренд','New brand','Новый бренд'],
 ['createBrand','Створити бренд','Create brand','Создать бренд'],
 ['emptyT','Створіть перший бренд','Create your first brand','Создайте первый бренд'],
-['emptyP','Бренд — це назва, яку бачить кінцевий клієнт: наприклад, «GAZER CONNECT» на порталі connect.gazer.ua, де він активує пристрій. Далі додайте категорії, моделі та списки IMEI.','A brand is the name your end customer sees — for example “GAZER CONNECT” on connect.gazer.ua, where they activate their device. Then add categories, models and IMEI lists.','Бренд — это название, которое видит конечный клиент: например, «GAZER CONNECT» на портале connect.gazer.ua, где он активирует устройство. Затем добавьте категории, модели и списки IMEI.'],
+['emptyP','Бренд — це назва, яку бачить кінцевий клієнт: наприклад, «ARVELO CONNECT» на порталі connect-ua.arvelo.example, де він активує пристрій. Далі додайте категорії, моделі та списки IMEI.','A brand is the name your end customer sees — for example “ARVELO CONNECT” on connect-ua.arvelo.example, where they activate their device. Then add categories, models and IMEI lists.','Бренд — это название, которое видит конечный клиент: например, «ARVELO CONNECT» на портале connect-ua.arvelo.example, где он активирует устройство. Затем добавьте категории, модели и списки IMEI.'],
 ['step1','Бренд','Brand','Бренд'],['step1p','Назва та колір, які бачить клієнт','Name and color your customer sees','Название и цвет, которые видит клиент'],
 ['step2','Категорії','Categories','Категории'],['step2p','Групи моделей: інвертори, трекери…','Groups of models: inverters, trackers…','Группы моделей: инверторы, трекеры…'],
 ['step3','Моделі','Models','Модели'],['step3p','OTA призначає пакет Light або Standard','OTA assigns a Light or Standard package','OTA назначает пакет Light или Standard'],
@@ -442,7 +442,7 @@ HOOKS.seedDemo.push(()=>{const src={m1:'hx5_batch_01.csv',m2:'hx8_batch_01.csv',
 ['rmImei','Видалити IMEI {imei}','Remove IMEI {imei}','Удалить IMEI {imei}'],
 ['qFound','Знайдено {n} за «{q}»','{n} found for “{q}”','Найдено {n} по «{q}»'],
 ['wlNoMatch','Немає IMEI, що починаються з «{q}»','No IMEIs start with “{q}”','Нет IMEI, начинающихся с «{q}»'],['wlNoMatchP','Перевірте цифри або очистьте пошук.','Check the digits or clear the search.','Проверьте цифры или очистите поиск.'],
-['fName','Назва бренду','Brand name','Название бренда'],['fNameH','Так його бачитиме кінцевий клієнт, напр. GAZER → «GAZER CONNECT».','How the end customer will see it, e.g. GAZER → “GAZER CONNECT”.','Так его увидит конечный клиент, напр. GAZER → «GAZER CONNECT».'],
+['fName','Назва бренду','Brand name','Название бренда'],['fNameH','Так його бачитиме кінцевий клієнт, напр. ARVELO → «ARVELO CONNECT».','How the end customer will see it, e.g. ARVELO → “ARVELO CONNECT”.','Так его увидит конечный клиент, напр. ARVELO → «ARVELO CONNECT».'],
 ['fColor','Колір бренду','Brand color','Цвет бренда'],['swatch','Колір {c}','Color {c}','Цвет {c}'],
 ['fDomain','Адреса клієнтського порталу','Customer portal address','Адрес клиентского портала'],['fDomainH','Тут клієнти активують пристрої. Ми налаштуємо адресу після запуску.','Customers activate devices here. We’ll set the address up after launch.','Здесь клиенты активируют устройства. Мы настроим адрес после запуска.'],
 ['fLogo','Логотип','Logo','Логотип'],['fLogoBtn','Завантажити логотип','Upload logo','Загрузить логотип'],['fLogoRm','Прибрати','Remove','Убрать'],
@@ -457,8 +457,8 @@ HOOKS.seedDemo.push(()=>{const src={m1:'hx5_batch_01.csv',m2:'hx8_batch_01.csv',
 ['gotIt','Зрозуміло','Got it','Понятно'],
 ['newBrandT','Новий бренд','New brand','Новый бренд'],['editBrandT','Змінити бренд','Edit brand','Изменить бренд'],
 ['eName','Вкажіть назву бренду.','Enter a brand name.','Укажите название бренда.'],['eNameDup','Бренд «{name}» уже є у вашому каталозі.','You already have a brand called “{name}”.','Бренд «{name}» уже есть в вашем каталоге.'],
-['eDom','Вкажіть адресу порталу, напр. connect.gazer.ua.','Enter the portal address, e.g. connect.gazer.ua.','Укажите адрес портала, напр. connect.gazer.ua.'],
-['eDomFmt','Адреса може містити латинські літери, цифри, дефіси й крапки — напр. connect.gazer.ua.','Use Latin letters, digits, hyphens and dots — e.g. connect.gazer.ua.','Адрес может содержать латинские буквы, цифры, дефисы и точки — напр. connect.gazer.ua.'],
+['eDom','Вкажіть адресу порталу, напр. connect-ua.arvelo.example.','Enter the portal address, e.g. connect-ua.arvelo.example.','Укажите адрес портала, напр. connect-ua.arvelo.example.'],
+['eDomFmt','Адреса може містити латинські літери, цифри, дефіси й крапки — напр. connect-ua.arvelo.example.','Use Latin letters, digits, hyphens and dots — e.g. connect-ua.arvelo.example.','Адрес может содержать латинские буквы, цифры, дефисы и точки — напр. connect-ua.arvelo.example.'],
 ['eDomDup','Цю адресу вже використовує бренд «{name}».','This address is already used by brand “{name}”.','Этот адрес уже использует бренд «{name}».'],
 ['logBrandNew','Створено бренд «{name}»','Brand “{name}” created','Создан бренд «{name}»'],['logBrandEd','Змінено бренд «{name}»','Brand “{name}” updated','Изменён бренд «{name}»'],['logBrandDel','Видалено бренд «{name}»','Brand “{name}” deleted','Удалён бренд «{name}»'],
 ['tBrandNew','Бренд «{name}» створено. Тепер додайте категорію та моделі.','Brand “{name}” created. Now add a category and models.','Бренд «{name}» создан. Теперь добавьте категорию и модели.'],['tBrandSaved','Бренд «{name}» збережено','Brand “{name}” saved','Бренд «{name}» сохранён'],['tBrandDel','Бренд «{name}» видалено','Brand “{name}” deleted','Бренд «{name}» удалён'],
