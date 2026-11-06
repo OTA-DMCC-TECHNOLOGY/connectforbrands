@@ -322,16 +322,16 @@ HL_RULES = [
 # Forced spans: matched on the original text (highlighted or not) before anything else.
 FORCED = [
     # OTA e-mails with the drafting marker "[confirm]" -> one OTA_* token
-    R(ANY, 'ops@ota-technology.com [confirm]', '{{OTA_EMAIL_OPS}}'),
-    R(ANY, 'legal@ota-technology.com [confirm]', '{{OTA_EMAIL_LEGAL}}'),
-    R(ANY, 'finance@ota-technology.com [confirm]', '{{OTA_EMAIL_FIN}}'),
-    R(ANY, 'privacy@ota-technology.com [confirm]', '{{OTA_EMAIL_PRIVACY}}'),
-    R(ANY, 'privacy@ota-technology.com [подтвердить]', '{{OTA_EMAIL_PRIVACY}}'),
+    R(ANY, 'ops@example.com [confirm]', '{{OTA_EMAIL_OPS}}'),
+    R(ANY, 'legal@example.com [confirm]', '{{OTA_EMAIL_LEGAL}}'),
+    R(ANY, 'finance@example.com [confirm]', '{{OTA_EMAIL_FIN}}'),
+    R(ANY, 'privacy@example.com [confirm]', '{{OTA_EMAIL_PRIVACY}}'),
+    R(ANY, 'privacy@example.com [подтвердить]', '{{OTA_EMAIL_PRIVACY}}'),
     # composite references
     R('INV', 'OTA-GZR-OF-[CC-NNN-vN]', '{{DOC_NO_OF}}', kind='struct'),
     # OTA signatory / title in prose
-    R('MPA', 'represented by its Manager, Ruslana Shcherbak', 'represented by its {{OTA_TITLE_EN}}, {{OTA_SIGNATORY}}'),
-    R('MPA', 'в лице менеджера Русланы Щербак', 'в лице {{OTA_TITLE_L2_GEN}} {{OTA_SIGNATORY_L2_GEN}}'),
+    R('MPA', 'represented by its Manager, Anna Petrova', 'represented by its {{OTA_TITLE_EN}}, {{OTA_SIGNATORY}}'),
+    R('MPA', 'в лице менеджера Анны Петровой', 'в лице {{OTA_TITLE_L2_GEN}} {{OTA_SIGNATORY_L2_GEN}}'),
     # OF country-specific literals (UA / KZ) -> country tokens
     R('OF', 'ORDER FORM – UKRAINE', 'ORDER FORM – {{CC_NAME_UPPER_EN}}'),
     R('OF', 'ORDER FORM – KAZAKHSTAN', 'ORDER FORM – {{CC_NAME_UPPER_EN}}'),
@@ -358,17 +358,17 @@ FORCED = [
 
 # Literal (non-highlighted) OTA data -> OTA_* tokens (ТЗ §3 "Данные OTA")
 OTA_LIT = [
-    ('Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Dubai, UAE', '{{OTA_ADDR_EN}}'),
-    ('Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Дубай, ОАЭ', '{{OTA_ADDR_L2}}'),
-    ('EMIRATES NBD BANK PJSC, Baniyas Street, Deira, Dubai, UAE', '{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}'),
-    ('AE200260001025816458902', '{{OTA_BANK_IBAN}}'),
-    ('1025816458902', '{{OTA_BANK_ACCOUNT}}'),
-    ('EBILAEADXXX', '{{OTA_BANK_SWIFT}}'),
+    ('Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Dubai, UAE', '{{OTA_ADDR_EN}}'),
+    ('Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Дубай, ОАЭ', '{{OTA_ADDR_L2}}'),
+    ('DEMO BANK PJSC, 1 Demo Street, Business Bay, Dubai, UAE', '{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}'),
+    ('AE070331234567890123456', '{{OTA_BANK_IBAN}}'),
+    ('1234567890123', '{{OTA_BANK_ACCOUNT}}'),
+    ('DEMOAEADXXX', '{{OTA_BANK_SWIFT}}'),
     ('OTA TECHNOLOGY DMCC', '{{OTA_NAME}}'),
-    ('DMCC193204', '{{OTA_REGNO}}'),
-    ('DMCC-843994', '{{OTA_LICENCE}}'),
-    ('104496001900001', '{{OTA_TRN}}'),
-    ('Ruslana Shcherbak', '{{OTA_SIGNATORY}}'),
+    ('DMCC100200', '{{OTA_REGNO}}'),
+    ('DMCC-100200', '{{OTA_LICENCE}}'),
+    ('100000000000003', '{{OTA_TRN}}'),
+    ('Anna Petrova', '{{OTA_SIGNATORY}}'),
 ]
 OTA_LIT_RE = re.compile('|'.join(re.escape(a) for a, _ in sorted(OTA_LIT, key=lambda x: -len(x[0]))))
 OTA_LIT_MAP = dict(OTA_LIT)
@@ -997,15 +997,15 @@ def make_values(form):
     for kk in ('P_TAXNO',):
         status[kk] = 'empty'   # form shows "[ ]"; OTA decides N/A
     ota = {
-        'OTA_NAME': 'OTA TECHNOLOGY DMCC', 'OTA_REGNO': 'DMCC193204', 'OTA_LICENCE': 'DMCC-843994', 'OTA_TRN': '104496001900001',
-        'OTA_ADDR_EN': 'Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Dubai, UAE',
-        'OTA_ADDR_L2': 'Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Дубай, ОАЭ',
-        'OTA_SIGNATORY': 'Ruslana Shcherbak', 'OTA_SIGNATORY_L2_GEN': 'Русланы Щербак',
+        'OTA_NAME': 'OTA TECHNOLOGY DMCC', 'OTA_REGNO': 'DMCC100200', 'OTA_LICENCE': 'DMCC-100200', 'OTA_TRN': '100000000000003',
+        'OTA_ADDR_EN': 'Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Dubai, UAE',
+        'OTA_ADDR_L2': 'Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Дубай, ОАЭ',
+        'OTA_SIGNATORY': 'Anna Petrova', 'OTA_SIGNATORY_L2_GEN': 'Анны Петровой',
         'OTA_TITLE_EN': 'Manager', 'OTA_TITLE_L2': 'Менеджер', 'OTA_TITLE_L2_GEN': 'менеджера',
-        'OTA_BANK_NAME': 'EMIRATES NBD BANK PJSC', 'OTA_BANK_ADDR': 'Baniyas Street, Deira, Dubai, UAE',
-        'OTA_BANK_ACCOUNT': '1025816458902', 'OTA_BANK_IBAN': 'AE200260001025816458902', 'OTA_BANK_SWIFT': 'EBILAEADXXX',
-        'OTA_EMAIL_OPS': 'ops@ota-technology.com', 'OTA_EMAIL_LEGAL': 'legal@ota-technology.com',
-        'OTA_EMAIL_FIN': 'finance@ota-technology.com', 'OTA_EMAIL_PRIVACY': 'privacy@ota-technology.com', 'OTA_EMAIL_SUPPORT': None,
+        'OTA_BANK_NAME': 'DEMO BANK PJSC', 'OTA_BANK_ADDR': '1 Demo Street, Business Bay, Dubai, UAE',
+        'OTA_BANK_ACCOUNT': '1234567890123', 'OTA_BANK_IBAN': 'AE070331234567890123456', 'OTA_BANK_SWIFT': 'DEMOAEADXXX',
+        'OTA_EMAIL_OPS': 'ops@example.com', 'OTA_EMAIL_LEGAL': 'legal@example.com',
+        'OTA_EMAIL_FIN': 'finance@example.com', 'OTA_EMAIL_PRIVACY': 'privacy@example.com', 'OTA_EMAIL_SUPPORT': None,
         'OTA_SUPPORT_HOURS': 'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',
         'OTA_CUSTOMS_CODE': None, 'OTA_VAT_UA': None, 'OTA_VAT_KZ': None, 'OTA_REP_UA': None, 'OTA_REP_KZ': None,
         'OTA_SUBPROC_EMAIL': None, 'OTA_SUBPROC_EMAIL_LOC': None,
@@ -1042,8 +1042,8 @@ RT_PLACEHOLDERS = {
         'P_TM_OWNER_RELATION_EN': '[distributor / licensee]', 'P_TM_OWNER_RELATION_L2': '[дистрибьютором / лицензиатом]',
         'P_TM_OWNER_TERRITORY_EN': '[countries]', 'P_TM_OWNER_TERRITORY_L2': '[страны]',
         'P_TM_OWNER_SIGNATORY': '[Name]', 'P_TM_OWNER_TITLE': '[Title / Должность]',
-        'OTA_EMAIL_OPS': 'ops@ota-technology.com [confirm]', 'OTA_EMAIL_LEGAL': 'legal@ota-technology.com [confirm]',
-        'OTA_EMAIL_FIN': 'finance@ota-technology.com [confirm]', 'OTA_EMAIL_PRIVACY': 'privacy@ota-technology.com [confirm]',
+        'OTA_EMAIL_OPS': 'ops@example.com [confirm]', 'OTA_EMAIL_LEGAL': 'legal@example.com [confirm]',
+        'OTA_EMAIL_FIN': 'finance@example.com [confirm]', 'OTA_EMAIL_PRIVACY': 'privacy@example.com [confirm]',
         'OTA_SUBPROC_EMAIL': '[Email service provider / Почтовый сервис]', 'OTA_SUBPROC_EMAIL_LOC': B,
         'CARD_DESCRIPTOR': '[OTA*GAZERCONNECT]', 'DOC_NO_MPA': 'OTA-GZR-MPA-001-v1', 'P_BANK_BENEFICIARY': 'GAZER LIMITED',
         'DOC_VER': '[1.0]', 'DATE': B, 'DUE_DATE': B, 'DOC_NO_OF': B, 'MPA_DATE': '[DATE / ДАТА]',
@@ -1059,7 +1059,7 @@ RT_PLACEHOLDERS = {
         'DOC_SEQ': B,
     }, 'en': {'INIT_SIMS': '[1,000]', 'INIT_KEYS': '[1,000]', 'ANNUAL_TARGET': '[3,000]'},
        'ru': {'INIT_SIMS': '[1 000]', 'INIT_KEYS': '[1 000]', 'ANNUAL_TARGET': '[3 000]', 'LAUNCH_DATE': '[ДАТА]',
-              'EFFECTIVE_DATE': '[ДАТА]', 'OTA_EMAIL_PRIVACY': 'privacy@ota-technology.com [подтвердить]', 'RS_MONTH': '[ГГГГ-ММ]', 'RS_YYYYMM': '[ГГГГММ]',
+              'EFFECTIVE_DATE': '[ДАТА]', 'OTA_EMAIL_PRIVACY': 'privacy@example.com [подтвердить]', 'RS_MONTH': '[ГГГГ-ММ]', 'RS_YYYYMM': '[ГГГГММ]',
               'SHIP_FORM_FACTOR': '[форм-фактор]'}},
     'MPA': {'*': {'DATE': '[DATE / ДАТА]'}},
     'BOA': {'en': {'DATE': '[DATE]', 'P_TM_OWNER_NAME': '[Brand Owner legal name]'}, 'ru': {'DATE': '[ДАТА]', 'P_TM_OWNER_NAME': '[наименование правообладателя]'}},

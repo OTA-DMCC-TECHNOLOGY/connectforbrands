@@ -134,10 +134,10 @@ const OTA_KEYS=['OTA_NAME','OTA_REGNO','OTA_LICENCE','OTA_TRN','OTA_ADDR_EN','OT
  'OTA_CUSTOMS_CODE','OTA_EMAIL_OPS','OTA_EMAIL_LEGAL','OTA_EMAIL_FIN','OTA_EMAIL_SUPPORT','OTA_EMAIL_PRIVACY','OTA_SUBPROC_EMAIL','OTA_SUBPROC_EMAIL_LOC','OTA_SUPPORT_HOURS','CARD_DESCRIPTOR'];
 const OTA_CC_KEYS=['OTA_VAT_','OTA_REP_'];   // + ISO country code, e.g. OTA_VAT_UA
 // hard fallback (ТЗ §3); the real seed merges LEGAL_DEMO_VALUES.ota from 60_legal_templates.js (see otaSeed)
-function otaDefaults(){return{OTA_NAME:'OTA TECHNOLOGY DMCC',OTA_REGNO:'DMCC193204',OTA_LICENCE:'DMCC-843994',OTA_TRN:'104496001900001',
- OTA_ADDR_EN:'Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Dubai, UAE',OTA_ADDR_L2:'',OTA_SIGNATORY:'Ruslana Shcherbak',OTA_SIGNATORY_L2_GEN:'',OTA_TITLE_EN:'Manager',OTA_TITLE_L2:'',OTA_TITLE_L2_GEN:'',
- OTA_BANK_BENEF:'OTA TECHNOLOGY DMCC',OTA_BANK_NAME:'Emirates NBD Bank PJSC',OTA_BANK_ADDR:'Baniyas Street, Deira, Dubai, UAE',OTA_BANK_ACCOUNT:'1025816458902',
- OTA_BANK_IBAN:'AE200260001025816458902',OTA_BANK_SWIFT:'EBILAEADXXX',OTA_BANK_CUR:'USD',OTA_BANK_INTER:'',OTA_BANK_INTER_SWIFT:'',
+function otaDefaults(){return{OTA_NAME:'OTA TECHNOLOGY DMCC',OTA_REGNO:'DMCC100200',OTA_LICENCE:'DMCC-100200',OTA_TRN:'100000000000003',
+ OTA_ADDR_EN:'Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Dubai, UAE',OTA_ADDR_L2:'',OTA_SIGNATORY:'Anna Petrova',OTA_SIGNATORY_L2_GEN:'',OTA_TITLE_EN:'Manager',OTA_TITLE_L2:'',OTA_TITLE_L2_GEN:'',
+ OTA_BANK_BENEF:'OTA TECHNOLOGY DMCC',OTA_BANK_NAME:'Demo Bank PJSC',OTA_BANK_ADDR:'1 Demo Street, Business Bay, Dubai, UAE',OTA_BANK_ACCOUNT:'1234567890123',
+ OTA_BANK_IBAN:'AE070331234567890123456',OTA_BANK_SWIFT:'DEMOAEADXXX',OTA_BANK_CUR:'USD',OTA_BANK_INTER:'',OTA_BANK_INTER_SWIFT:'',
  OTA_CUSTOMS_CODE:'',OTA_VAT_UA:'',OTA_VAT_KZ:'',OTA_REP_UA:'',OTA_REP_KZ:'',
  OTA_EMAIL_OPS:'',OTA_EMAIL_LEGAL:'',OTA_EMAIL_FIN:'',OTA_EMAIL_SUPPORT:'',OTA_EMAIL_PRIVACY:'',OTA_SUBPROC_EMAIL:'',OTA_SUBPROC_EMAIL_LOC:'',OTA_SUPPORT_HOURS:'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',CARD_DESCRIPTOR:''};}
 // LEGAL_DEMO_VALUES is a const in 60_legal_templates.js (loaded later): read it lazily, guarded against the temporal dead zone
@@ -157,7 +157,7 @@ const ROLES={
  p_ops:{side:'partner',perms:['p.orders','p.imei','p.receipt','p.codes','p.view']}};
 function demoUsers(){const o=S.org||{};const u=S.user||{};return[
  {id:'u_ota_admin',name:'Platform Admin',email:'admin@ota.demo',role:'ota_admin'},
- {id:'u_ota_legal',name:'Ruslana Shcherbak',email:'legal@ota.demo',role:'ota_legal',title:'Manager'},
+ {id:'u_ota_legal',name:'Anna Petrova',email:'legal@ota.demo',role:'ota_legal',title:'Manager'},
  {id:'u_ota_fin',name:'Finance Desk',email:'finance@ota.demo',role:'ota_finance'},
  {id:'u_p_admin',name:u.name||u.email||'Partner Admin',email:u.email||'',role:'p_admin'},
  {id:'u_p_sign',name:o.signatory||'Signatory',email:o.signatoryEmail||'',role:'p_sign',title:o.title||''},

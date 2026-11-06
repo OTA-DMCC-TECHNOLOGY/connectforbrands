@@ -982,7 +982,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
  // OTA invoices issued after signing refer to the MPA and the Order Form in force
  (S.invoices||[]).forEach(inv=>{if(!inv.mpa)inv.mpa=lg_docRef('MPA');if(!inv.of)inv.of=lg_docRef('OF',inv.cc);});
  // public documents 07/08 (class C)
- m=mark();orgCountries().forEach(cc=>['EUT','PN'].forEach(tp=>['en','ru'].forEach(l=>lg_pubPublish(tp,cc,l,{at:ago(57),notified:true,by:'Ruslana Shcherbak'}))));fix(m,ago(57),'u_ota_legal');
+ m=mark();orgCountries().forEach(cc=>['EUT','PN'].forEach(tp=>['en','ru'].forEach(l=>lg_pubPublish(tp,cc,l,{at:ago(57),notified:true,by:'Anna Petrova'}))));fix(m,ago(57),'u_ota_legal');
  // class A: Kazakhstan price increase (+5%), effective after the 90-day notice
  if(orgCountries().includes('KZ')&&plLatest('KZ')){m=mark();const b=plLatest('KZ');const up=x=>r2(x*1.05);const tok={};PLANS.forEach(p=>{tok[p]={};TERMS.forEach(tm=>{tok[p][tm]=up(b.tokens[p][tm]);});});
   const ret={};PLANS.forEach(p=>{ret[p]=up(b.retained[p]);});plAdd('KZ',{key:b.key,tokens:tok,retained:ret,fee:b.fee||0},{note:'Upstream connectivity cost increase in Kazakhstan (+5%)'});fix(m,ago(1),'u_ota_admin');
@@ -990,7 +990,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
  // class B: editorial update of the Service Terms (04), acknowledgment within 30 days
  const sla=lg_tpl('SLA');const b71=sla&&sla.blocks.find(x=>x.id==='SLA-7.1');
  if(b71){m=mark();const v=lg_tplSave('SLA',{'SLA-7.1':{en:b71.en.replace("email to OTA's support address","email to OTA's support address published in the cabinet"),ru:b71.ru.replace('e-mail на адрес поддержки OTA','e-mail на адрес поддержки OTA, указанный в кабинете')}},
-   {cls:'B',effective:iso(addDays(n,28)),note:'Support e-mail address: reference to the cabinet (editorial)',at:ago(2),by:'Ruslana Shcherbak'});
+   {cls:'B',effective:iso(addDays(n,28)),note:'Support e-mail address: reference to the cabinet (editorial)',at:ago(2),by:'Anna Petrova'});
   S.actor='u_ota_legal';lg_tplRelease('SLA',v.ver,{at:ago(2),sync:true});fix(m,ago(2),'u_ota_legal');}
  S.actor=prevActor||'u_p_admin';}
 HOOKS.seedDemo.push(lg_seed);
