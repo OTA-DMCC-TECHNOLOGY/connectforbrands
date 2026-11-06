@@ -1,0 +1,394 @@
+{
+ "type": "BL",
+ "docNo": "05A",
+ "title": {
+  "en": "Brand Licence (Partner is brand owner)",
+  "ru": "Лицензия на бренд (Партнёр – правообладатель)"
+ },
+ "ver": "T-BL-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "BL-title",
+   "kind": "heading",
+   "en": "BRAND LICENCE – PARTNER IS THE BRAND OWNER",
+   "ru": "ЛИЦЕНЗИЯ НА БРЕНД – ПАРТНЁР ЯВЛЯЕТСЯ ПРАВООБЛАДАТЕЛЕМ"
+  },
+  {
+   "id": "BL-ref",
+   "kind": "para",
+   "en": "Document 05A of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 05A из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "BL-p1",
+   "kind": "para",
+   "en": "Use this document when the Partner itself owns the trade marks. If the trade marks belong to another company, use Document 05B instead.",
+   "ru": "Используется, если Партнёр сам является владельцем товарных знаков. Если товарные знаки принадлежат другой компании, используется Документ 05B."
+  },
+  {
+   "id": "BL-p2",
+   "kind": "para",
+   "en": "This Brand Licence forms part of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\") and is signed together with it.",
+   "ru": "Настоящая Лицензия на бренд является частью Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр») и подписывается вместе с ним."
+  },
+  {
+   "id": "BL-s1",
+   "kind": "heading",
+   "en": "1. Ownership",
+   "ru": "1. Право собственности"
+  },
+  {
+   "id": "BL-1.1",
+   "kind": "clause",
+   "en": "1.1 Partner confirms that it owns the trade marks, logos, domain names, packaging artwork and trade dress listed in Annex 1 (the \"Marks\") in the countries listed there, and that no third-party rights prevent the licence granted below.",
+   "ru": "1.1 Партнёр подтверждает, что является владельцем товарных знаков, логотипов, доменных имён, оформления упаковки и фирменного стиля, указанных в Приложении 1 («Знаки»), в перечисленных там странах и что права третьих лиц не препятствуют предоставлению лицензии, указанной ниже."
+  },
+  {
+   "id": "BL-s2",
+   "kind": "heading",
+   "en": "2. Licence to OTA",
+   "ru": "2. Лицензия OTA"
+  },
+  {
+   "id": "BL-2.1",
+   "kind": "clause",
+   "en": "2.1 Partner grants OTA a non-exclusive, royalty-free, non-transferable licence, with the right to allow its hosting, payment and technology subcontractors to perform necessary technical acts, to reproduce and display the Marks only in: (a) the End User portal on the Partner Domain and the Partner cabinet; (b) login and checkout pages, receipts, emails, SMS and messenger notifications; (c) onboarding materials, QR labels and inserts approved by Partner; (d) service notices; and (e) support of existing End Users.",
+   "ru": "2.1 Партнёр предоставляет OTA неисключительную, безвозмездную, непередаваемую лицензию с правом допускать подрядчиков OTA по хостингу, платежам и технологиям к необходимым техническим действиям на воспроизведение и отображение Знаков только: (a) на портале Конечного пользователя на Домене Партнёра и в кабинете Партнёра; (b) на страницах входа и оплаты, в квитанциях, e-mail, SMS и уведомлениях в мессенджерах; (c) в материалах для подключения, QR-наклейках и вкладышах, одобренных Партнёром; (d) в сервисных уведомлениях; (e) при поддержке существующих Конечных пользователей."
+  },
+  {
+   "id": "BL-2.2",
+   "kind": "clause",
+   "en": "2.2 The licence covers the Approved Countries of all Order Forms signed under the Master Agreement, without separate amendment.",
+   "ru": "2.2 Лицензия распространяется на Одобренные страны всех Заказов, подписанных по Рамочному соглашению, без отдельного изменения."
+  },
+  {
+   "id": "BL-2.3",
+   "kind": "clause",
+   "en": "2.3 The licence remains in force after termination of the Master Agreement only to the extent and for the time needed to serve End Users with paid Service Plans until their expiry. No new marketing or sales take place after termination.",
+   "ru": "2.3 Лицензия сохраняет силу после прекращения Рамочного соглашения только в объёме и на срок, необходимые для обслуживания Конечных пользователей с оплаченными Тарифными планами до их окончания. После прекращения новый маркетинг и продажи не осуществляются."
+  },
+  {
+   "id": "BL-2.4",
+   "kind": "clause",
+   "en": "2.4 OTA acquires no ownership of the Marks and shall follow Partner's brand guidelines (Annex 2), as updated on reasonable notice.",
+   "ru": "2.4 OTA не приобретает права собственности на Знаки и соблюдает руководство по бренду Партнёра (Приложение 2) с учётом его обновлений, о которых Партнёр разумно заблаговременно уведомляет."
+  },
+  {
+   "id": "BL-s3",
+   "kind": "heading",
+   "en": "3. Warranty and indemnity",
+   "ru": "3. Гарантия и возмещение"
+  },
+  {
+   "id": "BL-s3.p1",
+   "kind": "para",
+   "en": "Partner warrants that the permitted use of the Marks does not infringe the rights of third parties and shall indemnify OTA against any third-party claim alleging such infringement, except where caused by OTA's use outside this licence.",
+   "ru": "Партнёр гарантирует, что разрешённое использование Знаков не нарушает права третьих лиц, и возмещает OTA убытки по любым претензиям третьих лиц о таком нарушении, кроме случаев использования OTA за пределами настоящей лицензии."
+  },
+  {
+   "id": "BL-s4",
+   "kind": "heading",
+   "en": "4. Law and disputes",
+   "ru": "4. Право и споры"
+  },
+  {
+   "id": "BL-s4.p1",
+   "kind": "para",
+   "en": "Clause 17 (governing law and dispute resolution) of the Master Agreement applies to this Brand Licence.",
+   "ru": "К настоящей Лицензии на бренд применяется п. 17 (применимое право и разрешение споров) Рамочного соглашения."
+  },
+  {
+   "id": "BL-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "BL-sig1",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  },
+  {
+   "id": "BL-h2",
+   "kind": "annex",
+   "en": "Annex 1 – Marks, products and countries",
+   "ru": "Приложение 1 – Знаки, товары и страны"
+  },
+  {
+   "id": "BL-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Mark",
+      "ru": "Знак",
+      "bi": true
+     },
+     {
+      "en": "Registration no. and office",
+      "ru": "№ регистрации и ведомство",
+      "bi": true
+     },
+     {
+      "en": "Countries",
+      "ru": "Страны",
+      "bi": true
+     },
+     {
+      "en": "Classes",
+      "ru": "Классы МКТУ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{TM_MARK}}",
+      "ru": "{{TM_MARK}}"
+     },
+     {
+      "en": "{{TM_REGNO}}",
+      "ru": "{{TM_REGNO}}"
+     },
+     {
+      "en": "{{TM_COUNTRIES}}",
+      "ru": "{{TM_COUNTRIES}}"
+     },
+     {
+      "en": "{{TM_CLASSES}}",
+      "ru": "{{TM_CLASSES}}"
+     }
+    ]
+   ],
+   "repeat": {
+    "row": 1,
+    "list": "P_TM_LIST"
+   }
+  },
+  {
+   "id": "BL-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Item",
+      "ru": "Позиция",
+      "bi": true
+     },
+     {
+      "en": "Details",
+      "ru": "Сведения",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Programme name",
+      "ru": "Название программы",
+      "bi": true
+     },
+     {
+      "en": "{{P_PROGRAMME}}",
+      "ru": "{{P_PROGRAMME}}"
+     }
+    ],
+    [
+     {
+      "en": "Partner Domain",
+      "ru": "Домен Партнёра",
+      "bi": true
+     },
+     {
+      "en": "{{P_DOMAIN}}",
+      "ru": "{{P_DOMAIN}}"
+     }
+    ],
+    [
+     {
+      "en": "Logo files and version",
+      "ru": "Файлы логотипов и версия",
+      "bi": true
+     },
+     {
+      "en": "{{P_LOGO}}",
+      "ru": "{{P_LOGO}}"
+     }
+    ],
+    [
+     {
+      "en": "Products",
+      "ru": "Товары",
+      "bi": true
+     },
+     {
+      "en": "[as listed in Annex 1 to each Order Form / согласно Приложению 1 к каждому Заказу]",
+      "ru": "[as listed in Annex 1 to each Order Form / согласно Приложению 1 к каждому Заказу]"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "BL-h3",
+   "kind": "annex",
+   "en": "Annex 2 – Brand guidelines",
+   "ru": "Приложение 2 – Руководство по бренду"
+  },
+  {
+   "id": "BL-t4",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Item",
+      "ru": "Позиция",
+      "bi": true
+     },
+     {
+      "en": "Details",
+      "ru": "Сведения",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Brand book",
+      "ru": "Брендбук",
+      "bi": true
+     },
+     {
+      "en": "{{P_BRANDBOOK}}",
+      "ru": "{{P_BRANDBOOK}}"
+     }
+    ],
+    [
+     {
+      "en": "Logo use, colours, fonts",
+      "ru": "Логотип, цвета, шрифты",
+      "bi": true
+     },
+     {
+      "en": "{{P_BRAND_RULES}}",
+      "ru": "{{P_BRAND_RULES}}"
+     }
+    ],
+    [
+     {
+      "en": "Approval contact",
+      "ru": "Контакт для согласования",
+      "bi": true
+     },
+     {
+      "en": "{{P_BRAND_CONTACT}}",
+      "ru": "{{P_BRAND_CONTACT}}"
+     }
+    ],
+    [
+     {
+      "en": "Approval time",
+      "ru": "Срок согласования",
+      "bi": true
+     },
+     {
+      "en": "5 business days; no reply means approval of non-material changes",
+      "ru": "5 рабочих дней; отсутствие ответа означает согласие на несущественные изменения",
+      "bi": true
+     }
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,426 @@
+{
+ "type": "SLA",
+ "docNo": "04",
+ "title": {
+  "en": "Service Terms and SLA",
+  "ru": "Условия сервиса и SLA"
+ },
+ "ver": "T-SLA-v3",
+ "effective": "2026-11-06",
+ "cls": "B",
+ "blocks": [
+  {
+   "id": "SLA-title",
+   "kind": "heading",
+   "en": "CONNECT SERVICE TERMS AND SERVICE LEVEL AGREEMENT",
+   "ru": "УСЛОВИЯ СЕРВИСА CONNECT И СОГЛАШЕНИЕ ОБ УРОВНЕ ОБСЛУЖИВАНИЯ"
+  },
+  {
+   "id": "SLA-ref",
+   "kind": "para",
+   "en": "Document 04 of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 04 из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "SLA-p1",
+   "kind": "para",
+   "en": "These Service Terms form part of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\") and are signed together with it. Capitalised terms have the meanings given in the Master Agreement.",
+   "ru": "Настоящие Условия сервиса являются частью Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр») и подписываются вместе с ним. Термины с заглавной буквы имеют значения, указанные в Рамочном соглашении."
+  },
+  {
+   "id": "SLA-s1",
+   "kind": "heading",
+   "en": "1. Division of responsibilities",
+   "ru": "1. Распределение обязанностей"
+  },
+  {
+   "id": "SLA-1.1",
+   "kind": "clause",
+   "en": "1.1 OTA is responsible for: the CONNECT platform, the Partner cabinet, the End User portal, subscriptions and billing, notifications, server-side diagnostics, management of the Connectivity Component and escalation to Upstream Providers, and support to End Users on accounts and payments.",
+   "ru": "1.1 OTA отвечает за: платформу CONNECT, кабинет Партнёра, портал Конечного пользователя, подписки и биллинг, уведомления, диагностику на стороне сервера, управление Компонентом связи и эскалацию Поставщикам, а также поддержку Конечных пользователей по учётным записям и платежам."
+  },
+  {
+   "id": "SLA-1.2",
+   "kind": "clause",
+   "en": "1.2 Partner is responsible for: device hardware and firmware, installation, retail sales and Token resale, the hardware warranty, training of its dealers, the IMEI Whitelist and first-line support for devices.",
+   "ru": "1.2 Партнёр отвечает за: аппаратную часть и прошивку устройств, установку, розничные продажи и перепродажу токенов, гарантию на оборудование, обучение своих дилеров, Белый список IMEI и первую линию поддержки по устройствам."
+  },
+  {
+   "id": "SLA-s2",
+   "kind": "heading",
+   "en": "2. Service Plans",
+   "ru": "2. Тарифные планы"
+  },
+  {
+   "id": "SLA-2.1",
+   "kind": "clause",
+   "en": "2.1 Light – devices sending short messages and commands (e.g. GPS trackers, GSM relays, heating controllers). Standard – devices sending telemetry and notifications (e.g. inverters, alarm systems, dashcams with event notifications). Premium – devices with higher data needs within the approved profile (e.g. event photos or previews), as agreed in Annex 1 of the Order Form.",
+   "ru": "2.1 Light – устройства, передающие короткие сообщения и команды (например, GPS-трекеры, GSM-реле, контроллеры отопления). Standard – устройства, передающие телеметрию и уведомления (например, инверторы, сигнализации, видеорегистраторы с уведомлениями о событиях). Premium – устройства с повышенной потребностью в данных в пределах одобренного профиля (например, фото или превью событий), как согласовано в Приложении 1 к Заказу."
+  },
+  {
+   "id": "SLA-2.2",
+   "kind": "clause",
+   "en": "2.2 Video streaming, general internet access and uses outside the approved device profile are not included in any Service Plan.",
+   "ru": "2.2 Потоковое видео, общий доступ в интернет и использование вне одобренного профиля устройства не входят ни в один Тарифный план."
+  },
+  {
+   "id": "SLA-s3",
+   "kind": "heading",
+   "en": "3. IMEI Whitelist",
+   "ru": "3. Белый список IMEI"
+  },
+  {
+   "id": "SLA-3.1",
+   "kind": "clause",
+   "en": "3.1 Partner provides the IMEI numbers of Approved Devices with installed SIMs before their activation, by uploading a file to the cabinet or by email to OTA's operations address, in the format published in the cabinet (at minimum: IMEI, ICCID if known, model).",
+   "ru": "3.1 Партнёр передаёт номера IMEI Одобренных устройств с установленными SIM до их активации путём загрузки файла в кабинет или по e-mail на операционный адрес OTA в формате, опубликованном в кабинете (как минимум: IMEI, ICCID при наличии, модель)."
+  },
+  {
+   "id": "SLA-3.2",
+   "kind": "clause",
+   "en": "3.2 OTA locks each SIM to the whitelisted IMEI. CONNECT works only in devices on the IMEI Whitelist; a SIM inserted in any other device stops working, and the End User and Partner receive a notification.",
+   "ru": "3.2 OTA привязывает каждую SIM к IMEI из Белого списка. CONNECT работает только в устройствах из Белого списка IMEI; SIM, вставленная в любое другое устройство, перестаёт работать, а Конечный пользователь и Партнёр получают уведомление."
+  },
+  {
+   "id": "SLA-3.3",
+   "kind": "clause",
+   "en": "3.3 A device replacement under warranty is handled by Partner updating the IMEI in the cabinet; the End User's paid Service Plan is transferred to the replacement device free of charge.",
+   "ru": "3.3 Замена устройства по гарантии оформляется Партнёром путём обновления IMEI в кабинете; оплаченный Тарифный план Конечного пользователя бесплатно переносится на новое устройство."
+  },
+  {
+   "id": "SLA-s4",
+   "kind": "heading",
+   "en": "4. Permitted use",
+   "ru": "4. Допустимое использование"
+  },
+  {
+   "id": "SLA-4.1",
+   "kind": "clause",
+   "en": "4.1 The following are prohibited: use of SIMs in devices other than Approved Devices; voice; standalone or outbound commercial SMS; tethering; VPN or proxy resale; SIM-boxing; traffic unrelated to the device function; and unlawful content.",
+   "ru": "4.1 Запрещены: использование SIM в устройствах, не являющихся Одобренными; голосовая связь; самостоятельные или исходящие коммерческие SMS; раздача интернета; перепродажа VPN или прокси; SIM-боксинг; трафик, не связанный с функцией устройства; противоправный контент."
+  },
+  {
+   "id": "SLA-4.2",
+   "kind": "clause",
+   "en": "4.2 OTA monitors consumption and signalling by device category. In case of abnormal consumption or signalling (including repeated network attach loops), OTA may investigate, temporarily limit or quarantine the affected SIMs and request a firmware fix. Partner shall remedy signalling issues within forty-eight (48) hours of OTA's notice.",
+   "ru": "4.2 OTA контролирует потребление и сигнализацию по категориям устройств. При аномальном потреблении или сигнализации (включая циклические попытки регистрации в сети) OTA вправе провести проверку, временно ограничить или поместить затронутые SIM в карантин и потребовать исправления прошивки. Партнёр устраняет проблемы сигнализации в течение сорока восьми (48) часов после уведомления OTA."
+  },
+  {
+   "id": "SLA-4.3",
+   "kind": "clause",
+   "en": "4.3 CONNECT functions are available in the Approved Country and during temporary trips abroad as set out in the Availability Policy, which also sets usage limits for use abroad. CONNECT is not provided in Excluded Territories. In Restricted Countries it is available only during temporary trips and not as a permanent place of use (Master Agreement, clause 1.14). Data transmission is provided by licensed mobile network operators through OTA's Upstream Providers.",
+   "ru": "4.3 Функции CONNECT доступны в Одобренной стране и во время временных поездок за рубеж согласно Политике доступности, которая также устанавливает ограничения использования за рубежом. CONNECT не предоставляется на Исключённых территориях. В Странах с ограничениями он доступен только во время временных поездок, а не как постоянное место использования (п. 1.14 Рамочного соглашения). Передачу данных обеспечивают лицензированные операторы мобильной связи через Поставщиков OTA."
+  },
+  {
+   "id": "SLA-s5",
+   "kind": "heading",
+   "en": "5. Service states",
+   "ru": "5. Состояния сервиса"
+  },
+  {
+   "id": "SLA-5.1",
+   "kind": "clause",
+   "en": "5.1 Factory/test: limited mode for production testing and first network attach. Activated – no plan: device enrolled with an Activation Key; the account is visible, but the device does not transmit data until a Service Plan is activated. Active – Token: redeemed Token, service until the expiry date. Active – subscription: paid Direct Subscription period. Expired: after the paid period the account remains visible in limited form and data transmission stops; reminders are sent before expiry. Suspended: only on the grounds set out in clause 10.4 of the Master Agreement.",
+   "ru": "5.1 Заводской/тестовый: ограниченный режим для проверки на производстве и первой регистрации в сети. Активирован – без тарифа: устройство подключено Ключом активации; учётная запись доступна, но устройство не передаёт данные, пока не активирован Тарифный план. Активен – токен: погашенный токен, сервис до даты окончания. Активен – подписка: оплаченный период Прямой подписки. Истёк: после окончания оплаченного периода учётная запись остаётся доступной в ограниченном виде, передача данных прекращается; до окончания направляются напоминания. Приостановлен: только по основаниям п. 10.4 Рамочного соглашения."
+  },
+  {
+   "id": "SLA-s6",
+   "kind": "heading",
+   "en": "6. Availability",
+   "ru": "6. Доступность"
+  },
+  {
+   "id": "SLA-6.1",
+   "kind": "clause",
+   "en": "6.1 OTA targets 99.5% monthly availability of the CONNECT platform (portal, cabinet, API and checkout), measured at OTA's application boundary and excluding maintenance announced at least forty-eight (48) hours in advance and urgent security work.",
+   "ru": "6.1 Целевой уровень доступности платформы CONNECT (портал, кабинет, API и платёжная страница) – 99,5% в месяц, измеряемый на границе приложений OTA, без учёта работ, объявленных не менее чем за сорок восемь (48) часов, и срочных работ по безопасности."
+  },
+  {
+   "id": "SLA-6.2",
+   "kind": "clause",
+   "en": "6.2 Availability of mobile networks, signal strength, a particular operator, speed, latency and operation abroad are outside the availability target. Also excluded are: Partner or End User equipment and firmware, power supply, user-side internet, third-party networks outside OTA's control, orders of authorities and force majeure.",
+   "ru": "6.2 Доступность мобильных сетей, уровень сигнала, конкретный оператор, скорость, задержка и работа за рубежом не входят в целевой уровень доступности. Также исключаются: оборудование и прошивка Партнёра или Конечного пользователя, электропитание, интернет на стороне пользователя, сторонние сети вне контроля OTA, требования органов власти и форс-мажор."
+  },
+  {
+   "id": "SLA-6.3",
+   "kind": "clause",
+   "en": "6.3 If availability is below 99.0% in two consecutive months, OTA shall provide Partner with a written root-cause report and remediation plan within ten (10) business days, and Partner may request a review meeting. No automatic service credits apply.",
+   "ru": "6.3 Если доступность ниже 99,0% два месяца подряд, OTA в течение десяти (10) рабочих дней предоставляет Партнёру письменный отчёт о причинах и план устранения, а Партнёр вправе запросить встречу по итогам. Автоматические сервисные компенсации не применяются."
+  },
+  {
+   "id": "SLA-s7",
+   "kind": "heading",
+   "en": "7. Support and incidents",
+   "ru": "7. Поддержка и инциденты"
+  },
+  {
+   "id": "SLA-7.1",
+   "kind": "clause",
+   "en": "7.1 Support channels: the ticket system in the cabinet (available 24/7), email to OTA's support address and the service status page. Staffed hours: Monday to Friday, 09:00–21:00 Dubai time (UTC+4). Priority 1 incidents are handled 24/7.",
+   "ru": "7.1 Каналы поддержки: система заявок в кабинете (доступна 24/7), e-mail на адрес поддержки OTA и страница статуса сервиса. Рабочие часы: с понедельника по пятницу, 09:00–21:00 по времени Дубая (UTC+4). Инциденты приоритета 1 обрабатываются 24/7."
+  },
+  {
+   "id": "SLA-7.2",
+   "kind": "clause",
+   "en": "7.2 Priorities and target first response times:",
+   "ru": "7.2 Приоритеты и целевое время первого ответа:"
+  },
+  {
+   "id": "SLA-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Priority",
+      "ru": "Приоритет",
+      "bi": true
+     },
+     {
+      "en": "Description",
+      "ru": "Описание",
+      "bi": true
+     },
+     {
+      "en": "First response",
+      "ru": "Первый ответ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "P1",
+      "ru": "P1"
+     },
+     {
+      "en": "Platform or payments unavailable for many users",
+      "ru": "Недоступность платформы или платежей для многих пользователей",
+      "bi": true
+     },
+     {
+      "en": "1 hour",
+      "ru": "1 час (24/7)",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "P2",
+      "ru": "P2"
+     },
+     {
+      "en": "Major degradation or a large group of devices",
+      "ru": "Существенная деградация или большая группа устройств",
+      "bi": true
+     },
+     {
+      "en": "4 business hours",
+      "ru": "4 рабочих часа",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "P3",
+      "ru": "P3"
+     },
+     {
+      "en": "Single device or billing question",
+      "ru": "Одно устройство или вопрос по оплате",
+      "bi": true
+     },
+     {
+      "en": "1 business day",
+      "ru": "1 рабочий день",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "P4",
+      "ru": "P4"
+     },
+     {
+      "en": "Request or improvement",
+      "ru": "Запрос или улучшение",
+      "bi": true
+     },
+     {
+      "en": "3 business days",
+      "ru": "3 рабочих дня",
+      "bi": true
+     }
+    ]
+   ]
+  },
+  {
+   "id": "SLA-7.3",
+   "kind": "clause",
+   "en": "7.3 Repairs of Upstream networks follow the Upstream Providers' timelines; OTA escalates and keeps Partner informed until resolution.",
+   "ru": "7.3 Ремонт сетей Поставщиков выполняется в их сроки; OTA эскалирует проблему и информирует Партнёра до её решения."
+  },
+  {
+   "id": "SLA-7.4",
+   "kind": "clause",
+   "en": "7.4 Partner shall promptly report loss or theft of SIMs, suspected compromise and mass device failures, providing sample IMEI/ICCID numbers and firmware versions.",
+   "ru": "7.4 Партнёр незамедлительно сообщает об утрате или хищении SIM, подозрении на компрометацию и массовых отказах устройств, указывая примеры IMEI/ICCID и версии прошивки."
+  },
+  {
+   "id": "SLA-s8",
+   "kind": "heading",
+   "en": "8. Notifications and location",
+   "ru": "8. Уведомления и местоположение"
+  },
+  {
+   "id": "SLA-8.1",
+   "kind": "clause",
+   "en": "8.1 Event notifications (loss of connection, device power-off, SIM removal or insertion into another device) are generated from network and device events and may be delayed or false. They are informational and are not an alarm, security, monitoring or life-safety service; nobody monitors devices or reacts to notifications. Notifications to End Users are governed by clause 2.5 of Document 07, and Partner shall not promise End Users more.",
+   "ru": "8.1 Уведомления о событиях (потеря связи, отключение устройства, извлечение SIM или установка её в другое устройство) формируются на основе сетевых событий и событий устройства и могут поступать с задержкой или ложно. Они носят информационный характер и не являются охранной, мониторинговой службой, сигнализацией или системой обеспечения безопасности жизни; никто не следит за устройствами и не реагирует на уведомления. Уведомления Конечных пользователей регулируются п. 2.5 Документа 07, и Партнёр не обещает Конечным пользователям большего."
+  },
+  {
+   "id": "SLA-8.2",
+   "kind": "clause",
+   "en": "8.2 Device location shown in CONNECT is approximate network-based (LBS) location provided by the Connectivity Component. OTA does not view or store the content of data transmitted by devices to Partner's services.",
+   "ru": "8.2 Местоположение устройства в CONNECT является приблизительным, определяемым по сети (LBS) через Компонент связи. OTA не просматривает и не хранит содержимое данных, передаваемых устройствами сервисам Партнёра."
+  },
+  {
+   "id": "SLA-s9",
+   "kind": "heading",
+   "en": "9. Security",
+   "ru": "9. Безопасность"
+  },
+  {
+   "id": "SLA-s9.p1",
+   "kind": "para",
+   "en": "OTA applies role-based access, multi-factor authentication for administrative access, encryption in transit, logging, backups and incident response. Partner manages the accounts of its staff and dealers and promptly removes access of persons who leave.",
+   "ru": "OTA применяет ролевой доступ, многофакторную аутентификацию для административного доступа, шифрование при передаче, журналирование, резервное копирование и реагирование на инциденты. Партнёр управляет учётными записями своих сотрудников и дилеров и своевременно отзывает доступ ушедших сотрудников."
+  },
+  {
+   "id": "SLA-s10",
+   "kind": "heading",
+   "en": "10. Changes and Supported Device Life",
+   "ru": "10. Изменения и Поддерживаемый срок службы"
+  },
+  {
+   "id": "SLA-10.1",
+   "kind": "clause",
+   "en": "10.1 OTA may release updates and security patches. OTA gives thirty (30) days' notice of changes that materially worsen agreed functions, except where urgently required by law or security.",
+   "ru": "10.1 OTA вправе выпускать обновления и исправления безопасности. Об изменениях, существенно ухудшающих согласованные функции, OTA уведомляет за тридцать (30) дней, кроме случаев, когда они срочно требуются по закону или для безопасности."
+  },
+  {
+   "id": "SLA-10.2",
+   "kind": "clause",
+   "en": "10.2 OTA supports each Approved Device model for the Supported Device Life: not shorter than the longest prepaid term (Service Token or prepaid Direct Subscription) sold for that model, and in any case not less than two (2) years from its first activation. Before that, OTA may end support of a model only for an objective reason outside its control (such as a shutdown of the radio technology used by the device, a legal prohibition or loss of all Upstream options in the country), with notice to Partner and affected End Users as early as possible. After the Supported Device Life, OTA may end support on at least three (3) months' notice, and does not sell new plans beyond the announced end date.",
+   "ru": "10.2 OTA поддерживает каждую модель Одобренного устройства в течение Поддерживаемого срока службы: не меньше самого длительного предоплаченного срока (Сервисного токена или предоплаченной Прямой подписки), проданного для этой модели, и в любом случае не менее двух (2) лет с даты её первой активации. До его окончания OTA вправе прекратить поддержку модели только по объективной причине вне своего контроля (например, отключение радиотехнологии, используемой устройством, запрет закона или утрата всех вариантов Поставщиков в стране) с уведомлением Партнёра и затронутых Конечных пользователей как можно раньше. После окончания Поддерживаемого срока службы OTA вправе прекратить поддержку с уведомлением не менее чем за три (3) месяца и не продаёт новые тарифы со сроком после объявленной даты."
+  },
+  {
+   "id": "SLA-10.3",
+   "kind": "clause",
+   "en": "10.3 If support ends before a paid Service Plan expires, OTA will transfer the plan to a compatible replacement device or eSIM profile where possible, or otherwise refund the unused full months on a pro-rata basis under clause 10.3 of the Master Agreement.",
+   "ru": "10.3 Если поддержка прекращается до окончания оплаченного Тарифного плана, OTA по возможности переносит тариф на совместимое устройство-замену или eSIM-профиль, а в противном случае возвращает стоимость неиспользованных полных месяцев пропорционально согласно п. 10.3 Рамочного соглашения."
+  },
+  {
+   "id": "SLA-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "SLA-sig2",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

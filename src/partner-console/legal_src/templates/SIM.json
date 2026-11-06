@@ -1,0 +1,237 @@
+{
+ "type": "SIM",
+ "docNo": "09",
+ "title": {
+  "en": "SIM Custody, Delivery and Customs Schedule",
+  "ru": "Порядок хранения, поставки и таможенного оформления SIM"
+ },
+ "ver": "T-SIM-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "SIM-title",
+   "kind": "heading",
+   "en": "SIM CUSTODY, DELIVERY AND CUSTOMS SCHEDULE",
+   "ru": "ПОРЯДОК ХРАНЕНИЯ, ПОСТАВКИ И ТАМОЖЕННОГО ОФОРМЛЕНИЯ SIM"
+  },
+  {
+   "id": "SIM-ref",
+   "kind": "para",
+   "en": "Document 09 of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 09 из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "SIM-p1",
+   "kind": "para",
+   "en": "This Schedule forms part of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\"), is signed together with it and applies to every shipment of physical SIMs under every Order Form.",
+   "ru": "Настоящий Порядок является частью Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр»), подписывается вместе с ним и применяется к каждой отгрузке физических SIM по каждому Заказу."
+  },
+  {
+   "id": "SIM-s1",
+   "kind": "heading",
+   "en": "1. Nature of the transfer",
+   "ru": "1. Характер передачи"
+  },
+  {
+   "id": "SIM-1.1",
+   "kind": "clause",
+   "en": "1.1 SIMs are necessary technical equipment for CONNECT. They are delivered into Partner's custody without separate charge, for installation in Approved Devices only. Title remains with OTA or its supplier. No sale of SIMs or of stand-alone connectivity takes place.",
+   "ru": "1.1 SIM являются необходимым техническим оборудованием для CONNECT. Они передаются Партнёру на хранение без отдельной платы исключительно для установки в Одобренные устройства. Право собственности остаётся за OTA или её поставщиком. Продажи SIM или самостоятельной услуги связи не происходит."
+  },
+  {
+   "id": "SIM-1.2",
+   "kind": "clause",
+   "en": "1.2 Each shipment is requested by Partner in the cabinet or by email, stating the destination address, quantity and SIM type. OTA confirms the shipment and sends the ICCID list securely. No payment is linked to the shipment of SIMs: Activation Keys are a separate electronic product, and SIM shipments are not conditional on their purchase (Master Agreement, clause 7.1).",
+   "ru": "1.2 Каждая отгрузка запрашивается Партнёром в кабинете или по e-mail с указанием адреса доставки, количества и типа SIM. OTA подтверждает отгрузку и защищённым способом направляет перечень ICCID. С отгрузкой SIM не связан никакой платёж: Ключи активации являются отдельным электронным продуктом, и отгрузки SIM не обусловлены их приобретением (п. 7.1 Рамочного соглашения)."
+  },
+  {
+   "id": "SIM-s2",
+   "kind": "heading",
+   "en": "2. Delivery terms",
+   "ru": "2. Условия поставки"
+  },
+  {
+   "id": "SIM-2.1",
+   "kind": "clause",
+   "en": "2.1 All shipments are made DAP (Incoterms® 2020) to the delivery address named by Partner. OTA arranges and pays for transport and insurance up to that address.",
+   "ru": "2.1 Все отгрузки осуществляются на условиях DAP (Incoterms® 2020) до адреса доставки, указанного Партнёром. OTA организует и оплачивает перевозку и страхование до этого адреса."
+  },
+  {
+   "id": "SIM-2.2",
+   "kind": "clause",
+   "en": "2.2 Partner, or a company appointed by it, acts as importer of record in the destination country and handles import clearance, including import duties, import VAT and customs broker fees, and any local permits or notifications required for SIM cards.",
+   "ru": "2.2 Партнёр или назначенная им компания выступает импортёром в стране назначения и обеспечивает импортное таможенное оформление, включая уплату ввозных пошлин, НДС при ввозе, услуг таможенного брокера, а также получение местных разрешений или уведомлений, необходимых для SIM-карт."
+  },
+  {
+   "id": "SIM-2.3",
+   "kind": "clause",
+   "en": "2.3 OTA issues for each shipment a pro forma invoice for customs purposes (Document 11) and a packing list. The goods are declared under HS code 8523.52 (smart cards), which the importer's customs broker confirms for the destination country.",
+   "ru": "2.3 Для каждой отгрузки OTA выдаёт проформу для таможенных целей (Документ 11) и упаковочный лист. Товар декларируется по коду ТН ВЭД 8523.52 (смарт-карты), который подтверждает таможенный брокер импортёра для страны назначения."
+  },
+  {
+   "id": "SIM-s3",
+   "kind": "heading",
+   "en": "3. Customs value",
+   "ru": "3. Таможенная стоимость"
+  },
+  {
+   "id": "SIM-s3.p1",
+   "kind": "para",
+   "en": "A free-of-charge transfer does not mean zero customs value. The pro forma states a non-zero value of the physical SIM cards based on OTA's documented purchase cost. Licence and service fees are not included in the customs value of the SIMs.",
+   "ru": "Безвозмездная передача не означает нулевую таможенную стоимость. В проформе указывается ненулевая стоимость физических SIM-карт на основе документально подтверждённой стоимости их приобретения OTA. Лицензионные и сервисные платежи не включаются в таможенную стоимость SIM."
+  },
+  {
+   "id": "SIM-s4",
+   "kind": "heading",
+   "en": "4. Receipt and custody",
+   "ru": "4. Приёмка и хранение"
+  },
+  {
+   "id": "SIM-4.1",
+   "kind": "clause",
+   "en": "4.1 Within ten (10) business days of delivery Partner signs the SIM Receipt and Custody Acknowledgment (Document 12) and reports any discrepancies or damage.",
+   "ru": "4.1 В течение десяти (10) рабочих дней с даты доставки Партнёр подписывает Акт приёмки SIM на хранение (Документ 12) и сообщает о расхождениях или повреждениях."
+  },
+  {
+   "id": "SIM-4.2",
+   "kind": "clause",
+   "en": "4.2 Partner's custody obligations apply to SIMs not yet installed in Approved Devices. For such SIMs, Partner shall keep them in a secure place, keep a record of stock, report stock quarterly on OTA's request and report any loss or theft within two (2) business days, after which OTA deactivates the SIMs concerned.",
+   "ru": "4.2 Обязанности Партнёра по хранению распространяются на SIM, ещё не установленные в Одобренные устройства. Такие SIM Партнёр хранит в надёжном месте, ведёт учёт остатков, ежеквартально по запросу OTA сообщает об остатках и в течение двух (2) рабочих дней сообщает об утрате или хищении, после чего OTA деактивирует соответствующие SIM."
+  },
+  {
+   "id": "SIM-4.3",
+   "kind": "clause",
+   "en": "4.3 Once a SIM is installed in an Approved Device and its IMEI is on the IMEI Whitelist, the SIM is protected by the IMEI lock, and Partner's custody obligations for that SIM end when the device is sold.",
+   "ru": "4.3 После установки SIM в Одобренное устройство и включения его IMEI в Белый список IMEI SIM защищена привязкой к IMEI, и обязанности Партнёра по хранению этой SIM прекращаются с продажей устройства."
+  },
+  {
+   "id": "SIM-4.4",
+   "kind": "clause",
+   "en": "4.4 Risk of loss of or damage to the SIMs passes to Partner on delivery at the DAP address; title does not pass. For uninstalled SIMs lost, stolen or misused while in Partner's custody, Partner reimburses OTA's documented replacement cost and any charges imposed on OTA by its supplier as a result of misuse.",
+   "ru": "4.4 Риск утраты или повреждения SIM переходит к Партнёру при доставке по адресу DAP; право собственности не переходит. За неустановленные SIM, утраченные, похищенные или неправомерно использованные во время хранения у Партнёра, Партнёр возмещает OTA документально подтверждённую стоимость их замены и расходы, начисленные OTA её поставщиком в результате злоупотребления."
+  },
+  {
+   "id": "SIM-4.5",
+   "kind": "clause",
+   "en": "4.5 On termination of the Agreement, uninstalled SIMs are returned to OTA at OTA's cost or, at OTA's request, destroyed by Partner with a written destruction certificate.",
+   "ru": "4.5 При прекращении Договора неустановленные SIM возвращаются OTA за счёт OTA или, по запросу OTA, уничтожаются Партнёром с составлением письменного акта об уничтожении."
+  },
+  {
+   "id": "SIM-s5",
+   "kind": "heading",
+   "en": "5. eSIM",
+   "ru": "5. eSIM"
+  },
+  {
+   "id": "SIM-s5.p1",
+   "kind": "para",
+   "en": "Where eSIM (SGP.32) profiles are used, no SIM cards are shipped. Profiles are downloaded to the eUICC in the Approved Device, OTA keeps a record of the downloads, and sections 2 to 4 do not apply.",
+   "ru": "При использовании eSIM-профилей (SGP.32) SIM-карты не отгружаются. Профили загружаются в eUICC Одобренного устройства, OTA ведёт учёт загрузок, а разделы 2–4 не применяются."
+  },
+  {
+   "id": "SIM-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "SIM-sig1",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

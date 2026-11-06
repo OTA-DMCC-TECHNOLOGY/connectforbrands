@@ -1,0 +1,2673 @@
+[
+ {
+  "key": "P_NAME",
+  "label": "Полное наименование партнёра",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "BOA",
+   "CI",
+   "DPA",
+   "EUT",
+   "INV",
+   "MPA",
+   "OF",
+   "PN",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_FORM_EN",
+  "label": "Форма и страна учреждения (англ.)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_FORM",
+  "used": [
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_FORM_L2",
+  "label": "Форма и страна учреждения (второй язык)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_FORM",
+  "used": [
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_COUNTRY",
+  "label": "Страна регистрации (ISO)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится в текстах; влияет на НДС в счёте 13",
+  "used": []
+ },
+ {
+  "key": "P_REGNO",
+  "label": "Регистрационный номер",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "INV",
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_TAXNO",
+  "label": "Налоговый / VAT-номер",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "CI",
+   "INV",
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_ADDR_EN",
+  "label": "Юридический адрес (англ.)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_ADDR",
+  "used": [
+   "BOA",
+   "CI",
+   "INV",
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_ADDR_L2",
+  "label": "Юридический адрес (второй язык)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_ADDR",
+  "used": [
+   "BOA",
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_SIGNATORY",
+  "label": "ФИО подписанта",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "CI",
+   "DPA",
+   "MPA",
+   "OF",
+   "RS",
+   "SIM",
+   "SLA",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_TITLE_EN",
+  "label": "Должность подписанта (англ.)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_TITLE",
+  "used": [
+   "BL",
+   "CI",
+   "DPA",
+   "MPA",
+   "OF",
+   "RS",
+   "SIM",
+   "SLA",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_TITLE_L2",
+  "label": "Должность подписанта (второй язык)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_TITLE",
+  "used": [
+   "BL",
+   "CI",
+   "DPA",
+   "MPA",
+   "OF",
+   "RS",
+   "SIM",
+   "SLA",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_TITLE_L2_GEN",
+  "label": "Должность подписанта, родительный падеж («в лице …»)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "pair": "P_TITLE",
+  "used": [
+   "MPA"
+  ]
+ },
+ {
+  "key": "P_AUTHORITY",
+  "label": "Основание полномочий (+ файл доверенности)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится в текстах v09",
+  "used": []
+ },
+ {
+  "key": "LANG2",
+  "label": "Второй язык документов",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится напрямую; см. LANG2_NAME_*",
+  "used": []
+ },
+ {
+  "key": "P_BRAND",
+  "label": "Бренд",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_PROGRAMME",
+  "label": "Название программы («БРЕНД CONNECT»)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "BOA",
+   "EUT",
+   "MPA",
+   "OF",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_IS_PARTNER",
+  "label": "Знаки принадлежат партнёру? (да → 05A, нет → 05B)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "управляет BRAND_DOC_05A/05B и выбором 05A/05B",
+  "used": []
+ },
+ {
+  "key": "P_TM_OWNER_NAME",
+  "label": "Правообладатель: наименование (05B)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_COUNTRY_EN",
+  "label": "Правообладатель: страна учреждения (англ.)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_COUNTRY",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_COUNTRY_L2",
+  "label": "Правообладатель: страна учреждения (второй язык, предл. падеж «в …»)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_COUNTRY",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_REGNO",
+  "label": "Правообладатель: рег. номер",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_ADDR",
+  "label": "Правообладатель: адрес",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_RELATION_EN",
+  "label": "Статус партнёра у правообладателя (distributor / licensee)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_RELATION",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_RELATION_L2",
+  "label": "Статус партнёра у правообладателя (твор. падеж: дистрибьютором / лицензиатом)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_RELATION",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_TERRITORY_EN",
+  "label": "Страны действия разрешения правообладателя (англ.)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_TERRITORY",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_TERRITORY_L2",
+  "label": "Страны действия разрешения правообладателя (второй язык, предл. падеж)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "pair": "P_TM_OWNER_TERRITORY",
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_SIGNATORY",
+  "label": "Правообладатель: ФИО подписанта",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_OWNER_TITLE",
+  "label": "Правообладатель: должность подписанта",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_TM_LIST",
+  "label": "Регистрации знаков (список: знак, №/ведомство, страны, классы МКТУ)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "format": "list",
+  "used": [
+   "BL",
+   "BOA"
+  ]
+ },
+ {
+  "key": "TM_MARK",
+  "label": "Знак (элемент списка P_TM_LIST)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "BL",
+   "BOA"
+  ]
+ },
+ {
+  "key": "TM_REGNO",
+  "label": "№ регистрации и ведомство (элемент P_TM_LIST)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "BL",
+   "BOA"
+  ]
+ },
+ {
+  "key": "TM_COUNTRIES",
+  "label": "Страны регистрации (элемент P_TM_LIST)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "BL",
+   "BOA"
+  ]
+ },
+ {
+  "key": "TM_CLASSES",
+  "label": "Классы МКТУ (элемент P_TM_LIST)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "BL",
+   "BOA"
+  ]
+ },
+ {
+  "key": "P_DOMAIN",
+  "label": "Домен портала (connect.бренд.com)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "BOA",
+   "EUT",
+   "MPA",
+   "OF",
+   "PN",
+   "TRT"
+  ]
+ },
+ {
+  "key": "P_DNS_CONTACT",
+  "label": "Технический контакт по DNS",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится в текстах v09",
+  "used": []
+ },
+ {
+  "key": "P_LOGO",
+  "label": "Файлы логотипа и версия",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL"
+  ]
+ },
+ {
+  "key": "P_BRANDBOOK",
+  "label": "Брендбук (файл)",
+  "src": "partner",
+  "req": "optional",
+  "tz": true,
+  "used": [
+   "BL"
+  ]
+ },
+ {
+  "key": "P_BRAND_RULES",
+  "label": "Правила использования логотипа, цвета, шрифты (05A, прил. 2)",
+  "src": "partner",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "BL"
+  ]
+ },
+ {
+  "key": "P_BRAND_CONTACT",
+  "label": "Контакт для согласования материалов бренда (05A, прил. 2)",
+  "src": "partner",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "BL"
+  ]
+ },
+ {
+  "key": "P_EMAIL_OPS",
+  "label": "E-mail для операций",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "P_EMAIL_LEGAL",
+  "label": "E-mail для юридических уведомлений",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "P_EMAIL_FIN",
+  "label": "E-mail для финансов",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "P_EMAIL_SUPPORT",
+  "label": "E-mail поддержки для пользователей (первая линия)",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "P_PHONE",
+  "label": "Телефон",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится в текстах v09",
+  "used": []
+ },
+ {
+  "key": "P_BANK_BENEFICIARY",
+  "label": "Банк: получатель",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_IBAN",
+  "label": "Банк: счёт / IBAN",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_NAME",
+  "label": "Банк: наименование",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_ADDR",
+  "label": "Банк: адрес",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_SWIFT",
+  "label": "Банк: SWIFT",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_INTERMEDIARY",
+  "label": "Банк-посредник: SWIFT",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_CODE",
+  "label": "Код партнёра PPP (присваивает OTA)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "RS"
+  ]
+ },
+ {
+  "key": "OTA_NAME",
+  "label": "OTA: наименование",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "BOA",
+   "CI",
+   "DPA",
+   "EUT",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "PN",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "OTA_REGNO",
+  "label": "OTA: регистрационный номер",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "EUT",
+   "INV",
+   "MPA",
+   "PF",
+   "PN"
+  ]
+ },
+ {
+  "key": "OTA_LICENCE",
+  "label": "OTA: номер лицензии",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "MPA"
+  ]
+ },
+ {
+  "key": "OTA_TRN",
+  "label": "OTA: налоговый номер ОАЭ (TRN)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "CI",
+   "INV",
+   "MPA",
+   "PF"
+  ]
+ },
+ {
+  "key": "OTA_ADDR_EN",
+  "label": "OTA: адрес (англ.)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "pair": "OTA_ADDR",
+  "used": [
+   "BOA",
+   "CI",
+   "EUT",
+   "INV",
+   "MPA",
+   "PF",
+   "PN"
+  ]
+ },
+ {
+  "key": "OTA_ADDR_L2",
+  "label": "OTA: адрес (второй язык)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "pair": "OTA_ADDR",
+  "used": [
+   "BOA",
+   "EUT",
+   "MPA",
+   "PN"
+  ]
+ },
+ {
+  "key": "OTA_SIGNATORY",
+  "label": "OTA: подписант (латиницей)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "BL",
+   "DPA",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "OTA_SIGNATORY_L2_GEN",
+  "label": "OTA: подписант, второй язык, родительный падеж («в лице …»)",
+  "src": "ota",
+  "req": "required",
+  "tz": false,
+  "pair": "OTA_SIGNATORY",
+  "used": [
+   "MPA"
+  ]
+ },
+ {
+  "key": "OTA_TITLE_EN",
+  "label": "OTA: должность подписанта (англ.)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "pair": "OTA_TITLE",
+  "used": [
+   "BL",
+   "DPA",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "OTA_TITLE_L2",
+  "label": "OTA: должность подписанта (второй язык)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "pair": "OTA_TITLE",
+  "used": [
+   "BL",
+   "DPA",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "OTA_TITLE_L2_GEN",
+  "label": "OTA: должность, родительный падеж («в лице …»)",
+  "src": "ota",
+  "req": "required",
+  "tz": false,
+  "pair": "OTA_TITLE",
+  "used": [
+   "MPA"
+  ]
+ },
+ {
+  "key": "OTA_BANK_NAME",
+  "label": "OTA: банк",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_BANK_ADDR",
+  "label": "OTA: адрес банка",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_BANK_ACCOUNT",
+  "label": "OTA: номер счёта",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_BANK_IBAN",
+  "label": "OTA: IBAN",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_BANK_SWIFT",
+  "label": "OTA: SWIFT",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_EMAIL_OPS",
+  "label": "OTA: e-mail операций",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_EMAIL_LEGAL",
+  "label": "OTA: e-mail юридических уведомлений",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_EMAIL_FIN",
+  "label": "OTA: e-mail финансов",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_EMAIL_PRIVACY",
+  "label": "OTA: e-mail по персональным данным",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "PN"
+  ]
+ },
+ {
+  "key": "OTA_EMAIL_SUPPORT",
+  "label": "OTA: e-mail поддержки (вторая линия)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится в текстах v09 (04 п. 7.1 ссылается на «адрес поддержки OTA» без значения)",
+  "used": []
+ },
+ {
+  "key": "OTA_SUPPORT_HOURS",
+  "label": "OTA: часы поддержки",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "note": "не выводится: 04 п. 7.1 содержит часы прозой (литерал)",
+  "used": []
+ },
+ {
+  "key": "OTA_CUSTOMS_CODE",
+  "label": "OTA: код Dubai Customs",
+  "src": "ota",
+  "req": "na",
+  "tz": true,
+  "note": "не используется в текстах v09 – нужна формулировка юриста (проформа 11)",
+  "used": []
+ },
+ {
+  "key": "OTA_VAT_{CC}",
+  "label": "OTA: регистрация по НДС в стране CC",
+  "src": "ota",
+  "req": "na",
+  "tz": true,
+  "note": "не используется в текстах v09 – нужна формулировка юриста",
+  "used": []
+ },
+ {
+  "key": "OTA_REP_{CC}",
+  "label": "OTA: представитель в стране CC (имя, адрес)",
+  "src": "ota",
+  "req": "na",
+  "tz": true,
+  "note": "не используется в текстах v09 – нужна формулировка юриста",
+  "used": []
+ },
+ {
+  "key": "OTA_SUBPROC_EMAIL",
+  "label": "OTA: почтовый сервис-субобработчик (06, прил. 1)",
+  "src": "ota",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "DPA"
+  ]
+ },
+ {
+  "key": "OTA_SUBPROC_EMAIL_LOC",
+  "label": "OTA: расположение почтового субобработчика",
+  "src": "ota",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "DPA"
+  ]
+ },
+ {
+  "key": "CARD_DESCRIPTOR",
+  "label": "Дескриптор в выписке по карте (OTA*БРЕНДCONNECT)",
+  "src": "ota",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "TRT"
+  ]
+ },
+ {
+  "key": "CC",
+  "label": "Код страны ISO 3166-1 alpha-2",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "used": [
+   "OF",
+   "RS"
+  ]
+ },
+ {
+  "key": "CC_NAME_EN",
+  "label": "Страна (англ.)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "pair": "CC_NAME",
+  "used": [
+   "EUT",
+   "INV",
+   "OF",
+   "PF"
+  ]
+ },
+ {
+  "key": "CC_NAME_L2",
+  "label": "Страна (второй язык)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "pair": "CC_NAME",
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "CC_NAME_UPPER_EN",
+  "label": "Страна прописными (англ., заголовок Заказа)",
+  "src": "country",
+  "req": "auto",
+  "tz": false,
+  "pair": "CC_NAME_UPPER",
+  "note": "= upper(CC_NAME_EN)",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_NAME_UPPER_L2",
+  "label": "Страна прописными (второй язык, заголовок)",
+  "src": "country",
+  "req": "auto",
+  "tz": false,
+  "pair": "CC_NAME_UPPER",
+  "note": "= upper(CC_NAME_L2)",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_NAME_FULL_EN",
+  "label": "Официальное название страны (англ., п. 1.1 Заказа)",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "pair": "CC_NAME_FULL",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_NAME_FULL_L2",
+  "label": "Официальное название страны (второй язык)",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "pair": "CC_NAME_FULL",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_NAME_LOC_L2",
+  "label": "Страна, предложный падеж («в Украине»)",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "pair": "CC_NAME",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_EXCLUSION_EN",
+  "label": "Исключение территорий страны (англ.)",
+  "src": "country",
+  "req": "na",
+  "tz": false,
+  "pair": "CC_EXCLUSION",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_EXCLUSION_L2",
+  "label": "Исключение территорий страны (второй язык)",
+  "src": "country",
+  "req": "na",
+  "tz": false,
+  "pair": "CC_EXCLUSION",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OF_EXCEPTIONS_EN",
+  "label": "Исключения из п. 5.6 (англ.)",
+  "src": "country",
+  "req": "na",
+  "tz": true,
+  "pair": "OF_EXCEPTIONS",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OF_EXCEPTIONS_L2",
+  "label": "Исключения из п. 5.6 (второй язык)",
+  "src": "country",
+  "req": "na",
+  "tz": true,
+  "pair": "OF_EXCEPTIONS",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "OF_EXCEPTIONS_NONE",
+  "label": "Флаг: исключений из п. 5.6 нет",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= OF_EXCEPTIONS_EN пусто/N/A",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "BRAND_DOC_05A",
+  "label": "Флаг: документ о бренде 05A",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= P_TM_OWNER_IS_PARTNER = да",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "BRAND_DOC_05B",
+  "label": "Флаг: документ о бренде 05B",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= P_TM_OWNER_IS_PARTNER = нет",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "LAUNCH_DATE",
+  "label": "Дата коммерческого запуска",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "date",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "INIT_SIMS",
+  "label": "Начальная отгрузка SIM, шт.",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "int",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "INIT_KEYS",
+  "label": "Первый заказ: ключей активации",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "int",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "INIT_TOKENS",
+  "label": "Первый заказ: сервисных токенов",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "int",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "ANNUAL_TARGET",
+  "label": "Годовая цель, активированных устройств",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "int",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEVICES",
+  "label": "Приложение 1: одобренные устройства (список)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "list",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_BRAND",
+  "label": "Устройство: бренд (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_MODEL",
+  "label": "Устройство: модель (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_HW",
+  "label": "Устройство: ревизия (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_FW",
+  "label": "Устройство: прошивка (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_PLAN",
+  "label": "Устройство: тариф (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_MB",
+  "label": "Устройство: ожидаемо МБ в мес. (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DEV_SIM",
+  "label": "Устройство: тип SIM (элемент DEVICES)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "format": "item",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "PRICE_KEY",
+  "label": "Цена ключа активации, USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_LIGHT_12",
+  "label": "Цена токена Light, 12 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_LIGHT_24",
+  "label": "Цена токена Light, 24 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_LIGHT_36",
+  "label": "Цена токена Light, 36 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_LIGHT_48",
+  "label": "Цена токена Light, 48 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_LIGHT_60",
+  "label": "Цена токена Light, 60 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "RET_LIGHT",
+  "label": "Удерживаемая OTA сумма Light за оплаченный месяц, USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_STANDARD_12",
+  "label": "Цена токена Standard, 12 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_STANDARD_24",
+  "label": "Цена токена Standard, 24 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_STANDARD_36",
+  "label": "Цена токена Standard, 36 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_STANDARD_48",
+  "label": "Цена токена Standard, 48 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_STANDARD_60",
+  "label": "Цена токена Standard, 60 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "RET_STANDARD",
+  "label": "Удерживаемая OTA сумма Standard за оплаченный месяц, USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_PREMIUM_12",
+  "label": "Цена токена Premium, 12 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_PREMIUM_24",
+  "label": "Цена токена Premium, 24 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_PREMIUM_36",
+  "label": "Цена токена Premium, 36 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_PREMIUM_48",
+  "label": "Цена токена Premium, 48 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "TOK_PREMIUM_60",
+  "label": "Цена токена Premium, 60 мес., USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "RET_PREMIUM",
+  "label": "Удерживаемая OTA сумма Premium за оплаченный месяц, USD",
+  "src": "commercial",
+  "req": "required",
+  "tz": true,
+  "format": "usd",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "FEE_PCT",
+  "label": "Сбор на соблюдение страновых требований, % (0–3)",
+  "src": "commercial",
+  "req": "na",
+  "tz": true,
+  "format": "pct",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "FEE_NONE",
+  "label": "Флаг: сбора нет",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= FEE_PCT пусто/0/N/A",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "DOC_NO",
+  "label": "Номер документа (присваивает портал)",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "used": [
+   "BL",
+   "BOA",
+   "DPA",
+   "MPA",
+   "OF",
+   "SIM",
+   "SLA",
+   "TRT"
+  ]
+ },
+ {
+  "key": "DOC_NO_MPA",
+  "label": "Номер Рамочного соглашения",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "used": [
+   "BL",
+   "CI",
+   "DPA",
+   "INV",
+   "OF",
+   "PF",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "DOC_NO_OF",
+  "label": "Номер Заказа по стране",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "used": [
+   "INV",
+   "PF",
+   "RS",
+   "SR"
+  ]
+ },
+ {
+  "key": "DOC_SEQ",
+  "label": "Часть номера YYYY-NNNN(NN) (счёт / проформа / акт / счёт партнёра)",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "used": [
+   "CI",
+   "INV",
+   "PF",
+   "SR"
+  ]
+ },
+ {
+  "key": "DOC_VER",
+  "label": "Версия публичного документа (vX.Y)",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "used": [
+   "EUT",
+   "PN"
+  ]
+ },
+ {
+  "key": "DATE",
+  "label": "Дата документа",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "format": "date",
+  "used": [
+   "BOA",
+   "CI",
+   "INV",
+   "MPA",
+   "PF",
+   "RS"
+  ]
+ },
+ {
+  "key": "MPA_DATE",
+  "label": "Дата Рамочного соглашения",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "format": "date",
+  "used": [
+   "OF"
+  ]
+ },
+ {
+  "key": "EFFECTIVE_DATE",
+  "label": "Дата вступления в силу / обновления",
+  "src": "system",
+  "req": "auto",
+  "tz": true,
+  "format": "date",
+  "used": [
+   "EUT",
+   "PN"
+  ]
+ },
+ {
+  "key": "DUE_DATE",
+  "label": "Срок оплаты",
+  "src": "invoice",
+  "req": "auto",
+  "tz": true,
+  "format": "date",
+  "used": [
+   "CI",
+   "INV"
+  ]
+ },
+ {
+  "key": "LANG2_NAME_EN",
+  "label": "Название второго языка по-английски (строка о языке)",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "BL",
+   "BOA",
+   "CI",
+   "DPA",
+   "EUT",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "PN",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "LANG2_NAME_L2",
+  "label": "Название второго языка на нём самом, форма для строки о языке («русском»)",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "BL",
+   "BOA",
+   "CI",
+   "DPA",
+   "EUT",
+   "INV",
+   "MPA",
+   "OF",
+   "PF",
+   "PN",
+   "RS",
+   "SIM",
+   "SLA",
+   "SR",
+   "TRT"
+  ]
+ },
+ {
+  "key": "EUT_LANGS",
+  "label": "07 страновое приложение: Языки публикации",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "EUT_WITHDRAWAL",
+  "label": "07 страновое приложение: Правила отказа и возврата для потребителей",
+  "src": "country",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "EUT_CONSUMER_AUTH",
+  "label": "07 страновое приложение: Орган по защите прав потребителей",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "EUT_DP_AUTH",
+  "label": "07 страновое приложение: Орган по защите персональных данных",
+  "src": "country",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "EUT_OTHER",
+  "label": "07 страновое приложение: Иная обязательная информация",
+  "src": "country",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "EUT"
+  ]
+ },
+ {
+  "key": "SHIP_CONSIGNEE",
+  "label": "Отгрузка: Грузополучатель и адрес доставки",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_IMPORTER",
+  "label": "Отгрузка: Импортёр и налоговый номер",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_PLACE",
+  "label": "Отгрузка: Место поставки DAP",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_WAYBILL",
+  "label": "Отгрузка: Перевозчик и накладная",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF",
+   "SR"
+  ]
+ },
+ {
+  "key": "SHIP_FORM_FACTOR",
+  "label": "Отгрузка: Форм-фактор SIM",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_ORIGIN",
+  "label": "Отгрузка: Происхождение SIM",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_QTY",
+  "label": "Отгрузка: Количество SIM",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF",
+   "SR"
+  ]
+ },
+ {
+  "key": "SHIP_UNIT_VALUE",
+  "label": "Отгрузка: Таможенная стоимость за ед., USD",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_TOTAL_VALUE",
+  "label": "Отгрузка: Итого таможенная стоимость, USD",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_CARTONS",
+  "label": "Отгрузка: Количество коробок",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_GROSS_KG",
+  "label": "Отгрузка: Вес брутто, кг",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_NET_KG",
+  "label": "Отгрузка: Вес нетто, кг",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_ICCID_REF",
+  "label": "Отгрузка: Ссылка на перечень ICCID",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "PF"
+  ]
+ },
+ {
+  "key": "SHIP_ICCID_RANGE",
+  "label": "Отгрузка: Диапазон ICCID",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_DELIVERY",
+  "label": "Акт приёмки SIM: дата и адрес доставки",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_IMPORTER_DECL",
+  "label": "Акт приёмки SIM: импортёр и № таможенной декларации",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_STORAGE",
+  "label": "Акт приёмки SIM: место хранения и ответственное лицо",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_SIM_TYPE",
+  "label": "Акт приёмки SIM: тип SIM",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_RECEIVED",
+  "label": "Акт приёмки SIM: получено, шт.",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_DIFF",
+  "label": "Акт приёмки SIM: расхождение, шт.",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_RECEIVER_NAME",
+  "label": "Акт приёмки SIM: ФИО принявшего",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_RECEIVER_TITLE",
+  "label": "Акт приёмки SIM: должность принявшего",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_CONDITION_EN",
+  "label": "Акт приёмки: состояние упаковки (англ.)",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "pair": "SR_CONDITION",
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "SR_CONDITION_L2",
+  "label": "Акт приёмки: состояние упаковки (второй язык)",
+  "src": "shipment",
+  "req": "required",
+  "tz": false,
+  "pair": "SR_CONDITION",
+  "used": [
+   "SR"
+  ]
+ },
+ {
+  "key": "INV_KEY_QTY",
+  "label": "Счёт OTA: ключи: кол-во",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_KEY_PRICE",
+  "label": "Счёт OTA: ключи: цена USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_KEY_AMOUNT",
+  "label": "Счёт OTA: ключи: сумма USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOK_PLAN",
+  "label": "Счёт OTA: токены: тариф",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOK_TERM",
+  "label": "Счёт OTA: токены: срок, мес.",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOK_QTY",
+  "label": "Счёт OTA: токены: кол-во",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOK_PRICE",
+  "label": "Счёт OTA: токены: цена USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOK_AMOUNT",
+  "label": "Счёт OTA: токены: сумма USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_OTHER_DESC",
+  "label": "Счёт OTA: прочая услуга: описание",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_OTHER_QTY",
+  "label": "Счёт OTA: прочая услуга: кол-во",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_OTHER_PRICE",
+  "label": "Счёт OTA: прочая услуга: цена USD",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_OTHER_AMOUNT",
+  "label": "Счёт OTA: прочая услуга: сумма USD",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_SUBTOTAL",
+  "label": "Счёт OTA: итого без НДС, USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_TOTAL",
+  "label": "Счёт OTA: итого к оплате, USD",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "CI_AMOUNT",
+  "label": "Счёт партнёра: сумма вознаграждения, USD",
+  "src": "invoice",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "CI"
+  ]
+ },
+ {
+  "key": "CI_VAT_TREATMENT",
+  "label": "Счёт партнёра: режим НДС (по заключению консультанта партнёра)",
+  "src": "invoice",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "CI"
+  ]
+ },
+ {
+  "key": "CI_VAT_AMOUNT",
+  "label": "Счёт партнёра: сумма НДС",
+  "src": "invoice",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "CI"
+  ]
+ },
+ {
+  "key": "CI_TOTAL",
+  "label": "Счёт партнёра: итого к оплате",
+  "src": "invoice",
+  "req": "required",
+  "tz": false,
+  "used": [
+   "CI"
+  ]
+ },
+ {
+  "key": "RS_MONTH",
+  "label": "Отчётный месяц (ГГГГ-ММ)",
+  "src": "statement",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "CI",
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_YYYYMM",
+  "label": "Отчётный месяц (ГГГГММ, для номера акта)",
+  "src": "statement",
+  "req": "auto",
+  "tz": false,
+  "used": [
+   "CI",
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_MONTHS_LIGHT",
+  "label": "Акт сверки A: Оплаченные месяцы подписки – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_MONTHS_STANDARD",
+  "label": "Акт сверки A: Оплаченные месяцы подписки – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_MONTHS_PREMIUM",
+  "label": "Акт сверки A: Оплаченные месяцы подписки – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_GROSS_LIGHT",
+  "label": "Акт сверки A: Валовые поступления – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_GROSS_STANDARD",
+  "label": "Акт сверки A: Валовые поступления – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_GROSS_PREMIUM",
+  "label": "Акт сверки A: Валовые поступления – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_TAX_LIGHT",
+  "label": "Акт сверки A: Минус косвенные налоги – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_TAX_STANDARD",
+  "label": "Акт сверки A: Минус косвенные налоги – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_TAX_PREMIUM",
+  "label": "Акт сверки A: Минус косвенные налоги – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_ACQ_LIGHT",
+  "label": "Акт сверки A: Минус эквайринг – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_ACQ_STANDARD",
+  "label": "Акт сверки A: Минус эквайринг – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_ACQ_PREMIUM",
+  "label": "Акт сверки A: Минус эквайринг – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_REFUNDS_LIGHT",
+  "label": "Акт сверки A: Минус возвраты и chargeback – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_REFUNDS_STANDARD",
+  "label": "Акт сверки A: Минус возвраты и chargeback – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_REFUNDS_PREMIUM",
+  "label": "Акт сверки A: Минус возвраты и chargeback – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_FEE_LIGHT",
+  "label": "Акт сверки A: Минус страновой сбор – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_FEE_STANDARD",
+  "label": "Акт сверки A: Минус страновой сбор – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_FEE_PREMIUM",
+  "label": "Акт сверки A: Минус страновой сбор – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_NCR_LIGHT",
+  "label": "Акт сверки A: Чистая собранная выручка – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_NCR_STANDARD",
+  "label": "Акт сверки A: Чистая собранная выручка – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_NCR_PREMIUM",
+  "label": "Акт сверки A: Чистая собранная выручка – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_RETAINED_LIGHT",
+  "label": "Акт сверки A: Минус удерживаемая OTA сумма – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_RETAINED_STANDARD",
+  "label": "Акт сверки A: Минус удерживаемая OTA сумма – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_RETAINED_PREMIUM",
+  "label": "Акт сверки A: Минус удерживаемая OTA сумма – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_CORR_LIGHT",
+  "label": "Акт сверки A: Корректировки за прошлые месяцы – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_CORR_STANDARD",
+  "label": "Акт сверки A: Корректировки за прошлые месяцы – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_CORR_PREMIUM",
+  "label": "Акт сверки A: Корректировки за прошлые месяцы – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_COMMISSION_LIGHT",
+  "label": "Акт сверки A: Вознаграждение Партнёра – Light",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_COMMISSION_STANDARD",
+  "label": "Акт сверки A: Вознаграждение Партнёра – Standard",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_A_COMMISSION_PREMIUM",
+  "label": "Акт сверки A: Вознаграждение Партнёра – Premium",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_KEYS_AMOUNT",
+  "label": "Акт сверки B (ключи активации): сумма",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_KEYS_PAID",
+  "label": "Акт сверки B (ключи активации): оплачено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_KEYS_DUE",
+  "label": "Акт сверки B (ключи активации): к оплате до 20-го",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOKENS_AMOUNT",
+  "label": "Акт сверки B (сервисные токены): сумма",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOKENS_PAID",
+  "label": "Акт сверки B (сервисные токены): оплачено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOKENS_DUE",
+  "label": "Акт сверки B (сервисные токены): к оплате до 20-го",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_OTHER_AMOUNT",
+  "label": "Акт сверки B (прочие услуги): сумма",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_OTHER_PAID",
+  "label": "Акт сверки B (прочие услуги): оплачено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_OTHER_DUE",
+  "label": "Акт сверки B (прочие услуги): к оплате до 20-го",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOTAL_DESC",
+  "label": "Акт сверки B (итого): описание",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOTAL_AMOUNT",
+  "label": "Акт сверки B (итого): сумма",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOTAL_PAID",
+  "label": "Акт сверки B (итого): оплачено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_B_TOTAL_DUE",
+  "label": "Акт сверки B (итого): к оплате до 20-го",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_C_COMMISSION_AMOUNT",
+  "label": "Акт сверки C (счёт партнёра): сумма",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_C_COMMISSION_PAID",
+  "label": "Акт сверки C (счёт партнёра): оплачено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_C_COMMISSION_DUE",
+  "label": "Акт сверки C (счёт партнёра): к оплате до 20-го",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_SIM_CUSTODY",
+  "label": "Акт сверки D: неустановленные SIM на хранении",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_SIM_LOST",
+  "label": "Акт сверки D: SIM утрачено/похищено",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_KEYS",
+  "label": "Акт сверки D: ключи куплено/использовано/не использовано",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_TOKENS",
+  "label": "Акт сверки D: токены выпущено/погашено/не погашено/истекло",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_ACTIVE",
+  "label": "Акт сверки D: активные устройства: токен/подписка",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ },
+ {
+  "key": "RS_D_IMEI_ADDED",
+  "label": "Акт сверки D: IMEI добавлено в Белый список",
+  "src": "statement",
+  "req": "optional",
+  "tz": false,
+  "used": [
+   "RS"
+  ]
+ }
+]

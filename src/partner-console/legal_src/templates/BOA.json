@@ -1,0 +1,219 @@
+{
+ "type": "BOA",
+ "docNo": "05B",
+ "title": {
+  "en": "Brand Owner Authorisation Letter",
+  "ru": "Письмо-разрешение правообладателя бренда"
+ },
+ "ver": "T-BOA-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "BOA-title",
+   "kind": "heading",
+   "en": "BRAND OWNER AUTHORISATION LETTER",
+   "ru": "ПИСЬМО-РАЗРЕШЕНИЕ ПРАВООБЛАДАТЕЛЯ БРЕНДА"
+  },
+  {
+   "id": "BOA-ref",
+   "kind": "para",
+   "en": "Document 05B of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 05B из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "BOA-p1",
+   "kind": "para",
+   "en": "Use this letter when the trade marks do not belong to the Partner. The Partner asks the brand owner to sign it on the brand owner's letterhead and returns the signed original to OTA before signing the package.",
+   "ru": "Используется, если товарные знаки не принадлежат Партнёру. Партнёр просит правообладателя подписать письмо на его фирменном бланке и передаёт подписанный оригинал OTA до подписания пакета."
+  },
+  {
+   "id": "BOA-p2",
+   "kind": "para",
+   "en": "[BRAND OWNER LETTERHEAD]\nDate: {{DATE}}",
+   "ru": "[ФИРМЕННЫЙ БЛАНК ПРАВООБЛАДАТЕЛЯ]\nДата: {{DATE}}"
+  },
+  {
+   "id": "BOA-p3",
+   "kind": "para",
+   "en": "To: {{OTA_NAME}}, {{OTA_ADDR_EN}}\nCopy: {{P_NAME}}, {{P_ADDR_EN}}",
+   "ru": "Кому: {{OTA_NAME}}, {{OTA_ADDR_L2}}\nКопия: {{P_NAME}}, {{P_ADDR_L2}}"
+  },
+  {
+   "id": "BOA-p4",
+   "kind": "para",
+   "en": "Subject: Authorisation to use the {{P_BRAND}} trade marks in the {{P_PROGRAMME}} service",
+   "ru": "Тема: разрешение на использование товарных знаков {{P_BRAND}} в сервисе {{P_PROGRAMME}}"
+  },
+  {
+   "id": "BOA-p5",
+   "kind": "para",
+   "en": "We, {{P_TM_OWNER_NAME}}, a company incorporated in {{P_TM_OWNER_COUNTRY_EN}}, registration no. {{P_TM_OWNER_REGNO}}, address {{P_TM_OWNER_ADDR}} (the \"Brand Owner\"), are the owner of the trade marks listed in the Annex (the \"Marks\").",
+   "ru": "Мы, {{P_TM_OWNER_NAME}}, компания, учреждённая в {{P_TM_OWNER_COUNTRY_L2}}, рег. № {{P_TM_OWNER_REGNO}}, адрес {{P_TM_OWNER_ADDR}} («Правообладатель»), являемся владельцем товарных знаков, перечисленных в Приложении («Знаки»)."
+  },
+  {
+   "id": "BOA-1",
+   "kind": "clause",
+   "en": "1. We confirm that {{P_NAME}} (the \"Partner\") is our authorised {{P_TM_OWNER_RELATION_EN}} for products bearing the Marks in {{P_TM_OWNER_TERRITORY_EN}} and is entitled to offer the CONNECT service integrated into these products under the name \"{{P_PROGRAMME}}\".",
+   "ru": "1. Мы подтверждаем, что {{P_NAME}} («Партнёр») является нашим уполномоченным {{P_TM_OWNER_RELATION_L2}} в отношении товаров со Знаками в {{P_TM_OWNER_TERRITORY_L2}} и вправе предлагать встроенный в эти товары сервис CONNECT под названием «{{P_PROGRAMME}}»."
+  },
+  {
+   "id": "BOA-2",
+   "kind": "clause",
+   "en": "2. We grant {{OTA_NAME}} (\"OTA\") a non-exclusive, royalty-free, non-transferable licence to reproduce and display the Marks only in the CONNECT End User portal on the domain {{P_DOMAIN}}, the partner cabinet, checkout pages, receipts, notifications, onboarding materials and service notices relating to the Partner's products, for as long as the Partner's agreement with OTA is in force.",
+   "ru": "2. Мы предоставляем {{OTA_NAME}} («OTA») неисключительную, безвозмездную, непередаваемую лицензию на воспроизведение и отображение Знаков только на портале Конечного пользователя CONNECT на домене {{P_DOMAIN}}, в кабинете партнёра, на платёжных страницах, в квитанциях, уведомлениях, материалах для подключения и сервисных уведомлениях, относящихся к товарам Партнёра, на срок действия договора Партнёра с OTA."
+  },
+  {
+   "id": "BOA-3",
+   "kind": "clause",
+   "en": "3. If our relationship with the Partner or the Partner's agreement with OTA ends, OTA may continue to use the Marks only to the extent needed to serve end users who have already paid for the service, until their paid periods expire. No new sales or marketing will be made with the Marks after that.",
+   "ru": "3. Если наши отношения с Партнёром или договор Партнёра с OTA прекращаются, OTA вправе продолжать использовать Знаки только в объёме, необходимом для обслуживания конечных пользователей, уже оплативших сервис, до окончания оплаченных периодов. После этого новые продажи и маркетинг со Знаками не осуществляются."
+  },
+  {
+   "id": "BOA-4",
+   "kind": "clause",
+   "en": "4. We confirm that the use of the Marks described above does not infringe any third-party rights known to us. OTA acquires no ownership of the Marks.",
+   "ru": "4. Мы подтверждаем, что описанное использование Знаков не нарушает известных нам прав третьих лиц. OTA не приобретает права собственности на Знаки."
+  },
+  {
+   "id": "BOA-5",
+   "kind": "clause",
+   "en": "5. This letter is governed by the laws of England and Wales. Any dispute arising from it shall be finally resolved under the ICC Rules of Arbitration by one arbitrator, seated in London, in English.",
+   "ru": "5. Настоящее письмо регулируется правом Англии и Уэльса. Любой спор, возникающий из него, окончательно разрешается по Арбитражному регламенту ICC одним арбитром, место арбитража – Лондон, язык – английский."
+  },
+  {
+   "id": "BOA-h1",
+   "kind": "heading",
+   "en": "Signature of the Brand Owner",
+   "ru": "Подпись правообладателя"
+  },
+  {
+   "id": "BOA-sig1",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{P_TM_OWNER_NAME}}",
+      "ru": "{{P_TM_OWNER_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{P_TM_OWNER_SIGNATORY}}",
+      "ru": "{{P_TM_OWNER_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{P_TM_OWNER_TITLE}}",
+      "ru": "{{P_TM_OWNER_TITLE}}"
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  },
+  {
+   "id": "BOA-h2",
+   "kind": "annex",
+   "en": "Annex – Marks",
+   "ru": "Приложение – Знаки"
+  },
+  {
+   "id": "BOA-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Mark",
+      "ru": "Знак",
+      "bi": true
+     },
+     {
+      "en": "Registration no. and office",
+      "ru": "№ регистрации и ведомство",
+      "bi": true
+     },
+     {
+      "en": "Countries",
+      "ru": "Страны",
+      "bi": true
+     },
+     {
+      "en": "Classes",
+      "ru": "Классы МКТУ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{TM_MARK}}",
+      "ru": "{{TM_MARK}}"
+     },
+     {
+      "en": "{{TM_REGNO}}",
+      "ru": "{{TM_REGNO}}"
+     },
+     {
+      "en": "{{TM_COUNTRIES}}",
+      "ru": "{{TM_COUNTRIES}}"
+     },
+     {
+      "en": "{{TM_CLASSES}}",
+      "ru": "{{TM_CLASSES}}"
+     }
+    ]
+   ],
+   "repeat": {
+    "row": 1,
+    "list": "P_TM_LIST"
+   }
+  }
+ ]
+}

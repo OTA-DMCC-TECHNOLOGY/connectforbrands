@@ -1,0 +1,330 @@
+{
+ "type": "CI",
+ "docNo": "14",
+ "title": {
+  "en": "Partner Commission Invoice",
+  "ru": "Счёт Партнёра на вознаграждение"
+ },
+ "ver": "T-CI-v3",
+ "effective": "2026-11-06",
+ "cls": "B",
+ "blocks": [
+  {
+   "id": "CI-title",
+   "kind": "heading",
+   "en": "INVOICE – MARKETING AND REFERRAL COMMISSION",
+   "ru": "СЧЁТ – ВОЗНАГРАЖДЕНИЕ ЗА МАРКЕТИНГ И ПРИВЛЕЧЕНИЕ КЛИЕНТОВ"
+  },
+  {
+   "id": "CI-ref",
+   "kind": "para",
+   "en": "Document 14 of 14 · Ref. {{P_CODE}}-INV-{{DOC_SEQ}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 14 из 14 · № {{P_CODE}}-INV-{{DOC_SEQ}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "CI-p1",
+   "kind": "para",
+   "en": "Template for the Partner. The Partner issues this invoice to OTA by the 15th day of the month, based on the Monthly Reconciliation Statement (Document 10). The Partner may use its own invoice form if it contains the same information.",
+   "ru": "Шаблон для Партнёра. Партнёр выставляет этот счёт OTA до 15-го числа месяца на основании Ежемесячного акта сверки (Документ 10). Партнёр вправе использовать свою форму счёта, если она содержит те же сведения."
+  },
+  {
+   "id": "CI-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Supplier",
+      "ru": "Поставщик",
+      "bi": true
+     },
+     {
+      "en": "Customer",
+      "ru": "Покупатель",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]",
+      "ru": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]"
+     },
+     {
+      "en": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}}\nTRN (VAT) {{OTA_TRN}}",
+      "ru": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}}\nTRN (VAT) {{OTA_TRN}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CI-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Invoice no.",
+      "ru": "№ счёта",
+      "bi": true
+     },
+     {
+      "en": "Invoice date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "Due date",
+      "ru": "Срок оплаты",
+      "bi": true
+     },
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{P_CODE}}-INV-{{DOC_SEQ}}",
+      "ru": "{{P_CODE}}-INV-{{DOC_SEQ}}"
+     },
+     {
+      "en": "{{DATE}}",
+      "ru": "{{DATE}}"
+     },
+     {
+      "en": "{{DUE_DATE}}",
+      "ru": "{{DUE_DATE}}"
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CI-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "No. / №",
+      "ru": "No. / №"
+     },
+     {
+      "en": "Description",
+      "ru": "Описание",
+      "bi": true
+     },
+     {
+      "en": "Amount USD",
+      "ru": "Сумма USD",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "1",
+      "ru": "1"
+     },
+     {
+      "en": "Marketing and referral services for {{RS_MONTH}} under Master Agreement {{DOC_NO_MPA}}, per Statement OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}",
+      "ru": "Услуги по маркетингу и привлечению клиентов за {{RS_MONTH}} по Рамочному соглашению {{DOC_NO_MPA}} согласно Акту OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}",
+      "bi": true
+     },
+     {
+      "en": "{{CI_AMOUNT}}",
+      "ru": "{{CI_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "VAT / НДС {{CI_VAT_TREATMENT}}",
+      "ru": "VAT / НДС {{CI_VAT_TREATMENT}}"
+     },
+     {
+      "en": "{{CI_VAT_AMOUNT}}",
+      "ru": "{{CI_VAT_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "Total due",
+      "ru": "Итого к оплате",
+      "bi": true
+     },
+     {
+      "en": "{{CI_TOTAL}}",
+      "ru": "{{CI_TOTAL}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CI-t4",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Bank details",
+      "ru": "Реквизиты",
+      "bi": true
+     },
+     {
+      "en": "Details",
+      "ru": "Сведения",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Beneficiary",
+      "ru": "Получатель",
+      "bi": true
+     },
+     {
+      "en": "{{P_BANK_BENEFICIARY}}",
+      "ru": "{{P_BANK_BENEFICIARY}}"
+     }
+    ],
+    [
+     {
+      "en": "IBAN / Account",
+      "ru": "Счёт",
+      "bi": true
+     },
+     {
+      "en": "{{P_BANK_IBAN}}",
+      "ru": "{{P_BANK_IBAN}}"
+     }
+    ],
+    [
+     {
+      "en": "Bank",
+      "ru": "Банк",
+      "bi": true
+     },
+     {
+      "en": "{{P_BANK_NAME}}, {{P_BANK_ADDR}}",
+      "ru": "{{P_BANK_NAME}}, {{P_BANK_ADDR}}"
+     }
+    ],
+    [
+     {
+      "en": "SWIFT",
+      "ru": "SWIFT"
+     },
+     {
+      "en": "{{P_BANK_SWIFT}}",
+      "ru": "{{P_BANK_SWIFT}}"
+     }
+    ],
+    [
+     {
+      "en": "Intermediary bank",
+      "ru": "Банк-посредник",
+      "bi": true
+     },
+     {
+      "en": "{{P_BANK_INTERMEDIARY}}",
+      "ru": "{{P_BANK_INTERMEDIARY}}"
+     }
+    ],
+    [
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ]
+   ],
+   "rowCond": {
+    "5": "P_BANK_INTERMEDIARY"
+   }
+  },
+  {
+   "id": "CI-sig5",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,349 @@
+{
+ "type": "EUT",
+ "docNo": "07",
+ "title": {
+  "en": "End User Terms (public)",
+  "ru": "Условия для Конечных пользователей (публичный документ)"
+ },
+ "ver": "T-EUT-v3",
+ "effective": "2026-11-06",
+ "cls": "C",
+ "blocks": [
+  {
+   "id": "EUT-title",
+   "kind": "heading",
+   "en": "CONNECT END USER TERMS",
+   "ru": "УСЛОВИЯ ИСПОЛЬЗОВАНИЯ CONNECT ДЛЯ КОНЕЧНЫХ ПОЛЬЗОВАТЕЛЕЙ"
+  },
+  {
+   "id": "EUT-ref",
+   "kind": "para",
+   "en": "Document 07 of 14\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 07 из 14\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "EUT-p1",
+   "kind": "para",
+   "en": "Public document published on {{P_DOMAIN}}/terms. Version {{DOC_VER}}, effective {{EFFECTIVE_DATE}}. It is published in the languages of each Approved Country; where local law requires the local-language version to prevail, that version prevails.",
+   "ru": "Публичный документ, размещается на {{P_DOMAIN}}/terms. Версия {{DOC_VER}}, действует с {{EFFECTIVE_DATE}}. Публикуется на языках каждой Одобренной страны; если местное законодательство требует приоритета версии на местном языке, применяется она."
+  },
+  {
+   "id": "EUT-s1",
+   "kind": "heading",
+   "en": "1. Who provides the service",
+   "ru": "1. Кто предоставляет сервис"
+  },
+  {
+   "id": "EUT-1.1",
+   "kind": "clause",
+   "en": "1.1 The {{P_PROGRAMME}} service (\"CONNECT\") is provided by {{OTA_NAME}}, registration no. {{OTA_REGNO}}, {{OTA_ADDR_EN}} (\"OTA\", \"we\"), as the technology provider of {{P_NAME}} (the \"Brand Partner\"). Support: {{P_EMAIL_SUPPORT}}.",
+   "ru": "1.1 Сервис {{P_PROGRAMME}} («CONNECT») предоставляет {{OTA_NAME}}, рег. № {{OTA_REGNO}}, {{OTA_ADDR_L2}} («OTA», «мы»), являющаяся технологическим партнёром {{P_NAME}} («Бренд-партнёр»). Поддержка: {{P_EMAIL_SUPPORT}}."
+  },
+  {
+   "id": "EUT-1.2",
+   "kind": "clause",
+   "en": "1.2 The Brand Partner sells the device and may sell you an activation code. These Terms govern the use of CONNECT.",
+   "ru": "1.2 Бренд-партнёр продаёт устройство и может продать вам код активации. Настоящие Условия регулируют пользование CONNECT."
+  },
+  {
+   "id": "EUT-s2",
+   "kind": "heading",
+   "en": "2. The service",
+   "ru": "2. Сервис"
+  },
+  {
+   "id": "EUT-2.1",
+   "kind": "clause",
+   "en": "2.1 CONNECT links your compatible device to your account, enables the device to exchange data with the platform through a built-in SIM or eSIM, shows device status and approximate network-based location, and sends notifications (for example, loss of connection, power-off or SIM removal). Functions depend on the device model and your plan (Light, Standard or Premium). Data transmission is provided by licensed mobile network operators; OTA provides the software service.",
+   "ru": "2.1 CONNECT связывает ваше совместимое устройство с вашей учётной записью, обеспечивает обмен данными между устройством и платформой через встроенную SIM или eSIM, показывает статус устройства и его приблизительное местоположение по сети, а также направляет уведомления (например, о потере связи, отключении питания или извлечении SIM). Функции зависят от модели устройства и вашего тарифа (Light, Standard или Premium). Передачу данных обеспечивают лицензированные операторы мобильной связи; OTA предоставляет программный сервис."
+  },
+  {
+   "id": "EUT-2.2",
+   "kind": "clause",
+   "en": "2.2 The SIM is part of the device service and remains the property of OTA or its suppliers. It is not a phone number or a mobile internet service. Calls and SMS are not included. The SIM works only in the device in which it was installed; you must not remove it, use it in another device or resell access.",
+   "ru": "2.2 SIM является частью сервиса устройства и остаётся собственностью OTA или её поставщиков. Это не телефонный номер и не услуга мобильного интернета. Звонки и SMS не включены. SIM работает только в том устройстве, в которое она установлена; запрещается извлекать её, использовать в другом устройстве или перепродавать доступ."
+  },
+  {
+   "id": "EUT-2.3",
+   "kind": "clause",
+   "en": "2.3 The service depends on mobile networks, local radio conditions, power supply and your device. We do not guarantee a particular operator, uninterrupted availability of mobile networks, speed or operation in every location. Notifications are subject to clause 2.5.",
+   "ru": "2.3 Работа сервиса зависит от мобильных сетей, условий радиоприёма, электропитания и вашего устройства. Мы не гарантируем определённого оператора, непрерывной доступности мобильных сетей, скорости или работы в любом месте. Уведомления регулируются п. 2.5."
+  },
+  {
+   "id": "EUT-2.4",
+   "kind": "clause",
+   "en": "2.4 CONNECT is provided in the country where your device was sold. During trips abroad it is available in the countries listed in the availability information on the portal. In the Gulf Cooperation Council countries, Türkiye, India, Brazil, China, Nigeria and other countries indicated in the availability information, CONNECT is available only during temporary trips and cannot be used there permanently; if the device stays there for more than ninety (90) days in twelve (12) months, the service there may be restricted. CONNECT is not provided in Russia, Belarus or territories under sanctions.",
+   "ru": "2.4 CONNECT предоставляется в стране, где было продано ваше устройство. Во время поездок за рубеж он доступен в странах, указанных в информации о доступности на портале. В странах Совета сотрудничества арабских государств Персидского залива, Турции, Индии, Бразилии, Китае, Нигерии и других странах, указанных в информации о доступности, CONNECT доступен только во время временных поездок и не может использоваться там постоянно; если устройство находится там более девяноста (90) дней за двенадцать (12) месяцев, сервис там может быть ограничен. CONNECT не предоставляется в России, Беларуси и на территориях под санкциями."
+  },
+  {
+   "id": "EUT-2.5",
+   "kind": "clause",
+   "en": "2.5 Notifications. Notifications about device events (for example, loss of connection, power-off, SIM removal or a suspected jamming of the signal) are generated automatically from network and device data, which may be incomplete. They are informational only and may be delayed, not delivered or triggered without a real event, in particular because of mobile network conditions, power supply, device settings or the services of third parties that deliver SMS, email and messenger messages. A \"jamming\" or \"power-off\" notification is an assumption based on loss of connection, not a confirmed fact. CONNECT is not an alarm, security, monitoring or emergency service, does not replace them or insurance, and nobody monitors your device or reacts to notifications on your behalf. You are responsible for keeping your contact details and notification settings up to date. To the extent permitted by law, we are not liable for any loss, theft or damage connected with a notification that was delayed, not delivered or false.",
+   "ru": "2.5 Уведомления. Уведомления о событиях устройства (например, о потере связи, отключении питания, извлечении SIM или предполагаемом глушении сигнала) формируются автоматически на основе данных сети и устройства, которые могут быть неполными. Они носят исключительно информационный характер и могут задерживаться, не доставляться или срабатывать без реального события, в частности из-за состояния мобильных сетей, электропитания, настроек устройства или работы сторонних сервисов доставки SMS, e-mail и сообщений в мессенджерах. Уведомление о «глушении» или «отключении» является предположением на основании потери связи, а не подтверждённым фактом. CONNECT не является охранной, мониторинговой или экстренной службой либо сигнализацией, не заменяет их и страхование, и никто не следит за вашим устройством и не реагирует на уведомления от вашего имени. Вы отвечаете за актуальность своих контактных данных и настроек уведомлений. В пределах, допускаемых законом, мы не отвечаем за утрату, кражу или повреждение имущества, связанные с задержкой, недоставкой или ложным срабатыванием уведомления."
+  },
+  {
+   "id": "EUT-s3",
+   "kind": "heading",
+   "en": "3. Plans and payment",
+   "ru": "3. Тарифы и оплата"
+  },
+  {
+   "id": "EUT-3.1",
+   "kind": "clause",
+   "en": "3.1 Activation code (12, 24, 36, 48 or 60 months). If you bought an activation code from the Brand Partner or its dealer, your plan starts when you redeem the code in the portal and lasts for the stated term. The price, receipt and refunds for the purchase of the code are matters between you and the seller of the code.",
+   "ru": "3.1 Код активации (12, 24, 36, 48 или 60 месяцев). Если вы купили код активации у Бренд-партнёра или его дилера, тариф начинается с момента погашения кода на портале и действует указанный срок. Цена, чек и возврат денег за покупку кода – вопросы между вами и продавцом кода."
+  },
+  {
+   "id": "EUT-3.2",
+   "kind": "clause",
+   "en": "3.2 Subscription (monthly, annual or prepaid for 12–60 months). If you subscribe on the portal, OTA is the seller and charges your card through its payment provider. The price including taxes, the billing period and the renewal terms are shown before you pay. We do not store your full card number.",
+   "ru": "3.2 Подписка (ежемесячная, годовая или предоплаченная на 12–60 месяцев). Если вы оформляете подписку на портале, продавцом является OTA, которая списывает оплату с вашей карты через своего платёжного провайдера. Цена с налогами, период оплаты и условия продления указываются до оплаты. Мы не храним полный номер вашей карты."
+  },
+  {
+   "id": "EUT-3.3",
+   "kind": "clause",
+   "en": "3.3 Automatic renewal. A subscription renews automatically only if you agreed to it at checkout. Before each renewal we send you a reminder: at least three (3) days before a monthly renewal and at least seven (7) days before an annual renewal. You can switch off renewal at any time with one click in your account.",
+   "ru": "3.3 Автоматическое продление. Подписка продлевается автоматически, только если вы согласились на это при оплате. Перед каждым продлением мы направляем вам напоминание: не менее чем за три (3) дня до ежемесячного продления и не менее чем за семь (7) дней до годового. Вы можете отключить продление в любой момент одним нажатием в личном кабинете."
+  },
+  {
+   "id": "EUT-3.4",
+   "kind": "clause",
+   "en": "3.4 A new subscription price (including a change caused by exchange rates or taxes) applies only from the next billing period and after at least thirty (30) days' notice; you may cancel before it applies. The price of a paid period or redeemed code never changes.",
+   "ru": "3.4 Новая цена подписки (в том числе изменённая из-за валютных курсов или налогов) применяется только со следующего периода оплаты и после уведомления не менее чем за тридцать (30) дней; вы можете отказаться от подписки до её применения. Цена оплаченного периода или погашенного кода не меняется."
+  },
+  {
+   "id": "EUT-3.5",
+   "kind": "clause",
+   "en": "3.5 Currency and bank fees. Prices are shown at checkout in the currency in which you will be charged. If that currency differs from the currency of your card, or if your bank treats the payment as a cross-border payment (OTA is located in the UAE), your bank or card issuer may charge currency conversion or cross-border fees and apply its own exchange rate. These fees are set by your bank, are not part of our price and are not received by OTA, and we cannot refund them. Refunds are made in the currency of the original payment; the amount credited by your bank may differ because of exchange rates.",
+   "ru": "3.5 Валюта и банковские комиссии. Цены указываются на платёжной странице в той валюте, в которой будет произведено списание. Если эта валюта отличается от валюты вашей карты или если ваш банк рассматривает платёж как трансграничный (OTA находится в ОАЭ), ваш банк или эмитент карты может взимать комиссию за конвертацию или трансграничный платёж и применять собственный курс. Такие комиссии устанавливает ваш банк, они не входят в нашу цену, не получаются OTA и не могут быть нами возвращены. Возврат производится в валюте исходного платежа; сумма, зачисленная вашим банком, может отличаться из-за курсов валют."
+  },
+  {
+   "id": "EUT-s4",
+   "kind": "heading",
+   "en": "4. Cancellation and refunds",
+   "ru": "4. Отказ и возврат денег"
+  },
+  {
+   "id": "EUT-4.1",
+   "kind": "clause",
+   "en": "4.1 Monthly subscription: you may cancel at any time; the service continues until the end of the paid month; the current month is not refunded.",
+   "ru": "4.1 Ежемесячная подписка: вы можете отказаться в любой момент; сервис действует до конца оплаченного месяца; оплата за текущий месяц не возвращается."
+  },
+  {
+   "id": "EUT-4.2",
+   "kind": "clause",
+   "en": "4.2 Annual subscription or prepaid term bought on the portal: if you are a consumer, you may withdraw within fourteen (14) days of purchase and receive a full refund, less a proportionate amount for the days used if you asked us to start the service immediately. After fourteen (14) days you may switch off renewal; the paid period is not refunded, except under clause 4.4.",
+   "ru": "4.2 Годовая подписка или предоплаченный срок, купленные на портале: если вы потребитель, вы можете отказаться в течение четырнадцати (14) дней с момента покупки и получить полный возврат за вычетом пропорциональной суммы за использованные дни, если вы попросили начать оказание сервиса сразу. По истечении четырнадцати (14) дней вы можете отключить продление; оплата за оплаченный период не возвращается, кроме случая, указанного в п. 4.4."
+  },
+  {
+   "id": "EUT-4.3",
+   "kind": "clause",
+   "en": "4.3 Activation codes: a refund before redemption is made by the seller of the code. After redemption the plan is not refundable, except under clause 4.4.",
+   "ru": "4.3 Коды активации: возврат денег до погашения осуществляет продавец кода. После погашения стоимость тарифа не возвращается, кроме случая, указанного в п. 4.4."
+  },
+  {
+   "id": "EUT-4.4",
+   "kind": "clause",
+   "en": "4.4 If we cannot continue the service: if we permanently stop providing CONNECT to your device before the end of your paid plan for reasons not caused by you (for example, a network shutdown we cannot replace), we will notify you and refund the unused full months on a pro-rata basis: for a subscription – directly to you; for an activation code – through the seller of the code.",
+   "ru": "4.4 Если мы не можем продолжать сервис: если мы окончательно прекращаем оказывать CONNECT для вашего устройства до окончания оплаченного тарифа по причинам, не связанным с вами (например, при отключении сети без возможности замены), мы уведомим вас и вернём стоимость неиспользованных полных месяцев пропорционально: по подписке – напрямую вам; по коду активации – через продавца кода."
+  },
+  {
+   "id": "EUT-4.5",
+   "kind": "clause",
+   "en": "4.5 Nothing in this section limits the mandatory rights of consumers in your country (see the Country Schedule).",
+   "ru": "4.5 Ничто в настоящем разделе не ограничивает обязательные права потребителей в вашей стране (см. Страновое приложение)."
+  },
+  {
+   "id": "EUT-s5",
+   "kind": "heading",
+   "en": "5. Your obligations",
+   "ru": "5. Ваши обязанности"
+  },
+  {
+   "id": "EUT-s5.p1",
+   "kind": "para",
+   "en": "You must give accurate account information, keep your login details secret, use CONNECT only with your own or an authorised device and only lawfully, and tell us promptly about loss, theft or misuse. You must not interfere with networks or bypass technical limits.",
+   "ru": "Вы обязаны указывать достоверные данные учётной записи, хранить в тайне данные для входа, использовать CONNECT только с принадлежащим вам или разрешённым устройством и только законно, а также незамедлительно сообщать нам об утрате, краже или неправомерном использовании. Запрещается вмешиваться в работу сетей или обходить технические ограничения."
+  },
+  {
+   "id": "EUT-s6",
+   "kind": "heading",
+   "en": "6. Suspension",
+   "ru": "6. Приостановление"
+  },
+  {
+   "id": "EUT-s6.p1",
+   "kind": "para",
+   "en": "We may suspend or limit the service only for fraud, misuse, security threats, abnormal network load caused by the device, legal or regulatory requirements an unpaid subscription, or use of the device in the countries and beyond the limits described in clause 2.4, and we will notify you where lawful and practicable. A paid plan is not suspended because of disputes between OTA and the Brand Partner.",
+   "ru": "Мы вправе приостановить или ограничить сервис только при мошенничестве, злоупотреблении, угрозах безопасности, аномальной нагрузке на сеть со стороны устройства, требованиях закона или регулятора, неоплате подписки либо использовании устройства в странах и сверх пределов, указанных в п. 2.4, и уведомим вас, где это законно и практически возможно. Оплаченный тариф не приостанавливается из-за споров между OTA и Бренд-партнёром."
+  },
+  {
+   "id": "EUT-s7",
+   "kind": "heading",
+   "en": "7. Device, support and supported period",
+   "ru": "7. Устройство, поддержка и срок поддержки"
+  },
+  {
+   "id": "EUT-7.1",
+   "kind": "clause",
+   "en": "7.1 The device, its installation and hardware warranty are the responsibility of the Brand Partner. We support your account, plan and payments.",
+   "ru": "7.1 За устройство, его установку и гарантию на оборудование отвечает Бренд-партнёр. Мы поддерживаем вашу учётную запись, тариф и платежи."
+  },
+  {
+   "id": "EUT-7.2",
+   "kind": "clause",
+   "en": "7.2 Your device model is supported in CONNECT at least until the end of the longest plan sold for it. Earlier support may end only for a reason outside our control (for example, the shutdown of the mobile technology used by the device); then we will notify you as early as possible and transfer your plan to a compatible device where possible or refund the unused full months.",
+   "ru": "7.2 Ваша модель устройства поддерживается в CONNECT как минимум до окончания самого длительного тарифа, проданного для неё. Раньше поддержка может прекратиться только по причине вне нашего контроля (например, при отключении мобильной технологии, используемой устройством); в этом случае мы уведомим вас как можно раньше и перенесём ваш тариф на совместимое устройство, если это возможно, или вернём стоимость неиспользованных полных месяцев."
+  },
+  {
+   "id": "EUT-s8",
+   "kind": "heading",
+   "en": "8. Personal data",
+   "ru": "8. Персональные данные"
+  },
+  {
+   "id": "EUT-s8.p1",
+   "kind": "para",
+   "en": "We process your data as described in the CONNECT Privacy Notice, including sharing certain data with the Brand Partner for device support, renewals and, with your consent where required, marketing.",
+   "ru": "Мы обрабатываем ваши данные согласно Политике конфиденциальности CONNECT, в том числе передаём часть данных Бренд-партнёру для поддержки устройства, продлений и, при наличии вашего согласия, если оно требуется, для маркетинга."
+  },
+  {
+   "id": "EUT-s9",
+   "kind": "heading",
+   "en": "9. Liability",
+   "ru": "9. Ответственность"
+  },
+  {
+   "id": "EUT-9.1",
+   "kind": "clause",
+   "en": "9.1 We provide the service with reasonable care and skill. To the extent permitted by law, we are not liable for losses caused by device defects, installation, lack of mobile signal or failures of third-party networks, nor for indirect losses or losses connected with notifications (clause 2.5) or bank fees (clause 3.5).",
+   "ru": "9.1 Мы оказываем сервис с разумной заботливостью и профессионализмом. В пределах, допускаемых законом, мы не отвечаем за убытки, вызванные дефектами устройства, установкой, отсутствием мобильного сигнала или сбоями сторонних сетей, а также за косвенные убытки и убытки, связанные с уведомлениями (п. 2.5) или банковскими комиссиями (п. 3.5)."
+  },
+  {
+   "id": "EUT-9.2",
+   "kind": "clause",
+   "en": "9.2 For business users, our total liability in any twelve (12) months is limited to the amounts paid to OTA for the plan concerned in that period. Nothing in these Terms limits liability that cannot be limited by law, including the rights of consumers.",
+   "ru": "9.2 Для пользователей-предпринимателей наша совокупная ответственность за любые двенадцать (12) месяцев ограничена суммами, уплаченными OTA за соответствующий тариф в этот период. Ничто в настоящих Условиях не ограничивает ответственность, которая не может быть ограничена по закону, включая права потребителей."
+  },
+  {
+   "id": "EUT-s10",
+   "kind": "heading",
+   "en": "10. Changes",
+   "ru": "10. Изменения"
+  },
+  {
+   "id": "EUT-s10.p1",
+   "kind": "para",
+   "en": "We may update CONNECT for security and compatibility. We give at least thirty (30) days' notice of material changes to these Terms. If a change materially worsens a paid service, you may cancel and receive a pro-rata refund of the unused full months.",
+   "ru": "Мы вправе обновлять CONNECT для безопасности и совместимости. О существенных изменениях настоящих Условий мы уведомляем не менее чем за тридцать (30) дней. Если изменение существенно ухудшает оплаченный сервис, вы вправе отказаться и получить пропорциональный возврат за неиспользованные полные месяцы."
+  },
+  {
+   "id": "EUT-s11",
+   "kind": "heading",
+   "en": "11. Law and disputes",
+   "ru": "11. Право и споры"
+  },
+  {
+   "id": "EUT-11.1",
+   "kind": "clause",
+   "en": "11.1 These Terms are governed by the laws of England and Wales. If you are a consumer, you also keep the protection of the mandatory laws of your country of residence.",
+   "ru": "11.1 Настоящие Условия регулируются правом Англии и Уэльса. Если вы потребитель, за вами также сохраняется защита императивных норм права страны вашего проживания."
+  },
+  {
+   "id": "EUT-11.2",
+   "kind": "clause",
+   "en": "11.2 Please contact our support first – most questions are solved quickly. Any dispute may be brought before the competent courts of the country where you live or, for business users, where you are registered. Consumers may also contact the consumer protection authority of their country.",
+   "ru": "11.2 Пожалуйста, сначала обратитесь в нашу поддержку – большинство вопросов решается быстро. Любой спор может быть передан в компетентный суд страны, в которой вы проживаете, а для пользователей-предпринимателей – страны их регистрации. Потребители также могут обратиться в орган по защите прав потребителей своей страны."
+  },
+  {
+   "id": "EUT-h1",
+   "kind": "annex",
+   "en": "Country Schedule – template (one per Approved Country)",
+   "ru": "Страновое приложение – шаблон (по одному на каждую Одобренную страну)"
+  },
+  {
+   "id": "EUT-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Item",
+      "ru": "Позиция",
+      "bi": true
+     },
+     {
+      "en": "Content",
+      "ru": "Содержание",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Country",
+      "ru": "Страна",
+      "bi": true
+     },
+     {
+      "en": "{{CC_NAME_EN}}",
+      "ru": "{{CC_NAME_EN}}"
+     }
+    ],
+    [
+     {
+      "en": "Languages of publication",
+      "ru": "Языки публикации",
+      "bi": true
+     },
+     {
+      "en": "{{EUT_LANGS}}",
+      "ru": "{{EUT_LANGS}}"
+     }
+    ],
+    [
+     {
+      "en": "Consumer withdrawal and refund rules (if different from clause 4)",
+      "ru": "Правила отказа и возврата для потребителей (если отличаются от п. 4)",
+      "bi": true
+     },
+     {
+      "en": "{{EUT_WITHDRAWAL}}",
+      "ru": "{{EUT_WITHDRAWAL}}"
+     }
+    ],
+    [
+     {
+      "en": "Consumer protection authority",
+      "ru": "Орган по защите прав потребителей",
+      "bi": true
+     },
+     {
+      "en": "{{EUT_CONSUMER_AUTH}}",
+      "ru": "{{EUT_CONSUMER_AUTH}}"
+     }
+    ],
+    [
+     {
+      "en": "Data protection authority",
+      "ru": "Орган по защите персональных данных",
+      "bi": true
+     },
+     {
+      "en": "{{EUT_DP_AUTH}}",
+      "ru": "{{EUT_DP_AUTH}}"
+     }
+    ],
+    [
+     {
+      "en": "Other mandatory information",
+      "ru": "Иная обязательная информация",
+      "bi": true
+     },
+     {
+      "en": "{{EUT_OTHER}}",
+      "ru": "{{EUT_OTHER}}"
+     }
+    ]
+   ]
+  }
+ ]
+}

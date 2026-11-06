@@ -1,0 +1,656 @@
+{
+ "type": "OF",
+ "docNo": "02",
+ "title": {
+  "en": "Order Form",
+  "ru": "Заказ"
+ },
+ "ver": "T-OF-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "OF-title",
+   "kind": "heading",
+   "en": "ORDER FORM – {{CC_NAME_UPPER_EN}}",
+   "ru": "ЗАКАЗ – {{CC_NAME_UPPER_L2}}"
+  },
+  {
+   "id": "OF-ref",
+   "kind": "para",
+   "en": "Document 02-{{CC}} of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 02-{{CC}} из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "OF-p1",
+   "kind": "para",
+   "en": "This Order Form is made under the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} dated {{MPA_DATE}} (the \"Master Agreement\") between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\"). It forms part of the Master Agreement and is subject to all its terms, including governing law and dispute resolution. Capitalised terms have the meanings given in the Master Agreement.",
+   "ru": "Настоящий Заказ заключён в рамках Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} от {{MPA_DATE}} («Рамочное соглашение») между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр»). Заказ является частью Рамочного соглашения и подчиняется всем его условиям, включая применимое право и порядок разрешения споров. Термины с заглавной буквы имеют значения, указанные в Рамочном соглашении."
+  },
+  {
+   "id": "OF-s1",
+   "kind": "heading",
+   "en": "1. Approved Country and programme",
+   "ru": "1. Одобренная страна и программа"
+  },
+  {
+   "id": "OF-1.1",
+   "kind": "clause",
+   "en": "1.1 Approved Country: {{CC_NAME_FULL_EN}}[[CC_EXCLUSION_EN|, {{CC_EXCLUSION_EN}}]].",
+   "ru": "1.1 Одобренная страна: {{CC_NAME_FULL_L2}}[[CC_EXCLUSION_L2|, {{CC_EXCLUSION_L2}}]]."
+  },
+  {
+   "id": "OF-1.2",
+   "kind": "clause",
+   "en": "1.2 Programme name: {{P_PROGRAMME}}. Partner Domain for the End User portal: {{P_DOMAIN}}.",
+   "ru": "1.2 Название программы: {{P_PROGRAMME}}. Домен Партнёра для портала Конечного пользователя: {{P_DOMAIN}}."
+  },
+  {
+   "id": "OF-1.3",
+   "kind": "clause",
+   "en": "1.3 Brand document: [[BRAND_DOC_05A|Document 05A (Partner is the brand owner)]][[BRAND_DOC_05B|Document 05B (authorisation from brand owner)]].",
+   "ru": "1.3 Документ о бренде: [[BRAND_DOC_05A|Документ 05A (Партнёр – правообладатель)]][[BRAND_DOC_05B|Документ 05B (разрешение правообладателя)]]."
+  },
+  {
+   "id": "OF-1.4",
+   "kind": "clause",
+   "en": "1.4 Approved Devices: as listed in Annex 1. CONNECT functions are available in {{CC_NAME_EN}} and during temporary trips abroad as set out in the Availability Policy. CONNECT is not provided in Excluded Territories; in Restricted Countries it is available only during temporary trips.",
+   "ru": "1.4 Одобренные устройства: согласно Приложению 1. Функции CONNECT доступны в {{CC_NAME_LOC_L2}} и во время временных поездок за рубеж согласно Политике доступности. CONNECT не предоставляется на Исключённых территориях; в Странах с ограничениями он доступен только во время временных поездок."
+  },
+  {
+   "id": "OF-1.5",
+   "kind": "clause",
+   "en": "1.5 Exceptions to clause 5.6 of the Master Agreement (single connectivity platform): [[OF_EXCEPTIONS_EN|{{OF_EXCEPTIONS_EN}}]][[OF_EXCEPTIONS_NONE|none]].",
+   "ru": "1.5 Исключения из п. 5.6 Рамочного соглашения (единая платформа связи): [[OF_EXCEPTIONS_L2|{{OF_EXCEPTIONS_L2}}]][[OF_EXCEPTIONS_NONE|нет]]."
+  },
+  {
+   "id": "OF-s2",
+   "kind": "heading",
+   "en": "2. Prices for Partner (USD, excluding taxes)",
+   "ru": "2. Цены для Партнёра (USD, без налогов)"
+  },
+  {
+   "id": "OF-2.1",
+   "kind": "clause",
+   "en": "2.1 Activation Key (copy of the CONNECT computer program for one Approved Device; includes device record, SIM binding, factory test mode and cabinet access; not a price for the SIM): USD {{PRICE_KEY}} per key. Purchased in advance; not linked to SIM shipments.",
+   "ru": "2.1 Ключ активации (экземпляр компьютерной программы CONNECT для одного Одобренного устройства; включает запись устройства, привязку SIM, заводской тестовый режим и доступ к кабинету; не является ценой SIM): USD {{PRICE_KEY}} за ключ. Приобретается заранее; не связан с отгрузками SIM."
+  },
+  {
+   "id": "OF-2.2",
+   "kind": "clause",
+   "en": "2.2 Wholesale prices of Service Tokens, per Approved Device:",
+   "ru": "2.2 Оптовые цены Сервисных токенов за одно Одобренное устройство:"
+  },
+  {
+   "id": "OF-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Service Plan",
+      "ru": "Тарифный план",
+      "bi": true
+     },
+     {
+      "en": "12 months / мес.",
+      "ru": "12 months / мес."
+     },
+     {
+      "en": "24 months / мес.",
+      "ru": "24 months / мес."
+     },
+     {
+      "en": "36 months / мес.",
+      "ru": "36 months / мес."
+     },
+     {
+      "en": "48 months / мес.",
+      "ru": "48 months / мес."
+     },
+     {
+      "en": "60 months / мес.",
+      "ru": "60 months / мес."
+     }
+    ],
+    [
+     {
+      "en": "Light",
+      "ru": "Light"
+     },
+     {
+      "en": "USD {{TOK_LIGHT_12}}",
+      "ru": "USD {{TOK_LIGHT_12}}"
+     },
+     {
+      "en": "USD {{TOK_LIGHT_24}}",
+      "ru": "USD {{TOK_LIGHT_24}}"
+     },
+     {
+      "en": "USD {{TOK_LIGHT_36}}",
+      "ru": "USD {{TOK_LIGHT_36}}"
+     },
+     {
+      "en": "USD {{TOK_LIGHT_48}}",
+      "ru": "USD {{TOK_LIGHT_48}}"
+     },
+     {
+      "en": "USD {{TOK_LIGHT_60}}",
+      "ru": "USD {{TOK_LIGHT_60}}"
+     }
+    ],
+    [
+     {
+      "en": "Standard",
+      "ru": "Standard"
+     },
+     {
+      "en": "USD {{TOK_STANDARD_12}}",
+      "ru": "USD {{TOK_STANDARD_12}}"
+     },
+     {
+      "en": "USD {{TOK_STANDARD_24}}",
+      "ru": "USD {{TOK_STANDARD_24}}"
+     },
+     {
+      "en": "USD {{TOK_STANDARD_36}}",
+      "ru": "USD {{TOK_STANDARD_36}}"
+     },
+     {
+      "en": "USD {{TOK_STANDARD_48}}",
+      "ru": "USD {{TOK_STANDARD_48}}"
+     },
+     {
+      "en": "USD {{TOK_STANDARD_60}}",
+      "ru": "USD {{TOK_STANDARD_60}}"
+     }
+    ],
+    [
+     {
+      "en": "Premium",
+      "ru": "Premium"
+     },
+     {
+      "en": "USD {{TOK_PREMIUM_12}}",
+      "ru": "USD {{TOK_PREMIUM_12}}"
+     },
+     {
+      "en": "USD {{TOK_PREMIUM_24}}",
+      "ru": "USD {{TOK_PREMIUM_24}}"
+     },
+     {
+      "en": "USD {{TOK_PREMIUM_36}}",
+      "ru": "USD {{TOK_PREMIUM_36}}"
+     },
+     {
+      "en": "USD {{TOK_PREMIUM_48}}",
+      "ru": "USD {{TOK_PREMIUM_48}}"
+     },
+     {
+      "en": "USD {{TOK_PREMIUM_60}}",
+      "ru": "USD {{TOK_PREMIUM_60}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "OF-2.3",
+   "kind": "clause",
+   "en": "2.3 Payment: Activation Keys and Service Tokens – 100% prepayment against OTA's invoice before their issue. Unredeemed Service Tokens are valid for thirty-six (36) months from issue and, during that period, may be exchanged for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded. The plan term starts on redemption.",
+   "ru": "2.3 Оплата: Ключи активации и Сервисные токены – 100% предоплата по счёту OTA до их выпуска. Непогашенные Сервисные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается. Срок тарифа начинается с даты погашения."
+  },
+  {
+   "id": "OF-s3",
+   "kind": "heading",
+   "en": "3. Direct Subscriptions and Partner commission",
+   "ru": "3. Прямые подписки и вознаграждение Партнёра"
+  },
+  {
+   "id": "OF-3.1",
+   "kind": "clause",
+   "en": "3.1 Partner sets the retail prices of Direct Subscriptions (monthly, annual and prepaid terms; in local currency, including taxes) in the cabinet, not below the minimum price shown there. The OTA Retained Amount is:",
+   "ru": "3.1 Розничные цены Прямых подписок (ежемесячных, годовых и на предоплаченный срок; в местной валюте, с налогами) Партнёр устанавливает в кабинете, не ниже показанной там минимальной цены. Сумма, удерживаемая OTA, составляет:"
+  },
+  {
+   "id": "OF-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Service Plan",
+      "ru": "Тарифный план",
+      "bi": true
+     },
+     {
+      "en": "OTA Retained Amount per paid month",
+      "ru": "Удерживаемая OTA сумма за оплаченный месяц",
+      "bi": true
+     },
+     {
+      "en": "Prepaid terms",
+      "ru": "Предоплаченные сроки",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Light",
+      "ru": "Light"
+     },
+     {
+      "en": "USD {{RET_LIGHT}}",
+      "ru": "USD {{RET_LIGHT}}"
+     },
+     {
+      "en": "Monthly amount × number of months",
+      "ru": "Месячная сумма × количество месяцев",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Standard",
+      "ru": "Standard"
+     },
+     {
+      "en": "USD {{RET_STANDARD}}",
+      "ru": "USD {{RET_STANDARD}}"
+     },
+     {
+      "en": "Monthly amount × number of months",
+      "ru": "Месячная сумма × количество месяцев",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Premium",
+      "ru": "Premium"
+     },
+     {
+      "en": "USD {{RET_PREMIUM}}",
+      "ru": "USD {{RET_PREMIUM}}"
+     },
+     {
+      "en": "Monthly amount × number of months",
+      "ru": "Месячная сумма × количество месяцев",
+      "bi": true
+     }
+    ]
+   ]
+  },
+  {
+   "id": "OF-3.2",
+   "kind": "clause",
+   "en": "3.2 Partner commission = Net Collected Revenue (Master Agreement, clause 7.4) − OTA Retained Amount. Country compliance fee under clause 7.4(d): [[FEE_PCT|{{FEE_PCT}}% of payments received]][[FEE_NONE|none]]. Currency conversion is made at the actual settlement rate of OTA's acquirer, shown in the Statement.",
+   "ru": "3.2 Вознаграждение Партнёра = Чистая собранная выручка (п. 7.4 Рамочного соглашения) − Сумма, удерживаемая OTA. Сбор на соблюдение страновых требований по п. 7.4(d): [[FEE_PCT|{{FEE_PCT}}% от полученных платежей]][[FEE_NONE|не применяется]]. Пересчёт валют производится по фактическому курсу расчётов эквайера OTA, отражаемому в Акте сверки."
+  },
+  {
+   "id": "OF-s4",
+   "kind": "heading",
+   "en": "4. Volumes and term",
+   "ru": "4. Объёмы и срок"
+  },
+  {
+   "id": "OF-4.1",
+   "kind": "clause",
+   "en": "4.1 Initial SIM shipment (custody, free of charge): {{INIT_SIMS}} units; further shipments under clause 8.1 of the Master Agreement. Initial order: {{INIT_KEYS}} Activation Keys and {{INIT_TOKENS}} Service Tokens, in the mix set out in OTA's first invoice.",
+   "ru": "4.1 Начальная отгрузка SIM (на хранение, бесплатно): {{INIT_SIMS}} шт.; последующие отгрузки – согласно п. 8.1 Рамочного соглашения. Первый заказ: {{INIT_KEYS}} Ключей активации и {{INIT_TOKENS}} Сервисных токенов в структуре, указанной в первом счёте OTA."
+  },
+  {
+   "id": "OF-4.2",
+   "kind": "clause",
+   "en": "4.2 Annual target: {{ANNUAL_TARGET}} newly activated Approved Devices per year from the commercial launch date. If the target is not met, OTA may only decline to renew this Order Form (Master Agreement, clause 9.2).",
+   "ru": "4.2 Годовая цель: {{ANNUAL_TARGET}} новых активированных Одобренных устройств в год с даты коммерческого запуска. При недостижении цели OTA вправе только отказаться от продления настоящего Заказа (п. 9.2 Рамочного соглашения)."
+  },
+  {
+   "id": "OF-4.3",
+   "kind": "clause",
+   "en": "4.3 Commercial launch date: {{LAUNCH_DATE}}. This Order Form runs for twelve (12) months from the launch date and renews together with the Master Agreement.",
+   "ru": "4.3 Дата коммерческого запуска: {{LAUNCH_DATE}}. Заказ действует двенадцать (12) месяцев с даты запуска и продлевается вместе с Рамочным соглашением."
+  },
+  {
+   "id": "OF-4.4",
+   "kind": "clause",
+   "en": "4.4 This Order Form and its later versions are issued under clause 16.5 of the Master Agreement. A version in effect supersedes the previous version for orders placed from its effective date; orders paid earlier remain governed by the version under which they were paid.",
+   "ru": "4.4 Настоящий Заказ и его последующие версии выпускаются согласно п. 16.5 Рамочного соглашения. Вступившая в силу версия заменяет предыдущую для заказов, размещённых с даты её вступления в силу; ранее оплаченные заказы регулируются версией, по которой они были оплачены."
+  },
+  {
+   "id": "OF-s5",
+   "kind": "heading",
+   "en": "5. Bank details and contacts",
+   "ru": "5. Банковские реквизиты и контакты"
+  },
+  {
+   "id": "OF-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "/",
+      "ru": "/"
+     },
+     {
+      "en": "OTA",
+      "ru": "OTA"
+     },
+     {
+      "en": "Partner",
+      "ru": "Партнёр",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Beneficiary",
+      "ru": "Получатель",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_BANK_BENEFICIARY}}",
+      "ru": "{{P_BANK_BENEFICIARY}}"
+     }
+    ],
+    [
+     {
+      "en": "Account / IBAN",
+      "ru": "Account / IBAN"
+     },
+     {
+      "en": "{{OTA_BANK_ACCOUNT}}\nIBAN {{OTA_BANK_IBAN}}",
+      "ru": "{{OTA_BANK_ACCOUNT}}\nIBAN {{OTA_BANK_IBAN}}"
+     },
+     {
+      "en": "{{P_BANK_IBAN}}",
+      "ru": "{{P_BANK_IBAN}}"
+     }
+    ],
+    [
+     {
+      "en": "Bank",
+      "ru": "Банк",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}",
+      "ru": "{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}"
+     },
+     {
+      "en": "{{P_BANK_NAME}}, {{P_BANK_ADDR}}",
+      "ru": "{{P_BANK_NAME}}, {{P_BANK_ADDR}}"
+     }
+    ],
+    [
+     {
+      "en": "SWIFT",
+      "ru": "SWIFT"
+     },
+     {
+      "en": "{{OTA_BANK_SWIFT}}",
+      "ru": "{{OTA_BANK_SWIFT}}"
+     },
+     {
+      "en": "{{P_BANK_SWIFT}}[[P_BANK_INTERMEDIARY|\nIntermediary / банк-посредник: {{P_BANK_INTERMEDIARY}}]]",
+      "ru": "{{P_BANK_SWIFT}}[[P_BANK_INTERMEDIARY|\nIntermediary / банк-посредник: {{P_BANK_INTERMEDIARY}}]]"
+     }
+    ],
+    [
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ],
+    [
+     {
+      "en": "Operations",
+      "ru": "Операции",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_EMAIL_OPS}}",
+      "ru": "{{OTA_EMAIL_OPS}}"
+     },
+     {
+      "en": "{{P_EMAIL_OPS}}",
+      "ru": "{{P_EMAIL_OPS}}"
+     }
+    ],
+    [
+     {
+      "en": "Legal notices",
+      "ru": "Юридические уведомления",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_EMAIL_LEGAL}}",
+      "ru": "{{OTA_EMAIL_LEGAL}}"
+     },
+     {
+      "en": "{{P_EMAIL_LEGAL}}",
+      "ru": "{{P_EMAIL_LEGAL}}"
+     }
+    ],
+    [
+     {
+      "en": "Finance",
+      "ru": "Финансы",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_EMAIL_FIN}}",
+      "ru": "{{OTA_EMAIL_FIN}}"
+     },
+     {
+      "en": "{{P_EMAIL_FIN}}",
+      "ru": "{{P_EMAIL_FIN}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "OF-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "OF-sig4",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  },
+  {
+   "id": "OF-h2",
+   "kind": "annex",
+   "en": "Annex 1 – Approved Devices",
+   "ru": "Приложение 1 – Одобренные устройства"
+  },
+  {
+   "id": "OF-t5",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Brand",
+      "ru": "Бренд",
+      "bi": true
+     },
+     {
+      "en": "Model",
+      "ru": "Модель",
+      "bi": true
+     },
+     {
+      "en": "HW revision",
+      "ru": "Ревизия",
+      "bi": true
+     },
+     {
+      "en": "Firmware",
+      "ru": "Прошивка",
+      "bi": true
+     },
+     {
+      "en": "Plan",
+      "ru": "Тариф",
+      "bi": true
+     },
+     {
+      "en": "Expected MB per month",
+      "ru": "Ожидаемо МБ в мес.",
+      "bi": true
+     },
+     {
+      "en": "SIM type",
+      "ru": "Тип SIM",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{DEV_BRAND}}",
+      "ru": "{{DEV_BRAND}}"
+     },
+     {
+      "en": "{{DEV_MODEL}}",
+      "ru": "{{DEV_MODEL}}"
+     },
+     {
+      "en": "{{DEV_HW}}",
+      "ru": "{{DEV_HW}}"
+     },
+     {
+      "en": "{{DEV_FW}}",
+      "ru": "{{DEV_FW}}"
+     },
+     {
+      "en": "{{DEV_PLAN}}",
+      "ru": "{{DEV_PLAN}}"
+     },
+     {
+      "en": "{{DEV_MB}}",
+      "ru": "{{DEV_MB}}"
+     },
+     {
+      "en": "{{DEV_SIM}}",
+      "ru": "{{DEV_SIM}}"
+     }
+    ]
+   ],
+   "repeat": {
+    "row": 1,
+    "list": "DEVICES"
+   }
+  },
+  {
+   "id": "OF-p2",
+   "kind": "para",
+   "en": "New models are added by an updated Annex 1 agreed by email between the Parties' operations contacts.",
+   "ru": "Новые модели добавляются путём обновления Приложения 1, согласованного по e-mail между операционными контактами Сторон."
+  }
+ ]
+}

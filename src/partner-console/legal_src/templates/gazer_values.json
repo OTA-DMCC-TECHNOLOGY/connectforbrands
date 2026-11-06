@@ -1,0 +1,449 @@
+{
+ "partner": {
+  "P_NAME": "GAZER LIMITED",
+  "P_FORM_EN": "a private limited company incorporated in England and Wales",
+  "P_FORM_L2": "частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе",
+  "P_COUNTRY": "GB",
+  "P_REGNO": "08778057",
+  "P_TAXNO": null,
+  "P_ADDR_EN": "17 Hanover Square, London, W1S 1BN, United Kingdom",
+  "P_ADDR_L2": "17 Hanover Square, London, W1S 1BN, Великобритания",
+  "P_SIGNATORY": "Serhii Boiar",
+  "P_TITLE_EN": "Director",
+  "P_TITLE_L2": "Директор",
+  "P_TITLE_L2_GEN": "директора",
+  "P_AUTHORITY": null,
+  "LANG2": "ru",
+  "P_BRAND": "GAZER",
+  "P_PROGRAMME": "GAZER CONNECT",
+  "P_TM_OWNER_IS_PARTNER": null,
+  "P_TM_OWNER_NAME": null,
+  "P_TM_OWNER_COUNTRY_EN": null,
+  "P_TM_OWNER_COUNTRY_L2": null,
+  "P_TM_OWNER_REGNO": null,
+  "P_TM_OWNER_ADDR": null,
+  "P_TM_OWNER_RELATION_EN": null,
+  "P_TM_OWNER_RELATION_L2": null,
+  "P_TM_OWNER_TERRITORY_EN": null,
+  "P_TM_OWNER_TERRITORY_L2": null,
+  "P_TM_OWNER_SIGNATORY": null,
+  "P_TM_OWNER_TITLE": null,
+  "P_TM_LIST": [
+   {
+    "TM_MARK": "GAZER (word / словесный)",
+    "TM_REGNO": null,
+    "TM_COUNTRIES": null,
+    "TM_CLASSES": null
+   },
+   {
+    "TM_MARK": "GAZER (logo / логотип)",
+    "TM_REGNO": null,
+    "TM_COUNTRIES": null,
+    "TM_CLASSES": null
+   }
+  ],
+  "P_DOMAIN": "connect.gazer.com",
+  "P_DNS_CONTACT": null,
+  "P_LOGO": null,
+  "P_BRANDBOOK": null,
+  "P_BRAND_RULES": null,
+  "P_BRAND_CONTACT": null,
+  "P_EMAIL_OPS": null,
+  "P_EMAIL_LEGAL": null,
+  "P_EMAIL_FIN": null,
+  "P_EMAIL_SUPPORT": null,
+  "P_PHONE": null,
+  "P_BANK_BENEFICIARY": "GAZER LIMITED",
+  "P_BANK_IBAN": "GB76REVO00996952368216",
+  "P_BANK_NAME": "Revolut Ltd",
+  "P_BANK_ADDR": "7 Westferry Circus, London, E14 4HD, United Kingdom",
+  "P_BANK_SWIFT": "REVOGB21",
+  "P_BANK_INTERMEDIARY": "CHASGB2L"
+ },
+ "status": {
+  "P_NAME": "filled",
+  "P_FORM_EN": "filled",
+  "P_FORM_L2": "filled",
+  "P_COUNTRY": "filled",
+  "P_REGNO": "filled",
+  "P_TAXNO": "empty",
+  "P_ADDR_EN": "filled",
+  "P_ADDR_L2": "filled",
+  "P_SIGNATORY": "filled",
+  "P_TITLE_EN": "filled",
+  "P_TITLE_L2": "filled",
+  "P_TITLE_L2_GEN": "filled",
+  "P_AUTHORITY": "empty",
+  "LANG2": "filled",
+  "P_BRAND": "filled",
+  "P_PROGRAMME": "filled",
+  "P_TM_OWNER_IS_PARTNER": "empty",
+  "P_TM_OWNER_NAME": "empty",
+  "P_TM_OWNER_COUNTRY_EN": "empty",
+  "P_TM_OWNER_COUNTRY_L2": "empty",
+  "P_TM_OWNER_REGNO": "empty",
+  "P_TM_OWNER_ADDR": "empty",
+  "P_TM_OWNER_RELATION_EN": "empty",
+  "P_TM_OWNER_RELATION_L2": "empty",
+  "P_TM_OWNER_TERRITORY_EN": "empty",
+  "P_TM_OWNER_TERRITORY_L2": "empty",
+  "P_TM_OWNER_SIGNATORY": "empty",
+  "P_TM_OWNER_TITLE": "empty",
+  "P_TM_LIST": "filled",
+  "P_DOMAIN": "filled",
+  "P_DNS_CONTACT": "empty",
+  "P_LOGO": "empty",
+  "P_BRANDBOOK": "empty",
+  "P_BRAND_RULES": "empty",
+  "P_BRAND_CONTACT": "empty",
+  "P_EMAIL_OPS": "empty",
+  "P_EMAIL_LEGAL": "empty",
+  "P_EMAIL_FIN": "empty",
+  "P_EMAIL_SUPPORT": "empty",
+  "P_PHONE": "empty",
+  "P_BANK_BENEFICIARY": "filled",
+  "P_BANK_IBAN": "filled",
+  "P_BANK_NAME": "filled",
+  "P_BANK_ADDR": "filled",
+  "P_BANK_SWIFT": "filled",
+  "P_BANK_INTERMEDIARY": "filled"
+ },
+ "ota": {
+  "OTA_NAME": "OTA TECHNOLOGY DMCC",
+  "OTA_REGNO": "DMCC193204",
+  "OTA_LICENCE": "DMCC-843994",
+  "OTA_TRN": "104496001900001",
+  "OTA_ADDR_EN": "Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Dubai, UAE",
+  "OTA_ADDR_L2": "Unit No. 1469, DMCC Business Centre, Level No. 1, Jewellery & Gemplex 3, Дубай, ОАЭ",
+  "OTA_SIGNATORY": "Ruslana Shcherbak",
+  "OTA_SIGNATORY_L2_GEN": "Русланы Щербак",
+  "OTA_TITLE_EN": "Manager",
+  "OTA_TITLE_L2": "Менеджер",
+  "OTA_TITLE_L2_GEN": "менеджера",
+  "OTA_BANK_NAME": "EMIRATES NBD BANK PJSC",
+  "OTA_BANK_ADDR": "Baniyas Street, Deira, Dubai, UAE",
+  "OTA_BANK_ACCOUNT": "1025816458902",
+  "OTA_BANK_IBAN": "AE200260001025816458902",
+  "OTA_BANK_SWIFT": "EBILAEADXXX",
+  "OTA_EMAIL_OPS": "ops@ota-technology.com",
+  "OTA_EMAIL_LEGAL": "legal@ota-technology.com",
+  "OTA_EMAIL_FIN": "finance@ota-technology.com",
+  "OTA_EMAIL_PRIVACY": "privacy@ota-technology.com",
+  "OTA_EMAIL_SUPPORT": null,
+  "OTA_SUPPORT_HOURS": "Mon–Fri 09:00–21:00 UTC+4; P1 24/7",
+  "OTA_CUSTOMS_CODE": null,
+  "OTA_VAT_UA": null,
+  "OTA_VAT_KZ": null,
+  "OTA_REP_UA": null,
+  "OTA_REP_KZ": null,
+  "OTA_SUBPROC_EMAIL": null,
+  "OTA_SUBPROC_EMAIL_LOC": null,
+  "P_CODE": "GZR",
+  "CARD_DESCRIPTOR": "OTA*GAZERCONNECT"
+ },
+ "countries": {
+  "UA": {
+   "CC": "UA",
+   "CC_NAME_EN": "Ukraine",
+   "CC_NAME_L2": "Украина",
+   "CC_NAME_UPPER_EN": "UKRAINE",
+   "CC_NAME_UPPER_L2": "УКРАИНА",
+   "CC_NAME_FULL_EN": "Ukraine",
+   "CC_NAME_FULL_L2": "Украина",
+   "CC_NAME_LOC_L2": "Украине",
+   "CC_EXCLUSION_EN": "excluding the temporarily occupied territories",
+   "CC_EXCLUSION_L2": "за исключением временно оккупированных территорий",
+   "OF_EXCEPTIONS_EN": null,
+   "OF_EXCEPTIONS_L2": null,
+   "LAUNCH_DATE": null,
+   "INIT_SIMS": 1000,
+   "INIT_KEYS": 1000,
+   "INIT_TOKENS": 300,
+   "ANNUAL_TARGET": 3000,
+   "FEE_PCT": null,
+   "DEVICES": [],
+   "DOC_NO": "OTA-GZR-OF-UA-001-v1",
+   "PRICE_KEY": "9.85",
+   "TOK_LIGHT_12": "14.98",
+   "TOK_LIGHT_24": "26.63",
+   "TOK_LIGHT_36": "34.96",
+   "TOK_LIGHT_48": "43.28",
+   "TOK_LIGHT_60": "49.94",
+   "RET_LIGHT": "1.39",
+   "TOK_STANDARD_12": "19.78",
+   "TOK_STANDARD_24": "35.16",
+   "TOK_STANDARD_36": "46.14",
+   "TOK_STANDARD_48": "57.13",
+   "TOK_STANDARD_60": "65.92",
+   "RET_STANDARD": "1.83",
+   "TOK_PREMIUM_12": "29.66",
+   "TOK_PREMIUM_24": "52.73",
+   "TOK_PREMIUM_36": "69.21",
+   "TOK_PREMIUM_48": "85.69",
+   "TOK_PREMIUM_60": "98.88",
+   "RET_PREMIUM": "2.75"
+  },
+  "KZ": {
+   "CC": "KZ",
+   "CC_NAME_EN": "Kazakhstan",
+   "CC_NAME_L2": "Казахстан",
+   "CC_NAME_UPPER_EN": "KAZAKHSTAN",
+   "CC_NAME_UPPER_L2": "КАЗАХСТАН",
+   "CC_NAME_FULL_EN": "Republic of Kazakhstan",
+   "CC_NAME_FULL_L2": "Республика Казахстан",
+   "CC_NAME_LOC_L2": "Казахстане",
+   "CC_EXCLUSION_EN": null,
+   "CC_EXCLUSION_L2": null,
+   "OF_EXCEPTIONS_EN": null,
+   "OF_EXCEPTIONS_L2": null,
+   "LAUNCH_DATE": null,
+   "INIT_SIMS": 1000,
+   "INIT_KEYS": 1000,
+   "INIT_TOKENS": 300,
+   "ANNUAL_TARGET": 3000,
+   "FEE_PCT": null,
+   "DEVICES": [],
+   "DOC_NO": "OTA-GZR-OF-KZ-001-v1",
+   "PRICE_KEY": "9.40",
+   "TOK_LIGHT_12": "20.86",
+   "TOK_LIGHT_24": "37.09",
+   "TOK_LIGHT_36": "48.68",
+   "TOK_LIGHT_48": "60.27",
+   "TOK_LIGHT_60": "69.55",
+   "RET_LIGHT": "1.93",
+   "TOK_STANDARD_12": "27.19",
+   "TOK_STANDARD_24": "48.33",
+   "TOK_STANDARD_36": "63.44",
+   "TOK_STANDARD_48": "78.54",
+   "TOK_STANDARD_60": "90.62",
+   "RET_STANDARD": "2.52",
+   "TOK_PREMIUM_12": "40.78",
+   "TOK_PREMIUM_24": "72.50",
+   "TOK_PREMIUM_36": "95.15",
+   "TOK_PREMIUM_48": "117.81",
+   "TOK_PREMIUM_60": "135.93",
+   "RET_PREMIUM": "3.78"
+  }
+ },
+ "system": {
+  "LANG2_NAME_EN": "Russian",
+  "LANG2_NAME_L2": "русском",
+  "DOC_NO_MPA": "OTA-GZR-MPA-001-v1",
+  "DOC_NO": {
+   "MPA": "OTA-GZR-MPA-001-v1",
+   "TRT": "OTA-GZR-TRT-001-v1",
+   "SLA": "OTA-GZR-SLA-001-v1",
+   "BL": "OTA-GZR-BL-001-v1",
+   "BOA": "OTA-GZR-BOA-001",
+   "DPA": "OTA-GZR-DPA-001-v1",
+   "SIM": "OTA-GZR-SIM-001-v1"
+  }
+ },
+ "roundtrip": {
+  "*": {
+   "*": {
+    "P_TAXNO": "[ ]",
+    "P_EMAIL_OPS": "[ ]",
+    "P_EMAIL_LEGAL": "[ ]",
+    "P_EMAIL_FIN": "[ ]",
+    "P_EMAIL_SUPPORT": "[ ]",
+    "P_LOGO": "[ ]",
+    "P_BRAND_RULES": "[ ]",
+    "P_BRAND_CONTACT": "[ ]",
+    "P_BRANDBOOK": "[attach file / приложить файл]",
+    "P_TM_OWNER_NAME": "[Brand Owner legal name]",
+    "P_TM_OWNER_REGNO": "[ ]",
+    "P_TM_OWNER_ADDR": "[ ]",
+    "P_TM_OWNER_COUNTRY_EN": "[country]",
+    "P_TM_OWNER_COUNTRY_L2": "[страна]",
+    "P_TM_OWNER_RELATION_EN": "[distributor / licensee]",
+    "P_TM_OWNER_RELATION_L2": "[дистрибьютором / лицензиатом]",
+    "P_TM_OWNER_TERRITORY_EN": "[countries]",
+    "P_TM_OWNER_TERRITORY_L2": "[страны]",
+    "P_TM_OWNER_SIGNATORY": "[Name]",
+    "P_TM_OWNER_TITLE": "[Title / Должность]",
+    "OTA_EMAIL_OPS": "ops@ota-technology.com [confirm]",
+    "OTA_EMAIL_LEGAL": "legal@ota-technology.com [confirm]",
+    "OTA_EMAIL_FIN": "finance@ota-technology.com [confirm]",
+    "OTA_EMAIL_PRIVACY": "privacy@ota-technology.com [confirm]",
+    "OTA_SUBPROC_EMAIL": "[Email service provider / Почтовый сервис]",
+    "OTA_SUBPROC_EMAIL_LOC": "[ ]",
+    "CARD_DESCRIPTOR": "[OTA*GAZERCONNECT]",
+    "DOC_NO_MPA": "OTA-GZR-MPA-001-v1",
+    "P_BANK_BENEFICIARY": "GAZER LIMITED",
+    "DOC_VER": "[1.0]",
+    "DATE": "[ ]",
+    "DUE_DATE": "[ ]",
+    "DOC_NO_OF": "[ ]",
+    "MPA_DATE": "[DATE / ДАТА]",
+    "PRICE_KEY": "[ ]",
+    "INIT_TOKENS": "[300]",
+    "LAUNCH_DATE": "[DATE]",
+    "EFFECTIVE_DATE": "[DATE]",
+    "EUT_LANGS": "[ ]",
+    "EUT_WITHDRAWAL": "[ ]",
+    "EUT_CONSUMER_AUTH": "[ ]",
+    "EUT_DP_AUTH": "[ ]",
+    "EUT_OTHER": "[ ]",
+    "RS_MONTH": "[YYYY-MM]",
+    "RS_YYYYMM": "[YYYYMM]",
+    "SHIP_FORM_FACTOR": "[form factor]",
+    "SHIP_ORIGIN": "[per manufacturer / по документам производителя]",
+    "SHIP_PLACE": "[named place / адрес]",
+    "SR_CONDITION_EN": "[intact / damaged – description and photos attached]",
+    "SR_CONDITION_L2": "[целая / повреждена – описание и фото прилагаются]",
+    "SR_RECEIVER_NAME": "[Name of person receiving]",
+    "SR_RECEIVER_TITLE": "[Title / Должность]",
+    "INV_TOK_PLAN": "[Light / Standard / Premium]",
+    "INV_TOK_TERM": "[12/24/36/48/60]",
+    "INV_OTHER_DESC": "[Other agreed service / Прочая согласованная услуга]",
+    "CI_VAT_TREATMENT": "[treatment per Partner's tax adviser; for UAE recipient usually outside the scope of Partner's VAT, UAE reverse charge by OTA / режим по заключению налогового консультанта Партнёра; для получателя в ОАЭ обычно вне сферы НДС Партнёра, обратное начисление НДС в ОАЭ у OTA]",
+    "DOC_SEQ": "[ ]"
+   },
+   "en": {
+    "INIT_SIMS": "[1,000]",
+    "INIT_KEYS": "[1,000]",
+    "ANNUAL_TARGET": "[3,000]"
+   },
+   "ru": {
+    "INIT_SIMS": "[1 000]",
+    "INIT_KEYS": "[1 000]",
+    "ANNUAL_TARGET": "[3 000]",
+    "LAUNCH_DATE": "[ДАТА]",
+    "EFFECTIVE_DATE": "[ДАТА]",
+    "OTA_EMAIL_PRIVACY": "privacy@ota-technology.com [подтвердить]",
+    "RS_MONTH": "[ГГГГ-ММ]",
+    "RS_YYYYMM": "[ГГГГММ]",
+    "SHIP_FORM_FACTOR": "[форм-фактор]"
+   }
+  },
+  "MPA": {
+   "*": {
+    "DATE": "[DATE / ДАТА]"
+   }
+  },
+  "BOA": {
+   "en": {
+    "DATE": "[DATE]",
+    "P_TM_OWNER_NAME": "[Brand Owner legal name]"
+   },
+   "ru": {
+    "DATE": "[ДАТА]",
+    "P_TM_OWNER_NAME": "[наименование правообладателя]"
+   },
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  },
+  "RS": {
+   "*": {
+    "DATE": "[date, no later than the 10th / дата, не позднее 10-го числа]",
+    "DOC_NO_OF": "[OTA-OF-__-____-___]",
+    "RS_MONTH": "[YYYY-MM]"
+   }
+  },
+  "PF": {
+   "*": {
+    "DOC_SEQ": "[YYYY-NNNN]",
+    "CC_NAME_EN": "[ ]"
+   }
+  },
+  "SR": {
+   "*": {
+    "DOC_SEQ": "[YYYY-NNNN]"
+   }
+  },
+  "INV": {
+   "*": {
+    "DOC_SEQ": "[YYYY-NNNNNN]",
+    "CC_NAME_EN": "[Approved Country]",
+    "CC_NAME_L2": "[страна]"
+   }
+  },
+  "CI": {
+   "*": {
+    "DOC_SEQ": "[YYYY-NNNN]",
+    "DUE_DATE": "[20th of the month / 20-е число]"
+   }
+  },
+  "EUT": {
+   "*": {
+    "CC_NAME_EN": "[ ]"
+   }
+  },
+  "OF-UA": {
+   "*": {
+    "TOK_LIGHT_12": "[ ]",
+    "TOK_LIGHT_24": "[ ]",
+    "TOK_LIGHT_36": "[ ]",
+    "TOK_LIGHT_48": "[ ]",
+    "TOK_LIGHT_60": "[ ]",
+    "RET_LIGHT": "[ ]",
+    "TOK_STANDARD_12": "[ ]",
+    "TOK_STANDARD_24": "[ ]",
+    "TOK_STANDARD_36": "[ ]",
+    "TOK_STANDARD_48": "[ ]",
+    "TOK_STANDARD_60": "[ ]",
+    "RET_STANDARD": "[ ]",
+    "TOK_PREMIUM_12": "[ ]",
+    "TOK_PREMIUM_24": "[ ]",
+    "TOK_PREMIUM_36": "[ ]",
+    "TOK_PREMIUM_48": "[ ]",
+    "TOK_PREMIUM_60": "[ ]",
+    "RET_PREMIUM": "[ ]",
+    "OF_EXCEPTIONS_EN": null,
+    "OF_EXCEPTIONS_L2": null
+   }
+  },
+  "OF-KZ": {
+   "*": {
+    "TOK_LIGHT_12": "[ ]",
+    "TOK_LIGHT_24": "[ ]",
+    "TOK_LIGHT_36": "[ ]",
+    "TOK_LIGHT_48": "[ ]",
+    "TOK_LIGHT_60": "[ ]",
+    "RET_LIGHT": "[ ]",
+    "TOK_STANDARD_12": "[ ]",
+    "TOK_STANDARD_24": "[ ]",
+    "TOK_STANDARD_36": "[ ]",
+    "TOK_STANDARD_48": "[ ]",
+    "TOK_STANDARD_60": "[ ]",
+    "RET_STANDARD": "[ ]",
+    "TOK_PREMIUM_12": "[ ]",
+    "TOK_PREMIUM_24": "[ ]",
+    "TOK_PREMIUM_36": "[ ]",
+    "TOK_PREMIUM_48": "[ ]",
+    "TOK_PREMIUM_60": "[ ]",
+    "RET_PREMIUM": "[ ]",
+    "OF_EXCEPTIONS_EN": null,
+    "OF_EXCEPTIONS_L2": null
+   }
+  },
+  "TRT": {
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  },
+  "SLA": {
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  },
+  "BL": {
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  },
+  "DPA": {
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  },
+  "SIM": {
+   "*": {
+    "DOC_NO": "OTA-GZR-MPA-001-v1"
+   }
+  }
+ },
+ "_note": "partner = GAZER values from A_Partner_Data_Form (null = \"[ ]\" in the form); roundtrip = placeholders exactly as shown in the v09 DOCX, used only by the round-trip test."
+}

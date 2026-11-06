@@ -1,0 +1,466 @@
+{
+ "type": "INV",
+ "docNo": "13",
+ "title": {
+  "en": "Tax Invoice (OTA)",
+  "ru": "Налоговый счёт (счёт OTA)"
+ },
+ "ver": "T-INV-v3",
+ "effective": "2026-11-06",
+ "cls": "B",
+ "blocks": [
+  {
+   "id": "INV-title",
+   "kind": "heading",
+   "en": "TAX INVOICE",
+   "ru": "НАЛОГОВЫЙ СЧЁТ (СЧЁТ НА ОПЛАТУ)"
+  },
+  {
+   "id": "INV-ref",
+   "kind": "para",
+   "en": "Document 13 of 14 · Ref. OTA-INV-{{DOC_SEQ}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 13 из 14 · № OTA-INV-{{DOC_SEQ}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "INV-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Supplier",
+      "ru": "Поставщик",
+      "bi": true
+     },
+     {
+      "en": "Customer",
+      "ru": "Покупатель",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}} · Licence no. {{OTA_LICENCE}}\nTRN (VAT) {{OTA_TRN}}",
+      "ru": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}} · Licence no. {{OTA_LICENCE}}\nTRN (VAT) {{OTA_TRN}}"
+     },
+     {
+      "en": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]",
+      "ru": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "INV-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Invoice no.",
+      "ru": "№ счёта",
+      "bi": true
+     },
+     {
+      "en": "Invoice date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "Due date",
+      "ru": "Срок оплаты",
+      "bi": true
+     },
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "OTA-INV-{{DOC_SEQ}}",
+      "ru": "OTA-INV-{{DOC_SEQ}}"
+     },
+     {
+      "en": "{{DATE}}",
+      "ru": "{{DATE}}"
+     },
+     {
+      "en": "{{DUE_DATE}}",
+      "ru": "{{DUE_DATE}}"
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "INV-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Master Agreement",
+      "ru": "Рамочное соглашение",
+      "bi": true
+     },
+     {
+      "en": "Order Form",
+      "ru": "Заказ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{DOC_NO_MPA}}",
+      "ru": "{{DOC_NO_MPA}}"
+     },
+     {
+      "en": "{{DOC_NO_OF}}",
+      "ru": "{{DOC_NO_OF}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "INV-t4",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "No. / №",
+      "ru": "No. / №"
+     },
+     {
+      "en": "Description",
+      "ru": "Описание",
+      "bi": true
+     },
+     {
+      "en": "Qty",
+      "ru": "Кол-во",
+      "bi": true
+     },
+     {
+      "en": "Unit price USD",
+      "ru": "Цена USD",
+      "bi": true
+     },
+     {
+      "en": "Amount USD",
+      "ru": "Сумма USD",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "1",
+      "ru": "1"
+     },
+     {
+      "en": "Activation Keys – copies of the CONNECT computer program (licence activation keys) – {{CC_NAME_EN}}",
+      "ru": "Ключи активации – экземпляры компьютерной программы CONNECT (лицензионные ключи активации) – {{CC_NAME_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{INV_KEY_QTY}}",
+      "ru": "{{INV_KEY_QTY}}"
+     },
+     {
+      "en": "{{INV_KEY_PRICE}}",
+      "ru": "{{INV_KEY_PRICE}}"
+     },
+     {
+      "en": "{{INV_KEY_AMOUNT}}",
+      "ru": "{{INV_KEY_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "2",
+      "ru": "2"
+     },
+     {
+      "en": "Service Token {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} months",
+      "ru": "Сервисный токен {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} мес.",
+      "bi": true
+     },
+     {
+      "en": "{{INV_TOK_QTY}}",
+      "ru": "{{INV_TOK_QTY}}"
+     },
+     {
+      "en": "{{INV_TOK_PRICE}}",
+      "ru": "{{INV_TOK_PRICE}}"
+     },
+     {
+      "en": "{{INV_TOK_AMOUNT}}",
+      "ru": "{{INV_TOK_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "3",
+      "ru": "3"
+     },
+     {
+      "en": "{{INV_OTHER_DESC}}",
+      "ru": "{{INV_OTHER_DESC}}"
+     },
+     {
+      "en": "{{INV_OTHER_QTY}}",
+      "ru": "{{INV_OTHER_QTY}}"
+     },
+     {
+      "en": "{{INV_OTHER_PRICE}}",
+      "ru": "{{INV_OTHER_PRICE}}"
+     },
+     {
+      "en": "{{INV_OTHER_AMOUNT}}",
+      "ru": "{{INV_OTHER_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "Subtotal",
+      "ru": "Итого без НДС",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "{{INV_SUBTOTAL}}",
+      "ru": "{{INV_SUBTOTAL}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)",
+      "ru": "НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "0.00",
+      "ru": "0.00"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "Total due",
+      "ru": "Итого к оплате",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "{{INV_TOTAL}}",
+      "ru": "{{INV_TOTAL}}"
+     }
+    ]
+   ],
+   "rowCond": {
+    "3": "INV_OTHER_DESC"
+   }
+  },
+  {
+   "id": "INV-p1",
+   "kind": "para",
+   "en": "SIM cards shipped under this Agreement are provided free of separate charge, remain the property of OTA or its supplier and are not invoiced.",
+   "ru": "SIM-карты, отгружаемые по настоящему Договору, предоставляются без отдельной платы, остаются собственностью OTA или её поставщика и в счёт не включаются."
+  },
+  {
+   "id": "INV-p2",
+   "kind": "para",
+   "en": "Payment terms: 100% prepayment by bank transfer in USD; Activation Keys and Service Tokens are issued after payment. Bank charges of the payer's bank are borne by the payer. Please quote the invoice number in the payment reference.",
+   "ru": "Условия оплаты: 100% предоплата банковским переводом в USD; Ключи активации и Сервисные токены выпускаются после оплаты. Комиссии банка плательщика оплачивает плательщик. В назначении платежа укажите номер счёта."
+  },
+  {
+   "id": "INV-t5",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Bank details",
+      "ru": "Реквизиты",
+      "bi": true
+     },
+     {
+      "en": "Details",
+      "ru": "Сведения",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Beneficiary",
+      "ru": "Получатель",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Account no.",
+      "ru": "Счёт",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_BANK_ACCOUNT}}",
+      "ru": "{{OTA_BANK_ACCOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "IBAN",
+      "ru": "IBAN"
+     },
+     {
+      "en": "{{OTA_BANK_IBAN}}",
+      "ru": "{{OTA_BANK_IBAN}}"
+     }
+    ],
+    [
+     {
+      "en": "Bank",
+      "ru": "Банк",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}",
+      "ru": "{{OTA_BANK_NAME}}, {{OTA_BANK_ADDR}}"
+     }
+    ],
+    [
+     {
+      "en": "SWIFT",
+      "ru": "SWIFT"
+     },
+     {
+      "en": "{{OTA_BANK_SWIFT}}",
+      "ru": "{{OTA_BANK_SWIFT}}"
+     }
+    ],
+    [
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "INV-sig6",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

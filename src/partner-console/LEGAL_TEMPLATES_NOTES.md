@@ -1,0 +1,13 @@
+# Template data notes (from the template extraction agent)
+- Files: legal_src/templates/{MPA,OF,TRT,SLA,BL,BOA,DPA,EUT,PN,SIM,RS,PF,SR,INV,CI}.json, keys.json (240 keys), gazer_values.json; generated src/modules/60_legal_templates.js (LEGAL_TPL, LEGAL_KEYS, LEGAL_DEMO_VALUES, onBoot loader into S.templates). Re-run: python3 tools/extract_templates.py (--check for checks only).
+- Shape: {type, docNo, title:{en,ru}, ver:'T-<TYPE>-v3', effective, cls:'A'|'B'|'C', blocks:[{id, kind:'heading'|'clause'|'para'|'table'|'signature'|'annex', en, ru, cond?, rows?:[[{en,ru}]], bi?, rowCond?:{row:KEY}, repeat?:{row, list:'DEVICES'|'P_TM_LIST'}}]}. cls: A = 01/02/03/05A/05B/06/09; B = 04, 10–14; C = 07/08.
+- Block ids: clause number (MPA-1.2), TYPE-s<n> section headings, TYPE-h<n>, TYPE-p<n>/TYPE-s<sec>.p<n> paras, TYPE-t<n> tables, TYPE-sig<n>, TYPE-title, TYPE-ref.
+- bi:true → source cell was one string "EN / RU": render as `en / ru`.
+- rowCond → show row only if KEY filled. repeat → render that row per list item (DEVICES for OF Annex 1; P_TM_LIST for 05A/05B marks).
+- Conditionals [[KEY|…]] hide when KEY empty, N/A, 0 or false; fragments may contain line breaks.
+- Derived flags: BRAND_DOC_05A/05B from P_TM_OWNER_IS_PARTNER; FEE_NONE when FEE_PCT empty/0/N/A; OF_EXCEPTIONS_NONE; CC_NAME_UPPER_* = upper(CC_NAME_*).
+- Numbers: INIT_* and ANNUAL_TARGET integers (EN 1,000; RU 1 000). Prices USD 2 decimals.
+- DOC_NO = own number (03/04/05A/05B/06/09 header Ref uses own number per ТЗ §5). DOC_SEQ = YYYY-NNNN(NN) part of INV/PF/SR/CI (prefix literal). DOC_NO_OF = Order Form number; MPA_DATE = MPA date.
+- RS empty cells = optional tokens RS_A_*, RS_B_*, RS_C_*, RS_D_* (blank if missing).
+- Page headers/footers are NOT in blocks: generate them per ТЗ §4.
+- Open legal questions (do not change wording): RS reference format inconsistency (doc 10 vs 14 vs ТЗ — follow ТЗ §5 for numbers the system generates); INV has no 5% VAT wording for AE partners; P_TAXNO fragment RU wording is new; OF 1.3/1.5/3.2 choice rendering new; 05B given class A.

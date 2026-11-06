@@ -1,0 +1,570 @@
+{
+ "type": "DPA",
+ "docNo": "06",
+ "title": {
+  "en": "Data Protection Addendum",
+  "ru": "Соглашение о защите данных"
+ },
+ "ver": "T-DPA-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "DPA-title",
+   "kind": "heading",
+   "en": "DATA PROTECTION ADDENDUM",
+   "ru": "СОГЛАШЕНИЕ О ЗАЩИТЕ ДАННЫХ"
+  },
+  {
+   "id": "DPA-ref",
+   "kind": "para",
+   "en": "Document 06 of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 06 из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "DPA-p1",
+   "kind": "para",
+   "en": "This Addendum forms part of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\"), is signed together with it and applies to all Approved Countries under all present and future Order Forms without re-signing. For data protection matters it prevails over the other contract documents.",
+   "ru": "Настоящее Соглашение является частью Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр»), подписывается вместе с ним и применяется ко всем Одобренным странам по всем текущим и будущим Заказам без переподписания. По вопросам защиты данных оно имеет приоритет над другими договорными документами."
+  },
+  {
+   "id": "DPA-s1",
+   "kind": "heading",
+   "en": "1. Applicable law",
+   "ru": "1. Применимое законодательство"
+  },
+  {
+   "id": "DPA-1.1",
+   "kind": "clause",
+   "en": "1.1 \"Data Protection Law\" means all laws on the protection of personal data that apply to a Party's processing under the Agreement, including the law of the country where that Party is established and the law of each Approved Country (for example, the UAE Personal Data Protection Law, the EU and UK GDPR, and national personal data laws of the Approved Countries).",
+   "ru": "1.1 «Законодательство о защите данных» – всё законодательство о защите персональных данных, применимое к обработке, осуществляемой Стороной по Договору, включая законодательство страны учреждения этой Стороны и законодательство каждой Одобренной страны (например, Закон ОАЭ о защите персональных данных, GDPR ЕС и Великобритании, национальные законы о персональных данных Одобренных стран)."
+  },
+  {
+   "id": "DPA-1.2",
+   "kind": "clause",
+   "en": "1.2 If Data Protection Law in an Approved Country requires additional terms, those terms are deemed incorporated into this Addendum to the extent required, and OTA publishes them in the cabinet. No re-signing is needed.",
+   "ru": "1.2 Если законодательство о защите данных Одобренной страны требует дополнительных условий, такие условия считаются включёнными в настоящее Соглашение в необходимом объёме, а OTA публикует их в кабинете. Переподписание не требуется."
+  },
+  {
+   "id": "DPA-s2",
+   "kind": "heading",
+   "en": "2. Roles of the Parties",
+   "ru": "2. Роли Сторон"
+  },
+  {
+   "id": "DPA-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Processing",
+      "ru": "Обработка",
+      "bi": true
+     },
+     {
+      "en": "OTA",
+      "ru": "OTA"
+     },
+     {
+      "en": "Partner",
+      "ru": "Партнёр",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Subscriptions, payments, billing, refunds, tax records",
+      "ru": "Подписки, платежи, биллинг, возвраты, налоговые записи",
+      "bi": true
+     },
+     {
+      "en": "Independent controller",
+      "ru": "Независимый контролёр",
+      "bi": true
+     },
+     {
+      "en": "Independent controller of commission records only",
+      "ru": "Независимый контролёр только данных о вознаграждении",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "CONNECT accounts, device status, notifications, fraud prevention, security logs, support",
+      "ru": "Учётные записи CONNECT, статус устройств, уведомления, предотвращение мошенничества, журналы безопасности, поддержка",
+      "bi": true
+     },
+     {
+      "en": "Independent controller",
+      "ru": "Независимый контролёр",
+      "bi": true
+     },
+     {
+      "en": "Independent controller of data received under clause 3",
+      "ru": "Независимый контролёр данных, полученных по п. 3",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Device sales, Token resale, warranty, installation, Partner CRM and marketing",
+      "ru": "Продажа устройств, перепродажа токенов, гарантия, установка, CRM и маркетинг Партнёра",
+      "bi": true
+     },
+     {
+      "en": "No role unless data is sent to OTA",
+      "ru": "Роли нет, если данные не передаются OTA",
+      "bi": true
+     },
+     {
+      "en": "Independent controller",
+      "ru": "Независимый контролёр",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Reports, campaigns or notifications run by OTA on Partner's instructions",
+      "ru": "Отчёты, кампании или уведомления, выполняемые OTA по инструкциям Партнёра",
+      "bi": true
+     },
+     {
+      "en": "Processor",
+      "ru": "Обработчик",
+      "bi": true
+     },
+     {
+      "en": "Controller",
+      "ru": "Контролёр",
+      "bi": true
+     }
+    ]
+   ]
+  },
+  {
+   "id": "DPA-s3",
+   "kind": "heading",
+   "en": "3. Sharing of data between controllers",
+   "ru": "3. Передача данных между контролёрами"
+  },
+  {
+   "id": "DPA-3.1",
+   "kind": "clause",
+   "en": "3.1 OTA makes available to Partner in the cabinet: the End User's name and contact details, device identifiers, Service Plan status and expiry date, and support history, for: (a) device support and warranty; (b) renewal reminders and offers; (c) Partner's own marketing.",
+   "ru": "3.1 OTA предоставляет Партнёру в кабинете: имя и контактные данные Конечного пользователя, идентификаторы устройства, статус и срок Тарифного плана, историю обращений – для: (a) поддержки устройств и гарантии; (b) напоминаний о продлении и предложений; (c) собственного маркетинга Партнёра."
+  },
+  {
+   "id": "DPA-3.2",
+   "kind": "clause",
+   "en": "3.2 End Users are informed of this sharing in OTA's Privacy Notice. Where the law requires consent for electronic marketing, it is collected in the portal on Partner's behalf through a separate, unticked checkbox, and any withdrawal of consent is passed to Partner automatically.",
+   "ru": "3.2 Конечные пользователи информируются о такой передаче в Политике конфиденциальности OTA. Если закон требует согласия на электронный маркетинг, оно собирается на портале от имени Партнёра отдельной неотмеченной галочкой, а отзыв согласия автоматически передаётся Партнёру."
+  },
+  {
+   "id": "DPA-3.3",
+   "kind": "clause",
+   "en": "3.3 Each controller is responsible for its own notices, legal bases, requests of data subjects, security and breach notifications for its own processing, and forwards to the other Party within five (5) business days any request relating to the other Party's processing.",
+   "ru": "3.3 Каждый контролёр отвечает за свои уведомления, правовые основания, запросы субъектов данных, безопасность и уведомления об инцидентах по своей обработке и в течение пяти (5) рабочих дней пересылает другой Стороне запросы, относящиеся к её обработке."
+  },
+  {
+   "id": "DPA-s4",
+   "kind": "heading",
+   "en": "4. Processing by OTA on Partner's instructions",
+   "ru": "4. Обработка OTA по инструкциям Партнёра"
+  },
+  {
+   "id": "DPA-4.1",
+   "kind": "clause",
+   "en": "4.1 When OTA processes personal data only on Partner's documented instructions (subject matter: Partner reports, campaigns and notifications; duration: term of the Agreement; data subjects: End Users, dealers and Partner staff; data: identification, contact, device and usage data), OTA shall: (a) process the data only on documented instructions, unless the law requires otherwise; (b) ensure that its personnel are bound by confidentiality; (c) apply the measures in Annex 2; (d) use sub-processors only under clause 5; (e) assist Partner with requests of data subjects and impact assessments; (f) notify Partner of a personal data breach without undue delay and within forty-eight (48) hours of becoming aware of it; (g) delete or return the data at the end of the service; and (h) provide the information needed to demonstrate compliance and allow one audit per year on thirty (30) days' notice, at Partner's cost.",
+   "ru": "4.1 Когда OTA обрабатывает персональные данные только по документированным инструкциям Партнёра (предмет: отчёты, кампании и уведомления Партнёра; срок: срок Договора; субъекты: Конечные пользователи, дилеры и сотрудники Партнёра; данные: идентификационные, контактные данные, данные устройства и использования), OTA обязуется: (a) обрабатывать данные только по документированным инструкциям, если закон не требует иного; (b) обеспечить обязательства своего персонала о конфиденциальности; (c) применять меры из Приложения 2; (d) привлекать субобработчиков только согласно п. 5; (e) содействовать Партнёру в ответах на запросы субъектов данных и в оценке воздействия; (f) уведомлять Партнёра об инциденте с персональными данными без неоправданной задержки и не позднее сорока восьми (48) часов с момента, когда OTA о нём узнала; (g) удалить или вернуть данные по окончании сервиса; (h) предоставлять сведения, подтверждающие соблюдение требований, и допускать один аудит в год с уведомлением за тридцать (30) дней за счёт Партнёра."
+  },
+  {
+   "id": "DPA-4.2",
+   "kind": "clause",
+   "en": "4.2 This clause 4 is the processor contract required by Data Protection Law, including Article 28 of the EU GDPR and UK GDPR.",
+   "ru": "4.2 Настоящий п. 4 является договором с обработчиком, требуемым законодательством о защите данных, включая ст. 28 GDPR ЕС и UK GDPR."
+  },
+  {
+   "id": "DPA-s5",
+   "kind": "heading",
+   "en": "5. Sub-processors",
+   "ru": "5. Субобработчики"
+  },
+  {
+   "id": "DPA-5.1",
+   "kind": "clause",
+   "en": "5.1 Partner authorises the sub-processors listed in Annex 1. OTA shall notify Partner at least thirty (30) days before adding or replacing a sub-processor. Partner may object on reasonable data protection grounds, in which case the Parties shall consult in good faith.",
+   "ru": "5.1 Партнёр даёт разрешение на привлечение субобработчиков, указанных в Приложении 1. OTA уведомляет Партнёра не менее чем за тридцать (30) дней до добавления или замены субобработчика. Партнёр вправе возразить по обоснованным соображениям защиты данных, и тогда Стороны добросовестно проводят консультации."
+  },
+  {
+   "id": "DPA-5.2",
+   "kind": "clause",
+   "en": "5.2 The name of OTA's network infrastructure provider is disclosed to Partner confidentially and only to the extent required by Data Protection Law. Partner shall not disclose it publicly. No access to Upstream Systems is given.",
+   "ru": "5.2 Наименование поставщика сетевой инфраструктуры OTA раскрывается Партнёру конфиденциально и только в объёме, требуемом законодательством о защите данных. Партнёр не раскрывает его публично. Доступ к Системам поставщиков не предоставляется."
+  },
+  {
+   "id": "DPA-s6",
+   "kind": "heading",
+   "en": "6. Storage location and international transfers",
+   "ru": "6. Место хранения и трансграничная передача"
+  },
+  {
+   "id": "DPA-6.1",
+   "kind": "clause",
+   "en": "6.1 CONNECT is hosted on Amazon Web Services in the UAE region. Where the law of an Approved Country requires data of its residents to be stored in that country (Master Agreement, clause 11.3), OTA stores that data in that country before launching sales there.",
+   "ru": "6.1 CONNECT размещён в Amazon Web Services в регионе ОАЭ. Если законодательство Одобренной страны требует хранить данные её жителей на её территории (п. 11.3 Рамочного соглашения), OTA обеспечивает такое хранение в этой стране до начала продаж в ней."
+  },
+  {
+   "id": "DPA-6.2",
+   "kind": "clause",
+   "en": "6.2 Personal data may be transferred between any countries where the Parties, the End Users and the sub-processors are located, worldwide, on condition that each transfer is made on a basis permitted by the Data Protection Law of the exporting country. For this purpose the Parties agree that, whenever such law requires a transfer instrument: (a) for transfers from the EU/EEA, the EU Standard Contractual Clauses (Module 1 between controllers; Module 2 or 3 for processing on instructions) apply; (b) for transfers from the United Kingdom, the UK International Data Transfer Addendum to those Clauses applies; (c) for transfers from any other country, the standard clauses, model contract or other mechanism required by that country's law apply. These instruments are incorporated by reference, deemed signed by the Parties, completed with the details in Annexes 1 and 2, and governed by the law that each instrument requires. Where the law of a country requires a separately signed instrument or its filing with an authority, the Parties shall sign or file it on request without delay.",
+   "ru": "6.2 Персональные данные могут передаваться между любыми странами мира, где находятся Стороны, Конечные пользователи и субобработчики, при условии что каждая передача осуществляется на основании, допускаемом законодательством о защите данных страны-экспортёра. Для этого Стороны договорились, что во всех случаях, когда такое законодательство требует документа о передаче: (a) для передачи из ЕС/ЕЭЗ применяются Стандартные договорные условия ЕС (Модуль 1 между контролёрами; Модуль 2 или 3 для обработки по инструкциям); (b) для передачи из Великобритании применяется UK International Data Transfer Addendum к этим условиям; (c) для передачи из любой другой страны применяются стандартные условия, типовой договор или иной механизм, требуемый законодательством этой страны. Указанные документы включены путём ссылки, считаются подписанными Сторонами, дополнены сведениями Приложений 1 и 2 и регулируются правом, которое требует каждый из них. Если законодательство страны требует отдельного подписания такого документа или его подачи в уполномоченный орган, Стороны по запросу без промедления подписывают или подают его."
+  },
+  {
+   "id": "DPA-6.3",
+   "kind": "clause",
+   "en": "6.3 Where the law of a country requires the data subject's consent for a transfer, the consent is collected in the portal.",
+   "ru": "6.3 Если законодательство страны требует согласия субъекта данных на передачу, такое согласие собирается на портале."
+  },
+  {
+   "id": "DPA-s7",
+   "kind": "heading",
+   "en": "7. Liability",
+   "ru": "7. Ответственность"
+  },
+  {
+   "id": "DPA-s7.p1",
+   "kind": "para",
+   "en": "Each Party is liable for its own breaches of Data Protection Law. Fines imposed by authorities on one Party because of the other Party's breach are recoverable from the other Party within the limit set in clause 13.5 of the Master Agreement.",
+   "ru": "Каждая Сторона отвечает за свои нарушения законодательства о защите данных. Штрафы, наложенные органами власти на одну Сторону из-за нарушения другой Стороны, возмещаются другой Стороной в пределах лимита, установленного п. 13.5 Рамочного соглашения."
+  },
+  {
+   "id": "DPA-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "DPA-sig2",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  },
+  {
+   "id": "DPA-h2",
+   "kind": "annex",
+   "en": "Annex 1 – Sub-processors",
+   "ru": "Приложение 1 – Субобработчики"
+  },
+  {
+   "id": "DPA-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Sub-processor",
+      "ru": "Субобработчик",
+      "bi": true
+     },
+     {
+      "en": "Service",
+      "ru": "Услуга",
+      "bi": true
+     },
+     {
+      "en": "Location",
+      "ru": "Расположение",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Amazon Web Services",
+      "ru": "Amazon Web Services"
+     },
+     {
+      "en": "Hosting, storage, backups",
+      "ru": "Хостинг, хранение, резервные копии",
+      "bi": true
+     },
+     {
+      "en": "UAE",
+      "ru": "ОАЭ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Local hosting providers",
+      "ru": "Местные хостинг-провайдеры",
+      "bi": true
+     },
+     {
+      "en": "Storage of data where local law requires it (list in the cabinet)",
+      "ru": "Хранение данных, где этого требует местный закон (перечень в кабинете)",
+      "bi": true
+     },
+     {
+      "en": "Country concerned",
+      "ru": "Соответствующая страна",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Twilio",
+      "ru": "Twilio"
+     },
+     {
+      "en": "SMS and messenger notifications",
+      "ru": "Уведомления по SMS и в мессенджерах",
+      "bi": true
+     },
+     {
+      "en": "USA, EU",
+      "ru": "США, ЕС",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Network International",
+      "ru": "Network International"
+     },
+     {
+      "en": "Card acquiring and payment processing",
+      "ru": "Эквайринг и обработка платежей",
+      "bi": true
+     },
+     {
+      "en": "UAE",
+      "ru": "ОАЭ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Network infrastructure provider (name disclosed confidentially)",
+      "ru": "Поставщик сетевой инфраструктуры (раскрывается конфиденциально)",
+      "bi": true
+     },
+     {
+      "en": "Connectivity, SIM management, network-based location (LBS)",
+      "ru": "Связь, управление SIM, определение местоположения по сети (LBS)",
+      "bi": true
+     },
+     {
+      "en": "EU",
+      "ru": "ЕС",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{OTA_SUBPROC_EMAIL}}",
+      "ru": "{{OTA_SUBPROC_EMAIL}}"
+     },
+     {
+      "en": "Transactional emails",
+      "ru": "Транзакционные письма",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SUBPROC_EMAIL_LOC}}",
+      "ru": "{{OTA_SUBPROC_EMAIL_LOC}}"
+     }
+    ]
+   ],
+   "rowCond": {
+    "6": "OTA_SUBPROC_EMAIL"
+   }
+  },
+  {
+   "id": "DPA-h3",
+   "kind": "annex",
+   "en": "Annex 2 – Technical and organisational measures",
+   "ru": "Приложение 2 – Технические и организационные меры"
+  },
+  {
+   "id": "DPA-t4",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Area",
+      "ru": "Область",
+      "bi": true
+     },
+     {
+      "en": "Measures",
+      "ru": "Меры",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Access",
+      "ru": "Доступ",
+      "bi": true
+     },
+     {
+      "en": "Role-based access, least privilege, multi-factor authentication for administrators, quarterly access review",
+      "ru": "Ролевой доступ, минимально необходимые права, многофакторная аутентификация администраторов, ежеквартальный пересмотр доступа",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Encryption",
+      "ru": "Шифрование",
+      "bi": true
+     },
+     {
+      "en": "TLS 1.2 or higher in transit; encryption of databases and backups at rest",
+      "ru": "TLS 1.2 и выше при передаче; шифрование баз данных и резервных копий при хранении",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Payment cards",
+      "ru": "Банковские карты",
+      "bi": true
+     },
+     {
+      "en": "OTA does not store full card numbers; tokenisation by the acquirer",
+      "ru": "OTA не хранит полные номера карт; токенизация на стороне эквайера",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Operations",
+      "ru": "Эксплуатация",
+      "bi": true
+     },
+     {
+      "en": "Logging and monitoring, vulnerability management, secure development",
+      "ru": "Журналирование и мониторинг, управление уязвимостями, безопасная разработка",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Continuity",
+      "ru": "Непрерывность",
+      "bi": true
+     },
+     {
+      "en": "Backups with tested restore; incident response plan with notification within 48 hours",
+      "ru": "Резервное копирование с проверкой восстановления; план реагирования на инциденты с уведомлением в течение 48 часов",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "People",
+      "ru": "Персонал",
+      "bi": true
+     },
+     {
+      "en": "Confidentiality undertakings, training, vendor checks",
+      "ru": "Обязательства о конфиденциальности, обучение, проверка подрядчиков",
+      "bi": true
+     }
+    ]
+   ]
+  }
+ ]
+}

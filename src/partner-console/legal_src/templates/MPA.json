@@ -1,0 +1,753 @@
+{
+ "type": "MPA",
+ "docNo": "01",
+ "title": {
+  "en": "Master Partner Agreement",
+  "ru": "Рамочное партнёрское соглашение"
+ },
+ "ver": "T-MPA-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "MPA-title",
+   "kind": "heading",
+   "en": "CONNECT FOR BRANDS MASTER PARTNER AGREEMENT",
+   "ru": "РАМОЧНОЕ ПАРТНЁРСКОЕ СОГЛАШЕНИЕ CONNECT FOR BRANDS"
+  },
+  {
+   "id": "MPA-ref",
+   "kind": "para",
+   "en": "Document 01 of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 01 из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "MPA-p1",
+   "kind": "para",
+   "en": "Date: {{DATE}}",
+   "ru": "Дата: {{DATE}}"
+  },
+  {
+   "id": "MPA-h1",
+   "kind": "heading",
+   "en": "Parties",
+   "ru": "Стороны"
+  },
+  {
+   "id": "MPA-p2",
+   "kind": "para",
+   "en": "{{OTA_NAME}}, a free zone company incorporated in the Dubai Multi Commodities Centre, United Arab Emirates, registration no. {{OTA_REGNO}}, licence no. {{OTA_LICENCE}}, Tax Registration Number {{OTA_TRN}}, address: {{OTA_ADDR_EN}}, represented by its {{OTA_TITLE_EN}}, {{OTA_SIGNATORY}} (\"OTA\"); and",
+   "ru": "{{OTA_NAME}}, компания свободной зоны, учреждённая в Dubai Multi Commodities Centre, ОАЭ, регистрационный № {{OTA_REGNO}}, лицензия № {{OTA_LICENCE}}, налоговый регистрационный номер {{OTA_TRN}}, адрес: {{OTA_ADDR_L2}}, в лице {{OTA_TITLE_L2_GEN}} {{OTA_SIGNATORY_L2_GEN}} («OTA»); и"
+  },
+  {
+   "id": "MPA-p3",
+   "kind": "para",
+   "en": "{{P_NAME}}, {{P_FORM_EN}}, company no. {{P_REGNO}}[[P_TAXNO|, tax no. {{P_TAXNO}}]], address: {{P_ADDR_EN}}, represented by its {{P_TITLE_EN}}, {{P_SIGNATORY}} (\"Partner\").",
+   "ru": "{{P_NAME}}, {{P_FORM_L2}}, регистрационный № {{P_REGNO}}[[P_TAXNO|, налоговый № {{P_TAXNO}}]], адрес: {{P_ADDR_L2}}, в лице {{P_TITLE_L2_GEN}} {{P_SIGNATORY}} («Партнёр»)."
+  },
+  {
+   "id": "MPA-p4",
+   "kind": "para",
+   "en": "OTA and Partner are each a \"Party\" and together the \"Parties\".",
+   "ru": "OTA и Партнёр по отдельности именуются «Сторона», совместно – «Стороны»."
+  },
+  {
+   "id": "MPA-h2",
+   "kind": "heading",
+   "en": "Background",
+   "ru": "Преамбула"
+  },
+  {
+   "id": "MPA-A",
+   "kind": "clause",
+   "en": "(A) OTA develops and operates its proprietary CONNECT software platform for onboarding, administration, monitoring, notifications and subscription management of IoT devices, in which data connectivity is embedded as a technical tool of the platform.",
+   "ru": "(A) OTA разрабатывает и эксплуатирует собственную программную платформу CONNECT для подключения, администрирования, мониторинга, уведомлений и управления подписками IoT-устройств, в которую передача данных встроена как технический инструмент платформы."
+  },
+  {
+   "id": "MPA-B",
+   "kind": "clause",
+   "en": "(B) Partner manufactures and/or distributes IoT devices under its brand and wishes to offer CONNECT as an integral function of those devices under an OEM (white-label) configuration named \"{{P_PROGRAMME}}\".",
+   "ru": "(B) Партнёр производит и/или распространяет IoT-устройства под своим брендом и желает предлагать CONNECT как неотъемлемую функцию этих устройств в OEM-конфигурации (white-label) под названием «{{P_PROGRAMME}}»."
+  },
+  {
+   "id": "MPA-C",
+   "kind": "clause",
+   "en": "(C) CONNECT is a software service, not a stand-alone telecommunications service. Data transmission for Approved Devices is provided by licensed mobile network operators through OTA's Upstream Providers. Neither Party sells SIM cards, mobile data, voice or SMS separately from the Approved Devices and the CONNECT platform.",
+   "ru": "(C) CONNECT является программным сервисом, а не самостоятельной телекоммуникационной услугой. Передачу данных для Одобренных устройств обеспечивают лицензированные операторы мобильной связи через Поставщиков OTA. Ни одна из Сторон не продаёт SIM-карты, мобильный интернет, голосовую связь или SMS отдельно от Одобренных устройств и платформы CONNECT."
+  },
+  {
+   "id": "MPA-s1",
+   "kind": "heading",
+   "en": "1. Definitions",
+   "ru": "1. Определения"
+  },
+  {
+   "id": "MPA-1.1",
+   "kind": "clause",
+   "en": "1.1 \"Approved Device\" means a device brand, model and firmware listed in an Order Form for which OTA has accepted the data and signalling profile, and whose IMEI is included in the IMEI Whitelist.",
+   "ru": "1.1 «Одобренное устройство» – бренд, модель и прошивка устройства, указанные в Заказе, профиль передачи данных и сигнализации которых принят OTA и IMEI которого включён в Белый список IMEI."
+  },
+  {
+   "id": "MPA-1.2",
+   "kind": "clause",
+   "en": "1.2 \"CONNECT Platform\" means OTA's hosted software: the Partner business cabinet, the white-label End User portal deployed on the Partner Domain, the subscription and billing engine, notification services, APIs, reports and integrations. It excludes Upstream Systems and device hardware.",
+   "ru": "1.2 «Платформа CONNECT» – размещённое ПО OTA: бизнес-кабинет Партнёра, white-label портал Конечного пользователя, развёрнутый на Домене Партнёра, система подписок и биллинга, сервисы уведомлений, API, отчёты и интеграции. Не включает Системы поставщиков и аппаратную часть устройств."
+  },
+  {
+   "id": "MPA-1.3",
+   "kind": "clause",
+   "en": "1.3 \"Partner Domain\" means the domain or subdomain provided by Partner (for this Agreement: {{P_DOMAIN}}) on which OTA deploys the End User portal.",
+   "ru": "1.3 «Домен Партнёра» – домен или поддомен, предоставленный Партнёром (по настоящему Соглашению: {{P_DOMAIN}}), на котором OTA разворачивает портал Конечного пользователя."
+  },
+  {
+   "id": "MPA-1.4",
+   "kind": "clause",
+   "en": "1.4 \"Connectivity Component\" means device-to-platform data transmission procured by OTA from specialist network infrastructure providers (\"Upstream Providers\") and embedded in CONNECT. \"Upstream Systems\" means the Upstream Providers' networks, portals, software and APIs.",
+   "ru": "1.4 «Компонент связи» – передача данных между устройством и платформой, приобретаемая OTA у специализированных поставщиков сетевой инфраструктуры («Поставщики») и встроенная в CONNECT. «Системы поставщиков» – сети, порталы, ПО и API Поставщиков."
+  },
+  {
+   "id": "MPA-1.5",
+   "kind": "clause",
+   "en": "1.5 \"SIM\" means a physical SIM/eUICC card or an eSIM profile (including SGP.32 IoT profiles) provided by OTA as necessary technical equipment for the operation of CONNECT in an Approved Device.",
+   "ru": "1.5 «SIM» – физическая SIM/eUICC-карта или eSIM-профиль (включая IoT-профили SGP.32), предоставляемые OTA как необходимое техническое оборудование для работы CONNECT в Одобренном устройстве."
+  },
+  {
+   "id": "MPA-1.6",
+   "kind": "clause",
+   "en": "1.6 \"Activation Key\" means a copy of the CONNECT computer program (licence activation key) supplied in electronic form via the Internet. Each Activation Key allows the enrolment (activation) of one unique Approved Device in CONNECT, including creation of its device record, SIM-to-device binding, factory test mode and access to CONNECT functions for the Supported Device Life. Partner acquires each copy for supply to the end user together with the Approved Device and receives no right to reproduce, modify or sublicense the program; payment for the copies is therefore not a royalty. Activation alone does not include data transmission: outside factory test mode, a device transmits data only while a Service Plan is active (a redeemed Service Token or a paid Direct Subscription). The price of an Activation Key is not a price for the SIM.",
+   "ru": "1.6 «Ключ активации» – экземпляр компьютерной программы CONNECT (лицензионный ключ активации), предоставляемый в электронной форме через сеть Интернет. Каждый Ключ активации позволяет подключить (активировать) одно уникальное Одобренное устройство в CONNECT, включая создание записи устройства, привязку SIM к устройству, заводской тестовый режим и доступ к функциям CONNECT в течение Поддерживаемого срока службы. Партнёр приобретает каждый экземпляр для поставки конечному пользователю вместе с Одобренным устройством и не получает права воспроизводить, изменять или сублицензировать программу; поэтому оплата экземпляров не является роялти. Активация сама по себе не включает передачу данных: вне заводского тестового режима устройство передаёт данные только при действующем Тарифном плане (погашенный Сервисный токен или оплаченная Прямая подписка). Цена Ключа активации не является ценой SIM."
+  },
+  {
+   "id": "MPA-1.7",
+   "kind": "clause",
+   "en": "1.7 \"Service Plan\" means a CONNECT service tier – Light, Standard or Premium – as described in Document 04. \"Service Token\" means a unique electronic activation code which, when redeemed for an Approved Device, activates a prepaid Service Plan for a fixed term of 12, 24, 36, 48 or 60 months.",
+   "ru": "1.7 «Тарифный план» – уровень сервиса CONNECT (Light, Standard или Premium), описанный в Документе 04. «Сервисный токен» – уникальный электронный код активации, который при погашении для Одобренного устройства активирует предоплаченный Тарифный план на фиксированный срок 12, 24, 36, 48 или 60 месяцев."
+  },
+  {
+   "id": "MPA-1.8",
+   "kind": "clause",
+   "en": "1.8 \"Direct Subscription\" means a Service Plan purchased by an End User directly through OTA's checkout on the End User portal – monthly, annual or for a prepaid term of 12, 24, 36, 48 or 60 months – for which OTA is the seller (merchant of record).",
+   "ru": "1.8 «Прямая подписка» – Тарифный план, приобретаемый Конечным пользователем непосредственно через платёжную страницу OTA на портале, – ежемесячный, годовой или на предоплаченный срок 12, 24, 36, 48 или 60 месяцев, – по которому продавцом (merchant of record) выступает OTA."
+  },
+  {
+   "id": "MPA-1.9",
+   "kind": "clause",
+   "en": "1.9 \"End User\" means any natural or legal person who uses an Approved Device and accepts the CONNECT End User Terms (Document 07).",
+   "ru": "1.9 «Конечный пользователь» – любое физическое или юридическое лицо, использующее Одобренное устройство и принявшее Условия для Конечных пользователей CONNECT (Документ 07)."
+  },
+  {
+   "id": "MPA-1.10",
+   "kind": "clause",
+   "en": "1.10 \"Order Form\" means a document signed by both Parties for one country (the \"Approved Country\"), specifying Approved Devices, prices and commercial terms for that country.",
+   "ru": "1.10 «Заказ» – подписываемый Сторонами документ по одной стране («Одобренная страна»), определяющий Одобренные устройства, цены и коммерческие условия по этой стране."
+  },
+  {
+   "id": "MPA-1.11",
+   "kind": "clause",
+   "en": "1.11 \"Supported Device Life\" means the period during which OTA supports an Approved Device model in CONNECT. It is not shorter than the longest prepaid term (Service Token or prepaid Direct Subscription) sold for that model and, in any case, not less than two (2) years from the first activation of that model, as set out in Document 04.",
+   "ru": "1.11 «Поддерживаемый срок службы» – период, в течение которого OTA поддерживает модель Одобренного устройства в CONNECT. Он не короче самого длительного предоплаченного срока (Сервисного токена или предоплаченной Прямой подписки), проданного для этой модели, и в любом случае не менее двух (2) лет с даты первой активации этой модели, как указано в Документе 04."
+  },
+  {
+   "id": "MPA-1.12",
+   "kind": "clause",
+   "en": "1.12 \"IMEI Whitelist\" means the list of IMEI numbers of Approved Devices provided by Partner under clause 5.3. CONNECT works only in devices whose IMEI is on the IMEI Whitelist.",
+   "ru": "1.12 «Белый список IMEI» – перечень IMEI Одобренных устройств, предоставляемый Партнёром согласно п. 5.3. CONNECT работает только в устройствах, IMEI которых включены в Белый список IMEI."
+  },
+  {
+   "id": "MPA-1.13",
+   "kind": "clause",
+   "en": "1.13 \"Excluded Territories\" means: (a) the Russian Federation and the Republic of Belarus; and (b) any country or territory subject to comprehensive UN, EU, UK or US sanctions, including the temporarily occupied territories of Ukraine. CONNECT is not sold or activated for persons resident there and is not provided while a device is located there; OTA may technically block such use.",
+   "ru": "1.13 «Исключённые территории»: (a) Российская Федерация и Республика Беларусь; (b) любые страны и территории под всеобъемлющими санкциями ООН, ЕС, Великобритании или США, включая временно оккупированные территории Украины. CONNECT не продаётся и не активируется для лиц, проживающих там, и не предоставляется, пока устройство находится там; OTA вправе технически блокировать такое использование."
+  },
+  {
+   "id": "MPA-1.14",
+   "kind": "clause",
+   "en": "1.14 \"Restricted Countries\" means countries where the long-term use of foreign SIM cards is prohibited or restricted, or where OTA does not offer CONNECT as a local service: the member states of the Gulf Cooperation Council (Bahrain, Kuwait, Oman, Qatar, Saudi Arabia and the United Arab Emirates), the Republic of Türkiye, the Republic of India, the Federative Republic of Brazil, the People's Republic of China and the Federal Republic of Nigeria, and any other country so designated in the Availability Policy. A Restricted Country cannot be an Approved Country, and CONNECT is not sold or activated for persons resident there. Approved Devices of End Users from Approved Countries may use CONNECT in Restricted Countries during temporary trips abroad, as shown in the Availability Policy, but not as a permanent place of use. If a device stays in Restricted Countries for more than ninety (90) days in any twelve (12) months, OTA may restrict the service there.",
+   "ru": "1.14 «Страны с ограничениями» – страны, в которых длительное использование иностранных SIM-карт запрещено или ограничено либо в которых OTA не предлагает CONNECT как местный сервис: государства Совета сотрудничества арабских государств Персидского залива (Бахрейн, Кувейт, Оман, Катар, Саудовская Аравия и ОАЭ), Турецкая Республика, Республика Индия, Федеративная Республика Бразилия, Китайская Народная Республика и Федеративная Республика Нигерия, а также иные страны, указанные в Политике доступности. Страна с ограничениями не может быть Одобренной страной; CONNECT не продаётся и не активируется для лиц, проживающих в ней. Одобренные устройства Конечных пользователей из Одобренных стран могут использовать CONNECT в Странах с ограничениями во время временных поездок за рубеж согласно Политике доступности, но не как постоянное место использования. Если устройство находится в Странах с ограничениями более девяноста (90) дней за любые двенадцать (12) месяцев, OTA вправе ограничить сервис в них."
+  },
+  {
+   "id": "MPA-1.15",
+   "kind": "clause",
+   "en": "1.15 \"Availability Policy\" means OTA's published information on the countries and conditions in which CONNECT functions are available, including use during trips abroad, as updated by OTA from time to time.",
+   "ru": "1.15 «Политика доступности» – публикуемая OTA информация о странах и условиях, в которых доступны функции CONNECT, включая использование во время поездок за рубеж, с учётом её обновлений."
+  },
+  {
+   "id": "MPA-s2",
+   "kind": "heading",
+   "en": "2. Contract documents",
+   "ru": "2. Договорные документы"
+  },
+  {
+   "id": "MPA-2.1",
+   "kind": "clause",
+   "en": "2.1 The Agreement consists of: this Master Agreement (Document 01); each Order Form (Document 02 with country code, e.g. 02-UA); the Service Token Reseller Terms (03); the Service Terms and SLA (04); the Brand Licence (05A) or the Brand Owner Authorisation (05B); the Data Protection Addendum (06); and the SIM Custody, Delivery and Customs Schedule (09). The End User Terms (07) and Privacy Notice (08) are OTA's public documents and are attached for information.",
+   "ru": "2.1 Договор состоит из: настоящего Рамочного соглашения (Документ 01); каждого Заказа (Документ 02 с кодом страны, например 02-UA); Условий перепродажи Сервисных токенов (03); Условий сервиса и SLA (04); Лицензии на бренд (05A) или Разрешения правообладателя бренда (05B); Соглашения о защите данных (06); Графика хранения, поставки и таможенного оформления SIM (09). Условия для Конечных пользователей (07) и Политика конфиденциальности (08) являются публичными документами OTA и прилагаются для сведения."
+  },
+  {
+   "id": "MPA-2.2",
+   "kind": "clause",
+   "en": "2.2 Documents 01, 03, 04, 05A/05B, 06, 09 and the first Order Forms are signed together as one package on the date of this Agreement. Order Forms for further countries may be signed later and are governed by this Agreement without re-signing the other documents.",
+   "ru": "2.2 Документы 01, 03, 04, 05A/05B, 06, 09 и первые Заказы подписываются вместе, единым пакетом, в дату настоящего Соглашения. Заказы по другим странам могут подписываться позднее и регулируются настоящим Соглашением без переподписания остальных документов."
+  },
+  {
+   "id": "MPA-2.3",
+   "kind": "clause",
+   "en": "2.3 Order of precedence: (a) Document 06, for data protection matters; (b) the Order Form, for the commercial terms of its country; (c) this Master Agreement; (d) the other documents.",
+   "ru": "2.3 Приоритет: (a) Документ 06 – по вопросам защиты данных; (b) Заказ – по коммерческим условиям своей страны; (c) настоящее Рамочное соглашение; (d) прочие документы."
+  },
+  {
+   "id": "MPA-2.4",
+   "kind": "clause",
+   "en": "2.4 Partner may sell CONNECT only in an Approved Country. An Excluded Territory or a Restricted Country cannot be an Approved Country, and Partner shall not sell or activate CONNECT for End Users ordinarily resident in an Excluded Territory or a Restricted Country.",
+   "ru": "2.4 Партнёр вправе продавать CONNECT только в Одобренной стране. Исключённая территория или Страна с ограничениями не может быть Одобренной страной; Партнёр не продаёт и не активирует CONNECT для Конечных пользователей, постоянно проживающих на Исключённой территории или в Стране с ограничениями."
+  },
+  {
+   "id": "MPA-2.5",
+   "kind": "clause",
+   "en": "2.5 Documents of the Agreement, Order Forms, new versions and acknowledgments may be generated, issued, signed and stored in OTA's partner portal. Signature in the portal by a Party's authorised signatory, confirmed by a one-time code, together with the portal's audit trail (signatory, time, IP address and document hash), is a valid electronic signature binding on that Party. The PDF bearing both Parties' signatures and the signature certificate, as stored in the portal, is the original of the document and is available to both Parties for download. Each Party keeps its portal access secure and is responsible for the authority of the signatories it designates.",
+   "ru": "2.5 Документы Договора, Заказы, их новые версии и подтверждения могут формироваться, выпускаться, подписываться и храниться на партнёрском портале OTA. Подпись на портале уполномоченным подписантом Стороны, подтверждённая одноразовым кодом, вместе с журналом портала (подписант, время, IP-адрес и хэш документа) является действительной электронной подписью и обязательна для этой Стороны. PDF с подписями обеих Сторон и сертификатом подписания, хранящийся на портале, является оригиналом документа и доступен обеим Сторонам для скачивания. Каждая Сторона обеспечивает безопасность своего доступа к порталу и отвечает за полномочия назначенных ею подписантов."
+  },
+  {
+   "id": "MPA-s3",
+   "kind": "heading",
+   "en": "3. Licence and intellectual property",
+   "ru": "3. Лицензия и интеллектуальная собственность"
+  },
+  {
+   "id": "MPA-3.1",
+   "kind": "clause",
+   "en": "3.1 Subject to payment and compliance with the Agreement, OTA grants Partner a non-exclusive, non-transferable licence, without the right to sublicense, for the term of the Agreement and in the Approved Countries, to: (a) use the Partner business cabinet; (b) offer CONNECT under Partner's brand as an OEM service integrated into Approved Devices; (c) resell Service Tokens under Document 03. Partner may give delegated cabinet accounts to its dealers and installers under its own responsibility.",
+   "ru": "3.1 При условии оплаты и соблюдения Договора OTA предоставляет Партнёру неисключительную, непередаваемую лицензию без права сублицензирования на срок Договора и в Одобренных странах на: (a) использование бизнес-кабинета Партнёра; (b) предложение CONNECT под брендом Партнёра как OEM-сервиса, интегрированного в Одобренные устройства; (c) перепродажу Сервисных токенов согласно Документу 03. Партнёр вправе предоставлять делегированные учётные записи кабинета своим дилерам и монтажникам под свою ответственность."
+  },
+  {
+   "id": "MPA-3.2",
+   "kind": "clause",
+   "en": "3.2 OTA and its licensors retain all rights in CONNECT, its software, databases, documentation, know-how and improvements. No source code, Upstream System access or credentials are provided to Partner, its dealers or End Users. Reverse engineering, scraping, sharing of credentials and circumvention of technical limits are prohibited, except where mandatory law permits them.",
+   "ru": "3.2 OTA и её лицензиары сохраняют все права на CONNECT, ПО, базы данных, документацию, ноу-хау и доработки. Исходный код, доступ к Системам поставщиков и учётные данные не предоставляются Партнёру, его дилерам или Конечным пользователям. Запрещены декомпиляция, автоматизированный сбор данных, передача учётных данных и обход технических ограничений, кроме случаев, когда это разрешено императивными нормами права."
+  },
+  {
+   "id": "MPA-3.3",
+   "kind": "clause",
+   "en": "3.3 Partner retains all rights in its brand and grants OTA the licence set out in Document 05A or 05B, including after termination, to the extent needed to serve End Users with paid Service Plans.",
+   "ru": "3.3 Партнёр сохраняет все права на свой бренд и предоставляет OTA лицензию, предусмотренную Документом 05A или 05B, в том числе после прекращения Договора – в объёме, необходимом для обслуживания Конечных пользователей с оплаченными Тарифными планами."
+  },
+  {
+   "id": "MPA-s4",
+   "kind": "heading",
+   "en": "4. SIMs: necessary equipment held in custody",
+   "ru": "4. SIM: необходимое оборудование, передаваемое на хранение"
+  },
+  {
+   "id": "MPA-4.1",
+   "kind": "clause",
+   "en": "4.1 SIMs are necessary technical equipment for CONNECT and are provided to Partner without separate charge. Title to SIMs remains with OTA or its Upstream Providers at all times. Partner receives custody of SIMs and a limited right to install each SIM only in an Approved Device. The SIM is not sold, and no SIM price is included in the price of the Activation Key.",
+   "ru": "4.1 SIM являются необходимым техническим оборудованием для CONNECT и предоставляются Партнёру без отдельной платы. Право собственности на SIM всегда остаётся за OTA или её Поставщиками. Партнёр получает SIM на хранение с ограниченным правом установки каждой SIM только в Одобренное устройство. SIM не продаётся, и цена SIM не входит в цену Ключа активации."
+  },
+  {
+   "id": "MPA-4.2",
+   "kind": "clause",
+   "en": "4.2 Until a SIM is installed in an Approved Device, Partner shall keep it secure and shall not sell, transfer, pledge or install it in any other device (including smartphones, routers or modems). After installation, the SIM is bound to the IMEI of its Approved Device by the IMEI Whitelist, and Partner's custody obligations for that SIM end when the device is sold, save that Partner shall inform OTA of any misuse it becomes aware of.",
+   "ru": "4.2 До установки SIM в Одобренное устройство Партнёр обеспечивает её сохранность и не вправе продавать, передавать, закладывать её или устанавливать в иные устройства (включая смартфоны, роутеры и модемы). После установки SIM привязывается к IMEI своего Одобренного устройства через Белый список IMEI, и обязанности Партнёра по хранению этой SIM прекращаются с продажей устройства; при этом Партнёр сообщает OTA о ставших ему известными случаях злоупотребления."
+  },
+  {
+   "id": "MPA-4.3",
+   "kind": "clause",
+   "en": "4.3 Delivery, customs and risk of loss are governed by Document 09.",
+   "ru": "4.3 Поставка, таможенное оформление и риск утраты регулируются Документом 09."
+  },
+  {
+   "id": "MPA-4.4",
+   "kind": "clause",
+   "en": "4.4 Where eSIM profiles are used, the same restrictions apply to the profile and the eUICC. OTA may switch the profile of a device to another Upstream Provider remotely to maintain service continuity under clause 10.",
+   "ru": "4.4 При использовании eSIM-профилей те же ограничения распространяются на профиль и eUICC. OTA вправе дистанционно переключить профиль устройства на другого Поставщика для обеспечения непрерывности сервиса согласно пункту 10."
+  },
+  {
+   "id": "MPA-s5",
+   "kind": "heading",
+   "en": "5. Partner's obligations",
+   "ru": "5. Обязанности Партнёра"
+  },
+  {
+   "id": "MPA-5.1",
+   "kind": "clause",
+   "en": "5.1 Partner is responsible for its Approved Devices: their design, safety, certification, labelling, import, installation instructions, consumer warranty and after-sales hardware support. Where the law of the country in which Approved Devices are sold requires registration of devices or their IMEI numbers, Partner shall arrange such registration itself.",
+   "ru": "5.1 Партнёр отвечает за свои Одобренные устройства: их конструкцию, безопасность, сертификацию, маркировку, ввоз, инструкции по установке, потребительскую гарантию и сервисную поддержку оборудования. Если законодательство страны, в которой продаются Одобренные устройства, требует регистрации устройств или их IMEI, Партнёр выполняет такую регистрацию самостоятельно."
+  },
+  {
+   "id": "MPA-5.2",
+   "kind": "clause",
+   "en": "5.2 Partner shall: (a) use firmware with reasonable reconnection (back-off) logic and avoid excessive signalling; (b) not use CONNECT for voice, standalone SMS, tethering, VPN resale or general internet access; (c) describe CONNECT in its marketing accurately and consistently with OTA's service documents; (d) ensure that End Users can access OTA's End User Terms and Privacy Notice before activation; (e) promptly cooperate with OTA in any investigation of misuse, fraud or abnormal traffic.",
+   "ru": "5.2 Партнёр обязуется: (a) использовать прошивку с разумной логикой повторного подключения и не допускать избыточной сигнализации; (b) не использовать CONNECT для голосовой связи, самостоятельных SMS, раздачи интернета, перепродажи VPN или общего доступа в интернет; (c) описывать CONNECT в своей рекламе корректно и в соответствии с сервисными документами OTA; (d) обеспечить Конечным пользователям доступ к Условиям и Политике конфиденциальности OTA до активации; (e) незамедлительно содействовать OTA в расследовании злоупотреблений, мошенничества или аномального трафика."
+  },
+  {
+   "id": "MPA-5.3",
+   "kind": "clause",
+   "en": "5.3 IMEI Whitelist. Before activation of any Approved Device, Partner shall provide OTA with the IMEI numbers of the devices in which SIMs are installed, by uploading them to the cabinet or by email to OTA's operations address, in the format set by OTA. CONNECT works only in devices whose IMEI is on the IMEI Whitelist; a SIM moved to another device stops working. Partner is responsible for the accuracy of the list.",
+   "ru": "5.3 Белый список IMEI. До активации любого Одобренного устройства Партнёр передаёт OTA номера IMEI устройств, в которые установлены SIM, путём загрузки в кабинет или по e-mail на операционный адрес OTA в формате, установленном OTA. CONNECT работает только в устройствах, IMEI которых включены в Белый список IMEI; SIM, переставленная в другое устройство, перестаёт работать. Партнёр отвечает за достоверность списка."
+  },
+  {
+   "id": "MPA-5.4",
+   "kind": "clause",
+   "en": "5.4 Partner provides the Partner Domain and maintains the DNS records required by OTA for the End User portal during the term of the Agreement. After termination, OTA moves the portal for existing End Users to a neutral OTA domain, and Partner keeps a redirect from the Partner Domain to that domain for twelve (12) months.",
+   "ru": "5.4 Партнёр предоставляет Домен Партнёра и поддерживает DNS-записи, необходимые OTA для портала Конечного пользователя, в течение срока Договора. После прекращения Договора OTA переносит портал для существующих Конечных пользователей на нейтральный домен OTA, а Партнёр в течение двенадцати (12) месяцев поддерживает переадресацию с Домена Партнёра на этот домен."
+  },
+  {
+   "id": "MPA-5.5",
+   "kind": "clause",
+   "en": "5.5 Partner provides first-line support for devices and installation; OTA provides second-line support for CONNECT and support to End Users on accounts and payments, as set out in Document 04.",
+   "ru": "5.5 Партнёр оказывает первую линию поддержки по устройствам и установке; OTA оказывает вторую линию поддержки по CONNECT и поддержку Конечных пользователей по учётным записям и платежам согласно Документу 04."
+  },
+  {
+   "id": "MPA-5.6",
+   "kind": "clause",
+   "en": "5.6 Single connectivity platform. OTA maintains for Partner its branded portal, the IMEI Whitelist, the brand licence and the service obligations to Partner's End Users, which requires one connectivity platform for Partner's devices. Accordingly: (a) during the term of the Agreement, Partner shall not, directly or through its affiliates, integrate, offer or use any other embedded connectivity, SIM/eSIM or connected-device subscription programme for devices of its brands; (b) after the term, for as long as OTA has obligations to End Users with paid Service Plans, Partner shall not offer such other programme for the Approved Device models, and shall not remove, replace or reprogram the SIMs or eSIM profiles of devices with paid Service Plans, move them to another connectivity provider or offer End Users a replacement that requires disabling CONNECT. This clause does not apply to SIM cards that End Users obtain and insert themselves, or to the programmes, brands, device categories or countries listed as exceptions in an Order Form. Each of sub-clauses (a) and (b) is a separate obligation. Where EU or UK competition law applies to Partner, the obligation in sub-clause (a) is limited to five (5) years from the date of this Agreement.",
+   "ru": "5.6 Единая платформа связи. OTA поддерживает для Партнёра брендированный портал, Белый список IMEI, лицензию на бренд и обязательства по сервису перед Конечными пользователями Партнёра, что требует единой платформы связи для устройств Партнёра. Поэтому: (a) в течение срока Договора Партнёр ни напрямую, ни через аффилированных лиц не внедряет, не предлагает и не использует для устройств своих брендов никакую иную встроенную программу связи, SIM/eSIM или подписки для подключённых устройств; (b) после окончания срока Договора, пока у OTA есть обязательства перед Конечными пользователями с оплаченными Тарифными планами, Партнёр не предлагает такую иную программу для моделей Одобренных устройств, не извлекает, не заменяет и не перепрограммирует SIM или eSIM-профили устройств с оплаченными Тарифными планами, не переводит их к другому поставщику связи и не предлагает Конечным пользователям замену, требующую отключения CONNECT. Настоящий пункт не применяется к SIM-картам, которые Конечные пользователи сами приобретают и устанавливают, а также к программам, брендам, категориям устройств или странам, указанным в Заказе как исключения. Подпункты (a) и (b) являются самостоятельными обязательствами. Если к Партнёру применяется конкурентное право ЕС или Великобритании, обязательство по подпункту (a) ограничено пятью (5) годами с даты настоящего Соглашения."
+  },
+  {
+   "id": "MPA-5.7",
+   "kind": "clause",
+   "en": "5.7 Presentation of the service. Partner shall present CONNECT as a function of its devices and a software service, using the terminology in the Annex to Document 03. Partner shall not present CONNECT as a mobile tariff, data plan or SIM card offer, shall not compare it with the tariffs of mobile operators, and shall not present notifications as an alarm or security service.",
+   "ru": "5.7 Представление сервиса. Партнёр представляет CONNECT как функцию своих устройств и программный сервис, используя терминологию из Приложения к Документу 03. Партнёр не представляет CONNECT как мобильный тариф, пакет данных или предложение SIM-карты, не сравнивает его с тарифами операторов мобильной связи и не представляет уведомления как охранный сервис или сигнализацию."
+  },
+  {
+   "id": "MPA-s6",
+   "kind": "heading",
+   "en": "6. OTA's obligations",
+   "ru": "6. Обязанности OTA"
+  },
+  {
+   "id": "MPA-6.1",
+   "kind": "clause",
+   "en": "6.1 OTA shall: (a) configure the Partner cabinet and deploy the white-label End User portal on the Partner Domain; (b) host and maintain CONNECT; (c) procure the Connectivity Component from Upstream Providers for the Approved Countries; (d) provide SIMs in agreed quantities; (e) process Direct Subscription payments as merchant of record; (f) provide support under Document 04; (g) maintain its licences and the Upstream arrangements necessary to perform the Agreement; (h) comply with the tax, data localisation and other legal requirements applicable to OTA as provider of CONNECT in each Approved Country.",
+   "ru": "6.1 OTA обязуется: (a) настроить кабинет Партнёра и развернуть white-label портал Конечного пользователя на Домене Партнёра; (b) обеспечить размещение и сопровождение CONNECT; (c) приобретать Компонент связи у Поставщиков для Одобренных стран; (d) предоставлять SIM в согласованном количестве; (e) принимать платежи по Прямым подпискам как продавец (merchant of record); (f) оказывать поддержку согласно Документу 04; (g) поддерживать свои лицензии и договоры с Поставщиками, необходимые для исполнения Договора; (h) соблюдать налоговые требования, требования о локализации данных и иные требования, применимые к OTA как поставщику CONNECT в каждой Одобренной стране."
+  },
+  {
+   "id": "MPA-6.2",
+   "kind": "clause",
+   "en": "6.2 OTA does not guarantee any particular network operator, signal strength, speed or uninterrupted availability of mobile networks. Service targets and exclusions are set out in Document 04.",
+   "ru": "6.2 OTA не гарантирует работу определённого оператора, уровень сигнала, скорость или непрерывную доступность мобильных сетей. Целевые показатели и исключения указаны в Документе 04."
+  },
+  {
+   "id": "MPA-s7",
+   "kind": "heading",
+   "en": "7. Commercial model",
+   "ru": "7. Коммерческая модель"
+  },
+  {
+   "id": "MPA-7.1",
+   "kind": "clause",
+   "en": "7.1 Activation Keys. Partner buys Activation Keys in advance, at the price set in the Order Form, in quantities it chooses. Activation Keys are supplied electronically in the cabinet as a separate product; their purchase is not linked to, and is not a condition of, any shipment of SIMs. One Activation Key is used for each Approved Device activated in CONNECT. Activation Keys do not expire during the term of the Agreement and may be used for twelve (12) months after its termination.",
+   "ru": "7.1 Ключи активации. Партнёр приобретает Ключи активации заранее по цене, указанной в Заказе, в выбранном им количестве. Ключи активации предоставляются в электронной форме в кабинете как отдельный продукт; их приобретение не связано с отгрузками SIM и не является их условием. Для каждого Одобренного устройства, активируемого в CONNECT, используется один Ключ активации. Ключи активации не истекают в течение срока Договора и могут быть использованы в течение двенадцати (12) месяцев после его прекращения."
+  },
+  {
+   "id": "MPA-7.2",
+   "kind": "clause",
+   "en": "7.2 Service Tokens. Partner buys Service Tokens from OTA at the wholesale prices set in the Order Form and resells them to End Users or to its dealers in its own name and for its own account, at prices it determines itself. Partner's earnings from Service Tokens are its resale margin (the difference between its resale price and OTA's wholesale price), which belongs to Partner in full. OTA pays no separate commission on Service Tokens, and OTA has no share in Partner's resale margin. Document 03 applies.",
+   "ru": "7.2 Сервисные токены. Партнёр покупает Сервисные токены у OTA по оптовым ценам, указанным в Заказе, и перепродаёт их Конечным пользователям или своим дилерам от своего имени и за свой счёт по ценам, которые определяет сам. Доход Партнёра от Сервисных токенов – его маржа при перепродаже (разница между его ценой продажи и оптовой ценой OTA), которая полностью принадлежит Партнёру. OTA не выплачивает отдельного вознаграждения по Сервисным токенам и не участвует в марже Партнёра. Применяется Документ 03."
+  },
+  {
+   "id": "MPA-7.3",
+   "kind": "clause",
+   "en": "7.3 Direct Subscriptions. For Direct Subscriptions OTA is the seller and merchant of record and collects payments through its acquirer. Partner sets the retail prices in the cabinet (OEM pricing), and OTA presents them as required by law (including tax-inclusive prices and renewal terms). The cabinet shows the minimum retail price for each plan and country, equal to the OTA Retained Amount plus the taxes and payment fees included in the price, and does not accept a lower price. OTA recalculates the minimum price at least monthly (including for exchange rate changes and changes under clause 9.1). If a retail price falls below the minimum price, OTA notifies Partner; if Partner does not raise it within thirty (30) days, OTA may raise it to the minimum price for future billing periods after the notice to End Users required by Document 07. For each Direct Subscription, OTA pays Partner a marketing and referral commission equal to the Net Collected Revenue less the OTA Retained Amount set in the Order Form.",
+   "ru": "7.3 Прямые подписки. По Прямым подпискам продавцом и merchant of record является OTA, которая принимает платежи через своего эквайера. Партнёр устанавливает розничные цены в кабинете (OEM-ценообразование), а OTA отображает их так, как требует закон (включая цены с налогами и условия продления). Кабинет показывает минимальную розничную цену по каждому тарифу и стране, равную Сумме, удерживаемой OTA, плюс включённые в цену налоги и платёжные комиссии, и не принимает более низкую цену. OTA пересчитывает минимальную цену не реже одного раза в месяц (в том числе при изменении валютных курсов и в случаях п. 9.1). Если розничная цена оказывается ниже минимальной, OTA уведомляет Партнёра; если Партнёр не повысит её в течение тридцати (30) дней, OTA вправе повысить её до минимальной для будущих периодов оплаты после уведомления Конечных пользователей, предусмотренного Документом 07. По каждой Прямой подписке OTA выплачивает Партнёру вознаграждение за маркетинг и привлечение клиентов в размере Чистой собранной выручки за вычетом Суммы, удерживаемой OTA, установленной в Заказе."
+  },
+  {
+   "id": "MPA-7.4",
+   "kind": "clause",
+   "en": "7.4 \"Net Collected Revenue\" means End User payments for Direct Subscriptions actually received by OTA, less: (a) VAT, GST, sales tax, digital services tax and other indirect taxes that OTA must pay in the End User's country; (b) acquiring and payment processing fees; (c) refunds, reversals, chargebacks and chargeback fees; and (d) where stated in the Order Form, the agreed country compliance fee covering OTA's tax registration and fiscal or tax representative costs in that country, which shall not exceed three per cent (3%) of the payments received. Commission is never negative for an individual payment; commission on a refunded or charged-back payment is reversed in a subsequent Statement.",
+   "ru": "7.4 «Чистая собранная выручка» – фактически полученные OTA платежи Конечных пользователей по Прямым подпискам за вычетом: (a) НДС, GST, налога с продаж, налога на цифровые услуги и иных косвенных налогов, которые OTA обязана уплатить в стране Конечного пользователя; (b) комиссий за эквайринг и обработку платежей; (c) возвратов, отмен, chargeback и комиссий за chargeback; (d) если это указано в Заказе, согласованного сбора на соблюдение страновых требований, покрывающего расходы OTA на налоговую регистрацию и налогового или фискального представителя в этой стране, который не может превышать трёх процентов (3%) полученных платежей. Вознаграждение по отдельному платежу не может быть отрицательным; вознаграждение по возвращённому или оспоренному платежу сторнируется в последующем Акте сверки."
+  },
+  {
+   "id": "MPA-7.5",
+   "kind": "clause",
+   "en": "7.5 The commission is remuneration for Partner's marketing and customer acquisition services. It is not a margin on the resale of telecommunications services.",
+   "ru": "7.5 Вознаграждение является оплатой маркетинговых услуг Партнёра и услуг по привлечению клиентов. Оно не является наценкой при перепродаже телекоммуникационных услуг."
+  },
+  {
+   "id": "MPA-7.6",
+   "kind": "clause",
+   "en": "7.6 Partner remunerates its dealers and installers at its own discretion; OTA is not a party to those arrangements.",
+   "ru": "7.6 Партнёр самостоятельно определяет вознаграждение своих дилеров и монтажников; OTA не является стороной этих отношений."
+  },
+  {
+   "id": "MPA-s8",
+   "kind": "heading",
+   "en": "8. Invoicing, payment and taxes",
+   "ru": "8. Счета, оплата и налоги"
+  },
+  {
+   "id": "MPA-8.1",
+   "kind": "clause",
+   "en": "8.1 All prices and payments between the Parties are in US dollars (USD) and exclude taxes. Activation Keys and Service Tokens are invoiced on order and paid 100% in advance, before their issue. SIMs are shipped free of charge; a new SIM shipment is made when at least seventy per cent (70%) of the SIMs previously delivered to Partner have been activated, unless OTA agrees otherwise.",
+   "ru": "8.1 Все цены и платежи между Сторонами указываются в долларах США (USD) без учёта налогов. Ключи активации и Сервисные токены выставляются к оплате при заказе и оплачиваются 100% авансом до их выпуска. SIM отгружаются бесплатно; новая отгрузка SIM производится, когда активировано не менее семидесяти процентов (70%) ранее поставленных Партнёру SIM, если OTA не согласует иное."
+  },
+  {
+   "id": "MPA-8.2",
+   "kind": "clause",
+   "en": "8.2 By the 10th day of each month OTA issues a Monthly Reconciliation Statement (Document 10) for the previous month. By the 15th day Partner issues its commission invoice to OTA (template: Document 14). By the 20th day each Party pays the other Party's undisputed invoices in full by separate bank transfer. If Partner's invoice is received after the 15th day, OTA pays it within ten (10) business days of receipt.",
+   "ru": "8.2 До 10-го числа каждого месяца OTA направляет Ежемесячный акт сверки (Документ 10) за предыдущий месяц. До 15-го числа Партнёр выставляет OTA счёт на вознаграждение (шаблон – Документ 14). До 20-го числа каждая Сторона оплачивает бесспорные счета другой Стороны в полном объёме отдельным банковским переводом. Если счёт Партнёра получен после 15-го числа, OTA оплачивает его в течение десяти (10) рабочих дней с даты получения."
+  },
+  {
+   "id": "MPA-8.3",
+   "kind": "clause",
+   "en": "8.3 There is no set-off or netting between the Parties' payment obligations, except mandatory tax withholding under clause 8.5. The Statement reconciles records and does not discharge any debt.",
+   "ru": "8.3 Зачёт и неттинг встречных платёжных обязательств Сторон не допускаются, за исключением обязательного удержания налогов по п. 8.5. Акт сверки фиксирует данные и не погашает обязательства."
+  },
+  {
+   "id": "MPA-8.4",
+   "kind": "clause",
+   "en": "8.4 Overdue amounts bear interest at one per cent (1%) per month. If Partner is more than fifteen (15) days late, OTA may, after written notice, suspend new SIM shipments, new Token issue and new activations. End Users already activated are protected under clause 10.",
+   "ru": "8.4 На просроченные суммы начисляются проценты в размере одного процента (1%) в месяц. При просрочке Партнёра более чем на пятнадцать (15) дней OTA вправе после письменного уведомления приостановить новые отгрузки SIM, выпуск токенов и новые активации. Уже активированные Конечные пользователи защищены согласно п. 10."
+  },
+  {
+   "id": "MPA-8.5",
+   "kind": "clause",
+   "en": "8.5 Each Party bears its own taxes. OTA shall provide Partner, on request and at least once a year, with its tax residency certificate issued under UAE law, so that relief under a double tax treaty can be applied. If Partner is nevertheless required by law to withhold tax from a payment to OTA, Partner shall increase the payment so that OTA receives the full invoiced amount. OTA is responsible for registering for and paying indirect taxes on Direct Subscriptions where it is the supplier. Partner is responsible for all taxes on its resale of Service Tokens.",
+   "ru": "8.5 Каждая Сторона самостоятельно уплачивает свои налоги. OTA по запросу и не реже одного раза в год предоставляет Партнёру сертификат налогового резидентства, выданный по законодательству ОАЭ, для применения освобождения по соглашению об избежании двойного налогообложения. Если Партнёр всё же обязан по закону удержать налог с платежа OTA, он увеличивает платёж так, чтобы OTA получила полную сумму счёта. OTA отвечает за регистрацию и уплату косвенных налогов по Прямым подпискам, где она является поставщиком. Партнёр отвечает за все налоги по перепродаже Сервисных токенов."
+  },
+  {
+   "id": "MPA-s9",
+   "kind": "heading",
+   "en": "9. Prices and volumes",
+   "ru": "9. Цены и объёмы"
+  },
+  {
+   "id": "MPA-9.1",
+   "kind": "clause",
+   "en": "9.1 OTA may change the prices of Activation Keys and Service Tokens for future orders, and the OTA Retained Amount for future subscription periods, by no more than ten per cent (10%) in any twelve (12) months, on ninety (90) days' written notice, where justified by documented increases in Upstream or regulatory costs. Price changes never apply to Activation Keys and Service Tokens already paid, or to already paid subscription periods.",
+   "ru": "9.1 OTA вправе изменять цены Ключей активации и Сервисных токенов для будущих заказов, а также Сумму, удерживаемую OTA, для будущих периодов подписки не более чем на десять процентов (10%) за любые двенадцать (12) месяцев с письменным уведомлением за девяносто (90) дней, если это обосновано документально подтверждённым ростом затрат Поставщиков или регуляторных затрат. Изменение цен никогда не распространяется на уже оплаченные Ключи активации и Сервисные токены, а также на уже оплаченные периоды подписки."
+  },
+  {
+   "id": "MPA-9.2",
+   "kind": "clause",
+   "en": "9.2 The annual volume target in an Order Form is a performance target only. If it is not met, OTA's only remedy is the right not to renew that Order Form; no shortfall payment is due.",
+   "ru": "9.2 Годовой целевой объём в Заказе является исключительно целевым показателем. При его недостижении единственное право OTA – не продлевать этот Заказ; доплата не взимается."
+  },
+  {
+   "id": "MPA-s10",
+   "kind": "heading",
+   "en": "10. Service continuity and protection of paid End Users",
+   "ru": "10. Непрерывность сервиса и защита оплативших пользователей"
+  },
+  {
+   "id": "MPA-10.1",
+   "kind": "clause",
+   "en": "10.1 OTA shall continue to provide CONNECT to every End User with a redeemed Service Token or a paid subscription period until its expiry, irrespective of termination or non-renewal of the Agreement or any unpaid Partner invoice for other items.",
+   "ru": "10.1 OTA продолжает оказывать CONNECT каждому Конечному пользователю с погашенным Сервисным токеном или оплаченным периодом подписки до его окончания, независимо от прекращения или непродления Договора и неоплаченных счетов Партнёра по иным позициям."
+  },
+  {
+   "id": "MPA-10.2",
+   "kind": "clause",
+   "en": "10.2 OTA maintains arrangements with its Upstream Providers allowing active SIMs and profiles to be migrated to an alternative provider, and shall use them, together with eSIM profile switching where technically possible, to preserve paid service if an Upstream Provider stops providing service.",
+   "ru": "10.2 OTA поддерживает договорённости с Поставщиками, позволяющие перенести активные SIM и профили к альтернативному поставщику, и использует их, а также переключение eSIM-профилей при наличии технической возможности, для сохранения оплаченного сервиса, если Поставщик прекращает обслуживание."
+  },
+  {
+   "id": "MPA-10.3",
+   "kind": "clause",
+   "en": "10.3 If continued service becomes impossible despite clause 10.2 (including because of law, sanctions, permanent network shutdown or force majeure), OTA shall notify Partner and the affected End Users and shall refund the pro-rata price of the unused full months of each affected Service Plan: (a) for Service Tokens – to Partner, calculated on the wholesale Token price, and Partner settles with its own customers; (b) for Direct Subscriptions – to the End User, calculated on the price actually received by OTA. Each refund shall not exceed the amount actually received by OTA for the Service Plan concerned. Such refunds are the sole and exclusive remedy of Partner and End Users for the discontinuation of service under this clause.",
+   "ru": "10.3 Если продолжение сервиса становится невозможным, несмотря на п. 10.2 (в том числе в силу закона, санкций, окончательного отключения сети или форс-мажора), OTA уведомляет Партнёра и затронутых Конечных пользователей и возвращает стоимость неиспользованных полных месяцев каждого затронутого Тарифного плана пропорционально: (a) по Сервисным токенам – Партнёру, исходя из оптовой цены токена, а Партнёр рассчитывается со своими покупателями; (b) по Прямым подпискам – Конечному пользователю, исходя из цены, фактически полученной OTA. Каждый возврат не может превышать сумму, фактически полученную OTA за соответствующий Тарифный план. Такие возвраты являются единственным и исключительным средством защиты Партнёра и Конечных пользователей в связи с прекращением сервиса по настоящему пункту."
+  },
+  {
+   "id": "MPA-10.4",
+   "kind": "clause",
+   "en": "10.4 OTA may suspend individual SIMs or accounts only in case of fraud, misuse, prohibited use, abnormal signalling, security threats, a legal or regulatory order, an unpaid Direct Subscription, or use of a device in an Excluded Territory or beyond the limits set in clause 1.14, and in each case proportionately and with notice where lawful and practicable.",
+   "ru": "10.4 OTA вправе приостанавливать отдельные SIM или учётные записи только при мошенничестве, злоупотреблении, запрещённом использовании, аномальной сигнализации, угрозах безопасности, требованиях закона или регулятора, неоплате Прямой подписки либо использовании устройства на Исключённой территории или сверх пределов, установленных п. 1.14, – во всех случаях соразмерно и с уведомлением, где это законно и практически возможно."
+  },
+  {
+   "id": "MPA-s11",
+   "kind": "heading",
+   "en": "11. Data protection",
+   "ru": "11. Защита данных"
+  },
+  {
+   "id": "MPA-11.1",
+   "kind": "clause",
+   "en": "11.1 OTA and Partner act as independent controllers: OTA for providing CONNECT, subscriptions, billing, security and legally required records; Partner for device sales, warranty, its own customer relationship and marketing. OTA acts as Partner's processor only for processing carried out on Partner's instructions. Details are set out in Document 06.",
+   "ru": "11.1 OTA и Партнёр действуют как независимые контролёры: OTA – для предоставления CONNECT, подписок, биллинга, безопасности и ведения обязательных по закону записей; Партнёр – для продажи устройств, гарантии, собственных отношений с клиентами и маркетинга. OTA действует как обработчик Партнёра только при обработке по инструкциям Партнёра. Подробности – в Документе 06."
+  },
+  {
+   "id": "MPA-11.2",
+   "kind": "clause",
+   "en": "11.2 OTA makes available to Partner, through the cabinet, the End User data needed for device support, renewals and Partner's own marketing, to the extent the End User has been informed and, where required, has consented.",
+   "ru": "11.2 OTA предоставляет Партнёру через кабинет данные Конечных пользователей, необходимые для поддержки устройств, продлений и собственного маркетинга Партнёра, в той мере, в какой Конечный пользователь проинформирован и, где требуется, дал согласие."
+  },
+  {
+   "id": "MPA-11.3",
+   "kind": "clause",
+   "en": "11.3 Where the law of an Approved Country requires personal data of its residents to be stored in that country, OTA stores the relevant End User data in that country. At the date of this Agreement such requirements exist, among others, in the Republic of Kazakhstan, the Republic of Uzbekistan, the Republic of Azerbaijan and the Socialist Republic of Vietnam (in cases defined by its law). OTA applies such requirements for every Approved Country without amendment of this Agreement.",
+   "ru": "11.3 Если законодательство Одобренной страны требует хранить персональные данные её жителей на её территории, OTA хранит соответствующие данные Конечных пользователей в этой стране. На дату настоящего Соглашения такие требования действуют, в частности, в Республике Казахстан, Республике Узбекистан, Азербайджанской Республике и Социалистической Республике Вьетнам (в случаях, определённых её законодательством). OTA выполняет такие требования для каждой Одобренной страны без изменения настоящего Соглашения."
+  },
+  {
+   "id": "MPA-s12",
+   "kind": "heading",
+   "en": "12. Compliance",
+   "ru": "12. Комплаенс"
+  },
+  {
+   "id": "MPA-12.1",
+   "kind": "clause",
+   "en": "12.1 Each Party represents that neither it nor its owners, directors or (to its knowledge) dealers are sanctioned persons, and shall comply with UN, EU, UK, US and UAE sanctions and export control laws. Partner shall not knowingly allow CONNECT to be used by sanctioned persons or in Excluded Territories and shall notify OTA immediately of any suspected breach.",
+   "ru": "12.1 Каждая Сторона заверяет, что ни она, ни её владельцы, директора и (насколько ей известно) дилеры не являются лицами под санкциями, и обязуется соблюдать санкционное и экспортное законодательство ООН, ЕС, Великобритании, США и ОАЭ. Партнёр заведомо не допускает использование CONNECT лицами под санкциями или на Исключённых территориях и незамедлительно уведомляет OTA о подозрении на нарушение."
+  },
+  {
+   "id": "MPA-12.2",
+   "kind": "clause",
+   "en": "12.2 Each Party shall comply with applicable anti-bribery and anti-money laundering laws and shall provide reasonable KYC information on request.",
+   "ru": "12.2 Каждая Сторона соблюдает применимое антикоррупционное законодательство и законодательство о противодействии отмыванию денег и предоставляет по запросу разумную KYC-информацию."
+  },
+  {
+   "id": "MPA-s13",
+   "kind": "heading",
+   "en": "13. Warranties, indemnities and liability",
+   "ru": "13. Заверения, возмещение и ответственность"
+  },
+  {
+   "id": "MPA-13.1",
+   "kind": "clause",
+   "en": "13.1 Each Party warrants that it has full authority to enter into the Agreement. Except as expressly stated in the Agreement, CONNECT is provided without warranty of uninterrupted operation, availability in specific locations, speed or suitability for devices that are not Approved Devices.",
+   "ru": "13.1 Каждая Сторона заверяет, что обладает всеми полномочиями на заключение Договора. Кроме прямо указанного в Договоре, CONNECT предоставляется без гарантий бесперебойной работы, доступности в определённых местах, скорости или пригодности для устройств, не являющихся Одобренными."
+  },
+  {
+   "id": "MPA-13.2",
+   "kind": "clause",
+   "en": "13.2 Partner shall indemnify OTA against third-party claims, fines and Upstream Provider charges arising from: defects of devices; Partner's marketing statements; its resale of Tokens; unauthorised use or diversion of SIMs; a breach of clauses 4, 5 or 12; or acts of its dealers and installers.",
+   "ru": "13.2 Партнёр возмещает OTA убытки по претензиям третьих лиц, штрафам и требованиям Поставщиков, возникшим из: дефектов устройств; рекламных заявлений Партнёра; перепродажи токенов; несанкционированного использования или перенаправления SIM; нарушения пунктов 4, 5 или 12; действий его дилеров и монтажников."
+  },
+  {
+   "id": "MPA-13.3",
+   "kind": "clause",
+   "en": "13.3 Neither Party is liable for indirect or consequential loss, loss of profit or loss of business. OTA's total liability under each Order Form in any twelve (12) months is limited to the fees paid by Partner to OTA under that Order Form in the preceding twelve (12) months.",
+   "ru": "13.3 Ни одна из Сторон не несёт ответственности за косвенные убытки, упущенную выгоду или потерю бизнеса. Совокупная ответственность OTA по каждому Заказу за любые двенадцать (12) месяцев ограничена суммой платежей Партнёра в пользу OTA по этому Заказу за предшествующие двенадцать (12) месяцев."
+  },
+  {
+   "id": "MPA-13.4",
+   "kind": "clause",
+   "en": "13.4 Clauses 13.3 and 13.5 do not limit liability for fraud, wilful misconduct, death or personal injury caused by negligence, Partner's payment obligations, the indemnities in clause 13.2, or any liability that cannot be limited by law.",
+   "ru": "13.4 Пункты 13.3 и 13.5 не ограничивают ответственность за мошенничество, умышленные действия, причинение смерти или вреда здоровью по неосторожности, платёжные обязательства Партнёра, возмещение по п. 13.2 и иную ответственность, которая не может быть ограничена по закону."
+  },
+  {
+   "id": "MPA-13.5",
+   "kind": "clause",
+   "en": "13.5 Each Party's total liability for breaches of data protection law and of Document 06, including fines and compensation recovered from the other Party, is limited to the greater of twenty-five thousand US dollars (USD 25,000) and the fees paid by Partner to OTA under the Agreement in the twelve (12) months preceding the claim. This limit does not apply to wilful misconduct or fraud.",
+   "ru": "13.5 Совокупная ответственность каждой Стороны за нарушение законодательства о защите данных и Документа 06, включая штрафы и компенсации, взыскиваемые с другой Стороны, ограничена бо́льшей из сумм: двадцать пять тысяч долларов США (USD 25 000) или сумма платежей Партнёра в пользу OTA по Договору за двенадцать (12) месяцев, предшествующих требованию. Ограничение не применяется к умышленным действиям и мошенничеству."
+  },
+  {
+   "id": "MPA-s14",
+   "kind": "heading",
+   "en": "14. Term and termination",
+   "ru": "14. Срок и прекращение"
+  },
+  {
+   "id": "MPA-14.1",
+   "kind": "clause",
+   "en": "14.1 This Agreement enters into force on signature, has an initial term of twelve (12) months and renews automatically for successive twelve-month periods unless either Party gives sixty (60) days' written notice of non-renewal.",
+   "ru": "14.1 Настоящее Соглашение вступает в силу с момента подписания, действует двенадцать (12) месяцев и автоматически продлевается на последующие двенадцатимесячные периоды, если ни одна из Сторон не уведомит другую о непродлении письменно за шестьдесят (60) дней."
+  },
+  {
+   "id": "MPA-14.2",
+   "kind": "clause",
+   "en": "14.2 Either Party may terminate the Agreement or an Order Form: (a) for a material breach not remedied within thirty (30) days of written notice; or (b) immediately, if the other Party becomes insolvent, becomes a sanctioned person or commits a serious breach of law. OTA may terminate an Order Form if CONNECT becomes unlawful or permanently unavailable in that country. OTA may also terminate the Agreement on thirty (30) days' notice if control of Partner passes to a person that provides IoT connectivity or device platform services competing with CONNECT; Partner shall notify OTA of any change of control within ten (10) days. Clause 10 continues to apply.",
+   "ru": "14.2 Каждая Сторона вправе расторгнуть Договор или Заказ: (a) при существенном нарушении, не устранённом в течение тридцати (30) дней после письменного уведомления; или (b) немедленно, если другая Сторона стала несостоятельной, попала под санкции или совершила серьёзное нарушение закона. OTA вправе расторгнуть Заказ, если CONNECT становится незаконным или окончательно недоступным в соответствующей стране. OTA также вправе расторгнуть Договор с уведомлением за тридцать (30) дней, если контроль над Партнёром переходит к лицу, оказывающему услуги IoT-связи или платформ для устройств, конкурирующие с CONNECT; Партнёр уведомляет OTA о смене контроля в течение десяти (10) дней. Пункт 10 продолжает применяться."
+  },
+  {
+   "id": "MPA-14.3",
+   "kind": "clause",
+   "en": "14.3 On termination: accrued payment obligations survive; clause 10 continues to apply to End Users with paid Service Plans; issued but unredeemed Service Tokens may be resold and redeemed until their expiry date, and unused Activation Keys may be used under clause 7.1; Partner stops marketing new subscriptions and, at OTA's choice, returns or securely destroys uninstalled SIMs; and OTA may use Partner's brand under Document 05A or 05B only to serve existing End Users.",
+   "ru": "14.3 При прекращении: начисленные платёжные обязательства сохраняются; п. 10 продолжает применяться к Конечным пользователям с оплаченными Тарифными планами; выпущенные, но не погашенные Сервисные токены могут быть перепроданы и погашены до истечения их срока, а неиспользованные Ключи активации могут быть использованы согласно п. 7.1; Партнёр прекращает продвижение новых подписок и по выбору OTA возвращает или надёжно уничтожает неустановленные SIM; OTA вправе использовать бренд Партнёра по Документу 05A или 05B только для обслуживания существующих Конечных пользователей."
+  },
+  {
+   "id": "MPA-s15",
+   "kind": "heading",
+   "en": "15. Confidentiality",
+   "ru": "15. Конфиденциальность"
+  },
+  {
+   "id": "MPA-15.1",
+   "kind": "clause",
+   "en": "15.1 Each Party shall keep confidential the other Party's non-public commercial, technical, pricing and customer information during the Agreement and for five (5) years after it ends (trade secrets – for as long as they are protected by law). Disclosure is permitted to professional advisers, auditors, financiers, authorised subcontractors and to authorities where required by law.",
+   "ru": "15.1 Каждая Сторона сохраняет конфиденциальность непубличной коммерческой, технической, ценовой и клиентской информации другой Стороны в течение срока Договора и пяти (5) лет после его окончания (коммерческая тайна – пока она охраняется законом). Раскрытие допускается профессиональным консультантам, аудиторам, финансирующим организациям, уполномоченным подрядчикам и органам власти по требованию закона."
+  },
+  {
+   "id": "MPA-15.2",
+   "kind": "clause",
+   "en": "15.2 Partner may present CONNECT as its own branded service. Partner is not required to disclose to its customers or to the market the role of OTA or the identity of OTA's Upstream Providers beyond what is stated in OTA's public documents (Documents 07 and 08) or required by law. The identity of OTA's Upstream Providers is OTA's confidential information.",
+   "ru": "15.2 Партнёр вправе представлять CONNECT как собственный брендированный сервис. Партнёр не обязан раскрывать своим покупателям или рынку роль OTA или наименования Поставщиков OTA сверх того, что указано в публичных документах OTA (Документы 07 и 08) или требуется по закону. Сведения о Поставщиках OTA являются конфиденциальной информацией OTA."
+  },
+  {
+   "id": "MPA-15.3",
+   "kind": "clause",
+   "en": "15.3 The texts of the Agreement documents and templates are works protected by copyright, © {{OTA_NAME}}. Partner may copy and use them only for performing this Agreement and may disclose them only to its professional advisers, auditors and authorities; it shall not use them as templates for other agreements. This does not restrict the publication of Documents 07 and 08 on the Partner Domain or Partner's use of its own information.",
+   "ru": "15.3 Тексты документов Договора и шаблонов являются объектами авторского права, © {{OTA_NAME}}. Партнёр вправе копировать и использовать их только для исполнения настоящего Договора и раскрывать только своим профессиональным консультантам, аудиторам и органам власти; Партнёр не использует их как шаблоны для других договоров. Это не ограничивает размещение Документов 07 и 08 на Домене Партнёра и использование Партнёром собственной информации."
+  },
+  {
+   "id": "MPA-s16",
+   "kind": "heading",
+   "en": "16. General",
+   "ru": "16. Общие положения"
+  },
+  {
+   "id": "MPA-16.1",
+   "kind": "clause",
+   "en": "16.1 Neither Party may assign this Agreement without the prior written consent of the other, which shall not be unreasonably withheld, except to a successor in a genuine reorganisation that assumes all obligations.",
+   "ru": "16.1 Ни одна из Сторон не вправе уступить права по Договору без предварительного письменного согласия другой Стороны, в котором не может быть необоснованно отказано, кроме передачи правопреемнику при добросовестной реорганизации с принятием всех обязательств."
+  },
+  {
+   "id": "MPA-16.2",
+   "kind": "clause",
+   "en": "16.2 Force majeure (including war, sanctions, acts of authorities, network shutdowns, cyber-attacks and natural disasters) suspends the affected obligations, other than payment obligations, for its duration. If it lasts more than ninety (90) days, either Party may terminate the affected Order Form, without prejudice to clause 10.3.",
+   "ru": "16.2 Форс-мажор (включая войну, санкции, действия властей, отключение сетей, кибератаки и стихийные бедствия) приостанавливает затронутые обязательства, кроме платёжных, на время его действия. Если он длится более девяноста (90) дней, каждая Сторона вправе расторгнуть затронутый Заказ без ущерба для п. 10.3."
+  },
+  {
+   "id": "MPA-16.3",
+   "kind": "clause",
+   "en": "16.3 Notices are sent by email to the addresses stated in the Order Form; notices of breach or termination are also sent by courier to the Party's address. Amendments are valid only in writing and signed by both Parties, save as provided in clause 16.5. Electronic signatures and signature in counterparts are valid.",
+   "ru": "16.3 Уведомления направляются по электронной почте на адреса, указанные в Заказе; уведомления о нарушении или прекращении дополнительно направляются курьером по адресу Стороны. Изменения действительны только в письменной форме и при подписании обеими Сторонами, кроме случаев, предусмотренных п. 16.5. Электронные подписи и подписание отдельных экземпляров допускаются."
+  },
+  {
+   "id": "MPA-16.4",
+   "kind": "clause",
+   "en": "16.4 If any provision is invalid, the remainder of the Agreement remains in force. This Agreement replaces all prior proposals and presentations on its subject; presentations and business calculations are not contractual commitments.",
+   "ru": "16.4 Недействительность какого-либо положения не влияет на остальную часть Договора. Настоящее Соглашение заменяет все предыдущие предложения и презентации по его предмету; презентации и бизнес-расчёты не являются договорными обязательствами."
+  },
+  {
+   "id": "MPA-16.5",
+   "kind": "clause",
+   "en": "16.5 Document updates are issued in the portal and each new version states its number, the version it supersedes and its effective date:\n(a) Order Forms. A change of prices, of the OTA Retained Amount or of other commercial terms of a country is made by a new version of that country's Order Form. A price increase under clause 9.1 takes effect at the end of the notice period; until Partner signs the new version, OTA may decline new orders of Activation Keys and Service Tokens for that country only, and Partner may instead terminate that Order Form on notice. A price decrease takes effect on issue.\n(b) Updates required by law, a regulator, payment card scheme rules or an Upstream Provider take effect thirty (30) days after issue, or earlier if the law so requires; other changes that reduce Partner's rights or increase its obligations take effect only when signed by both Parties.\n(c) Other updates (clarifications, corrections of translation, contact or bank details, formatting, and changes that do not reduce Partner's rights or increase its obligations) take effect thirty (30) days after issue; Partner acknowledges them in the portal, and the absence of acknowledgment does not prevent their effect or block any order.\n(d) Documents 07 and 08 are updated by OTA under their own terms and published on the Partner Domain.\n(e) No update applies to Activation Keys, Service Tokens or subscription periods already paid.",
+   "ru": "16.5 Обновления документов выпускаются на портале; в каждой новой версии указываются её номер, заменяемая версия и дата вступления в силу:\n(a) Заказы. Изменение цен, Суммы, удерживаемой OTA, или иных коммерческих условий по стране оформляется новой версией Заказа этой страны. Повышение цен по п. 9.1 вступает в силу по окончании срока уведомления; пока Партнёр не подпишет новую версию, OTA вправе не принимать новые заказы Ключей активации и Сервисных токенов только по этой стране, а Партнёр вправе вместо этого расторгнуть этот Заказ с уведомлением. Снижение цен вступает в силу с момента выпуска.\n(b) Обновления, требуемые законом, регулятором, правилами платёжных систем или Поставщиком, вступают в силу через тридцать (30) дней после выпуска либо раньше, если этого требует закон; иные изменения, уменьшающие права Партнёра или увеличивающие его обязанности, вступают в силу только после подписания обеими Сторонами.\n(c) Прочие обновления (уточнения, исправления перевода, контактных или банковских реквизитов, оформления, а также изменения, не уменьшающие права Партнёра и не увеличивающие его обязанности) вступают в силу через тридцать (30) дней после выпуска; Партнёр подтверждает их на портале, а отсутствие подтверждения не препятствует их вступлению в силу и не блокирует заказы.\n(d) Документы 07 и 08 обновляются OTA в порядке, предусмотренном в них самих, и публикуются на Домене Партнёра.\n(e) Никакое обновление не распространяется на уже оплаченные Ключи активации, Сервисные токены и периоды подписки."
+  },
+  {
+   "id": "MPA-s17",
+   "kind": "heading",
+   "en": "17. Governing law and dispute resolution",
+   "ru": "17. Применимое право и разрешение споров"
+  },
+  {
+   "id": "MPA-17.1",
+   "kind": "clause",
+   "en": "17.1 This Agreement, every Order Form and all other documents listed in clause 2.1, and any non-contractual obligations arising from or in connection with them, are governed by the laws of England and Wales.",
+   "ru": "17.1 Настоящее Соглашение, каждый Заказ и все иные документы, указанные в п. 2.1, а также любые внедоговорные обязательства, возникающие из них или в связи с ними, регулируются правом Англии и Уэльса."
+  },
+  {
+   "id": "MPA-17.2",
+   "kind": "clause",
+   "en": "17.2 The Parties shall first try to settle any dispute by good-faith negotiations between their senior managers within thirty (30) days of a written request by either Party.",
+   "ru": "17.2 Стороны сначала пытаются урегулировать любой спор путём добросовестных переговоров между руководителями в течение тридцати (30) дней с даты письменного обращения любой из Сторон."
+  },
+  {
+   "id": "MPA-17.3",
+   "kind": "clause",
+   "en": "17.3 Any dispute not settled under clause 17.2, including any question regarding the existence, validity or termination of the Agreement, shall be finally resolved under the Rules of Arbitration of the International Chamber of Commerce (ICC) by one arbitrator appointed in accordance with those Rules. The seat of arbitration is London, United Kingdom. The language of arbitration is English. Hearings may be held by videoconference. The ICC Expedited Procedure Provisions apply whenever their conditions are met.",
+   "ru": "17.3 Любой спор, не урегулированный согласно п. 17.2, включая вопросы о существовании, действительности или прекращении Договора, окончательно разрешается в соответствии с Арбитражным регламентом Международной торговой палаты (ICC) одним арбитром, назначенным согласно этому Регламенту. Место арбитража – Лондон, Великобритания. Язык арбитража – английский. Слушания могут проводиться по видеосвязи. Положения ICC об ускоренной процедуре применяются во всех случаях, когда выполнены условия их применения."
+  },
+  {
+   "id": "MPA-17.4",
+   "kind": "clause",
+   "en": "17.4 Nothing in this clause prevents a Party from seeking urgent interim relief from a competent court or from applying for recognition and enforcement of an arbitral award in any country. End Users are not bound by this clause.",
+   "ru": "17.4 Ничто в настоящем разделе не препятствует Стороне обратиться в компетентный суд за срочными обеспечительными мерами или за признанием и исполнением арбитражного решения в любой стране. Конечные пользователи не связаны настоящим разделом."
+  },
+  {
+   "id": "MPA-h3",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "MPA-sig1",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

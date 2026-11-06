@@ -1,0 +1,375 @@
+{
+ "type": "TRT",
+ "docNo": "03",
+ "title": {
+  "en": "Service Token Reseller Terms",
+  "ru": "Условия перепродажи сервисных токенов"
+ },
+ "ver": "T-TRT-v3",
+ "effective": "2026-11-06",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "TRT-title",
+   "kind": "heading",
+   "en": "SERVICE TOKEN RESELLER TERMS",
+   "ru": "УСЛОВИЯ ПЕРЕПРОДАЖИ СЕРВИСНЫХ ТОКЕНОВ"
+  },
+  {
+   "id": "TRT-ref",
+   "kind": "para",
+   "en": "Document 03 of 14 · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 03 из 14 · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "TRT-p1",
+   "kind": "para",
+   "en": "These Terms form part of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\") and are signed together with it. Capitalised terms have the meanings given in the Master Agreement.",
+   "ru": "Настоящие Условия являются частью Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр») и подписываются вместе с ним. Термины с заглавной буквы имеют значения, указанные в Рамочном соглашении."
+  },
+  {
+   "id": "TRT-s1",
+   "kind": "heading",
+   "en": "1. OEM model and resale",
+   "ru": "1. OEM-модель и перепродажа"
+  },
+  {
+   "id": "TRT-1.1",
+   "kind": "clause",
+   "en": "1.1 Partner offers CONNECT to the market under its own brand ({{P_PROGRAMME}}) as an integral OEM function of its Approved Devices, and may present it in marketing as its own branded service.",
+   "ru": "1.1 Партнёр предлагает CONNECT на рынке под собственным брендом ({{P_PROGRAMME}}) как неотъемлемую OEM-функцию своих Одобренных устройств и вправе представлять его в рекламе как собственный брендированный сервис."
+  },
+  {
+   "id": "TRT-1.2",
+   "kind": "clause",
+   "en": "1.2 Partner buys Service Tokens from OTA and resells them in its own name and for its own account. Partner acts as an independent reseller: it does not act as OTA's agent and does not make commitments on OTA's behalf.",
+   "ru": "1.2 Партнёр покупает Сервисные токены у OTA и перепродаёт их от своего имени и за свой счёт. Партнёр действует как независимый реселлер: он не является агентом OTA и не принимает обязательств от имени OTA."
+  },
+  {
+   "id": "TRT-1.3",
+   "kind": "clause",
+   "en": "1.3 A Service Token gives the right to activate a prepaid Service Plan for one Approved Device. The service itself is provided under OTA's End User Terms, which the End User accepts in the portal when redeeming the Token. Partner's sale covers the Token (price, payment, receipt and refunds relating to the purchase); the terms of use of the service are those of the End User Terms.",
+   "ru": "1.3 Сервисный токен даёт право активировать предоплаченный Тарифный план для одного Одобренного устройства. Сам сервис предоставляется по Условиям OTA для Конечных пользователей, которые Конечный пользователь принимает на портале при погашении токена. Продажа Партнёра охватывает токен (цену, оплату, чек и возвраты по покупке); условия пользования сервисом определяются Условиями для Конечных пользователей."
+  },
+  {
+   "id": "TRT-1.4",
+   "kind": "clause",
+   "en": "1.4 OTA's name appears only where the law or payment card rules require it: in the End User Terms and Privacy Notice, on the checkout and receipts for Direct Subscriptions, and in the card statement descriptor (which will read \"{{CARD_DESCRIPTOR}}\" or similar). OTA does not appear on Partner's packaging, devices or advertising.",
+   "ru": "1.4 Наименование OTA указывается только там, где этого требуют закон или правила платёжных систем: в Условиях для Конечных пользователей и Политике конфиденциальности, на платёжной странице и в квитанциях по Прямым подпискам, а также в назначении платежа в банковской выписке (в виде «{{CARD_DESCRIPTOR}}» или аналогичном). OTA не указывается на упаковке, устройствах и в рекламе Партнёра."
+  },
+  {
+   "id": "TRT-1.5",
+   "kind": "clause",
+   "en": "1.5 Partner may resell Tokens: (a) bundled with an Approved Device at the point of sale; (b) to its distributors, dealers and installers for onward resale on terms consistent with these Terms; (c) to owners of Approved Devices through its own retail points and service centres. Sales of Service Plans to End Users online are made through OTA's checkout on the Partner Domain (Direct Subscriptions), for which Partner receives commission under the Master Agreement; this avoids tax registration of Partner as a foreign seller of electronic services in other countries. Partner is responsible for its sales channel's compliance with these Terms.",
+   "ru": "1.5 Партнёр вправе перепродавать токены: (a) в комплекте с Одобренным устройством при продаже; (b) своим дистрибьюторам, дилерам и монтажникам для дальнейшей перепродажи на условиях, соответствующих настоящим Условиям; (c) владельцам Одобренных устройств через свои розничные точки и сервисные центры. Продажа Тарифных планов Конечным пользователям онлайн осуществляется через платёжную страницу OTA на Домене Партнёра (Прямые подписки), за что Партнёр получает вознаграждение по Рамочному соглашению; это избавляет Партнёра от налоговой регистрации в качестве иностранного продавца электронных услуг в других странах. Партнёр отвечает за соблюдение настоящих Условий своим каналом продаж."
+  },
+  {
+   "id": "TRT-s2",
+   "kind": "heading",
+   "en": "2. Prices, taxes and sales documents",
+   "ru": "2. Цены, налоги и документы о продаже"
+  },
+  {
+   "id": "TRT-2.1",
+   "kind": "clause",
+   "en": "2.1 Partner sets its resale prices freely. Any prices recommended by OTA are not binding.",
+   "ru": "2.1 Партнёр свободно устанавливает цены перепродажи. Рекомендованные OTA цены не являются обязательными."
+  },
+  {
+   "id": "TRT-2.2",
+   "kind": "clause",
+   "en": "2.2 Partner issues to its customers all receipts, invoices and fiscal documents required by local law and pays all VAT, sales and other taxes on its resale. OTA issues no documents to Partner's customers for Token sales.",
+   "ru": "2.2 Партнёр выдаёт своим покупателям все чеки, счета и фискальные документы, требуемые местным законодательством, и уплачивает НДС, налог с продаж и иные налоги по перепродаже. OTA не выдаёт покупателям Партнёра документы по продаже токенов."
+  },
+  {
+   "id": "TRT-s3",
+   "kind": "heading",
+   "en": "3. Information for customers",
+   "ru": "3. Информирование покупателей"
+  },
+  {
+   "id": "TRT-3.1",
+   "kind": "clause",
+   "en": "3.1 Partner shall make available to customers, on the packaging, insert or sales page, the following: (a) the plan term (12, 24, 36, 48 or 60 months) and that it starts on activation; (b) the activation deadline; (c) the address of the service terms: {{P_DOMAIN}}/terms.",
+   "ru": "3.1 Партнёр доводит до покупателей на упаковке, вкладыше или странице продажи: (a) срок тарифа (12, 24, 36, 48 или 60 месяцев) и то, что он начинается с даты активации; (b) крайний срок активации; (c) адрес условий сервиса: {{P_DOMAIN}}/terms."
+  },
+  {
+   "id": "TRT-3.2",
+   "kind": "clause",
+   "en": "3.2 Partner's descriptions of the service shall be accurate and consistent with the service terms. Recommended wording for packaging and terminology are set out in the Annex.",
+   "ru": "3.2 Описание сервиса Партнёром должно быть корректным и соответствовать условиям сервиса. Рекомендуемые формулировки для упаковки и терминология приведены в Приложении."
+  },
+  {
+   "id": "TRT-s4",
+   "kind": "heading",
+   "en": "4. Issue, validity and security of Tokens",
+   "ru": "4. Выпуск, срок действия и безопасность токенов"
+  },
+  {
+   "id": "TRT-4.1",
+   "kind": "clause",
+   "en": "4.1 OTA issues Tokens after full payment, as codes or QR codes in the cabinet. Each Token can be redeemed once. Unredeemed Tokens are valid for thirty-six (36) months from the date of issue and, during that period, may be exchanged in the cabinet for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded.",
+   "ru": "4.1 OTA выпускает токены после полной оплаты в виде кодов или QR-кодов в кабинете. Каждый токен может быть погашен один раз. Непогашенные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены в кабинете на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается."
+  },
+  {
+   "id": "TRT-4.2",
+   "kind": "clause",
+   "en": "4.2 Partner keeps Tokens secure and is responsible for Tokens lost, stolen or disclosed within its organisation or sales channel. On Partner's notice, OTA will block a compromised unredeemed Token and issue a free replacement.",
+   "ru": "4.2 Партнёр обеспечивает сохранность токенов и отвечает за токены, утраченные, похищенные или раскрытые в его организации или канале продаж. По уведомлению Партнёра OTA блокирует скомпрометированный непогашенный токен и бесплатно выпускает замену."
+  },
+  {
+   "id": "TRT-4.3",
+   "kind": "clause",
+   "en": "4.3 OTA does not refund Tokens purchased by Partner, except: (a) Tokens that cannot be redeemed for reasons attributable to OTA, which are replaced or refunded; (b) if OTA terminates the Order Form for reasons not attributable to Partner, or Partner terminates it for OTA's material breach, unredeemed and unexpired Tokens and unused Activation Keys are refunded at the purchase price; (c) as provided in clause 10.3 of the Master Agreement.",
+   "ru": "4.3 OTA не возвращает стоимость приобретённых Партнёром токенов, за исключением: (a) токенов, которые невозможно погасить по причинам на стороне OTA, – они заменяются или их стоимость возвращается; (b) случая расторжения Заказа OTA по причинам, не связанным с Партнёром, или Партнёром из-за существенного нарушения OTA, – стоимость непогашенных токенов с неистёкшим сроком и неиспользованных Ключей активации возвращается по цене покупки; (c) случаев, предусмотренных п. 10.3 Рамочного соглашения."
+  },
+  {
+   "id": "TRT-s5",
+   "kind": "heading",
+   "en": "5. Refunds and complaints of customers",
+   "ru": "5. Возвраты и претензии покупателей"
+  },
+  {
+   "id": "TRT-5.1",
+   "kind": "clause",
+   "en": "5.1 Refunds, withdrawals and complaints concerning the purchase of a Token (price, payment, wrong item, statutory right to withdraw from the purchase) are handled by Partner under local law at its own cost.",
+   "ru": "5.1 Возвраты, отказ от покупки и претензии по приобретению токена (цена, оплата, неверный товар, законное право отказаться от покупки) рассматриваются Партнёром по местному законодательству за его счёт."
+  },
+  {
+   "id": "TRT-5.2",
+   "kind": "clause",
+   "en": "5.2 Complaints concerning the operation of CONNECT after activation are handled by OTA's second-line support, with Partner providing first-line device support. If continued service becomes impossible under clause 10.3 of the Master Agreement, OTA refunds the unused part of the Token to Partner at the wholesale price, and Partner settles with its own customer.",
+   "ru": "5.2 Претензии по работе CONNECT после активации рассматривает вторая линия поддержки OTA; первую линию поддержки по устройству оказывает Партнёр. Если продолжение сервиса становится невозможным согласно п. 10.3 Рамочного соглашения, OTA возвращает Партнёру стоимость неиспользованной части токена по оптовой цене, а Партнёр рассчитывается со своим покупателем."
+  },
+  {
+   "id": "TRT-5.3",
+   "kind": "clause",
+   "en": "5.3 If a customer is entitled to a refund from Partner for an unredeemed Token, Partner may return that Token to OTA for cancellation, and its price is credited against Partner's next Token order.",
+   "ru": "5.3 Если покупатель имеет право на возврат средств от Партнёра за непогашенный токен, Партнёр вправе вернуть этот токен OTA для аннулирования, и его стоимость засчитывается в оплату следующего заказа токенов Партнёром."
+  },
+  {
+   "id": "TRT-s6",
+   "kind": "heading",
+   "en": "6. Territory and sanctions",
+   "ru": "6. Территория и санкции"
+  },
+  {
+   "id": "TRT-s6.p1",
+   "kind": "para",
+   "en": "Tokens may be resold only for Approved Devices used in the Approved Country of the relevant Order Form, and never to persons resident in Excluded Territories or Restricted Countries or to sanctioned persons.",
+   "ru": "Токены перепродаются только для Одобренных устройств, используемых в Одобренной стране соответствующего Заказа, и никогда – лицам, проживающим на Исключённых территориях или в Странах с ограничениями, или лицам под санкциями."
+  },
+  {
+   "id": "TRT-h1",
+   "kind": "heading",
+   "en": "Signatures",
+   "ru": "Подписи"
+  },
+  {
+   "id": "TRT-sig1",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     },
+     {
+      "en": "{{P_NAME}}",
+      "ru": "{{P_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     },
+     {
+      "en": "{{P_SIGNATORY}}",
+      "ru": "{{P_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{P_TITLE_EN}}",
+      "ru": "{{P_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  },
+  {
+   "id": "TRT-h2",
+   "kind": "annex",
+   "en": "Annex – Recommended packaging wording",
+   "ru": "Приложение – Рекомендуемые формулировки для упаковки"
+  },
+  {
+   "id": "TRT-p2",
+   "kind": "para",
+   "en": "\"{{P_PROGRAMME}} – [12/24/36/48/60] months. Activate by scanning the QR code before [date]. The plan starts on activation and works with the supported device in [country], where mobile networks are available. Notifications are informational and are not an alarm system. Service terms: {{P_DOMAIN}}/terms.\"",
+   "ru": "«{{P_PROGRAMME}} – [12/24/36/48/60] мес. Активируйте, отсканировав QR-код, до [дата]. Тариф начинается с даты активации и работает с поддерживаемым устройством в [страна] при наличии мобильной сети. Уведомления носят информационный характер и не являются сигнализацией. Условия сервиса: {{P_DOMAIN}}/terms.»"
+  },
+  {
+   "id": "TRT-h3",
+   "kind": "heading",
+   "en": "Terminology for marketing and packaging",
+   "ru": "Терминология для рекламы и упаковки"
+  },
+  {
+   "id": "TRT-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Use",
+      "ru": "Используйте",
+      "bi": true
+     },
+     {
+      "en": "Instead of",
+      "ru": "Вместо",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{P_PROGRAMME}} service; connected functions of the device",
+      "ru": "сервис {{P_PROGRAMME}}; подключённые функции устройства",
+      "bi": true
+     },
+     {
+      "en": "mobile tariff, data plan, mobile internet",
+      "ru": "мобильный тариф, пакет данных, мобильный интернет",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "built-in communication module",
+      "ru": "встроенный модуль связи",
+      "bi": true
+     },
+     {
+      "en": "SIM card offer, \"our SIM card\"",
+      "ru": "предложение SIM-карты, «наша SIM-карта»",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "plan for 12–60 months; activation code",
+      "ru": "тариф на 12–60 месяцев; код активации",
+      "bi": true
+     },
+     {
+      "en": "top-up, balance, minutes, MB",
+      "ru": "пополнение, баланс, минуты, МБ",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "works in [country] and during trips abroad",
+      "ru": "работает в [страна] и во время поездок за рубеж",
+      "bi": true
+     },
+     {
+      "en": "all networks, roaming, coverage, unlimited",
+      "ru": "все сети, роуминг, покрытие, безлимит",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "informational notifications about device events",
+      "ru": "информационные уведомления о событиях устройства",
+      "bi": true
+     },
+     {
+      "en": "alarm, security system, guaranteed instant alert",
+      "ru": "сигнализация, охранная система, гарантированное мгновенное оповещение",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "supported for the term of the plan",
+      "ru": "поддерживается в течение срока тарифа",
+      "bi": true
+     },
+     {
+      "en": "lifetime, never blocked",
+      "ru": "пожизненно, никогда не блокируется",
+      "bi": true
+     }
+    ]
+   ]
+  }
+ ]
+}

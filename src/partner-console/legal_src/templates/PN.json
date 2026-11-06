@@ -1,0 +1,145 @@
+{
+ "type": "PN",
+ "docNo": "08",
+ "title": {
+  "en": "Privacy Notice (public)",
+  "ru": "Политика конфиденциальности (публичный документ)"
+ },
+ "ver": "T-PN-v3",
+ "effective": "2026-11-06",
+ "cls": "C",
+ "blocks": [
+  {
+   "id": "PN-title",
+   "kind": "heading",
+   "en": "CONNECT PRIVACY NOTICE",
+   "ru": "ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ CONNECT"
+  },
+  {
+   "id": "PN-ref",
+   "kind": "para",
+   "en": "Document 08 of 14\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 08 из 14\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "PN-p1",
+   "kind": "para",
+   "en": "Public document published on {{P_DOMAIN}}/privacy. Version {{DOC_VER}}, last updated {{EFFECTIVE_DATE}}.",
+   "ru": "Публичный документ, размещается на {{P_DOMAIN}}/privacy. Версия {{DOC_VER}}, обновлено {{EFFECTIVE_DATE}}."
+  },
+  {
+   "id": "PN-s1",
+   "kind": "heading",
+   "en": "1. Who we are",
+   "ru": "1. Кто мы"
+  },
+  {
+   "id": "PN-1.1",
+   "kind": "clause",
+   "en": "1.1 The controller of your data in CONNECT is {{OTA_NAME}}, registration no. {{OTA_REGNO}}, {{OTA_ADDR_EN}} (\"OTA\", \"we\"). Contact for privacy questions: {{OTA_EMAIL_PRIVACY}}.",
+   "ru": "1.1 Контролёром ваших данных в CONNECT является {{OTA_NAME}}, рег. № {{OTA_REGNO}}, {{OTA_ADDR_L2}} («OTA», «мы»). Контакт по вопросам данных: {{OTA_EMAIL_PRIVACY}}."
+  },
+  {
+   "id": "PN-1.2",
+   "kind": "clause",
+   "en": "1.2 {{P_NAME}} (the \"Brand Partner\") is a separate controller for the sale of the device, warranty and its own marketing, and has its own privacy notice.",
+   "ru": "1.2 {{P_NAME}} («Бренд-партнёр») является отдельным контролёром в отношении продажи устройства, гарантии и собственного маркетинга и имеет свою политику конфиденциальности."
+  },
+  {
+   "id": "PN-s2",
+   "kind": "heading",
+   "en": "2. Data we process",
+   "ru": "2. Какие данные мы обрабатываем"
+  },
+  {
+   "id": "PN-s2.p1",
+   "kind": "para",
+   "en": "Account: name, email, phone number, language, login data, consents and settings.\nDevice and connection: device model, IMEI, ICCID/EID, activation status, connection and session times, data volumes, signal and diagnostic logs, device events (power-off, SIM removal, IMEI change).\nLocation: for our service we use only the approximate location of the device determined by the mobile network (cell-based location, LBS).\nContent of device data: we do not view or store the content of the data that your device sends to the Brand Partner's services.\nPayments: plan, amounts, currency, transaction references, payment status, refunds and chargebacks, and a token of your card (full card details are held by the payment provider).\nCommunications: support requests and notification history.",
+   "ru": "Учётная запись: имя, e-mail, номер телефона, язык, данные для входа, согласия и настройки.\nУстройство и связь: модель устройства, IMEI, ICCID/EID, статус активации, время подключений и сессий, объёмы данных, журналы сигнала и диагностики, события устройства (отключение питания, извлечение SIM, смена IMEI).\nМестоположение: для нашего сервиса мы используем только приблизительное местоположение устройства, определяемое мобильной сетью (по базовым станциям, LBS).\nСодержимое данных устройства: мы не просматриваем и не храним содержимое данных, которые ваше устройство передаёт сервисам Бренд-партнёра.\nПлатежи: тариф, суммы, валюта, идентификаторы операций, статус оплаты, возвраты и chargeback, а также токен вашей карты (полные данные карты хранит платёжный провайдер).\nКоммуникации: обращения в поддержку и история уведомлений."
+  },
+  {
+   "id": "PN-s3",
+   "kind": "heading",
+   "en": "3. Why we use your data",
+   "ru": "3. Для чего мы используем данные"
+  },
+  {
+   "id": "PN-s3.p1",
+   "kind": "para",
+   "en": "To provide CONNECT, activation, notifications and support – performance of the contract.\nPayments, invoicing, taxes and accounting – contract and legal obligations.\nSecurity, prevention of fraud and misuse, protection of networks – legitimate interests and legal obligations.\nImprovement of the service using aggregated or anonymised data – legitimate interests.\nSharing with the Brand Partner for device support and renewal reminders – contract and legitimate interests.\nMarketing by OTA or the Brand Partner – your consent where the law requires it; you can withdraw it at any time.\nWhere the law of your country requires consent to processing or to transfer abroad, we ask for it in the portal.",
+   "ru": "Предоставление CONNECT, активация, уведомления и поддержка – исполнение договора.\nПлатежи, счета, налоги и бухгалтерский учёт – договор и требования закона.\nБезопасность, предотвращение мошенничества и злоупотреблений, защита сетей – законные интересы и требования закона.\nУлучшение сервиса на основе агрегированных или обезличенных данных – законные интересы.\nПередача Бренд-партнёру для поддержки устройства и напоминаний о продлении – договор и законные интересы.\nМаркетинг OTA или Бренд-партнёра – ваше согласие, если его требует закон; вы можете отозвать его в любой момент.\nЕсли законодательство вашей страны требует согласия на обработку или передачу за рубеж, мы запрашиваем его на портале."
+  },
+  {
+   "id": "PN-s4",
+   "kind": "heading",
+   "en": "4. Who receives your data",
+   "ru": "4. Кто получает ваши данные"
+  },
+  {
+   "id": "PN-s4.p1",
+   "kind": "para",
+   "en": "Our hosting providers (Amazon Web Services and, where local law requires, local providers in your country), our connectivity provider, our notification provider (Twilio), our payment acquirer (Network International), the Brand Partner, our professional advisers, and authorities where the law requires. We do not sell personal data. Where the law requires, we will tell you the names of specific recipients on request.",
+   "ru": "Наши хостинг-провайдеры (Amazon Web Services и, если этого требует местный закон, местные провайдеры в вашей стране), наш поставщик связи, наш сервис уведомлений (Twilio), наш эквайер (Network International), Бренд-партнёр, наши профессиональные консультанты и органы власти, если этого требует закон. Мы не продаём персональные данные. Если этого требует закон, мы сообщим вам по запросу наименования конкретных получателей."
+  },
+  {
+   "id": "PN-s5",
+   "kind": "heading",
+   "en": "5. Where your data is stored",
+   "ru": "5. Где хранятся ваши данные"
+  },
+  {
+   "id": "PN-s5.p1",
+   "kind": "para",
+   "en": "Your data is stored in the United Arab Emirates. If the law of your country requires that your data be stored in your country, we store it there. Any transfer of data abroad is made on a basis permitted by the law of your country and with appropriate safeguards.",
+   "ru": "Ваши данные хранятся в Объединённых Арабских Эмиратах. Если законодательство вашей страны требует хранить ваши данные на её территории, мы храним их там. Любая передача данных за рубеж осуществляется на основании, допускаемом законодательством вашей страны, и с соответствующими гарантиями."
+  },
+  {
+   "id": "PN-s6",
+   "kind": "heading",
+   "en": "6. How long we keep data",
+   "ru": "6. Сроки хранения"
+  },
+  {
+   "id": "PN-s6.p1",
+   "kind": "para",
+   "en": "Account and device data: during the plan and for twenty-four (24) months after it ends (so you can renew), then deleted or anonymised.\nPayment and tax records: for the periods required by tax and accounting law.\nNetwork and security logs: twelve (12) months.\nMarketing data: until you withdraw consent.",
+   "ru": "Данные учётной записи и устройства: в течение действия тарифа и двадцати четырёх (24) месяцев после его окончания (для возможности продления), затем удаляются или обезличиваются.\nПлатёжные и налоговые записи: в сроки, установленные налоговым и бухгалтерским законодательством.\nСетевые журналы и журналы безопасности: двенадцать (12) месяцев.\nМаркетинговые данные: до отзыва согласия."
+  },
+  {
+   "id": "PN-s7",
+   "kind": "heading",
+   "en": "7. Your rights",
+   "ru": "7. Ваши права"
+  },
+  {
+   "id": "PN-s7.p1",
+   "kind": "para",
+   "en": "Depending on the law of your country, you may ask for access, correction, deletion, restriction, objection, data portability and withdrawal of consent, and you may complain to the data protection authority of your country. Write to us at the privacy contact above; we answer within the time required by law.",
+   "ru": "В зависимости от законодательства вашей страны вы вправе запросить доступ, исправление, удаление, ограничение обработки, возразить против обработки, получить данные в переносимом формате, отозвать согласие, а также подать жалобу в орган по защите данных своей страны. Пишите нам по указанному выше контакту; мы отвечаем в сроки, установленные законом."
+  },
+  {
+   "id": "PN-s8",
+   "kind": "heading",
+   "en": "8. Automated notifications",
+   "ru": "8. Автоматические уведомления"
+  },
+  {
+   "id": "PN-s8.p1",
+   "kind": "para",
+   "en": "CONNECT automatically detects device events and missed payments to send you notifications. We do not take decisions with legal effect about you solely by automated means. The service is intended for adults who are entitled to manage the device.",
+   "ru": "CONNECT автоматически определяет события устройства и пропущенные платежи, чтобы направлять вам уведомления. Мы не принимаем решений, порождающих для вас юридические последствия, исключительно автоматически. Сервис предназначен для совершеннолетних лиц, которые вправе управлять устройством."
+  },
+  {
+   "id": "PN-s9",
+   "kind": "heading",
+   "en": "9. Changes",
+   "ru": "9. Изменения"
+  },
+  {
+   "id": "PN-s9.p1",
+   "kind": "para",
+   "en": "We will inform you of material changes through the portal or by email before they take effect.",
+   "ru": "О существенных изменениях мы сообщим через портал или по e-mail до их вступления в силу."
+  }
+ ]
+}
