@@ -101,7 +101,7 @@ const PKG_DIGIT={'light-24':'1','light-36':'2','light-60':'3','std-24':'4','std-
 function pkgKey(plan,term){return plan+'-'+term;}
 function pkgSplit(k){const [p,tm]=String(k).split('-');return{plan:p,term:+tm};}
 function pkgLabel(plan,term){return PLAN_NAME[plan]+' · '+termLabel(term);}
-function termLabel(m){if(m===1)return t('c.monthly');const y=m/12;if(y%1)return m+' '+t('c.monthsShort');return fmtNum(y)+' '+plural(y,{one:t('c.year1'),few:t('c.year2'),many:t('c.year5'),other:t('c.year2')});}
+function termLabel(m){if(m===1)return t('c.monthly');const y=m/12;if(y%1)return m+' '+t('c.monthsShort');return fmtNum(y)+' '+plural(y,{one:t('c.year1'),few:t('c.year2'),many:t('c.year5'),other:t('c.year5')});}
 function ctyName(cc){if(!cc)return '—';try{return new Intl.DisplayNames([LOCALES[S.lang]],{type:'region'}).of(cc)||cc;}catch(e){return cc;}}
 function ctyNameEn(cc){try{return new Intl.DisplayNames(['en'],{type:'region'}).of(cc)||cc;}catch(e){return cc;}}
 const r2=x=>Math.round(x*100)/100;

@@ -34,7 +34,7 @@ Sie, vous, Вы, Siz, etc.). Keep button labels short.
 7. Plurals: keys ending in `.one / .few / .many / .other` are selected with `Intl.PluralRules` (CLDR) for your language.
    Fill all four. If your language has only one/other, set `.few` and `.many` = the `.other` form. For languages with
    'two'/'zero' categories (sl, ga, mt, lv), those fall back to `.other`, so make `.other` the general plural.
-   `c.year1` is used for "one", `c.year2` for "few" and "other", `c.year5` for "many" (number + word, e.g. "2 years").
+   `c.year1` is used for "one", `c.year2` for "few", `c.year5` for "many" and "other" (number + word; the number is always a whole number, e.g. "2 years", "5 years").
 8. Do not translate placeholder-like demo text in square brackets literally if it is a note to the reader — translate the
    meaning, keep the brackets. Keep typographic quotes natural for the language („…“, «…», “…”).
 9. Keep the same capitalisation style as the source (sentence case for labels; CAPS only where the source uses CAPS).
