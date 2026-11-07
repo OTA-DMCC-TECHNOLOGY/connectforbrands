@@ -7057,10 +7057,23 @@ function own_sync(){if(!S||!S.authed||!S.org||!Array.isArray(S.sims))return null
  const pc=own_partnerContacts();const old=b.partnerContacts.filter(x=>x.partner===P);
  if(JSON.stringify(pc)!==JSON.stringify(old)){b.partnerContacts=b.partnerContacts.filter(x=>x.partner!==P).concat(pc);dirty=true;}
  if(own_settings(b))dirty=true;
+ if(own_reconcile(b))dirty=true;
  if(own_process(b))dirty=true;
  const st=own_st();if(st.ret.lastDay!==own_day(now())&&st.seededAt){own_runRetention(b,{auto:true});dirty=true;}
  if(!st.seededAt){st.seededAt=iso(now());st.ret.lastDay=own_day(now());}
  if(dirty)own_bWrite(b);else{own__b=b;own_mirror(b);}return b;}
+// records written by the portal before the shared clock / console seed: device_id = the SIM's IMEI (one source: bridge.sims, as the
+// portal's devIdOf), and no timestamp later than the shared demo now()
+function own_reconcile(b){const P=own_pc();const ts=iso(now());let ch=false;const fut=(o,k)=>{if(o[k]&&o[k]>ts){o[k]=ts;ch=true;}};
+ const devOk=(iccid,d)=>{const sm=b.sims[iccid];const im=sm&&sm.imei;return im&&d!==im?im:null;};   // portal: devIdOf = sims[iccid].imei || 'd-'+iccid
+ b.bindings.forEach(bd=>{if(bd.partner_id!==P)return;fut(bd,'bound_at');fut(bd,'unbound_at');if(bd.status!=='ended'){const im=devOk(bd.iccid,bd.device_id);if(im){bd.device_id=im;ch=true;}}});
+ const mine=new Set(b.bindings.filter(x=>x.partner_id===P).map(x=>x.id));
+ b.transfers.forEach(tr=>{if(!mine.has(tr.binding_id))return;['initiated_at','accepted_at','effective_at','cancelled_at'].forEach(k=>fut(tr,k));const bd=b.bindings.find(x=>x.id===tr.binding_id);
+  if(bd&&tr.device_id!=null&&!['effective','cancelled','expired'].includes(tr.status)&&tr.device_id!==bd.device_id){tr.device_id=bd.device_id;ch=true;}});
+ b.events.forEach(e=>{if((e.partner_id||e.partner)===P||(e.iccid&&b.sims[e.iccid]&&b.sims[e.iccid].partner===P)){fut(e,'at');if(e.iccid&&e.device_id!=null){const im=devOk(e.iccid,e.device_id);if(im){e.device_id=im;ch=true;}}}});
+ Object.keys(b.codes).forEach(k=>{const c=b.codes[k];if(c.iccid&&c.status==='redeemed'&&b.sims[c.iccid]&&b.sims[c.iccid].partner===P){fut(c,'redeemed_at');const im=devOk(c.iccid,c.device_id);if(im){c.device_id=im;ch=true;}}});
+ b.history.forEach(h=>{if(h.partner_id!==P)return;['from','to','hidden_at'].forEach(k=>fut(h,k));if(h.hidden_at&&(!h.erase_due||h.erase_due>iso(addDays(h.hidden_at,OWN_RET_DAYS)))){h.erase_due=iso(addDays(h.hidden_at,OWN_RET_DAYS));ch=true;}});
+ return ch;}
 // the console is the authority for per-country settings in the bridge (OTA edits them on the OTA data page)
 function own_settings(b){if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.settings.countries||typeof b.settings.countries!=='object')b.settings.countries={};let ch=false;
  const ccs=Array.from(new Set(orgCountries().concat(Object.keys((S.ota&&S.ota.countries)||{}))));
@@ -7396,7 +7409,7 @@ function own_runRetention(b,o){o=o||{};const st=own_st();const at=now();const ts
  audit('retention.run','4.10',{auto:r.auto,hidden:r.hidden,erased:r.erased,held:r.held,files:r.files,anon:r.anon});return r;}
 route('own-ret',{nav:'own-ret',render(){if(!own_isSupport())return own_noAccess(t('own.rt.title'),'ota');const b=own_b();const st=own_st();const P=own_pc();
  const hs=b.history.filter(h=>h.partner_id===P).slice().sort((a,c)=>String(a.hidden_at)<String(c.hidden_at)?1:-1);const ts=iso(now());
- const rows=hs.map(h=>{const held=own_held(b,h);const over=h.state==='hidden'&&h.erase_due<ts&&!held;return{cells:[`<span class="mono nowrap">···${esc(h.iccid.slice(-6))}</span>`,`${fmtDate(h.from)} – ${fmtDate(h.to)}`,h.state==='erased'?'—':`${fmtNum(h.points)} / ${fmtNum(h.events)}`,
+ const rows=hs.map(h=>{const held=own_held(b,h);const over=h.state==='hidden'&&h.erase_due<ts&&!held;return{cells:[`<span class="mono nowrap">···${esc(h.iccid.slice(-6))}</span>`,`${fmtDate(h.from)} – ${fmtDate(h.to)}`,h.state==='erased'?'—':`${isFinite(h.points)&&h.points!=null?fmtNum(h.points):'—'} / ${isFinite(h.events)&&h.events!=null?fmtNum(h.events):'—'}`,
   ui.badge(t('own.rt.st.'+h.state),{visible:'info',hidden:'warn',erased:'ok'}[h.state])+(held&&h.state==='hidden'?' '+ui.badge(t('own.rt.held'),'bad'):'')+(over?' '+ui.badge(t('own.rt.overdue'),'bad'):''),
   h.state==='erased'?fmtDateTime(h.erased_at):fmtDate(h.erase_due),h.state==='erased'?'':ui.btn(h.legal_hold?t('own.rt.release'):t('own.rt.hold'),{size:'sm',kind:'ghost',act:'own_hold',arg:h.id})]};});
  const runs=st.ret.runs.slice(0,10);

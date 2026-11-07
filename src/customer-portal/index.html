@@ -1093,10 +1093,13 @@ const A={
  ubgo(id){startFlow('unbind',primary(acct()),{id},'unbind-'+id);},
  ff(min){S.tick+=+min;save();closeOverlay(true);toast('+'+(min>=60?Math.round(min/60)+' h':min+' min'));processDue().then(()=>render(true));},
  ffend(id){const tr=B().transfers.find(z=>z.id===id);if(tr&&tr.effective_at){const m=Math.ceil((Date.parse(tr.effective_at)-nowMs())/MIN)+1;if(m>0)S.tick+=m;save();}processDue().then(()=>render(true));},
- async reqobject(id){await bridgeTx(b=>{const rq=b.requests.find(r=>r.id===id);if(!rq)return{write:false};rq.objected_at=isoNow();rq.objected_by_account_id=SS.cur;
-  // the partner console turns an objection into a dispute + frozen binding; a request made by the portal's own demo lab is handled here so the portal works alone
-  const bd=b.bindings.find(z=>z.id===rq.binding_id||(z.iccid===rq.iccid&&liveB(z)));
-  if(rq.src==='portal-demo'&&bd&&bd.status==='active'){rq.status='disputed';bd.status='frozen';(bd.freeze_log=bd.freeze_log||[]).push({at:isoNow(),action:'freeze',by:'owner objection',request_id:id});}b.events.push(bEvent('ownership_objection',bd||{iccid:rq.iccid,device_id:'d-'+rq.iccid},{request_id:id}));return{};});rerender();},
+ async reqobject(id){await bridgeTx(b=>{const rq=b.requests.find(r=>r.id===id);if(!rq)return{write:false};const at=isoNow();
+  // objection (ТЗ 4.7.3): set objected_at and freeze the binding at once. Idempotent with the console (own_dispute keeps objected_at and freezes only an active binding);
+  // the console then marks the request disputed. A request made by the portal's own demo lab is also marked disputed here so the portal works alone.
+  if(!rq.objected_at){rq.objected_at=at;rq.objected_by_account_id=SS.cur;}
+  const bd=b.bindings.find(z=>z.id===rq.binding_id)||b.bindings.find(z=>z.iccid===rq.iccid&&liveB(z));
+  if(bd&&bd.status==='active'){bd.status='frozen';bd.frozen_at=at;bd.frozen_reason='ownership_dispute';bd.frozen_by='owner objection';(bd.freeze_log=bd.freeze_log||[]).push({at,action:'freeze',by:'owner',reason:'owner objection',request_id:id});}
+  if(rq.src==='portal-demo')rq.status='disputed';b.events.push(bEvent('ownership_objection',bd||{iccid:rq.iccid,device_id:'d-'+rq.iccid},{request_id:id}));return{};});rerender();},
  async labfreeze(id){const x=dev(id);if(!x)return;await bridgeTx(b=>{const bd=b.bindings.find(z=>z.id===bnd(x).id);if(!bd)return{write:false};const fr=bd.status==='active';bd.status=fr?'frozen':'active';
   (bd.freeze_log=bd.freeze_log||[]).push({at:isoNow(),action:fr?'freeze':'unfreeze',by:'OTA support (demo)',reason:'demo'});b.events.push(bEvent(fr?'binding_frozen':'binding_unfrozen',bd));return{};});closeOverlay(true);go('device-'+id);},
  async labreq(id){const x=dev(id);if(!x)return;const N=delayHours(x.iccid);await bridgeTx(b=>{const rid=uid('req'),ou=isoMs(nowMs()+N*HOUR);b.requests.push({id:rid,iccid:x.iccid,binding_id:bnd(x).id,reason:'error',status:'owner_notified',created_by:'Demo Dealer',file:'receipt-demo.pdf',doc_checked:true,created_at:isoNow(),notified_at:isoNow(),delay_hours:N,object_until:ou,src:'portal-demo'});
