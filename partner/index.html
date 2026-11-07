@@ -921,7 +921,7 @@ const LANG_META={
  tg:['Тоҷикӣ','tg-TJ','asia'],tk:['Türkmençe','tk-TM','asia'],uz:['O‘zbekcha','uz-UZ','asia']};
 const LANG_GROUPS=['main','eu','eur','asia'];
 const I18N_EMBED=['uk','en','ru'];
-const I18N_VER="89acdfbbff";const I18N_AVAIL=["bg", "cs", "de", "es", "fr", "hu", "it", "nl", "pl", "pt", "ro", "sk"]; // replaced by build.py
+const I18N_VER="16a1b5b81e";const I18N_AVAIL=["bg", "cs", "de", "el", "es", "fr", "hu", "it", "kk", "nl", "pl", "pt", "ro", "sk", "uz"]; // replaced by build.py
 const LANGS=Object.keys(LANG_META).filter(l=>I18N_EMBED.includes(l)||I18N_AVAIL.includes(l));
 const LANG_NAMES={},LOCALES={};for(const l in LANG_META){LANG_NAMES[l]=LANG_META[l][0];LOCALES[l]=LANG_META[l][1];}
 const I18N={d:{uk:{},en:{},ru:{}},add(o){for(const l in o){this.d[l]=Object.assign(this.d[l]||{},o[l]);}}};
