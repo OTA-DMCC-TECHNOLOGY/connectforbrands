@@ -609,7 +609,7 @@ function lg_stBadge(d){let s=d.status;let label=t('lg.st.'+s);if(d.type==='BOA'&
  if(d.ack&&d.ack.auto&&s==='acknowledged')label=t('lg.st.autoEff');
  const ts=iso(now());if((s==='signed_both'||s==='acknowledged')&&d.effective&&d.effective>ts){return ui.badge(t('lg.st.signedFuture',{d:fmtDate(d.effective)}),'info',true);}
  return ui.badge(label,LG_ST_TONE[s]||'',true);}
-function lg_docTitle(d,lang){lang=lang||S.lang;const base=lang==='en'?lg_tplTitle(d.type,'en'):(I18N.d[lang]&&I18N.d[lang]['lg.tt.'+d.type])||lg_tplTitle(d.type,'ru');return base+(d.cc?' — '+ctyName(d.cc):'');}
+function lg_docTitle(d,lang){lang=lang||S.lang;const base=lang==='en'?lg_tplTitle(d.type,'en'):(I18N.d[lang]&&I18N.d[lang]['lg.tt.'+d.type])||lg_tplTitle(d.type,lang==='uk'||lang==='ru'?'ru':'en');return base+(d.cc?' — '+ctyName(d.cc):'');}
 function lg_docNoLbl(d){return d.type==='CHG'?'—':lg_docLabel(d.type,d.cc);}
 function lg_clsBadge(c){return c?ui.badge(t('lg.cls.'+c),c==='A'?'bad':c==='B'?'info':'',false):'';}
 function lg_stepper(){const st=lg_pkgStage();const order=['form','review','ready','draft','issued','signed_partner','signed'];const idx=order.indexOf(st);

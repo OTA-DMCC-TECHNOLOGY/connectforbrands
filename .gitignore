@@ -2,3 +2,4 @@ src/partner-console/index.html
 src/partner-console/bundle.js
 src/customer-portal/app_built.js
 __pycache__/
+src/partner-console/i18n_work/

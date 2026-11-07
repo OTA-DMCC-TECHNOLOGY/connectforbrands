@@ -51,7 +51,7 @@ function lineDescL2(l,lang){lang=lang||(S.org&&S.org.lang2)||'ru';if(lang==='en'
  const tok=(p,tm)=>(ru?'Сервисные токены ':'Сервісні токени ')+PLAN_EN[p]+', '+tm+(ru?' мес.':' міс.');
  if(l.type==='token')return tok(l.plan,l.term);
  if(l.type==='xchg')return tok(l.plan,l.term)+(ru?' – обмен ':' – обмін ')+PLAN_EN[l.fromPlan]+', '+l.fromTerm+(ru?' мес. (разница в цене)':' міс. (різниця в ціні)');return l.desc||'';}
-function lineDesc(l){return S.lang==='en'?lineDescEn(l):lineDescL2(l,S.lang);} // UI language
+function lineDesc(l){return S.lang==='uk'||S.lang==='ru'?lineDescL2(l,S.lang):lineDescEn(l);} // UI language
 function invNextNo(){return docNo('INV',{peek:true});}
 // create and issue an OTA Tax Invoice. o: {cc, lines, kind:'keys'|'tokens'|'combined'|'exchange', orderIds, exchangeId, created, dueDays}
 function mkInvoice(o){const created=o.created||iso(now());const v=invVat();const o2=S.org||{};

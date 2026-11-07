@@ -13,7 +13,7 @@ for(let i=NAVS.length-1;i>=0;i--)if(NAVS[i].key==='home')NAVS.splice(i,1);
 function onb_cty(c){return !c||c==='XX'?t('onb.cty.XX'):ctyName(c);}
 function onb_rnd(n){return rndB32(n).toLowerCase();}
 function onb_mask(k){return k.slice(0,11)+'•'.repeat(12)+k.slice(-4);}
-function onb_langSel(){return `<label class="onb-sr" for="onb-lang">${t('c.language')}</label><select id="onb-lang" class="inp onb-langsel" data-act="setlang">${LANGS.map(l=>`<option value="${l}" ${S.lang===l?'selected':''}>${LANG_NAMES[l]}</option>`).join('')}</select>`;}
+function onb_langSel(){return langBtn('onb-langsel');}
 function onb_vals(){return [['bolt','v1'],['tag','v2'],['layers','v3']].map(([ic,k])=>`<li>${icon(ic)}<div><b>${t('onb.'+k+'.t')}</b><span>${t('onb.'+k+'.d')}</span></div></li>`).join('');}
 function onb_authShell(inner,showVals){
  return `<div class="auth onb-auth"><div class="l"><div class="onb-auth-top"><span class="onb-logo"><span class="bm" aria-hidden="true">CFB</span><b>${t('c.program')}</b></span>${onb_langSel()}</div>
@@ -288,7 +288,7 @@ Object.assign(ACT,{
    ui.btn(t('onb.om.signout'),{kind:'ghost',icon:'logout',act:'onb_signout'}));},
  usermenu(){if(!S.user)return;
   modal(t('onb.um.title'),`<div class="row g12"><span class="onb-av lg" aria-hidden="true">${esc(S.user.email[0].toUpperCase())}</span><div class="grow"><b>${esc(S.user.name||S.user.email)}</b><div class="small muted">${esc(S.user.email)}</div></div>${ui.badge(t('onb.r.owner'),'accent')}</div>
-   <div class="field"><label for="onb-ulang">${t('c.language')}</label><select id="onb-ulang" class="inp" data-act="setlang">${LANGS.map(l=>`<option value="${l}" ${S.lang===l?'selected':''}>${LANG_NAMES[l]}</option>`).join('')}</select><span class="hint">${t('onb.um.langD')}</span></div>`,
+   <div class="field"><span class="lbl">${t('c.language')}</span>${langBtn('inp')}<span class="hint">${t('onb.um.langD')}</span></div>`,
    ui.btn(t('onb.om.signout'),{kind:'ghost',icon:'logout',act:'onb_signout'})+ui.btn(t('c.close'),{kind:'primary',act:'ovclose'}));},
  onb_signout(){onb_signOut();toast(t('onb.t.signout'));},
 });

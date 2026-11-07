@@ -127,7 +127,7 @@ route('calculator',{nav:'calculator',render(){
 }});
 
 function calc_inputs(c){
- const cur=c.cur==='UAH'?(S.lang==='en'?'UAH':'грн'):c.cur==='KZT'?'₸':c.cur;const ccs=orgCountries();
+ const cur=c.cur==='UAH'?(S.lang==='uk'||S.lang==='ru'?'грн':'UAH'):c.cur==='KZT'?'₸':c.cur;const ccs=orgCountries();
  const f=(k,label,unit,hint)=>{const id='calc_f_'+k;return `<div class="field"><label for="${id}">${label}</label><div class="prc_inw"><input class="inp num" id="${id}" type="text" inputmode="decimal" autocomplete="off" data-calc="${k}" value="${esc(c[k])}" aria-describedby="${id}-h"><span class="prc_unit" aria-hidden="true">${unit}</span></div><span class="hint" id="${id}-h">${hint||''}</span></div>`;};
  let gi=0;const grp=(title,html)=>{const id='calc_g'+(++gi);return `<div class="calc_grp" role="group" aria-labelledby="${id}"><h3 class="calc_gh" id="${id}">${title}</h3>${html}</div>`;};
  return (ccs.length>1?`<div class="field"><span class="lbl">${t('prc.country')}</span>${ui.seg('calc_ccseg',ccs.map(x=>[x,esc(ctyName(x))]),c.cc,'calc_cc')}</div>`:'')+grp(t('calc.g.sales'),`<div class="calc_2">${f('dev',t('calc.dev'),t('calc.u.pcs'))}${f('growth',t('calc.growth'),'%')}</div>${f('std',t('calc.std'),'%',t('calc.stdH'))}`)

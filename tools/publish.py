@@ -14,3 +14,7 @@ for app,out,lang in (('partner-console','partner','uk'),('customer-portal','port
     os.makedirs(os.path.join(R,out),exist_ok=True)
     open(os.path.join(R,out,'index.html'),'w').write(wrap(open(os.path.join(d,'index.html')).read(),lang))
     print('wrote',out+'/index.html')
+    src_i18n=os.path.join(d,'i18n')
+    if app=='partner-console' and os.path.isdir(src_i18n):
+        import shutil;dst=os.path.join(R,out,'i18n');shutil.rmtree(dst,ignore_errors=True);shutil.copytree(src_i18n,dst)
+        print('copied',len(os.listdir(dst)),'language files to',out+'/i18n/')
