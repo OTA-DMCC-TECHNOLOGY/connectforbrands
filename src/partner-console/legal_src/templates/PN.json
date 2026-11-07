@@ -5,8 +5,8 @@
   "en": "Privacy Notice (public)",
   "ru": "Политика конфиденциальности (публичный документ)"
  },
- "ver": "T-PN-v3",
- "effective": "2026-11-06",
+ "ver": "T-PN-v10",
+ "effective": "2026-11-07",
  "cls": "C",
  "blocks": [
   {
@@ -46,6 +46,13 @@
    "ru": "1.2 {{P_NAME}} («Бренд-партнёр») является отдельным контролёром в отношении продажи устройства, гарантии и собственного маркетинга и имеет свою политику конфиденциальности."
   },
   {
+   "id": "PN-1.3",
+   "kind": "clause",
+   "cond": "OTA_REP_LOCAL",
+   "en": "1.3 OTA's representative in your country: {{OTA_REP_LOCAL}}",
+   "ru": "1.3 Представитель OTA в вашей стране: {{OTA_REP_LOCAL}}"
+  },
+  {
    "id": "PN-s2",
    "kind": "heading",
    "en": "2. Data we process",
@@ -54,8 +61,8 @@
   {
    "id": "PN-s2.p1",
    "kind": "para",
-   "en": "Account: name, email, phone number, language, login data, consents and settings.\nDevice and connection: device model, IMEI, ICCID/EID, activation status, connection and session times, data volumes, signal and diagnostic logs, device events (power-off, SIM removal, IMEI change).\nLocation: for our service we use only the approximate location of the device determined by the mobile network (cell-based location, LBS).\nContent of device data: we do not view or store the content of the data that your device sends to the Brand Partner's services.\nPayments: plan, amounts, currency, transaction references, payment status, refunds and chargebacks, and a token of your card (full card details are held by the payment provider).\nCommunications: support requests and notification history.",
-   "ru": "Учётная запись: имя, e-mail, номер телефона, язык, данные для входа, согласия и настройки.\nУстройство и связь: модель устройства, IMEI, ICCID/EID, статус активации, время подключений и сессий, объёмы данных, журналы сигнала и диагностики, события устройства (отключение питания, извлечение SIM, смена IMEI).\nМестоположение: для нашего сервиса мы используем только приблизительное местоположение устройства, определяемое мобильной сетью (по базовым станциям, LBS).\nСодержимое данных устройства: мы не просматриваем и не храним содержимое данных, которые ваше устройство передаёт сервисам Бренд-партнёра.\nПлатежи: тариф, суммы, валюта, идентификаторы операций, статус оплаты, возвраты и chargeback, а также токен вашей карты (полные данные карты хранит платёжный провайдер).\nКоммуникации: обращения в поддержку и история уведомлений."
+   "en": "Account: name, email, phone number, language, login data (login and one-time code logs; one-time codes are not kept after use), consents and settings.\nBinding and ownership: binding and unbinding of the device to your account, date and method (ICCID, activation code or transfer), redeemed activation codes (serial number and time), transfer requests, confirmations and cancellations, and any ownership dispute, including the proof of purchase you provide.\nDevice and connection: device model, IMEI, ICCID/EID, activation status, connection and session times, data volumes, signal and diagnostic logs, device events (power-off, SIM removal, IMEI change).\nLocation: for our service we use only the approximate location of the device determined by the mobile network (cell-based location, LBS). It is shown to you only for the period after you bound the device.\nContent of device data: we do not view or store the content of the data that your device sends to the Brand Partner's services.\nPayments: plan, amounts, currency, transaction references, payment status, refunds and chargebacks, and a token of your card (full card details are held by the payment provider).\nCommunications: support requests and notification history.",
+   "ru": "Учётная запись: имя, e-mail, номер телефона, язык, данные для входа (журналы входов и одноразовых кодов; сами одноразовые коды после использования не хранятся), согласия и настройки.\nПривязка и владение: привязка и отвязка устройства к вашей учётной записи, дата и способ (ICCID, код активации или передача), погашенные коды активации (серийный номер и время), запросы на передачу, подтверждения и отмены, а также споры о владении, включая предоставленные вами документы о покупке.\nУстройство и связь: модель устройства, IMEI, ICCID/EID, статус активации, время подключений и сессий, объёмы данных, журналы сигнала и диагностики, события устройства (отключение питания, извлечение SIM, смена IMEI).\nМестоположение: для нашего сервиса мы используем только приблизительное местоположение устройства, определяемое мобильной сетью (по базовым станциям, LBS). Оно показывается вам только за период после привязки устройства.\nСодержимое данных устройства: мы не просматриваем и не храним содержимое данных, которые ваше устройство передаёт сервисам Бренд-партнёра.\nПлатежи: тариф, суммы, валюта, идентификаторы операций, статус оплаты, возвраты и chargeback, а также токен вашей карты (полные данные карты хранит платёжный провайдер).\nКоммуникации: обращения в поддержку и история уведомлений."
   },
   {
    "id": "PN-s3",
@@ -66,8 +73,8 @@
   {
    "id": "PN-s3.p1",
    "kind": "para",
-   "en": "To provide CONNECT, activation, notifications and support – performance of the contract.\nPayments, invoicing, taxes and accounting – contract and legal obligations.\nSecurity, prevention of fraud and misuse, protection of networks – legitimate interests and legal obligations.\nImprovement of the service using aggregated or anonymised data – legitimate interests.\nSharing with the Brand Partner for device support and renewal reminders – contract and legitimate interests.\nMarketing by OTA or the Brand Partner – your consent where the law requires it; you can withdraw it at any time.\nWhere the law of your country requires consent to processing or to transfer abroad, we ask for it in the portal.",
-   "ru": "Предоставление CONNECT, активация, уведомления и поддержка – исполнение договора.\nПлатежи, счета, налоги и бухгалтерский учёт – договор и требования закона.\nБезопасность, предотвращение мошенничества и злоупотреблений, защита сетей – законные интересы и требования закона.\nУлучшение сервиса на основе агрегированных или обезличенных данных – законные интересы.\nПередача Бренд-партнёру для поддержки устройства и напоминаний о продлении – договор и законные интересы.\nМаркетинг OTA или Бренд-партнёра – ваше согласие, если его требует закон; вы можете отозвать его в любой момент.\nЕсли законодательство вашей страны требует согласия на обработку или передачу за рубеж, мы запрашиваем его на портале."
+   "en": "To provide CONNECT, activation, notifications and support – performance of the contract.\nPayments, invoicing, taxes and accounting – contract and legal obligations.\nSecurity, prevention of fraud and misuse, protection of networks – legitimate interests and legal obligations.\nBinding of devices, preventing binding without the owner's authority, transfers of ownership and resolution of ownership disputes – contract and legitimate interests.\nImprovement of the service using aggregated or anonymised data – legitimate interests.\nSharing with the Brand Partner for device support and renewal reminders – contract and legitimate interests.\nMarketing by OTA or the Brand Partner – your consent where the law requires it; you can withdraw it at any time.\nWhere the law of your country requires consent to processing or to transfer abroad, we ask for it in the portal.",
+   "ru": "Предоставление CONNECT, активация, уведомления и поддержка – исполнение договора.\nПлатежи, счета, налоги и бухгалтерский учёт – договор и требования закона.\nБезопасность, предотвращение мошенничества и злоупотреблений, защита сетей – законные интересы и требования закона.\nПривязка устройств, предотвращение привязки без разрешения собственника, передача владения и разрешение споров о владении – договор и законные интересы.\nУлучшение сервиса на основе агрегированных или обезличенных данных – законные интересы.\nПередача Бренд-партнёру для поддержки устройства и напоминаний о продлении – договор и законные интересы.\nМаркетинг OTA или Бренд-партнёра – ваше согласие, если его требует закон; вы можете отозвать его в любой момент.\nЕсли законодательство вашей страны требует согласия на обработку или передачу за рубеж, мы запрашиваем его на портале."
   },
   {
    "id": "PN-s4",
@@ -80,6 +87,12 @@
    "kind": "para",
    "en": "Our hosting providers (Amazon Web Services and, where local law requires, local providers in your country), our connectivity provider, our notification provider (Twilio), our payment acquirer (Network International), the Brand Partner, our professional advisers, and authorities where the law requires. We do not sell personal data. Where the law requires, we will tell you the names of specific recipients on request.",
    "ru": "Наши хостинг-провайдеры (Amazon Web Services и, если этого требует местный закон, местные провайдеры в вашей стране), наш поставщик связи, наш сервис уведомлений (Twilio), наш эквайер (Network International), Бренд-партнёр, наши профессиональные консультанты и органы власти, если этого требует закон. Мы не продаём персональные данные. Если этого требует закон, мы сообщим вам по запросу наименования конкретных получателей."
+  },
+  {
+   "id": "PN-s4.p2",
+   "kind": "para",
+   "en": "The Brand Partner is informed when a device it sold is bound or transferred. Its dealers and installers see, for the devices they sold or installed, only technical status (bound or not, online or offline, installation test results) and do not receive location or device events. In an ownership dispute, the seller receives the information needed to resolve it. After a transfer, the new Owner does not receive your account, contact or payment data or the history of your period of ownership.",
+   "ru": "Бренд-партнёр получает информацию о привязке или передаче проданного им устройства. Его дилеры и монтажники по проданным или установленным ими устройствам видят только технический статус (привязано или нет, в сети или нет, результаты проверки установки) и не получают местоположение и события устройства. При споре о владении продавец получает сведения, необходимые для его разрешения. После передачи новый Владелец не получает вашу учётную запись, контактные и платёжные данные и историю за период вашего владения."
   },
   {
    "id": "PN-s5",
@@ -102,8 +115,8 @@
   {
    "id": "PN-s6.p1",
    "kind": "para",
-   "en": "Account and device data: during the plan and for twenty-four (24) months after it ends (so you can renew), then deleted or anonymised.\nPayment and tax records: for the periods required by tax and accounting law.\nNetwork and security logs: twelve (12) months.\nMarketing data: until you withdraw consent.",
-   "ru": "Данные учётной записи и устройства: в течение действия тарифа и двадцати четырёх (24) месяцев после его окончания (для возможности продления), затем удаляются или обезличиваются.\nПлатёжные и налоговые записи: в сроки, установленные налоговым и бухгалтерским законодательством.\nСетевые журналы и журналы безопасности: двенадцать (12) месяцев.\nМаркетинговые данные: до отзыва согласия."
+   "en": "Account and device data: during the plan and for twenty-four (24) months after it ends (so you can renew), then deleted or anonymised.\nPayment and tax records: for the periods required by tax and accounting law.\nNetwork and security logs: twelve (12) months.\nLocation and event history after a transfer or unbinding: hidden from the new Owner at once and deleted or anonymised within thirty (30) days, unless needed for an open dispute, security incident or legal request.\nBinding, transfer and activation code records: during the plan and for twenty-four (24) months after it ends, to prevent fraud and resolve disputes.\nMarketing data: until you withdraw consent.",
+   "ru": "Данные учётной записи и устройства: в течение действия тарифа и двадцати четырёх (24) месяцев после его окончания (для возможности продления), затем удаляются или обезличиваются.\nПлатёжные и налоговые записи: в сроки, установленные налоговым и бухгалтерским законодательством.\nСетевые журналы и журналы безопасности: двенадцать (12) месяцев.\nИстория местоположения и событий после передачи или отвязки: сразу скрывается от нового Владельца и удаляется или обезличивается в течение тридцати (30) дней, если она не нужна для незавершённого спора, расследования инцидента безопасности или запроса органа власти.\nЗаписи о привязке, передаче и погашении кодов активации: в течение действия тарифа и двадцати четырёх (24) месяцев после его окончания – для предотвращения мошенничества и разрешения споров.\nМаркетинговые данные: до отзыва согласия."
   },
   {
    "id": "PN-s7",

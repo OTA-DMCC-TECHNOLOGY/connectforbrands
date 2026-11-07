@@ -50,7 +50,7 @@ route('sims',{nav:'sims',render(){
   <button type="button" role="menuitem" data-act="sim_simInstall">${icon('bolt','sm')}<span>${t('sim.simInstall')}</span></button>
   <button type="button" role="menuitem" data-act="sim_simLink">${icon('users','sm')}<span>${t('sim.simLink')}</span></button>
   <button type="button" role="menuitem" data-act="cod_simAct">${icon('key','sm')}<span>${t('cod.simAct')}</span></button></div></details>`;
- const actions=(S.admin?demo:'')+ui.btn(t('sim.export'),{icon:'download',act:'sim_export'})+ui.btn(t('sim.orderMore'),{kind:'primary',icon:'plus',href:'#shipments'});
+ const actions=(S.admin?demo:'')+(can('p.orders')&&(can('p.imei')||can('p.receipt'))&&['p_admin','p_ops'].includes(actor().role)?ui.btn(t('sim.export'),{icon:'download',act:'sim_export'}):'')+ui.btn(t('sim.orderMore'),{kind:'primary',icon:'plus',href:'#shipments'});
  if(!total){
   return ui.page({title:t('sim.title'),sub:t('sim.sub'),actions,body:ui.card({body:ui.empty('sim',t('sim.emptyT'),t('sim.emptyP'),ui.btn(t('sim.orderMore'),{kind:'primary',href:'#shipments'}))})});}
  const kpis=`<div class="sim_kpis">
@@ -78,7 +78,7 @@ route('sims',{nav:'sims',render(){
   s.reseller?`<span class="small" style="white-space:nowrap">${esc(sim_resName(s.reseller))}</span>`:'<span class="faint small">'+t('sim.f.noResShort')+'</span>',
   s.modelId&&mm[s.modelId]?`<span style="white-space:nowrap">${esc(mm[s.modelId].model.name)}</span><br><span class="xs faint">${esc(mm[s.modelId].brand.name)}</span>`:'<span class="faint">—</span>',
   s.imei?`<span class="mono small">${esc(s.imei)}</span>`:'<span class="faint">—</span>',
-  s.plan?`<span style="white-space:nowrap">${esc(pkgLabel(s.plan,s.term))}</span><br><span class="xs faint">${t('sim.until',{d:fmtDate(s.paidUntil)})}</span>`:`<span class="faint small">${t('sim.noPkg')}</span>`,
+  s.plan?`<span style="white-space:nowrap">${esc(s.sub?PLAN_NAME[s.plan]+' · '+t('cx.via.sub'):pkgLabel(s.plan,s.term))}</span><br><span class="xs faint">${t('sim.until',{d:fmtDate(s.paidUntil)})}</span>`:`<span class="faint small">${t('sim.noPkg')}</span>`,
   s.linked?ui.badge(t('sim.linked'),'ok'):s.status==='active'?ui.badge(t('sim.notLinked'),''):'<span class="faint">—</span>',
   `<span class="small muted" style="white-space:nowrap">${sim_ago(s.lastSeen)}</span>`]}));
  const table=ui.table(cols,trs,{empty:ui.empty('search',t('c.nothing'),t('sim.nothingP'),ui.btn(t('sim.f.reset'),{act:'sim_reset'}))});
@@ -94,7 +94,7 @@ Object.assign(ACT,{
  sim_reset(){S.ui.sim_f={q:'',st:'all',model:'',pkg:'',res:''};S.ui.sim_page=1;rerender();},
  sim_page(p){S.ui.sim_page=+p;rerender();const c=$('#content .card');if(c)c.scrollIntoView({block:'start'});},
  sim_open(iccid){sim_drawer(iccid);},
- sim_export(){sim_exportModal();},
+ sim_export(){if(!['p_admin','p_ops'].includes(actor().role)){toast(t('c.noPerm',{r:esc(roleName(actor().role))}),'bad');return;}sim_exportModal();},   // ТЗ v10 4.9 p.5: Partner Admin / Operations only, audited
  sim_copyCsv(){const ta=$('#sim_csv');if(ta)copyText(ta.value);},
  sim_simInstall(){sim_installModal();},
  sim_simLink(){sim_simulateLink();},
@@ -110,6 +110,7 @@ function sim_evText(ev,s,mm){const [ts,type,detail]=ev;const dev=s.modelId?sim_d
   case 'installed':return [t('sim.ev.installed'),(detail?esc(detail):dev)+(s.imei?' · IMEI '+esc(s.imei):''),'ok'];
   case 'linked':return [t('sim.ev.linked'),t('sim.ev.linkedS'),'ok'];
   case 'package':return [t('sim.ev.package'),(s.plan?esc(pkgLabel(s.plan,s.term)):'')+(s.code?' · <span class="mono">'+fmtCode(s.code)+'</span>':''),'ok'];
+  case 'subscription':return [t('cx.via.sub'),s.plan?esc(PLAN_NAME[s.plan]):'','ok'];
   case 'blocked':return [t('sim.ev.blocked'),t('sim.ev.blockedS',{imei:esc(detail||s.imei||'—')}),'bad'];
   case 'toReseller':return [t('sim.ev.toRes'),esc(detail||''),'ok'];
   case 'fromReseller':return [t('sim.ev.fromRes'),esc(detail||''),'ok'];
@@ -124,7 +125,7 @@ function sim_drawer(iccid){const s=S.sims.find(x=>x.iccid===iccid);if(!s)return;
   <dt>${t('c.status')}</dt><dd>${sim_statusBadge(s)}</dd>
   <dt>${t('sim.c.device')}</dt><dd>${x?sim_devName(x):'—'}</dd>
   <dt>IMEI</dt><dd class="mono">${s.imei?esc(s.imei):'—'}</dd>
-  <dt>${t('sim.c.pkg')}</dt><dd>${s.plan?esc(pkgLabel(s.plan,s.term))+'<br><span class="small muted">'+t('sim.until',{d:fmtDate(s.paidUntil)})+'</span>':'<span class="faint">'+t('sim.noPkg')+'</span>'}</dd>
+  <dt>${t('sim.c.pkg')}</dt><dd>${s.plan?esc(s.sub?PLAN_NAME[s.plan]+' · '+t('cx.via.sub'):pkgLabel(s.plan,s.term))+'<br><span class="small muted">'+t('sim.until',{d:fmtDate(s.paidUntil)})+'</span>':'<span class="faint">'+t('sim.noPkg')+'</span>'}</dd>
   <dt>${t('sim.d.code')}</dt><dd>${s.code?'<span class="mono">'+fmtCode(s.code)+'</span>':'—'}</dd>
   <dt>${t('sim.c.customer')}</dt><dd>${s.linked?ui.badge(t('sim.linked'),'ok'):t('sim.notLinked')}</dd>
   <dt>${t('sim.c.seen')}</dt><dd>${s.lastSeen?sim_ago(s.lastSeen)+' <span class="xs faint">('+fmtDateTime(s.lastSeen)+')</span>':'—'}</dd>
@@ -137,6 +138,7 @@ function sim_drawer(iccid){const s=S.sims.find(x=>x.iccid===iccid);if(!s)return;
  let foot=ui.btn(t('c.close'),{act:'ovclose'});
  if(s.status==='blocked')foot=ui.btn(t('sim.d.addWl'),{kind:'primary',icon:'shield',act:'sim_wl',arg:s.iccid})+foot;
  if(s.status==='active'&&!s.plan)foot=ui.btn(t('cod.simActShort'),{icon:'spark',act:'cod_simAct',arg:s.iccid})+foot;
+ foot=(foot||'')+HOOKS.simDrawer.map(fn=>{try{return fn(s)||'';}catch(e){console.error(e);return '';}}).join('');
  drawer(t('sim.d.title')+' <span class="mono faint" style="font-weight:500">···'+esc(s.iccid.slice(-6))+'</span>',`${extra}${dl}<h3 class="sim_h3">${t('sim.d.history')}</h3>${tl}`,foot);}
 
 /* ----- whitelist fix ----- */
@@ -152,7 +154,7 @@ FORM.sim_wl=f=>{const d=formData(f);const s=S.sims.find(x=>x.iccid===d.iccid);co
  log(t('sim.wl.log',{imei:s.imei,m:x.model.name,iccid:fmtIccid(s.iccid)}));closeOverlay();toast(t('sim.wl.toast',{m:esc(x.model.name)}));rerender();};
 
 /* ----- export ----- */
-function sim_exportModal(){const f=sim_f();const mm=sim_modelMap();const rows=sim_filtered(f,mm);const max=5000;const part=rows.slice(0,max);
+function sim_exportModal(){const f=sim_f();const mm=sim_modelMap();const rows=sim_filtered(f,mm);const max=5000;const part=rows.slice(0,max);audit('iccid.export','sims',{count:part.length,filter:f});
  const q=v=>{v=v==null?'':String(v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
  const lines=['iccid,status,brand,model,imei,package,paid_until,customer_linked,last_seen'];
  for(const s of part){const x=s.modelId&&mm[s.modelId];lines.push([s.iccid,s.status,x?x.brand.name:'',x?x.model.name:'',s.imei||'',s.plan?pkgKey(s.plan,s.term):'',s.paidUntil?s.paidUntil.slice(0,10):'',s.linked?'yes':'no',s.lastSeen||''].map(q).join(','));}

@@ -86,9 +86,10 @@ const TERMS=[12,24,36,48,60];              // Service Token terms in months (mon
 const TERM_DISC={1:0,12:0.10,24:0.20,36:0.30,48:0.35,60:0.40};
 const TOKEN_VALID_MONTHS=36;               // a Service Token is usable for 36 months from issue
 const PRICE_NOTICE_DAYS=90;                // price increase: notice >= 90 days (MPA 9.1)
+const PRICE_CAP=0.10;                      // price increase: not more than 10% in any rolling 12 months (MPA 9.1, ТЗ v10 3.2)
 const CLASS_A_NOTICE_DAYS=30;              // other class-A changes: >= 30 days
 const RESERVED_CODES=['OTA','INV','TST'];
-const LANG2_AVAILABLE=['ru'];              // approved second document languages
+const LANG2_AVAILABLE=['ru','kk'];         // approved second document languages (kk: Kazakhstan class-C documents need kk + ru)
 // Seed sources for per-country price lists (OTA can edit the lists afterwards; these are only the starting point)
 const CC_META={
  UA:{cur:'UAH',fx:45.0564,vat:0.20,key:9.85,month:{light:75,std:99}},
@@ -139,14 +140,37 @@ function plIsIncrease(a,b){if(!a)return false;if(b.key>a.key+0.004||(b.fee||0)>(
  return PLANS.some(p=>(b.retained[p]>a.retained[p]+0.004)||TERMS.some(tm=>b.tokens[p][tm]>a.tokens[p][tm]+0.004));}
 // earliest allowed effective date for a new version (ISO)
 function plMinFrom(cc,data){const base=plLatest(cc);return plIsIncrease(base,data)?iso(addDays(now(),PRICE_NOTICE_DAYS)):iso(now());}
-// add a price-list version. data: {key,tokens,retained,fee}; o: {from (ISO, clamped to the notice rule), note}
+// price items compared by the 10% / 12 months cap (key, every token, every retained amount). The fee is a 0–3% rate:
+// raising it counts as an increase for the 90-day notice but is not measured in percent of itself (see API.md).
+function plItems(d){const o={key:d.key};PLANS.forEach(p=>{TERMS.forEach(tm=>{o['tok:'+p+'-'+tm]=d.tokens[p][tm];});o['ret:'+p]=d.retained[p];});return o;}
+function plItemLabel(k){if(k==='key')return 'Activation Key';const m=k.match(/^(tok|ret):(\w+)(?:-(\d+))?$/);if(!m)return k;return m[1]==='tok'?`Service Token ${PLAN_EN[m[2]]}, ${m[3]} months`:`Retained Amount ${PLAN_EN[m[2]]}`;}
+// check a new price version effective `from` against the rules: {increase, minFrom, noticeOk, cap:[{item,label,base,val,pct}] (items over +10% vs the
+// lowest value in force at any time during the 12 months before `from`)}. `skipVer` excludes a version (to re-check an existing one).
+function plIncreaseCheck(cc,data,from,skipVer){const vs=plVersions(cc).filter(v=>v.ver!==skipVer);const base=skipVer!=null?vs.filter(v=>v.ver<skipVer).pop()||null:plLatest(cc);
+ const increase=plIsIncrease(base,data);const minFrom=increase?iso(addDays(now(),PRICE_NOTICE_DAYS)):iso(now());from=from||minFrom;
+ const winStart=iso(addMonths(new Date(from),-12));const inWin=vs.filter(v=>v.from<=from&&(!v.to||v.to>winStart||v===base));
+ const ni=plItems(data);const cap=[];
+ if(inWin.length)Object.keys(ni).forEach(k=>{const lows=inWin.map(v=>plItems(v)[k]).filter(x=>x!=null&&x>0);if(!lows.length)return;const lo=Math.min(...lows);
+  if(ni[k]>r2(lo*(1+PRICE_CAP))+0.004)cap.push({item:k,label:plItemLabel(k),base:lo,val:ni[k],pct:(ni[k]-lo)/lo});});
+ return{increase,minFrom,noticeOk:!increase||from>=minFrom.slice(0,10),cap};}
+// re-check an existing version (e.g. before issuing its Order Form version): {ok, cap, noticeOk}
+function plCheckVersion(cc,ver){const v=((S.priceLists||{})[cc]||[]).find(x=>x.ver===ver);if(!v)return{ok:false,cap:[],noticeOk:false};
+ const c=plIncreaseCheck(cc,v,v.from,ver);const created=v.createdAt||v.from;const noticeOk=!v.increase||new Date(v.from)-new Date(created)>=PRICE_NOTICE_DAYS*864e5-6e4;
+ return{ok:!c.cap.length&&noticeOk,cap:c.cap,noticeOk};}
+// add a price-list version. data: {key,tokens,retained,fee}; o: {from (ISO, clamped to the notice rule), note, justification, docLink}
+// An increase needs a justification (supplier / regulatory cost growth) and a link to the supporting document; it never applies to keys, tokens
+// or subscription periods already paid (invoices freeze unit prices and priceVer). Returns the version, or {err:'cap'|'justification', cap} (nothing saved).
 function plAdd(cc,data,o){o=o||{};S.priceLists=S.priceLists||{};const all=S.priceLists[cc]=S.priceLists[cc]||[];
  const minFrom=plMinFrom(cc,data);let from=o.from&&o.from>minFrom?o.from:minFrom;
+ const chk=plIncreaseCheck(cc,data,from);if(chk.cap.length){audit('pricelist.blocked',cc,{reason:'cap_10pct_12m',items:chk.cap.map(x=>x.item)});return{err:'cap',cap:chk.cap};}
+ const just=String(o.justification||o.note||'').trim(),docLink=String(o.docLink||'').trim();
+ if(chk.increase&&o.strict&&(!just||!docLink)){return{err:'justification',cap:[]};}
  const ts=iso(now());all.forEach(v=>{if(v.status!=='withdrawn'&&v.from>ts){v.status='withdrawn';v.withdrawnAt=ts;}}); // a new version replaces pending ones
  const prev=plVersions(cc).filter(v=>v.from<=from).pop();if(prev)prev.to=from;
  const ver=all.reduce((m,v)=>Math.max(m,v.ver),0)+1;
  const v={ver,from,to:null,key:r2(data.key),tokens:JSON.parse(JSON.stringify(data.tokens)),retained:Object.assign({},data.retained),fee:+data.fee||0,createdAt:ts,by:actorName(),note:o.note||'',increase:plIsIncrease(prev||null,data)};
- all.push(v);audit('pricelist.version',cc+' v'+ver,{from,increase:v.increase,note:v.note});return v;}
+ if(v.increase){v.justification=just;v.docLink=docLink;if(!just||!docLink)v.justMissing=true;}
+ all.push(v);audit('pricelist.version',cc+' v'+ver,{from,increase:v.increase,note:v.note,justification:v.justification||'',docLink:v.docLink||''});return v;}
 
 /* legacy pricing API kept for other modules (20_catalog): prices are USD from the primary country's price list */
 function unitPrice(item,cur,cc){ // item: 'key' | 'sim'(=key, legacy) | {plan,term}
@@ -171,21 +195,51 @@ function orgMin(){const o=S.org||{};return{first:o.minFirst||1000,next:o.minNext
 /* ---------- OTA data (ТЗ §3 "Данные OTA"): S.ota = {KEY: value}. Empty = N/A (never printed) ---------- */
 const OTA_KEYS=['OTA_NAME','OTA_REGNO','OTA_LICENCE','OTA_TRN','OTA_ADDR_EN','OTA_ADDR_L2','OTA_SIGNATORY','OTA_SIGNATORY_L2_GEN','OTA_TITLE_EN','OTA_TITLE_L2','OTA_TITLE_L2_GEN',
  'OTA_BANK_BENEF','OTA_BANK_NAME','OTA_BANK_ADDR','OTA_BANK_ACCOUNT','OTA_BANK_IBAN','OTA_BANK_SWIFT','OTA_BANK_CUR','OTA_BANK_INTER','OTA_BANK_INTER_SWIFT',
- 'OTA_CUSTOMS_CODE','OTA_EMAIL_OPS','OTA_EMAIL_LEGAL','OTA_EMAIL_FIN','OTA_EMAIL_SUPPORT','OTA_EMAIL_PRIVACY','OTA_SUBPROC_EMAIL','OTA_SUBPROC_EMAIL_LOC','OTA_SUPPORT_HOURS','CARD_DESCRIPTOR'];
-const OTA_CC_KEYS=['OTA_VAT_','OTA_REP_'];   // + ISO country code, e.g. OTA_VAT_UA
+ 'OTA_EMAIL_OPS','OTA_EMAIL_LEGAL','OTA_EMAIL_FIN','OTA_EMAIL_SUPPORT','OTA_EMAIL_PRIVACY','OTA_SUBPROC_EMAIL','OTA_SUBPROC_EMAIL_LOC','OTA_SUPPORT_HOURS','CARD_DESCRIPTOR'];
+const OTA_REMOVED_KEYS=['OTA_CUSTOMS_CODE'];   // + legacy flat OTA_VAT_{CC} / OTA_REP_{CC} (v10: per-country S.ota.countries, see otaLocal)
+const otaRemovedKey=k=>OTA_REMOVED_KEYS.includes(k)||/^OTA_(VAT|REP)_[A-Z]{2}$/.test(k);  // v10 (ТЗ 1.2): SIMs ship only from the EU — no Dubai Customs code anywhere
+/* per-country OTA settings (ТЗ v10 2.6, 4.5, part 6): S.ota.countries[CC] = {vat_local, rep_local, delay_hours, ownership_v10_enabled}
+   vat_local → OTA_VAT_LOCAL, rep_local → OTA_REP_LOCAL: printed ONLY when set and ONLY in documents of that country (EUT annex row, PN 1.3, OF requisites,
+   payment page / receipts of Direct Subscriptions). delay_hours: transfer cooling-off, integer 1–24, default 24. ownership_v10_enabled: technical launch switch. */
+const OTA_DELAY_DEFAULT=24,OTA_DELAY_MIN=1,OTA_DELAY_MAX=24;
+function otaCountries(){S.ota=S.ota||{};if(!S.ota.countries||typeof S.ota.countries!=='object')S.ota.countries={};return S.ota.countries;}
+function otaCountry(cc){const c=(S.ota&&S.ota.countries&&S.ota.countries[cc])||{};const s=x=>x==null?'':String(x).trim();
+ const d=parseInt(c.delay_hours,10);return{vat_local:s(c.vat_local),rep_local:s(c.rep_local),delay_hours:d>=OTA_DELAY_MIN&&d<=OTA_DELAY_MAX?d:OTA_DELAY_DEFAULT,ownership_v10_enabled:!!c.ownership_v10_enabled};}
+// validate + save; returns '' or an error code: 'delay' (not an integer 1–24)
+function otaCountrySet(cc,patch){const cur=otaCountry(cc);const n=Object.assign({},cur,patch||{});
+ if(patch&&'delay_hours' in patch){const raw=String(patch.delay_hours).trim();if(!/^\d+$/.test(raw)||+raw<OTA_DELAY_MIN||+raw>OTA_DELAY_MAX)return 'delay';n.delay_hours=+raw;}
+ n.vat_local=String(n.vat_local||'').trim();n.rep_local=String(n.rep_local||'').trim();n.ownership_v10_enabled=!!n.ownership_v10_enabled;
+ otaCountries()[cc]=n;return '';}
+// template values for ONE country: only keys that are set (N/A → absent, never printed)
+function otaLocal(cc){const c=otaCountry(cc);const o={};const na=x=>!x||x.toUpperCase()==='N/A';if(!na(c.vat_local))o.OTA_VAT_LOCAL=c.vat_local;if(!na(c.rep_local))o.OTA_REP_LOCAL=c.rep_local;return o;}
+// demo per-country values shipped by the template agent (LEGAL_DEMO_VALUES.countries[CC].OTA_VAT_LOCAL / OTA_REP_LOCAL), fictional
+function otaCountryDemo(cc){const D=legalDemo();const c=D&&D.countries&&D.countries[cc]||{};return{vat_local:c.OTA_VAT_LOCAL||'',rep_local:c.OTA_REP_LOCAL||''};}
+function otaDelayHours(cc){return otaCountry(cc).delay_hours;}
+function ownershipEnabled(cc){return otaCountry(cc).ownership_v10_enabled;}
+
+/* ---------- UAE Central Bank USD→AED reference rates (ТЗ v10 2.2): S.fx.aed = [{date:'YYYY-MM-DD', usd_aed, src}] ----------
+   Every OTA Tax Invoice / Tax Credit Note stores the rate of its own date (inv.aedRate, inv.aedRateDate). Edited by OTA Finance (perm ota.vat). */
+const AED_DEMO_RATE=3.6725;
+function fxAed(){S.fx=S.fx||{};if(!Array.isArray(S.fx.aed))S.fx.aed=[];return S.fx.aed;}
+function aedRate(date){const d=String(date?(typeof date==='string'?date:iso(date)):iso(now())).slice(0,10);
+ const list=fxAed().slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);let r=null;list.forEach(x=>{if(x.date<=d)r=x;});
+ if(!r)r=list[0]||{date:d,usd_aed:AED_DEMO_RATE,src:'CBUAE (demo)'};return{rate:+r.usd_aed,date:r.date,src:r.src||''};}
+// add/replace the rate of a date; returns '' or 'date' | 'rate'
+function aedRateSet(date,rate,src){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||''))||isNaN(new Date(date)))return 'date';const r=parseFloat(String(rate).replace(',','.'));if(!(r>0)||r>100)return 'rate';
+ const list=fxAed();const ex=list.find(x=>x.date===date);const row={date,usd_aed:Math.round(r*1e6)/1e6,src:src||'CBUAE'};if(ex)Object.assign(ex,row);else list.push(row);list.sort((a,b)=>a.date<b.date?-1:1);return '';}
+const fmtAed=r=>{const x=+r;return isFinite(x)?String(Math.round(x*1e6)/1e6).replace(/^(\d+)$/,'$1.0'):'';};
 // hard fallback (ТЗ §3); the real seed merges LEGAL_DEMO_VALUES.ota from 60_legal_templates.js (see otaSeed)
 function otaDefaults(){return{OTA_NAME:'OTA TECHNOLOGY DMCC',OTA_REGNO:'DMCC100200',OTA_LICENCE:'DMCC-100200',OTA_TRN:'100000000000003',
  OTA_ADDR_EN:'Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Dubai, UAE',OTA_ADDR_L2:'',OTA_SIGNATORY:'Anna Petrova',OTA_SIGNATORY_L2_GEN:'',OTA_TITLE_EN:'Manager',OTA_TITLE_L2:'',OTA_TITLE_L2_GEN:'',
  OTA_BANK_BENEF:'OTA TECHNOLOGY DMCC',OTA_BANK_NAME:'Demo Bank PJSC',OTA_BANK_ADDR:'1 Demo Street, Business Bay, Dubai, UAE',OTA_BANK_ACCOUNT:'1234567890123',
  OTA_BANK_IBAN:'AE070331234567890123456',OTA_BANK_SWIFT:'DEMOAEADXXX',OTA_BANK_CUR:'USD',OTA_BANK_INTER:'',OTA_BANK_INTER_SWIFT:'',
- OTA_CUSTOMS_CODE:'',OTA_VAT_UA:'',OTA_VAT_KZ:'',OTA_REP_UA:'',OTA_REP_KZ:'',
- OTA_EMAIL_OPS:'',OTA_EMAIL_LEGAL:'',OTA_EMAIL_FIN:'',OTA_EMAIL_SUPPORT:'',OTA_EMAIL_PRIVACY:'',OTA_SUBPROC_EMAIL:'',OTA_SUBPROC_EMAIL_LOC:'',OTA_SUPPORT_HOURS:'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',CARD_DESCRIPTOR:''};}
+  OTA_EMAIL_OPS:'',OTA_EMAIL_LEGAL:'',OTA_EMAIL_FIN:'',OTA_EMAIL_SUPPORT:'',OTA_EMAIL_PRIVACY:'',OTA_SUBPROC_EMAIL:'',OTA_SUBPROC_EMAIL_LOC:'',OTA_SUPPORT_HOURS:'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',CARD_DESCRIPTOR:''};}
 // LEGAL_DEMO_VALUES is a const in 60_legal_templates.js (loaded later): read it lazily, guarded against the temporal dead zone
 function legalDemo(){try{return LEGAL_DEMO_VALUES;}catch(e){return null;}}
 function otaSeed(){const o=otaDefaults();try{const LD=legalDemo();if(LD&&LD.ota){const L=LD.ota;
-  Object.keys(L).forEach(k=>{if(k==='P_CODE')return;o[k]=L[k]==null?'':String(L[k]);});}}catch(e){}return o;}
-function otaVal(k){const v=S.ota&&S.ota[k];const s=v==null?'':String(v).trim();return s&&s.toUpperCase()!=='N/A'?s:null;} // null = N/A → hide
-function otaKeys(){const cc=Array.from(new Set(plCountries().concat(orgCountries())));return OTA_KEYS.concat(...cc.map(c=>OTA_CC_KEYS.map(p=>p+c)));}
+  Object.keys(L).forEach(k=>{if(k==='P_CODE'||otaRemovedKey(k))return;o[k]=L[k]==null?'':String(L[k]);});}}catch(e){}return o;}
+function otaVal(k){const v=S.ota&&S.ota[k];if(v&&typeof v==='object')return null;const s=v==null?'':String(v).trim();return s&&s.toUpperCase()!=='N/A'?s:null;} // null = N/A → hide
+function otaKeys(){return OTA_KEYS.slice();}   // per-country keys: otaLocal(cc)
 
 /* ---------- roles & demo users (ТЗ §9) ---------- */
 const ROLES={
@@ -202,7 +256,8 @@ function demoUsers(){const o=S.org||{};const u=S.user||{};return[
  {id:'u_p_admin',name:u.name||u.email||'Partner Admin',email:u.email||'',role:'p_admin'},
  {id:'u_p_sign',name:o.signatory||'Signatory',email:o.signatoryEmail||'',role:'p_sign',title:o.title||''},
  {id:'u_p_ops',name:o.opsName||'Operations',email:o.opsEmail||'',role:'p_ops'}];}
-function users(){return S.users&&S.users.length?S.users:demoUsers();}
+// HOOKS.users: fns returning extra users (e.g. dealers / installers from 80_ownership); appended once, by id
+function users(){const base=S.users&&S.users.length?S.users:demoUsers();const ex=[];(typeof HOOKS!=='undefined'&&HOOKS.users||[]).forEach(f=>{try{(f()||[]).forEach(u=>{if(u&&!base.some(b=>b.id===u.id)&&!ex.some(b=>b.id===u.id))ex.push(u);});}catch(e){}});return ex.length?base.concat(ex):base;}
 function actor(){const us=users();return us.find(u=>u.id===S.actor)||us.find(u=>u.role===(S.admin?'ota_admin':'p_admin'))||us[0];}
 function actorName(){const a=actor();return a?a.name:'';}
 function roleName(r){return t('c.role.'+r);}
@@ -287,6 +342,10 @@ function freshState(){return{v:3,lang:'uk',admin:false,clock:0,authed:false,
  resellers:[],        // [{id,name,type:'installer'|'shop'|'branch'|'dealer',city,contact,createdAt}]
  form:{},             // partner questionnaire {KEY:{value,status:'filled'|'empty'|'na',comment,by,at}} (legal module)
  templates:{},docs:[],statements:[],commissionInvoices:[], // legal / ops modules
+ fx:{aed:[]},         // UAE Central Bank USD→AED reference rates [{date,usd_aed,src}] (see aedRate)
+ subs:[],             // Direct Subscriptions (card payment on the portal, OTA = seller) [{id,iccid,imei,plan,cc,status:'active'|'cancelled',startedAt,paidUntil,autoRenew}]
+ subproc:null,        // sub-processor directory (Document 06 Annex 1), see subprocList() in 02_shared
+ notices:[],          // notices without signature [{id,type:'subproc'|'of_terminate',…}] (shown by the legal module)
  activity:[],         // [{ts,text}]
  ui:{}};}
 let S;
@@ -417,7 +476,7 @@ const ROUTES={};   // name -> {render(params)->html, nav:'key', auth:true}
 const NAVS=[];     // {key,label:()=>,icon,href,section,order,count:()=>}
 const ACT={};      // data-act handlers (arg, el, event)
 const FORM={};     // data-form submit handlers (formEl, event)
-const HOOKS={afterRender:[],onBoot:[],seedDemo:[]};
+const HOOKS={afterRender:[],onBoot:[],seedDemo:[],users:[],simDrawer:[]};   // simDrawer: fns(sim) → extra footer HTML in the SIM drawer
 function route(name,def){ROUTES[name]=Object.assign({auth:true},def);}
 function nav(def){NAVS.push(def);NAVS.sort((a,b)=>(a.order||0)-(b.order||0));}
 function parseHash(){const h=(location.hash||'').slice(1);if(!h)return{name:'',params:[]};const p=h.split('--');return{name:p[0],params:p.slice(1)};}

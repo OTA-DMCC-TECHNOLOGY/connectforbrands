@@ -5,8 +5,8 @@
   "en": "Pro Forma Invoice for Customs",
   "ru": "Проформа-инвойс для таможни"
  },
- "ver": "T-PF-v3",
- "effective": "2026-11-06",
+ "ver": "T-PF-v10",
+ "effective": "2026-11-07",
  "cls": "B",
  "blocks": [
   {
@@ -56,13 +56,35 @@
     ],
     [
      {
-      "en": "Exporter",
-      "ru": "Экспортёр",
+      "en": "Owner of the goods",
+      "ru": "Собственник товара",
       "bi": true
      },
      {
-      "en": "{{OTA_NAME}}, {{OTA_ADDR_EN}}\nReg. no. {{OTA_REGNO}} · TRN {{OTA_TRN}}",
-      "ru": "{{OTA_NAME}}, {{OTA_ADDR_EN}}\nReg. no. {{OTA_REGNO}} · TRN {{OTA_TRN}}"
+      "en": "{{OTA_NAME}}, {{OTA_ADDR_EN}}\nReg. no. {{OTA_REGNO}}",
+      "ru": "{{OTA_NAME}}, {{OTA_ADDR_EN}}\nReg. no. {{OTA_REGNO}}"
+     }
+    ],
+    [
+     {
+      "en": "Ship-from address",
+      "ru": "Адрес отправки",
+      "bi": true
+     },
+     {
+      "en": "{{SHIP_FROM_NAME}}, {{SHIP_FROM_ADDR}}, {{SHIP_FROM_COUNTRY}}",
+      "ru": "{{SHIP_FROM_NAME}}, {{SHIP_FROM_ADDR}}, {{SHIP_FROM_COUNTRY}}"
+     }
+    ],
+    [
+     {
+      "en": "Exporter of record and EORI",
+      "ru": "Экспортёр и EORI",
+      "bi": true
+     },
+     {
+      "en": "{{EXPORTER_EU}}, EORI no. {{EXPORTER_EORI}}",
+      "ru": "{{EXPORTER_EU}}, EORI no. {{EXPORTER_EORI}}"
      }
     ],
     [
@@ -89,13 +111,13 @@
     ],
     [
      {
-      "en": "Country of export / destination",
-      "ru": "Страна вывоза / назначения",
+      "en": "Country of dispatch / destination",
+      "ru": "Страна отправки / назначения",
       "bi": true
      },
      {
-      "en": "United Arab Emirates / {{CC_NAME_EN}}",
-      "ru": "United Arab Emirates / {{CC_NAME_EN}}"
+      "en": "{{SHIP_FROM_COUNTRY}} / {{CC_NAME_EN}}",
+      "ru": "{{SHIP_FROM_COUNTRY}} / {{CC_NAME_EN}}"
      }
     ],
     [
@@ -138,8 +160,8 @@
       "bi": true
      },
      {
-      "en": "Free-of-charge transfer into custody of SIM cards remaining the property of the exporter or its supplier, for installation in approved IoT devices; not for retail sale",
-      "ru": "Безвозмездная передача на хранение SIM-карт, остающихся собственностью экспортёра или его поставщика, для установки в одобренные IoT-устройства; не для розничной продажи",
+      "en": "Free-of-charge transfer into custody of SIM cards remaining the property of OTA or its supplier, for installation in approved IoT devices; not for retail sale",
+      "ru": "Безвозмездная передача на хранение SIM-карт, остающихся собственностью OTA или её поставщика, для установки в одобренные IoT-устройства; не для розничной продажи",
       "bi": true
      }
     ]
@@ -258,8 +280,8 @@
   {
    "id": "PF-p3",
    "kind": "para",
-   "en": "I declare that the information in this document is true and correct and is supported by the exporter's records.",
-   "ru": "Подтверждаю, что сведения в настоящем документе достоверны и подтверждаются документами экспортёра."
+   "en": "I declare that the information in this document is true and correct and is supported by the records of OTA as owner of the goods.",
+   "ru": "Подтверждаю, что сведения в настоящем документе достоверны и подтверждаются документами OTA как собственника товара."
   },
   {
    "id": "PF-sig3",

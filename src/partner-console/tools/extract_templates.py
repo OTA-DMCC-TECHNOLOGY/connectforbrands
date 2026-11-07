@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""Extract the CONNECT FOR BRANDS v09 DOCX templates into tokenised, paragraph-level
+"""Extract the CONNECT FOR BRANDS legal pack v10 DOCX templates into tokenised, paragraph-level
 bilingual (EN | RU) JSON templates + key catalogue + ARVELO demo values, generate
 src/modules/60_legal_templates.js, and run the verification suite.
+
+Private inputs (never committed): legal_src/private_values.json (gitignored) gives
+  "pack_dir": path of the DOCX pack (or env LEGAL_PACK_DIR), and
+  "replace": [[real, demo], ...] substitutions applied to every DOCX text run before extraction,
+so this script, the templates and the module only ever contain fictional demo values; the run
+aborts without writing if any real value would reach an output file.
 
 Usage:  python3 tools/extract_templates.py            (writes files, prints report)
         python3 tools/extract_templates.py --check    (verification only, no writes)
@@ -30,10 +36,24 @@ from docx.text.run import Run
 from docx.table import Table
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PACK = os.path.join(ROOT, 'legal_src', 'CONNECT_FOR_BRANDS_Legal_Pack_v09')
+# Real-value -> demo-value substitutions and the location of the private DOCX pack live in the gitignored
+# legal_src/private_values.json (never commit real OTA / partner requisites). See LEGAL_TEMPLATES_NOTES.md.
+PRIVATE_FILE = os.path.join(ROOT, 'legal_src', 'private_values.json')
+PRIVATE = json.load(open(PRIVATE_FILE)) if os.path.exists(PRIVATE_FILE) else {}
+PACK = os.environ.get('LEGAL_PACK_DIR') or PRIVATE.get('pack_dir') or os.path.join(ROOT, 'legal_src', 'CONNECT_FOR_BRANDS_Legal_Pack_v10')
+SANITIZE = sorted(PRIVATE.get('replace', []), key=lambda x: -len(x[0]))
+FORBIDDEN = [a for a, _ in SANITIZE] + PRIVATE.get('forbidden_extra', [])
+
+
+def sanitize(t):
+    for a, b in SANITIZE:
+        if a in t:
+            t = t.replace(a, b)
+    return t
 OUT = os.path.join(ROOT, 'legal_src', 'templates')
 MODULE = os.path.join(ROOT, 'src', 'modules', '60_legal_templates.js')
-EFFECTIVE = '2026-11-06'
+EFFECTIVE = '2026-11-07'
+TPL_VER = 'v10'   # template version suffix: T-<TYPE>-v10 (legal pack v10)
 CYR = re.compile('[Ѐ-ӿ]')
 
 # --------------------------------------------------------------------------------------
@@ -56,7 +76,9 @@ DOCS = [
     ('PF', '11', {'PF': P2 + '11_SIM_Customs_Pro_Forma.docx'}, 'B', 'Pro Forma Invoice for Customs', 'Проформа-инвойс для таможни'),
     ('SR', '12', {'SR': P2 + '12_SIM_Receipt_Custody_Acknowledgment.docx'}, 'B', 'SIM Receipt and Custody Acknowledgment', 'Акт приёмки SIM на хранение'),
     ('INV', '13', {'INV': P2 + '13_OTA_Invoice_Template.docx'}, 'B', 'Tax Invoice (OTA)', 'Налоговый счёт (счёт OTA)'),
+    ('CN', '13A', {'CN': P2 + '13A_OTA_Tax_Credit_Note_Template.docx'}, 'B', 'Tax Credit Note (OTA)', 'Налоговая кредит-нота (OTA)'),
     ('CI', '14', {'CI': P2 + '14_Partner_Commission_Invoice_Template.docx'}, 'B', 'Partner Commission Invoice', 'Счёт Партнёра на вознаграждение'),
+    ('CHG', 'E', {'CHG': P2 + 'E_Notice_Change_of_Details.docx'}, 'A', 'Notice of Change of Details', 'Уведомление об изменении реквизитов'),
 ]
 FORM_A = P2 + 'A_Partner_Data_Form.docx'
 PKG = {'TRT', 'SLA', 'BL', 'BOA', 'DPA', 'SIM'}   # package docs referring to the MPA
@@ -76,7 +98,7 @@ def read_para(p):
             segs[-1] = (segs[-1][0] + t, hl)
         else:
             segs.append((t, hl))
-    return segs
+    return [(sanitize(t), h) for t, h in segs]
 
 
 def cell_shade(c):
@@ -190,8 +212,10 @@ HL_RULES = [
     # --- document numbers / dates -------------------------------------------------------
     R('MPA', 'OTA-ARV-MPA-001-v1', '{{DOC_NO}}'),
     R(PKG, 'OTA-ARV-MPA-001-v1', '{{DOC_NO}}', before=r'(Ref\. |№ )$', label=r'^Document \d'),
+    R('CHG', 'OTA-ARV-MPA-001-v1', '{{DOC_NO}}', before=r'(Ref\. |№ )$', label=r'^Notice of Change'),   # own notice number
     R(ANY, 'OTA-ARV-MPA-001-v1', '{{DOC_NO_MPA}}'),
     R('MPA', '[DATE / ДАТА]', '{{DATE}}'),
+    R('MPA', B, '{{P_TAXNO}}', before=r'(tax no\.|налоговый №) $'),      # v10: ", tax no. [ ]" in Parties (ТЗ 2.4, wrapped below)
     R('OF', '[DATE / ДАТА]', '{{MPA_DATE}}'),
     R('OF', '[DATE]', '{{LAUNCH_DATE}}'), R('OF', '[ДАТА]', '{{LAUNCH_DATE}}'),
     R('BOA', '[DATE]', '{{DATE}}'), R('BOA', '[ДАТА]', '{{DATE}}'),
@@ -201,6 +225,12 @@ HL_RULES = [
       '[[BRAND_DOC_05A|Document 05A (Partner is the brand owner)]][[BRAND_DOC_05B|Document 05B (authorisation from brand owner)]]', kind='struct'),
     R('OF', 'Документ 05A (Партнёр – правообладатель) / Документ 05B (разрешение правообладателя)',
       '[[BRAND_DOC_05A|Документ 05A (Партнёр – правообладатель)]][[BRAND_DOC_05B|Документ 05B (разрешение правообладателя)]]', kind='struct'),
+    # v10 (ТЗ 2.4): 1.5 "none" or "the following: {list}"; 3.2 "not applicable" or "X% of payments received, not more than 3%"
+    R('OF', 'none', '[[OF_EXCEPTIONS_NONE|none]][[OF_EXCEPTIONS_EN|the following: {{OF_EXCEPTIONS_EN}}]]', before=r'platform\): $'),
+    R('OF', 'нет', '[[OF_EXCEPTIONS_NONE|нет]][[OF_EXCEPTIONS_L2|следующие: {{OF_EXCEPTIONS_L2}}]]', before=r'связи\): $'),
+    R('OF', 'not applicable', '[[FEE_NONE|not applicable]][[FEE_PCT|{{FEE_PCT}}% of payments received, not more than 3%]]'),
+    R('OF', 'не применяется', '[[FEE_NONE|не применяется]][[FEE_PCT|{{FEE_PCT}}% от полученных платежей, но не более 3%]]'),
+    # (v09 wording, kept for reference)
     R('OF', '[none / list of programmes, brands, device categories or countries]',
       '[[OF_EXCEPTIONS_EN|{{OF_EXCEPTIONS_EN}}]][[OF_EXCEPTIONS_NONE|none]]', kind='struct'),
     R('OF', '[нет / перечень программ, брендов, категорий устройств или стран]',
@@ -222,6 +252,7 @@ HL_RULES = [
     # --- 03 packaging annex: recommended wording keeps its placeholders literally ---------
     R('TRT', '[12/24/36/48/60]', None, kind='lit'), R('TRT', '[date]', None, kind='lit'),
     R('TRT', '[country]', None, kind='lit'), R('TRT', '[дата]', None, kind='lit'), R('TRT', '[страна]', None, kind='lit'),
+    R('TRT', '[serial]', '{serial}', kind='struct'), R('TRT', '[серийный]', '{serial}', kind='struct'),   # ТЗ part 5: print variable {serial}
     # --- 05A Brand Licence --------------------------------------------------------------------
     R('BL', B, '{{P_LOGO}}', label=r'^Logo files'),
     R('BL', '[as listed in Annex 1 to each Order Form / согласно Приложению 1 к каждому Заказу]', None, kind='lit'),
@@ -257,7 +288,12 @@ HL_RULES = [
     R('PF', B, '{{DATE}}', label=r'^Date /'),
     R('PF', B, '{{SHIP_CONSIGNEE}}', label=r'^Consignee'),
     R('PF', B, '{{SHIP_IMPORTER}}', label=r'^Importer of record'),
-    R('PF', B, '{{CC_NAME_EN}}', label=r'^Country of export'),
+    R('PF', B, '{{CC_NAME_EN}}', label=r'^Country of (export|dispatch)'),
+    R('PF', '[EU country / страна ЕС]', '{{SHIP_FROM_COUNTRY}}'),
+    R('PF', '[Warehouse name, street, postcode, city, EU country / Склад, улица, индекс, город, страна ЕС]',
+      '{{SHIP_FROM_NAME}}, {{SHIP_FROM_ADDR}}, {{SHIP_FROM_COUNTRY}}', kind='struct'),
+    R('PF', '[Supplier / logistics provider acting for OTA, EORI no. / Поставщик или логист от имени OTA, № EORI]',
+      '{{EXPORTER_EU}}, EORI no. {{EXPORTER_EORI}}', kind='struct'),
     R('PF', '[named place / адрес]', '{{SHIP_PLACE}}'),
     R('PF', B, '{{SHIP_WAYBILL}}', label=r'^Carrier'),
     R('PF', B, '{{DOC_NO_OF}}', label=r'^Related documents'),
@@ -287,7 +323,20 @@ HL_RULES = [
     R('SR', '[Name of person receiving]', '{{SR_RECEIVER_NAME}}'),
     R('SR', '[Title / Должность]', '{{SR_RECEIVER_TITLE}}'),
     # --- 13 INV ----------------------------------------------------------------------------------
-    R('INV', B, '{{P_TAXNO}}', before=r'Tax / VAT no\. $'),
+    R({'INV', 'CN'}, B, '{{P_TAXNO}}', before=r'Tax / VAT no\. $'),
+    R({'INV', 'CN'}, B, '{{AED_RATE}}', before=r'(rate|курсу ЦБ ОАЭ) $'),
+    R({'INV', 'CN'}, '0.00', None, kind='lit'),          # VAT amount in AED is always 0.00 (ТЗ 2.2/2.3)
+    # --- 13A CN -----------------------------------------------------------------------------------
+    R('CN', B, '{{CN_DATE}}', col=r'^Date /'),
+    R('CN', B, '{{CN_INV_DATE}}', before=r'от $'),
+    R('CN', B, '{{CN_SUBTOTAL}}', label=r'^\|Subtotal credited'),
+    R('CN', B, '{{CN_TOTAL}}', label=r'^\|Total credited'),
+    # --- E CHG ------------------------------------------------------------------------------------
+    R('CHG', '[Party name]', '{{CHG_PARTY_NAME}}'), R('CHG', '[наименование Стороны]', '{{CHG_PARTY_NAME}}'),
+    R('CHG', '[DATE]', '{{CHG_EFFECTIVE_DATE}}'), R('CHG', '[ДАТА]', '{{CHG_EFFECTIVE_DATE}}'),
+    R('CHG', 'ARVELO LIMITED', '{{CHG_SIG_COMPANY}}', label=r'^Company'),
+    R('CHG', 'Daniel Hart', '{{CHG_SIG_NAME}}', label=r'^Name'),
+    R('CHG', 'Director', '{{CHG_SIG_TITLE_EN}}', label=r'^Title'), R('CHG', 'Директор', '{{CHG_SIG_TITLE_L2}}', label=r'^Title'),
     R('INV', B, '{{DATE}}', col=r'^Invoice date'),
     R('INV', B, '{{DUE_DATE}}', col=r'^Due date'),
     R('INV', '[CC-NNN-vN]', None),  # covered by forced span (DOC_NO_OF)
@@ -329,6 +378,12 @@ FORCED = [
     R(ANY, 'privacy@example.com [подтвердить]', '{{OTA_EMAIL_PRIVACY}}'),
     # composite references
     R('INV', 'OTA-ARV-OF-[CC-NNN-vN]', '{{DOC_NO_OF}}', kind='struct'),
+    R('CN', 'OTA-CN-[YYYY-NNNNNN]', '{{CN_NUMBER}}'),
+    R('CHG', 'Notice of Change of Details (template) · Ref.', 'Notice of Change of Details · Ref.', kind='struct'),   # drafting marker dropped
+    R('CN', 'OTA-INV-[YYYY-NNNNNN]', '{{CN_INV_NUMBER}}'),
+    # 14: statement reference(s) (ТЗ 2.1: OTA-{PARTNER}-RS-{CC}-{YYYYMM}, one invoice may cite several statements)
+    R('CI', 'OTA-ARV-RS-[CC-YYYYMM]', '{{RS_NO}}', kind='struct'),
+    R('CI', 'OTA-RS-ARV-[ГГГГММ]', '{{RS_NO}}', kind='struct'),
     # OTA signatory / title in prose
     R('MPA', 'represented by its Manager, Anna Petrova', 'represented by its {{OTA_TITLE_EN}}, {{OTA_SIGNATORY}}'),
     R('MPA', 'в лице менеджера Анны Петровой', 'в лице {{OTA_TITLE_L2_GEN}} {{OTA_SIGNATORY_L2_GEN}}'),
@@ -378,20 +433,74 @@ SIG_TITLE = {('en', 'Manager'): '{{OTA_TITLE_EN}}', ('ru', 'Менеджер'): 
 # Conditional wraps applied to tpl AND rt (text exists in the source, depends on N/A-able key)
 WRAPS = [
     (ANY, re.compile(r'\nTax / VAT no\. \{\{P_TAXNO\}\}'), '[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]'),
+    (ANY, re.compile(r', tax no\. \{\{P_TAXNO\}\}'), '[[P_TAXNO|, tax no. {{P_TAXNO}}]]'),
+    (ANY, re.compile(r', налоговый № \{\{P_TAXNO\}\}'), '[[P_TAXNO|, налоговый № {{P_TAXNO}}]]'),
     (ANY, re.compile(r'\nIntermediary / банк-посредник: \{\{P_BANK_INTERMEDIARY\}\}'),
      '[[P_BANK_INTERMEDIARY|\nIntermediary / банк-посредник: {{P_BANK_INTERMEDIARY}}]]'),
 ]
 # Additions to tpl only (ТЗ §4 example; hidden for ARVELO because P_TAXNO is N/A there) -> lawyer check
-ADDS = [
-    ('MPA', 'en', 'company no. {{P_REGNO}}, address:', 'company no. {{P_REGNO}}[[P_TAXNO|, tax no. {{P_TAXNO}}]], address:'),
-    ('MPA', 'ru', 'регистрационный № {{P_REGNO}}, адрес:', 'регистрационный № {{P_REGNO}}[[P_TAXNO|, налоговый № {{P_TAXNO}}]], адрес:'),
-]
+ADDS = []   # v10: the MPA ", tax no." fragment is now in the DOCX (see WRAPS)
+
+CHOICE_TEXTS = {'none', 'нет', 'not applicable', 'не применяется'}
+WTBA = '[wording to be approved]'
+ADDITION_LOG = []
+
+
+def apply_additions(templates):
+    """Blocks / rows mandated by ТЗ v10 that are not in the DOCX (shown only when their key is set)."""
+    def find(t, bid):
+        return next(i for i, b in enumerate(t['blocks']) if b['id'] == bid)
+    # OF: "This version replaces…" paragraph before section 1, only for versions v2+ (ТЗ 2.4, criteria 5 / 22)
+    of = templates['OF']
+    of['blocks'].insert(find(of, 'OF-s1'), {
+        'id': 'OF-replaces', 'kind': 'para', 'cond': 'OF_SUPERSEDES',
+        'en': 'This version replaces Order Form No. {{OF_SUPERSEDES}} from {{OF_EFFECTIVE}} under clause 16.5 of the Master Agreement. '
+              'Orders paid before that date remain governed by the version under which they were paid.',
+        'ru': 'Настоящая версия заменяет Заказ № {{OF_SUPERSEDES}} с {{OF_EFFECTIVE}} согласно п. 16.5 Рамочного соглашения. '
+              'Заказы, оплаченные до этой даты, регулируются версией, по которой они были оплачены.'})
+    ADDITION_LOG.append(('OF', 'OF-replaces', 'cond OF_SUPERSEDES', 'ТЗ 2.4 wording'))
+    # OF: OTA requisites rows (ТЗ 2.6) - no approved label wording exists
+    t3 = next(b for b in of['blocks'] if b.get('rows') and b['rows'][1][0].get('en') == 'Beneficiary')
+    for key in ('OTA_VAT_LOCAL', 'OTA_REP_LOCAL'):
+        t3.setdefault('rowCond', {})[str(len(t3['rows']))] = key
+        t3['rows'].append([{'en': WTBA, 'ru': WTBA}, {'en': '{{%s}}' % key, 'ru': '{{%s}}' % key}, {'en': '', 'ru': ''}])
+        ADDITION_LOG.append(('OF', t3['id'], 'row if ' + key, 'label ' + WTBA))
+    # EUT: Country Schedule rows (ТЗ 2.6)
+    eut = templates['EUT']
+    t1 = next(b for b in eut['blocks'] if b.get('rows') and b['rows'][0][0].get('en') == 'Item')
+    for key, label in (('OTA_VAT_LOCAL', {'en': WTBA, 'ru': WTBA}),
+                       ('OTA_REP_LOCAL', {'en': "OTA's representative in your country", 'ru': 'Представитель OTA в вашей стране', 'bi': True})):
+        t1.setdefault('rowCond', {})[str(len(t1['rows']))] = key
+        t1['rows'].append([label, {'en': '{{%s}}' % key, 'ru': '{{%s}}' % key}])
+        ADDITION_LOG.append(('EUT', t1['id'], 'row if ' + key, 'label ' + (label['en'] if label['en'] == WTBA else 'ТЗ 2.6 wording (08 cl. 1.3)')))
+    # PN: clause 1.3 OTA's representative (ТЗ 2.6 wording)
+    pn = templates['PN']
+    pn['blocks'].insert(find(pn, 'PN-1.2') + 1, {
+        'id': 'PN-1.3', 'kind': 'clause', 'cond': 'OTA_REP_LOCAL',
+        'en': "1.3 OTA's representative in your country: {{OTA_REP_LOCAL}}", 'ru': '1.3 Представитель OTA в вашей стране: {{OTA_REP_LOCAL}}'})
+    ADDITION_LOG.append(('PN', 'PN-1.3', 'cond OTA_REP_LOCAL', 'ТЗ 2.6 wording'))
+
 
 # Repeat rows (lists): (type, header-cell-0 prefix) -> list name, item keys
 REPEATS = {
     ('OF', 'Brand / Бренд'): ('DEVICES', ['DEV_BRAND', 'DEV_MODEL', 'DEV_HW', 'DEV_FW', 'DEV_PLAN', 'DEV_MB', 'DEV_SIM']),
     ('BL', 'Mark / Знак'): ('P_TM_LIST', ['TM_MARK', 'TM_REGNO', 'TM_COUNTRIES', 'TM_CLASSES']),
     ('BOA', 'Mark / Знак'): ('P_TM_LIST', ['TM_MARK', 'TM_REGNO', 'TM_COUNTRIES', 'TM_CLASSES']),
+    ('CN', 'No. / №'): ('CN_LINES', ['CN_LINE_NO', {'en': '{{CN_LINE_DESC_EN}}', 'ru': '{{CN_LINE_DESC_L2}}', 'bi': True},
+                                    'CN_LINE_QTY', 'CN_LINE_PRICE', {'en': '–{{CN_LINE_AMOUNT}}', 'ru': '–{{CN_LINE_AMOUNT}}'}], 1),
+    ('CHG', 'Detail / Реквизит'): ('CHG_LIST', ['CHG_LABEL', 'CHG_OLD', 'CHG_NEW']),
+}
+# Whole-cell replacements (type, exact source cell text) -> template cell; RT keeps the source literal (struct)
+CN_REASON_TXT = collections.OrderedDict([
+    ('cancel_unpaid', ('Cancellation of an unpaid invoice', 'Отмена неоплаченного счёта')),
+    ('error', ('Correction of an error', 'Исправление ошибки')),
+    ('refund', ('Refund under clause 4.3 of Document 03 or clause 10.3 of the Master Agreement', 'Возврат по п. 4.3 Документа 03 или п. 10.3 Рамочного соглашения')),
+])
+CELL_OVERRIDES = {
+    ('CN', '[Cancellation of an unpaid invoice / Correction of an error / Refund under clause 4.3 of Document 03 or clause 10.3 of the Master Agreement – '
+           'Отмена неоплаченного счёта / Исправление ошибки / Возврат по п. 4.3 Документа 03 или п. 10.3 Рамочного соглашения]'):
+        {'en': ''.join('[[CN_REASON_%s|%s]]' % (c.upper(), e) for c, (e, r) in CN_REASON_TXT.items()),
+         'ru': ''.join('[[CN_REASON_%s|%s]]' % (c.upper(), r) for c, (e, r) in CN_REASON_TXT.items()), 'bi': True},
 }
 # Row conditions: (type, row label prefix) -> key
 ROW_COND = {
@@ -399,7 +508,7 @@ ROW_COND = {
     ('DPA', '{{OTA_SUBPROC_EMAIL}}'): 'OTA_SUBPROC_EMAIL',
     ('INV', '3'): 'INV_OTHER_DESC',
 }
-NO_SPLIT = [re.compile(r'^\d+ months / мес\.$'), re.compile(r'^VAT / НДС ')]
+NO_SPLIT = [re.compile(r'^\d+ months / мес\.$'), re.compile(r'^VAT / НДС '), re.compile(r' of / от ')]
 
 # RS: tokens for empty value cells (filled by the ops module)
 RS_A_LINES = ['MONTHS', 'GROSS', 'TAX', 'ACQ', 'REFUNDS', 'FEE', 'NCR', 'RETAINED', 'CORR', 'COMMISSION']
@@ -615,7 +724,7 @@ def build(typ, variant, path):
                 shade = en_c['shade']
                 if first and ri == 0:
                     kind, bid = 'heading', '%s-title' % typ
-                elif first and ri == 1 and oen.startswith('Document '):
+                elif first and ri == 1 and (oen.startswith('Document ') or typ == 'CHG'):
                     kind, bid = 'para', '%s-ref' % typ
                 elif shade in ('F3F3F3', 'E8ECF2'):
                     kind = 'annex' if re.match(r'^(Annex|Country Schedule)', oen) else 'heading'
@@ -655,6 +764,7 @@ def build(typ, variant, path):
         kind = 'signature' if sig else 'table'
         bid = uid('%s-%s%d' % (typ, 'sig' if sig else 't', tcount))
         rep = REPEATS.get((typ, hdr0))
+        rep_n = (rep[2] if rep and len(rep) > 2 else 10 ** 6)
         trows, rtrows, orows = [], [], []
         rowcond = {}
         rs_tbl = None
@@ -669,14 +779,20 @@ def build(typ, variant, path):
             for ci, c in enumerate(r):
                 col = cell_text(rows[0][ci]) if ri > 0 else ''
                 ctx = {'label': label if ci > 0 else '', 'col': col, 'sig': sig}
-                if ri > 0 and ci > 0 and len(r) > 2 and typ in ('INV', 'CI') and label == '':
+                if ri > 0 and ci > 0 and len(r) > 2 and typ in ('INV', 'CI', 'CN') and label == '':
                     ctx['label'] = '|' + cell_text(r[1])
                 oc = cell_text(c)
                 ocells.append(oc)
-                if rep and ri > 0:
+                if rep and 0 < ri <= rep_n:
                     k = rep[1][ci]
-                    tcells.append({'en': '{{%s}}' % k, 'ru': '{{%s}}' % k})
+                    tcells.append(dict(k) if isinstance(k, dict) else {'en': '{{%s}}' % k, 'ru': '{{%s}}' % k})
                     rcells.append(None)
+                    continue
+                ov = CELL_OVERRIDES.get((typ, oc))
+                if ov:
+                    STRUCT_LOG.append((variant, 'cell', oc, json.dumps(ov, ensure_ascii=False)))
+                    tcells.append(dict(ov))
+                    rcells.append({'en': oc, 'ru': oc})
                     continue
                 if rs_tbl and ri > 0 and ci > 0 and oc == '':
                     if rs_tbl == 'A':
@@ -704,8 +820,8 @@ def build(typ, variant, path):
                     a1, r1 = tok_cell_paras(typ, variant, c['paras'], 'en', ctx)
                     tcells.append({'en': a1, 'ru': a1})
                     rcells.append({'en': r1, 'ru': r1})
-            if rep and ri > 0:
-                rep_items.append(dict(zip(rep[1], ocells)))
+            if rep and 0 < ri <= rep_n:
+                rep_items.append(dict(zip(range(len(ocells)), ocells)))
                 if ri == 1:
                     trows.append(tcells)
                     rtrows.append(None)
@@ -725,7 +841,7 @@ def build(typ, variant, path):
         if rep:
             b['repeat'] = {'row': 1, 'list': rep[0]}
         blocks.append(b)
-        rt_blocks.append({'rows': rtrows, 'repeat': rep, 'items': rep_items})
+        rt_blocks.append({'rows': rtrows, 'repeat': rep, 'items': rep_items, 'rep_n': rep_n})
         orig_blocks.append({'rows': orows})
     return blocks, rt_blocks, orig_blocks
 
@@ -805,7 +921,8 @@ def k(key, label, src, req='required', tz=True, fmt=None, pair=None, note=None):
 k('P_NAME', 'Полное наименование партнёра', 'partner')
 k('P_FORM_EN', 'Форма и страна учреждения (англ.)', 'partner', pair='P_FORM')
 k('P_FORM_L2', 'Форма и страна учреждения (второй язык)', 'partner', pair='P_FORM')
-k('P_COUNTRY', 'Страна регистрации (ISO)', 'partner', note='не выводится в текстах; влияет на НДС в счёте 13')
+k('P_COUNTRY', 'Страна регистрации (ISO)', 'partner', note='не выводится в текстах; AE/SA/QA/KW/BH/OM (ССАГПЗ) – регистрация блокируется (ТЗ v10 1.1); НДС в счёте всегда 0%')
+k('P_GCC_CONFIRM', 'Подтверждение: компания не учреждена, не резидент, не зарегистрирована по НДС и не имеет постоянного представительства в странах ССАГПЗ (обязательная отметка)', 'partner', fmt='bool', note='ТЗ v10 1.1; не выводится в текстах (МПА п. 2.6 – текст заверения)')
 k('P_REGNO', 'Регистрационный номер', 'partner')
 k('P_TAXNO', 'Налоговый / VAT-номер', 'partner', req='na')
 k('P_ADDR_EN', 'Юридический адрес (англ.)', 'partner', pair='P_ADDR')
@@ -876,9 +993,9 @@ k('OTA_EMAIL_FIN', 'OTA: e-mail финансов', 'ota')
 k('OTA_EMAIL_PRIVACY', 'OTA: e-mail по персональным данным', 'ota')
 k('OTA_EMAIL_SUPPORT', 'OTA: e-mail поддержки (вторая линия)', 'ota', note='не выводится в текстах v09 (04 п. 7.1 ссылается на «адрес поддержки OTA» без значения)')
 k('OTA_SUPPORT_HOURS', 'OTA: часы поддержки', 'ota', note='не выводится: 04 п. 7.1 содержит часы прозой (литерал)')
-k('OTA_CUSTOMS_CODE', 'OTA: код Dubai Customs', 'ota', req='na', note='не используется в текстах v09 – нужна формулировка юриста (проформа 11)')
-k('OTA_VAT_{CC}', 'OTA: регистрация по НДС в стране CC', 'ota', req='na', note='не используется в текстах v09 – нужна формулировка юриста')
-k('OTA_REP_{CC}', 'OTA: представитель в стране CC (имя, адрес)', 'ota', req='na', note='не используется в текстах v09 – нужна формулировка юриста')
+# OTA_CUSTOMS_CODE removed in v10 (ТЗ 1.2: SIMs never shipped to/through the UAE)
+k('OTA_VAT_LOCAL', 'OTA: налоговая регистрация в стране документа (по стране, S.ota.countries[CC].vat_local)', 'country', req='na', note='ТЗ v10 2.6: выводится только если задано – строка Странового приложения 07, строка реквизитов Заказа')
+k('OTA_REP_LOCAL', 'OTA: представитель в стране документа (по стране, S.ota.countries[CC].rep_local)', 'country', req='na', note='ТЗ v10 2.6: выводится только если задано – Страновое приложение 07, п. 1.3 Документа 08, строка реквизитов Заказа')
 k('OTA_SUBPROC_EMAIL', 'OTA: почтовый сервис-субобработчик (06, прил. 1)', 'ota', req='na', tz=False)
 k('OTA_SUBPROC_EMAIL_LOC', 'OTA: расположение почтового субобработчика', 'ota', req='na', tz=False)
 k('CARD_DESCRIPTOR', 'Дескриптор в выписке по карте (OTA*БРЕНДCONNECT)', 'ota', tz=False)
@@ -913,7 +1030,9 @@ for pl in ('LIGHT', 'STANDARD', 'PREMIUM'):
         k('TOK_%s_%d' % (pl, tm), 'Цена токена %s, %d мес., USD' % (pl.title(), tm), 'commercial', fmt='usd')
     k('RET_%s' % pl, 'Удерживаемая OTA сумма %s за оплаченный месяц, USD' % pl.title(), 'commercial', fmt='usd')
 k('FEE_PCT', 'Сбор на соблюдение страновых требований, % (0–3)', 'commercial', req='na', fmt='pct')
-k('FEE_NONE', 'Флаг: сбора нет', 'system', req='auto', tz=False, note='= FEE_PCT пусто/0/N/A')
+k('FEE_NONE', 'Флаг: сбора нет', 'system', req='auto', tz=False, note='= FEE_PCT пусто/0/N/A; FEE_PCT > 3 не принимать (ТЗ 2.4)')
+k('OF_SUPERSEDES', 'Номер заменяемой версии Заказа (только версии v2+)', 'system', req='auto', tz=False, note='абзац OF-replaces выводится только если задано (ТЗ 2.4, критерий 5/22)')
+k('OF_EFFECTIVE', 'Дата вступления в силу новой версии Заказа', 'system', req='auto', tz=False, fmt='date')
 # system / document
 k('DOC_NO', 'Номер документа (присваивает портал)', 'system', req='auto')
 k('DOC_NO_MPA', 'Номер Рамочного соглашения', 'system', req='auto')
@@ -924,12 +1043,16 @@ k('DATE', 'Дата документа', 'system', req='auto', fmt='date')
 k('MPA_DATE', 'Дата Рамочного соглашения', 'system', req='auto', fmt='date')
 k('EFFECTIVE_DATE', 'Дата вступления в силу / обновления', 'system', req='auto', fmt='date')
 k('DUE_DATE', 'Срок оплаты', 'invoice', req='auto', fmt='date')
+k('AED_RATE', 'Курс ЦБ ОАЭ USD→AED на дату счёта / кредит-ноты (хранится с документом)', 'invoice', req='auto', tz=False, fmt='rate', note='ТЗ v10 2.2; счёт 13 и кредит-нота 13A')
 k('LANG2_NAME_EN', 'Название второго языка по-английски (строка о языке)', 'system', req='auto', tz=False)
 k('LANG2_NAME_L2', 'Название второго языка на нём самом, форма для строки о языке («русском»)', 'system', req='auto', tz=False)
 # public docs (07) country schedule
 for kk, lab in [('EUT_LANGS', 'Языки публикации'), ('EUT_WITHDRAWAL', 'Правила отказа и возврата для потребителей'), ('EUT_CONSUMER_AUTH', 'Орган по защите прав потребителей'), ('EUT_DP_AUTH', 'Орган по защите персональных данных'), ('EUT_OTHER', 'Иная обязательная информация')]:
     k(kk, '07 страновое приложение: ' + lab, 'country', req='optional' if kk in ('EUT_WITHDRAWAL', 'EUT_OTHER') else 'required', tz=False)
 # shipments (PF 11 / SR 12)
+for kk, lab in [('SHIP_FROM_NAME', 'Склад отправки в ЕС: название'), ('SHIP_FROM_ADDR', 'Склад отправки: адрес (улица, индекс, город)'), ('SHIP_FROM_COUNTRY', 'Склад отправки: страна ЕС'),
+                ('EXPORTER_EU', 'Экспортёр в декларации (поставщик или логист от имени OTA)'), ('EXPORTER_EORI', 'Экспортёр: номер EORI')]:
+    k(kk, 'Отгрузка (v10): ' + lab, 'shipment', tz=False)
 for kk, lab in [('SHIP_CONSIGNEE', 'Грузополучатель и адрес доставки'), ('SHIP_IMPORTER', 'Импортёр и налоговый номер'), ('SHIP_PLACE', 'Место поставки DAP'), ('SHIP_WAYBILL', 'Перевозчик и накладная'), ('SHIP_FORM_FACTOR', 'Форм-фактор SIM'), ('SHIP_ORIGIN', 'Происхождение SIM'), ('SHIP_QTY', 'Количество SIM'), ('SHIP_UNIT_VALUE', 'Таможенная стоимость за ед., USD'), ('SHIP_TOTAL_VALUE', 'Итого таможенная стоимость, USD'), ('SHIP_CARTONS', 'Количество коробок'), ('SHIP_GROSS_KG', 'Вес брутто, кг'), ('SHIP_NET_KG', 'Вес нетто, кг'), ('SHIP_ICCID_REF', 'Ссылка на перечень ICCID'), ('SHIP_ICCID_RANGE', 'Диапазон ICCID')]:
     k(kk, 'Отгрузка: ' + lab, 'shipment', tz=False)
 for kk, lab in [('SR_DELIVERY', 'дата и адрес доставки'), ('SR_IMPORTER_DECL', 'импортёр и № таможенной декларации'), ('SR_STORAGE', 'место хранения и ответственное лицо'), ('SR_SIM_TYPE', 'тип SIM'), ('SR_RECEIVED', 'получено, шт.'), ('SR_DIFF', 'расхождение, шт.'), ('SR_RECEIVER_NAME', 'ФИО принявшего'), ('SR_RECEIVER_TITLE', 'должность принявшего')]:
@@ -942,7 +1065,33 @@ for kk, lab in [('INV_KEY_QTY', 'ключи: кол-во'), ('INV_KEY_PRICE', '�
 # commission invoice 14
 for kk, lab in [('CI_AMOUNT', 'сумма вознаграждения, USD'), ('CI_VAT_TREATMENT', 'режим НДС (по заключению консультанта партнёра)'), ('CI_VAT_AMOUNT', 'сумма НДС'), ('CI_TOTAL', 'итого к оплате')]:
     k(kk, 'Счёт партнёра: ' + lab, 'invoice', tz=False)
+# credit note 13A
+k('CN_NUMBER', 'Номер кредит-ноты OTA-CN-YYYY-NNNNNN (сквозной, не переиспользуется)', 'invoice', req='auto', tz=False)
+k('CN_DATE', 'Дата кредит-ноты', 'invoice', req='auto', tz=False, fmt='date')
+k('CN_INV_NUMBER', 'Исходный счёт: номер OTA-INV-…', 'invoice', req='auto', tz=False)
+k('CN_INV_DATE', 'Исходный счёт: дата', 'invoice', req='auto', tz=False, fmt='date')
+k('CN_REASON', 'Основание: cancel_unpaid | error | refund (тексты ТЗ 2.3)', 'invoice', tz=False, note='управляет флагами CN_REASON_CANCEL_UNPAID / CN_REASON_ERROR / CN_REASON_REFUND')
+for c in CN_REASON_TXT:
+    k('CN_REASON_' + c.upper(), 'Флаг: основание кредит-ноты = ' + c, 'system', req='auto', tz=False, note='= (CN_REASON == "%s")' % c)
+k('CN_LINES', 'Строки кредит-ноты (список; суммы без знака – знак «–» в шаблоне)', 'invoice', fmt='list', tz=False)
+for kk, lab in [('CN_LINE_NO', '№'), ('CN_LINE_DESC_EN', 'описание (англ., из исходного счёта)'), ('CN_LINE_DESC_L2', 'описание (второй язык)'),
+                ('CN_LINE_QTY', 'кол-во'), ('CN_LINE_PRICE', 'цена USD'), ('CN_LINE_AMOUNT', 'сумма USD без знака')]:
+    k(kk, 'Строка кредит-ноты: %s (элемент CN_LINES)' % lab, 'invoice', fmt='item', tz=False)
+k('CN_SUBTOTAL', 'Кредит-нота: итого к уменьшению без НДС (без знака)', 'invoice', req='auto', tz=False)
+k('CN_TOTAL', 'Кредит-нота: итого к уменьшению (без знака)', 'invoice', req='auto', tz=False)
+# notice of change of details (E)
+k('CHG_PARTY_NAME', 'Уведомление E: наименование уведомляющей Стороны', 'notice', tz=False)
+k('CHG_EFFECTIVE_DATE', 'Уведомление E: дата вступления изменения в силу', 'notice', tz=False, fmt='date')
+k('CHG_LIST', 'Уведомление E: изменения (список: реквизит, прежнее, новое)', 'notice', fmt='list', tz=False)
+for kk, lab in [('CHG_LABEL', 'реквизит'), ('CHG_OLD', 'прежнее значение'), ('CHG_NEW', 'новое значение')]:
+    k(kk, 'Уведомление E: %s (элемент CHG_LIST)' % lab, 'notice', fmt='item', tz=False)
+k('CHG_SIG_COMPANY', 'Уведомление E: подпись – компания (уведомляющая Сторона)', 'notice', tz=False)
+k('CHG_SIG_NAME', 'Уведомление E: подпись – ФИО подписанта', 'notice', tz=False)
+k('CHG_SIG_TITLE_EN', 'Уведомление E: подпись – должность (англ.)', 'notice', tz=False, pair='CHG_SIG_TITLE')
+k('CHG_SIG_TITLE_L2', 'Уведомление E: подпись – должность (второй язык)', 'notice', tz=False, pair='CHG_SIG_TITLE')
+k('{serial}', 'Серийный номер токена в тексте упаковки (Документ 03, приложение) – переменная печати, не ключ шаблона', 'print', req='auto', tz=False, note='в шаблоне TRT остаётся литералом {serial}; подставляется при печати карт')
 # statement 10
+k('RS_NO', 'Номер(а) акта(ов) сверки OTA-{P}-RS-{CC}-{YYYYMM} через запятую (счёт партнёра 14)', 'statement', req='auto', tz=False)
 k('RS_MONTH', 'Отчётный месяц (ГГГГ-ММ)', 'statement', req='auto', tz=False)
 k('RS_YYYYMM', 'Отчётный месяц (ГГГГММ, для номера акта)', 'statement', req='auto', tz=False)
 RS_A_LAB = ['Оплаченные месяцы подписки', 'Валовые поступления', 'Минус косвенные налоги', 'Минус эквайринг', 'Минус возвраты и chargeback', 'Минус страновой сбор', 'Чистая собранная выручка', 'Минус удерживаемая OTA сумма', 'Корректировки за прошлые месяцы', 'Вознаграждение Партнёра']
@@ -1007,7 +1156,6 @@ def make_values(form):
         'OTA_EMAIL_OPS': 'ops@example.com', 'OTA_EMAIL_LEGAL': 'legal@example.com',
         'OTA_EMAIL_FIN': 'finance@example.com', 'OTA_EMAIL_PRIVACY': 'privacy@example.com', 'OTA_EMAIL_SUPPORT': None,
         'OTA_SUPPORT_HOURS': 'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',
-        'OTA_CUSTOMS_CODE': None, 'OTA_VAT_UA': None, 'OTA_VAT_KZ': None, 'OTA_REP_UA': None, 'OTA_REP_KZ': None,
         'OTA_SUBPROC_EMAIL': None, 'OTA_SUBPROC_EMAIL_LOC': None,
         'P_CODE': 'ARV', 'CARD_DESCRIPTOR': 'OTA*ARVELOCONNECT',
     }
@@ -1017,19 +1165,38 @@ def make_values(form):
               CC_EXCLUSION_L2='за исключением временно оккупированных территорий',
               OF_EXCEPTIONS_EN=None, OF_EXCEPTIONS_L2=None, LAUNCH_DATE=None,
               INIT_SIMS=1000, INIT_KEYS=1000, INIT_TOKENS=300, ANNUAL_TARGET=3000, FEE_PCT=None,
-              DEVICES=[], DOC_NO='OTA-ARV-OF-UA-001-v1')
+              DEVICES=[], DOC_NO='OTA-ARV-OF-UA-001-v1',
+              OTA_VAT_LOCAL='DEMO-UA-VAT-000001', OTA_REP_LOCAL=None)   # fictional demo values (ТЗ 2.6: per country)
     ua.update(demo_prices(9.85, 75, 99, 1.2, 45.0564))
     kz = dict(CC='KZ', CC_NAME_EN='Kazakhstan', CC_NAME_L2='Казахстан', CC_NAME_UPPER_EN='KAZAKHSTAN', CC_NAME_UPPER_L2='КАЗАХСТАН',
               CC_NAME_FULL_EN='Republic of Kazakhstan', CC_NAME_FULL_L2='Республика Казахстан', CC_NAME_LOC_L2='Казахстане',
               CC_EXCLUSION_EN=None, CC_EXCLUSION_L2=None,
               OF_EXCEPTIONS_EN=None, OF_EXCEPTIONS_L2=None, LAUNCH_DATE=None,
               INIT_SIMS=1000, INIT_KEYS=1000, INIT_TOKENS=300, ANNUAL_TARGET=3000, FEE_PCT=None,
-              DEVICES=[], DOC_NO='OTA-ARV-OF-KZ-001-v1')
+              DEVICES=[], DOC_NO='OTA-ARV-OF-KZ-001-v1',
+              OTA_VAT_LOCAL=None, OTA_REP_LOCAL='Demo Representative LLP, 1 Demo Avenue, Almaty, Kazakhstan')
     kz.update(demo_prices(9.40, 990, 1290, 1.16, 441.77))
     system = {'LANG2_NAME_EN': 'Russian', 'LANG2_NAME_L2': 'русском', 'DOC_NO_MPA': 'OTA-ARV-MPA-001-v1',
               'DOC_NO': {'MPA': 'OTA-ARV-MPA-001-v1', 'TRT': 'OTA-ARV-TRT-001-v1', 'SLA': 'OTA-ARV-SLA-001-v1', 'BL': 'OTA-ARV-BL-001-v1',
-                         'BOA': 'OTA-ARV-BOA-001', 'DPA': 'OTA-ARV-DPA-001-v1', 'SIM': 'OTA-ARV-SIM-001-v1'}}
-    return {'partner': partner, 'status': status, 'ota': ota, 'countries': {'UA': ua, 'KZ': kz}, 'system': system}
+                         'BOA': 'OTA-ARV-BOA-001', 'DPA': 'OTA-ARV-DPA-001-v1', 'SIM': 'OTA-ARV-SIM-001-v1', 'CHG': 'OTA-ARV-CHG-001'}}
+    partner['P_GCC_CONFIRM'] = True
+    status['P_GCC_CONFIRM'] = 'filled'
+    # fictional samples for the new v10 documents (CN 13A, E notice, PF ship-from, AED rate)
+    samples = {
+        'AED_RATE': '3.6725',
+        'shipment': {'SHIP_FROM_NAME': 'Demo Logistics Warehouse', 'SHIP_FROM_ADDR': '10 Demostraat, 1000 AA Amsterdam', 'SHIP_FROM_COUNTRY': 'Netherlands',
+                     'EXPORTER_EU': 'Demo Logistics B.V. (acting for OTA)', 'EXPORTER_EORI': 'NL000000000'},
+        'CN': {'CN_NUMBER': 'OTA-CN-2026-000001', 'CN_DATE': '2026-11-20', 'CN_INV_NUMBER': 'OTA-INV-2026-000001', 'CN_INV_DATE': '2026-11-10',
+               'CN_REASON': 'cancel_unpaid', 'AED_RATE': '3.6725', 'CN_SUBTOTAL': '9,850.00', 'CN_TOTAL': '9,850.00',
+               'CN_LINES': [{'CN_LINE_NO': '1', 'CN_LINE_DESC_EN': 'Activation Keys – copies of the CONNECT computer program (licence activation keys) – Ukraine',
+                             'CN_LINE_DESC_L2': 'Ключи активации – экземпляры компьютерной программы CONNECT (лицензионные ключи активации) – Украина',
+                             'CN_LINE_QTY': '1,000', 'CN_LINE_PRICE': '9.85', 'CN_LINE_AMOUNT': '9,850.00'}]},
+        'CHG': {'CHG_PARTY_NAME': partner['P_NAME'], 'CHG_EFFECTIVE_DATE': '2026-12-01',
+                'CHG_LIST': [{'CHG_LABEL': 'Bank account / IBAN', 'CHG_OLD': partner['P_BANK_IBAN'], 'CHG_NEW': 'GB33DEMO00000000000000'}],
+                'CHG_SIG_COMPANY': partner['P_NAME'], 'CHG_SIG_NAME': partner['P_SIGNATORY'], 'CHG_SIG_TITLE_EN': partner['P_TITLE_EN'], 'CHG_SIG_TITLE_L2': partner['P_TITLE_L2']},
+        'OF_v2': {'OF_SUPERSEDES': 'OTA-ARV-OF-UA-001-v1', 'OF_EFFECTIVE': '2027-03-01', 'DOC_NO': 'OTA-ARV-OF-UA-001-v2'},
+    }
+    return {'partner': partner, 'status': status, 'ota': ota, 'countries': {'UA': ua, 'KZ': kz}, 'system': system, 'samples': samples}
 
 
 # Round-trip placeholders: what the v09 DOCX shows for each key (lookup: variant/lang, variant/*, */lang, */*)
@@ -1064,7 +1231,10 @@ RT_PLACEHOLDERS = {
     'MPA': {'*': {'DATE': '[DATE / ДАТА]'}},
     'BOA': {'en': {'DATE': '[DATE]', 'P_TM_OWNER_NAME': '[Brand Owner legal name]'}, 'ru': {'DATE': '[ДАТА]', 'P_TM_OWNER_NAME': '[наименование правообладателя]'}},
     'RS': {'*': {'DATE': '[date, no later than the 10th / дата, не позднее 10-го числа]', 'DOC_NO_OF': '[OTA-OF-__-____-___]', 'RS_MONTH': '[YYYY-MM]'}},
-    'PF': {'*': {'DOC_SEQ': '[YYYY-NNNN]', 'CC_NAME_EN': B}},
+    'PF': {'*': {'DOC_SEQ': '[YYYY-NNNN]', 'CC_NAME_EN': B, 'SHIP_FROM_COUNTRY': '[EU country / страна ЕС]'}},
+    'CN': {'*': {'CN_NUMBER': 'OTA-CN-[YYYY-NNNNNN]', 'CN_INV_NUMBER': 'OTA-INV-[YYYY-NNNNNN]'}},
+    'CHG': {'*': {'DOC_NO': 'OTA-ARV-MPA-001-v1', 'CHG_SIG_COMPANY': 'ARVELO LIMITED', 'CHG_SIG_NAME': 'Daniel Hart', 'CHG_SIG_TITLE_EN': 'Director', 'CHG_SIG_TITLE_L2': 'Директор'},
+            'en': {'CHG_PARTY_NAME': '[Party name]', 'CHG_EFFECTIVE_DATE': '[DATE]'}, 'ru': {'CHG_PARTY_NAME': '[наименование Стороны]', 'CHG_EFFECTIVE_DATE': '[ДАТА]'}},
     'SR': {'*': {'DOC_SEQ': '[YYYY-NNNN]'}},
     'INV': {'*': {'DOC_SEQ': '[YYYY-NNNNNN]', 'CC_NAME_EN': '[Approved Country]', 'CC_NAME_L2': '[страна]'}},
     'CI': {'*': {'DOC_SEQ': '[YYYY-NNNN]', 'DUE_DATE': '[20th of the month / 20-е число]'}},
@@ -1139,7 +1309,7 @@ def main():
                     if a != b:
                         print('VARIANT DIFF', variant, json.dumps(a, ensure_ascii=False)[:300], '\n   vs', json.dumps(b, ensure_ascii=False)[:300])
                 raise SystemExit('variants of %s do not produce one template' % typ)
-        templates[typ] = {'type': typ, 'docNo': no, 'title': {'en': ten, 'ru': tru}, 'ver': 'T-%s-v3' % typ,
+        templates[typ] = {'type': typ, 'docNo': no, 'title': {'en': ten, 'ru': tru}, 'ver': 'T-%s-%s' % (typ, TPL_VER),
                           'effective': EFFECTIVE, 'cls': cls, 'blocks': blocks}
         # round trip per variant
         for variant in variants:
@@ -1149,9 +1319,8 @@ def main():
                     rows_rt = []
                     for ri, row in enumerate(r['rows']):
                         if row is None and r['repeat']:
-                            lst, keys = r['repeat']
                             for item in r['items']:
-                                rows_rt.append([item[kk] for kk in keys])
+                                rows_rt.append([item[i] for i in range(len(item))])
                             continue
                         if row is None:
                             continue
@@ -1178,6 +1347,7 @@ def main():
         cnt = collections.Counter(b['kind'] for b in blocks)
         report[typ] = (len(blocks), dict(cnt))
 
+    apply_additions(templates)
     # ---- verification: tokens vs catalogue, EN/L2 discipline, demo render ----
     used = collections.defaultdict(set)
     lang_viol = []
@@ -1213,6 +1383,7 @@ def main():
     # (b) independent check: no highlighted source string survives in the raw template text
     hl_left = []
     allow = set(t for _, _, t in LIT_LOG)
+    allow |= CHOICE_TEXTS   # ТЗ 2.4 choice texts legitimately stay inside [[KEY|…]] fragments
     for typ, no, variants, cls, ten, tru in DOCS:
         raw = []
         for b in templates[typ]['blocks']:
@@ -1244,12 +1415,27 @@ def main():
 
     # demo values (seed): partner + ota + countries + system
     demo = {'partner': values['partner'], 'status': values['status'], 'ota': values['ota'],
-            'countries': values['countries'], 'system': values['system']}
+            'countries': values['countries'], 'system': values['system'], 'samples': values['samples']}
 
-    out_js = ('const LEGAL_TPL=' + json.dumps(templates, ensure_ascii=False, separators=(',', ':')) + ';'
+    reasons = {c: {'en': e, 'ru': r} for c, (e, r) in CN_REASON_TXT.items()}
+    out_js = ('/* generated by tools/extract_templates.py from legal pack v10 - do not edit by hand */\n'
+              'const LEGAL_PACK_VER=' + json.dumps(TPL_VER) + ';'
+              'const LEGAL_TPL=' + json.dumps(templates, ensure_ascii=False, separators=(',', ':')) + ';'
               'const LEGAL_KEYS=' + json.dumps(keys_list, ensure_ascii=False, separators=(',', ':')) + ';'
               'const LEGAL_DEMO_VALUES=' + json.dumps(demo, ensure_ascii=False, separators=(',', ':')) + ';'
-              'HOOKS.onBoot.push(()=>{if(!S.templates||!Object.keys(S.templates).length){S.templates=JSON.parse(JSON.stringify(LEGAL_TPL));}});\n')
+              'const LEGAL_CN_REASONS=' + json.dumps(reasons, ensure_ascii=False, separators=(',', ':')) + ';\n'
+              '/* derived flags for a value map V (call before rendering): CN_REASON_<CODE>, FEE_NONE, OF_EXCEPTIONS_NONE */\n'
+              'function legalDerive(V){if(!V)return V;const f=v=>v!=null&&v!==false&&v!==0&&String(v).trim()!==""&&String(v).trim()!=="0"&&String(v).trim().toUpperCase()!=="N/A";'
+              'Object.keys(LEGAL_CN_REASONS).forEach(c=>{const k="CN_REASON_"+c.toUpperCase();if(V.CN_REASON===c)V[k]=true;else delete V[k];});'
+              'if(!f(V.FEE_PCT))V.FEE_NONE=true;if(!f(V.OF_EXCEPTIONS_EN))V.OF_EXCEPTIONS_NONE=true;return V;}\n'
+              '/* boot: seed S.templates; replace stored templates of an older pack (ver number lower than the base) and add new types */\n'
+              'HOOKS.onBoot.push(()=>{if(!S.templates||typeof S.templates!=="object")S.templates={};const n=v=>+String(v||"").replace(/^.*-v/,"")||0;'
+              'Object.keys(LEGAL_TPL).forEach(tp=>{const cur=S.templates[tp];if(!cur||!Array.isArray(cur.blocks)||n(cur.ver)<n(LEGAL_TPL[tp].ver))S.templates[tp]=JSON.parse(JSON.stringify(LEGAL_TPL[tp]));});});\n')
+    # safety: no real (private) value may reach any generated file
+    leaks = sorted({f for f in FORBIDDEN if f and (f in out_js or f in json.dumps(RT_PLACEHOLDERS, ensure_ascii=False))})
+    if leaks:
+        print('!! REAL VALUES FOUND IN OUTPUT:', len(leaks), 'items (see private_values.json) - nothing written')
+        return 2
     if not check_only:
         os.makedirs(OUT, exist_ok=True)
         for typ, t in templates.items():
@@ -1280,6 +1466,9 @@ def main():
     for s in sorted(set((v.split('-')[0], l, o, r) for v, l, o, r in STRUCT_LOG)):
         print('   ', s)
     print('== Additions (tpl only, hidden for ARVELO):', sorted(set(ADD_LOG)))
+    print('== ТЗ v10 additions (not in DOCX; shown only when the key is set):')
+    for x in ADDITION_LOG:
+        print('   ', x)
     print('== (b) highlighted source strings still present literally in templates:', hl_left)
     print('== EN/L2 token discipline violations:', lang_viol)
     print('== Round-trip mismatches: %d' % len(rt_mismatch))

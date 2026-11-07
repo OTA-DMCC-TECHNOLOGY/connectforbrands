@@ -5,8 +5,8 @@
   "en": "Order Form",
   "ru": "Заказ"
  },
- "ver": "T-OF-v3",
- "effective": "2026-11-06",
+ "ver": "T-OF-v10",
+ "effective": "2026-11-07",
  "cls": "A",
  "blocks": [
   {
@@ -26,6 +26,13 @@
    "kind": "para",
    "en": "This Order Form is made under the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} dated {{MPA_DATE}} (the \"Master Agreement\") between {{OTA_NAME}} (\"OTA\") and {{P_NAME}} (\"Partner\"). It forms part of the Master Agreement and is subject to all its terms, including governing law and dispute resolution. Capitalised terms have the meanings given in the Master Agreement.",
    "ru": "Настоящий Заказ заключён в рамках Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} от {{MPA_DATE}} («Рамочное соглашение») между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр»). Заказ является частью Рамочного соглашения и подчиняется всем его условиям, включая применимое право и порядок разрешения споров. Термины с заглавной буквы имеют значения, указанные в Рамочном соглашении."
+  },
+  {
+   "id": "OF-replaces",
+   "kind": "para",
+   "cond": "OF_SUPERSEDES",
+   "en": "This version replaces Order Form No. {{OF_SUPERSEDES}} from {{OF_EFFECTIVE}} under clause 16.5 of the Master Agreement. Orders paid before that date remain governed by the version under which they were paid.",
+   "ru": "Настоящая версия заменяет Заказ № {{OF_SUPERSEDES}} с {{OF_EFFECTIVE}} согласно п. 16.5 Рамочного соглашения. Заказы, оплаченные до этой даты, регулируются версией, по которой они были оплачены."
   },
   {
    "id": "OF-s1",
@@ -60,8 +67,8 @@
   {
    "id": "OF-1.5",
    "kind": "clause",
-   "en": "1.5 Exceptions to clause 5.6 of the Master Agreement (single connectivity platform): [[OF_EXCEPTIONS_EN|{{OF_EXCEPTIONS_EN}}]][[OF_EXCEPTIONS_NONE|none]].",
-   "ru": "1.5 Исключения из п. 5.6 Рамочного соглашения (единая платформа связи): [[OF_EXCEPTIONS_L2|{{OF_EXCEPTIONS_L2}}]][[OF_EXCEPTIONS_NONE|нет]]."
+   "en": "1.5 Exceptions to clause 5.6 of the Master Agreement (single connectivity platform): [[OF_EXCEPTIONS_NONE|none]][[OF_EXCEPTIONS_EN|the following: {{OF_EXCEPTIONS_EN}}]].",
+   "ru": "1.5 Исключения из п. 5.6 Рамочного соглашения (единая платформа связи): [[OF_EXCEPTIONS_NONE|нет]][[OF_EXCEPTIONS_L2|следующие: {{OF_EXCEPTIONS_L2}}]]."
   },
   {
    "id": "OF-s2",
@@ -281,8 +288,8 @@
   {
    "id": "OF-3.2",
    "kind": "clause",
-   "en": "3.2 Partner commission = Net Collected Revenue (Master Agreement, clause 7.4) − OTA Retained Amount. Country compliance fee under clause 7.4(d): [[FEE_PCT|{{FEE_PCT}}% of payments received]][[FEE_NONE|none]]. Currency conversion is made at the actual settlement rate of OTA's acquirer, shown in the Statement.",
-   "ru": "3.2 Вознаграждение Партнёра = Чистая собранная выручка (п. 7.4 Рамочного соглашения) − Сумма, удерживаемая OTA. Сбор на соблюдение страновых требований по п. 7.4(d): [[FEE_PCT|{{FEE_PCT}}% от полученных платежей]][[FEE_NONE|не применяется]]. Пересчёт валют производится по фактическому курсу расчётов эквайера OTA, отражаемому в Акте сверки."
+   "en": "3.2 Partner commission = Net Collected Revenue (Master Agreement, clause 7.4) − OTA Retained Amount. Country compliance fee under clause 7.4(d): [[FEE_NONE|not applicable]][[FEE_PCT|{{FEE_PCT}}% of payments received, not more than 3%]]. Currency conversion is made at the actual settlement rate of OTA's acquirer, shown in the Statement.",
+   "ru": "3.2 Вознаграждение Партнёра = Чистая собранная выручка (п. 7.4 Рамочного соглашения) − Сумма, удерживаемая OTA. Сбор на соблюдение страновых требований по п. 7.4(d): [[FEE_NONE|не применяется]][[FEE_PCT|{{FEE_PCT}}% от полученных платежей, но не более 3%]]. Пересчёт валют производится по фактическому курсу расчётов эквайера OTA, отражаемому в Акте сверки."
   },
   {
    "id": "OF-s4",
@@ -456,8 +463,40 @@
       "en": "{{P_EMAIL_FIN}}",
       "ru": "{{P_EMAIL_FIN}}"
      }
+    ],
+    [
+     {
+      "en": "[wording to be approved]",
+      "ru": "[wording to be approved]"
+     },
+     {
+      "en": "{{OTA_VAT_LOCAL}}",
+      "ru": "{{OTA_VAT_LOCAL}}"
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "[wording to be approved]",
+      "ru": "[wording to be approved]"
+     },
+     {
+      "en": "{{OTA_REP_LOCAL}}",
+      "ru": "{{OTA_REP_LOCAL}}"
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
     ]
-   ]
+   ],
+   "rowCond": {
+    "9": "OTA_VAT_LOCAL",
+    "10": "OTA_REP_LOCAL"
+   }
   },
   {
    "id": "OF-h1",

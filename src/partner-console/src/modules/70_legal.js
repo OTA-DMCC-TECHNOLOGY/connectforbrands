@@ -8,7 +8,7 @@
 
 /* ---------- constants ---------- */
 const LG_LEGAL_TYPES=['MPA','OF','TRT','SLA','BL','BOA','DPA','SIM','CHG'];
-const LG_ALL_TYPES=['MPA','OF','TRT','SLA','BL','BOA','DPA','EUT','PN','SIM','RS','PF','SR','INV','CI'];
+const LG_ALL_TYPES=['MPA','OF','TRT','SLA','BL','BOA','DPA','EUT','PN','SIM','RS','PF','SR','INV','CN','CI','CHG'];
 const LG_LANG2={ru:{en:'Russian',l2:'русском',name:'Русский',loc:'ru-RU'},uk:{en:'Ukrainian',l2:'українській',name:'Українська',loc:'uk-UA'}};
 const LG_CLAUSE={ru:(n)=>`Документ составлен на английском и ${n} языках. При расхождении текстов преимущественную силу имеет английский текст.`,
  uk:(n)=>`Документ складено англійською та ${n} мовами. У разі розбіжностей переважну силу має текст англійською мовою.`};
@@ -27,6 +27,19 @@ const LG_COUNTRY_OTA=['CC_NAME_L2','CC_NAME_FULL_EN','CC_NAME_FULL_L2','CC_NAME_
 const LG_DEV_COLS=['DEV_BRAND','DEV_MODEL','DEV_HW','DEV_FW','DEV_PLAN','DEV_MB','DEV_SIM'];
 const LG_TM_COLS=['TM_MARK','TM_REGNO','TM_COUNTRIES','TM_CLASSES'];
 const LG_PLANKEY={light:'LIGHT',std:'STANDARD',prem:'PREMIUM'};
+// v10 (ТЗ 1.1): OTA does not contract with partners established in GCC states
+const LG_GCC=['AE','SA','QA','KW','BH','OM'];
+const LG_GCC_MSG='OTA does not contract with partners established in GCC states';
+function lg_isGcc(cc){return LG_GCC.includes(String(cc||'').toUpperCase());}
+// v10 (ТЗ 3.4 / part 6): mandatory publication languages of Documents 07/08 per country; other countries → English
+const LG_PUB_LANGS={UA:['uk'],KZ:['kk','ru']};
+function lg_pubLangs(cc){return LG_PUB_LANGS[cc]||['en'];}
+function lg_langName(l){return l==='en'?'English':((typeof LANG_NAMES!=='undefined'&&LANG_NAMES[l])||(LG_LANG2[l]||{}).name||l);}
+// v10 is the first edition of the pack (ТЗ part 5)
+const LG_PACK='v10';
+// fields whose change needs an uploaded extract / power of attorney (template E, clause 3)
+const LG_CHG_PROOF=['P_NAME','P_FORM_EN','P_FORM_L2','P_REGNO','P_SIGNATORY','P_TITLE_EN','P_TITLE_L2','P_TITLE_L2_GEN'];
+const LG_BANK_KEYS=['P_BANK_BENEFICIARY','P_BANK_IBAN','P_BANK_NAME','P_BANK_ADDR','P_BANK_SWIFT','P_BANK_INTERMEDIARY'];
 ICONS.lg_pen='<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/>';
 ICONS.lg_hist='<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>';
 ICONS.lg_diff='<path d="M12 3v18M5 8h4M7 6v4M15 16h4"/><rect x="2" y="3" width="20" height="18" rx="2"/>';
@@ -34,14 +47,15 @@ ICONS.lg_diff='<path d="M12 3v18M5 8h4M7 6v4M15 16h4"/><rect x="2" y="3" width="
 /* ---------- state ---------- */
 function lg_st(){if(!S.lg||typeof S.lg!=='object')S.lg={};const L=S.lg;
  ['tpl','kyc','reviewNa'].forEach(k=>{if(!L[k]||typeof L[k]!=='object')L[k]={};});
- ['changes','pub','reminders','notices','tasks'].forEach(k=>{if(!Array.isArray(L[k]))L[k]=[];});
+ ['changes','pub','reminders','notices','tasks','bankHist'].forEach(k=>{if(!Array.isArray(L[k]))L[k]=[];});
+ if(!L.tr||typeof L.tr!=='object')L.tr={};if(S.bankChange===undefined)S.bankChange=null;
  if(!S.form)S.form={};if(!S.docs)S.docs=[];return L;}
 function lg_docs(){if(!S.docs)S.docs=[];return S.docs;}
 function lg_doc(id){return lg_docs().find(d=>d.id===id)||null;}
 function lg_demo(){try{return legalDemo();}catch(e){return null;}}
 let lg__km=null;
 function lg_meta(k){if(!lg__km){lg__km={};let arr=[];try{arr=LEGAL_KEYS;}catch(e){}(arr||[]).forEach(m=>{lg__km[m.key]=m;});}
- if(lg__km[k])return lg__km[k];if(/^OTA_(VAT|REP)_[A-Z]{2}$/.test(k))return{key:k,src:'ota',req:'na'};return null;}
+ return lg__km[k]||null;}
 function lg_baseTpl(type){try{return LEGAL_TPL[type]||null;}catch(e){return null;}}
 function lg_l2(){const v=lg_fval('LANG2');return (v&&LG_LANG2[v])?v:((S.org&&S.org.lang2&&LG_LANG2[S.org.lang2])?S.org.lang2:'ru');}
 function lg_actor(){return actor()||{};}
@@ -60,7 +74,8 @@ function lg_ccKey(k,cc){return k+'@'+cc;}
 
 /* ---------- templates & versions (base = LEGAL_TPL v3; later versions are patches in S.lg.tpl[TYPE]) ---------- */
 function lg_tplVersions(type){const b=lg_baseTpl(type);if(!b)return [];const L=lg_st();
- return [{ver:b.ver,n:+String(b.ver).replace(/^.*-v/,''),effective:b.effective,cls:b.cls,status:'released',base:true,changes:{},note:''}].concat(L.tpl[type]||[]);}
+ const bn=+String(b.ver).replace(/^.*-v/,'');
+ return [{ver:b.ver,n:bn,effective:b.effective,cls:b.cls,status:'released',base:true,changes:{},note:''}].concat((L.tpl[type]||[]).filter(v=>(v.n||0)>bn));}
 function lg_tplCurVer(type){const vs=lg_tplVersions(type).filter(v=>v.status==='released');return vs.length?vs[vs.length-1].ver:null;}
 const lg__tc={};
 function lg_tpl(type,ver){const b=lg_baseTpl(type);if(!b)return null;const vs=lg_tplVersions(type);ver=ver||lg_tplCurVer(type);
@@ -69,23 +84,28 @@ function lg_tpl(type,ver){const b=lg_baseTpl(type);if(!b)return null;const vs=lg
  const ch={};for(let i=1;i<=upto;i++)Object.assign(ch,vs[i].changes||{});
  const t2=Object.assign({},b,{ver:vs[upto].ver,effective:vs[upto].effective,cls:vs[upto].cls||b.cls,blocks:b.blocks.map(bl=>ch[bl.id]?Object.assign({},bl,ch[bl.id]):bl)});
  lg__tc[type]={key,t:t2};return t2;}
-function lg_tplTitle(type,lang){const b=lg_baseTpl(type);if(type==='CHG')return lang==='en'?'Notice of Change of Partner Details':(lang==='uk'?'Повідомлення про зміну реквізитів партнера':'Уведомление об изменении реквизитов Партнёра');
+function lg_tplTitle(type,lang){const b=lg_baseTpl(type);if(type==='CHG'&&!b)return lang==='en'?'Notice of Change of Details':(lang==='uk'?'Повідомлення про зміну реквізитів':'Уведомление об изменении реквизитов');
  return b?(lang==='en'?b.title.en:(b.title[lang]||b.title.ru||b.title.en)):type;}
-// built-in notice template (change of partner details) — wording for OTA Legal to approve
-const LG_CHG_TPL={type:'CHG',docNo:'—',title:{en:'Notice of Change of Partner Details',ru:'Уведомление об изменении реквизитов Партнёра'},ver:'T-CHG-v1',effective:'2026-11-06',cls:'A',blocks:[
- {id:'CHG-title',kind:'heading',en:'NOTICE OF CHANGE OF PARTNER DETAILS',ru:'УВЕДОМЛЕНИЕ ОБ ИЗМЕНЕНИИ РЕКВИЗИТОВ ПАРТНЁРА'},
- {id:'CHG-ref',kind:'para',en:'Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.',ru:'№ {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст.'},
- {id:'CHG-p1',kind:'para',en:'Date: {{DATE}}',ru:'Дата: {{DATE}}'},
- {id:'CHG-p2',kind:'para',en:'Under the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} dated {{MPA_DATE}} between {{OTA_NAME}} ("OTA") and {{P_NAME}} ("Partner"), Partner notifies OTA of the following change of its details, effective {{EFFECTIVE_DATE}}:',
-  ru:'В рамках Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} от {{MPA_DATE}} между {{OTA_NAME}} («OTA») и {{P_NAME}} («Партнёр») Партнёр уведомляет OTA о следующем изменении своих реквизитов с {{EFFECTIVE_DATE}}:'},
+// Notice of Change of Details = template E of the v10 pack. The template agent ships it as LEGAL_TPL.CHG; until it lands this
+// fallback carries the E wording verbatim (only the placeholders are replaced by variables).
+const LG_CHG_TPL={type:'CHG',docNo:'E',title:{en:'Notice of Change of Details',ru:'Уведомление об изменении реквизитов'},ver:'T-CHG-v10',effective:'2026-11-07',cls:'A',blocks:[
+ {id:'CHG-title',kind:'heading',en:'NOTICE OF CHANGE OF DETAILS',ru:'УВЕДОМЛЕНИЕ ОБ ИЗМЕНЕНИИ РЕКВИЗИТОВ'},
+ {id:'CHG-ref',kind:'para',en:'Notice of Change of Details · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.',ru:'Уведомление об изменении реквизитов · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст.'},
+ {id:'CHG-p1',kind:'para',en:'Under clause 16.3 of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} (the "Master Agreement"), {{CHG_PARTY_NAME}} notifies the other Party of the following change of its details, effective from {{CHG_EFFECTIVE_DATE}}:',
+  ru:'В соответствии с п. 16.3 Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} («Рамочное соглашение») {{CHG_PARTY_NAME}} уведомляет другую Сторону о следующем изменении своих реквизитов с {{CHG_EFFECTIVE_DATE}}:'},
  {id:'CHG-t1',kind:'table',rows:[[{en:'Detail',ru:'Реквизит',bi:true},{en:'Previous',ru:'Прежнее значение',bi:true},{en:'New',ru:'Новое значение',bi:true}],
   [{en:'{{CHG_LABEL}}',ru:'{{CHG_LABEL}}'},{en:'{{CHG_OLD}}',ru:'{{CHG_OLD}}'},{en:'{{CHG_NEW}}',ru:'{{CHG_NEW}}'}]],repeat:{row:1,list:'CHG_LIST'}},
- {id:'CHG-p3',kind:'para',en:'Documents signed before this notice remain in force and are not reissued. From the effective date the new details apply to all documents, notices and invoices under the Master Agreement.',
-  ru:'Документы, подписанные до настоящего уведомления, сохраняют силу и не переоформляются. С даты вступления в силу новые реквизиты применяются ко всем документам, уведомлениям и счетам по Рамочному соглашению.'},
- {id:'CHG-h1',kind:'heading',en:'Signature',ru:'Подпись'},
- {id:'CHG-sig1',kind:'signature',rows:[[{en:'Company',ru:'Компания',bi:true},{en:'{{P_NAME}}',ru:'{{P_NAME}}'}],[{en:'Name',ru:'ФИО',bi:true},{en:'{{P_SIGNATORY}}',ru:'{{P_SIGNATORY}}'}],
-  [{en:'Title',ru:'Должность',bi:true},{en:'{{P_TITLE_EN}}',ru:'{{P_TITLE_L2}}',bi:true}],[{en:'Signature',ru:'Подпись',bi:true},{en:'',ru:''}],[{en:'Date',ru:'Дата',bi:true},{en:'____ / ____ / 20__',ru:'____ / ____ / 20__'}]]}]};
-function lg_tplFor(type,ver){return type==='CHG'?LG_CHG_TPL:lg_tpl(type,ver);}
+ {id:'CHG-1',kind:'clause',en:'1. This notice does not amend the Master Agreement or any Order Form; previously signed documents are not reissued and remain valid with the new details.',
+  ru:'1. Настоящее уведомление не изменяет Рамочное соглашение и Заказы; ранее подписанные документы не переоформляются и действуют с новыми реквизитами.'},
+ {id:'CHG-2',kind:'clause',en:'2. Bank details. A change of bank details takes effect only after (a) this notice is signed in the portal by an authorised signatory of the notifying Party with a one-time code, and (b) the receiving Party has confirmed the change through a call-back to a contact person already on record. Until both steps are completed, payments are made to the previous bank details and such payments discharge the paying Party. A Party is not liable for a payment made in good faith to bank details recorded in the portal at the time of payment.',
+  ru:'2. Банковские реквизиты. Изменение банковских реквизитов вступает в силу только после того, как (a) настоящее уведомление подписано на портале уполномоченным подписантом уведомляющей Стороны с подтверждением одноразовым кодом и (b) получающая Сторона подтвердила изменение обратным звонком контактному лицу, уже указанному в реквизитах. До выполнения обоих условий платежи производятся по прежним реквизитам, и такие платежи считаются надлежащим исполнением. Сторона не несёт ответственности за платёж, добросовестно произведённый по реквизитам, указанным на портале на момент платежа.'},
+ {id:'CHG-3',kind:'clause',en:'3. A change of the Party\'s name, legal form, registration number or authorised signatory must be supported by an official document (extract from the register or power of attorney) uploaded to the portal. A change of control is governed by the Master Agreement and is not a mere change of details.',
+  ru:'3. Изменение наименования, организационно-правовой формы, регистрационного номера или уполномоченного подписанта Стороны подтверждается официальным документом (выпиской из реестра или доверенностью), загружаемым на портал. Смена контроля регулируется Рамочным соглашением и не является простым изменением реквизитов.'},
+ {id:'CHG-sig1',kind:'signature',rows:[[{en:'Company',ru:'Компания',bi:true},{en:'{{CHG_SIG_COMPANY}}',ru:'{{CHG_SIG_COMPANY}}'}],[{en:'Name',ru:'ФИО',bi:true},{en:'{{CHG_SIG_NAME}}',ru:'{{CHG_SIG_NAME}}'}],
+  [{en:'Title',ru:'Должность',bi:true},{en:'{{CHG_SIG_TITLE_EN}}',ru:'{{CHG_SIG_TITLE_L2}}',bi:true}],[{en:'Signature',ru:'Подпись',bi:true},{en:'',ru:''}],[{en:'Date',ru:'Дата',bi:true},{en:'____ / ____ / 20__',ru:'____ / ____ / 20__'}],[{en:'Stamp (if any)',ru:'Печать (при наличии)',bi:true},{en:'',ru:''}]]}]};
+function lg_tplFor(type,ver){return type==='CHG'?(lg_baseTpl('CHG')?lg_tpl('CHG',ver):LG_CHG_TPL):lg_tpl(type,ver);}
+// edition of the legal pack a template comes from (template agent: optional `pack` field); the signing package is assembled only from v10
+function lg_tplEdition(type){const b=lg_baseTpl(type);if(!b)return null;return b.pack||b.edition||null;}
 // a language can be chosen as LANG2 only if every package template is fully translated into it
 function lg_langComplete(l){return ['MPA','OF','TRT','SLA','BL','BOA','DPA','SIM','EUT','PN'].every(tp=>{const tt=lg_tpl(tp);if(!tt)return false;
  return tt.blocks.every(b=>{if(b.rows)return b.rows.every(r=>r.every(c=>!String(c.en||'').trim()||String(c[l]||'').trim()));return !String(b.en||'').trim()||String(b[l]||'').trim();});});}
@@ -124,6 +144,7 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
  Object.defineProperty(V,'__na',{value:NA,enumerable:false});
  // OTA data: empty = N/A automatically
  const okeys=new Set(otaKeys());Object.keys(S.ota||{}).forEach(k=>okeys.add(k));
+ okeys.delete('OTA_CUSTOMS_CODE'); // v10 (ТЗ 1.2): Dubai Customs code is not used
  okeys.forEach(k=>{const v=otaVal(k);if(v!=null)V[k]=v;else NA.add(k);});
  if(S.org&&S.org.code)V.P_CODE=S.org.code;
  // partner questionnaire (status 'na' or empty N/A-able → absent)
@@ -145,7 +166,10 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
    const fee=+(pl.fee||0);if(fee>0)lg_put(V,'FEE_PCT',r2(fee*100),'pct',l2);else{NA.add('FEE_PCT');}}
   if(!V.FEE_PCT)V.FEE_NONE=true;
   const of=ctx.docOf||lg_latestNo('OF',cc);if(of)V.DOC_NO_OF=of;
- }
+  // ТЗ 2.6: OTA tax registration / representative of the document's country only (commercial agent's S.ota.countries, demo fallback)
+  const oc=((S.ota&&S.ota.countries)||{})[cc]||{};let dc={};try{dc=(LEGAL_DEMO_VALUES.countries||{})[cc]||{};}catch(e){}
+  [['OTA_VAT_LOCAL','vat_local'],['OTA_REP_LOCAL','rep_local']].forEach(([k,f])=>{const ne=x=>x!=null&&String(x).trim()!=='';const v=ne(oc[f])?oc[f]:(ne(oc[k])?oc[k]:dc[k]);if(v!=null&&String(v).trim())V[k]=String(v).trim();else NA.add(k);});
+ }else{NA.add('OTA_VAT_LOCAL');NA.add('OTA_REP_LOCAL');}
  // system keys
  const date=ctx.date||iso(now());lg_put(V,'DATE',date,'date',l2);
  if(ctx.effective)lg_put(V,'EFFECTIVE_DATE',ctx.effective,'date',l2);
@@ -155,6 +179,13 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
  // ctx.extra (ops documents etc.)
  Object.keys(ctx.extra||{}).forEach(k=>{const v=ctx.extra[k];if(v==null||v===''){const m=lg_meta(k);if(m&&(m.req==='na'))NA.add(k);delete V[k];return;}
   const m=lg_meta(k);if(Array.isArray(v))V[k]=v;else lg_put(V,k,v,m&&m.format,l2);});
+ // ТЗ 2.4: the "replaces" paragraph of an Order Form exists only from v2 (keys are passed by lg_renderDoc for v>=2 only)
+ if(V.OF_EFFECTIVE&&/^\d{4}-\d{2}-\d{2}/.test(String(V.OF_EFFECTIVE)))lg_put(V,'OF_EFFECTIVE',String(V.OF_EFFECTIVE),'date',l2);
+ ['OF_SUPERSEDES','OF_EFFECTIVE'].forEach(k=>{if(V[k]==null)NA.add(k);});
+ if(V.P_TAXNO==null)NA.add('P_TAXNO'); // ТЗ 2.4: optional — the [[P_TAXNO|…]] fragment / line is not printed
+ if(typeof subprocRows==='function'&&!V.SUBPROC_ROWS){const bi=x=>{x=x||{};const en=String(x.en||'').trim(),ru=String(x[l2]||x.ru||'').trim();return !ru||ru===en?en:en+' / '+ru;};
+  try{V.SUBPROC_ROWS=subprocRows().map(r=>({SP_NAME:bi(r.name),SP_SERVICE:bi(r.service),SP_LOCATION:bi(r.location)}));}catch(e){}}
+ try{legalDerive(V);}catch(e){}
  return V;}
 // the MPA the document refers to: the package MPA (draft or live)
 function lg_mpaRef(){const ds=lg_docs().filter(d=>d.type==='MPA'&&d.status!=='terminated');const live=ds.filter(d=>d.status!=='draft'&&d.status!=='superseded').sort((a,b)=>b.ver-a.ver)[0]||ds.filter(d=>d.status==='draft')[0];
@@ -184,12 +215,15 @@ function lg_docLabel(type,cc){const n=type==='OF'&&cc?'02-'+cc:((lg_baseTpl(type
 function lg_header(type,cc,number,tplVer,V){const name=(V&&V.OTA_NAME)||'OTA TECHNOLOGY DMCC';const title=lg_tplTitle(type,'en')+(type==='OF'&&cc?' – '+(lg_ccDemo(cc).CC_NAME_EN||ctyNameEn(cc)):'');
  return [name,'CONNECT FOR BRANDS',type==='CHG'?'Notice':('Doc '+lg_docLabel(type,cc)+' of 14'),title,number||'[number]',tplVer].filter(Boolean).join(' · ');}
 function lg_footer(date,number,V){const y=new Date(date||now()).getUTCFullYear();const l2=(V&&V.LANG2)||'ru';const c2={ru:'Конфиденциально',uk:'Конфіденційно'}[l2];return `© ${y} ${(V&&V.OTA_NAME)||'OTA TECHNOLOGY DMCC'}. All rights reserved · Confidential`+(c2?' · '+c2:'')+(number?' · '+number:'');}
-function lg_render(type,ctx){ctx=ctx||{};const tpl=ctx.tpl||lg_tplFor(type,ctx.tplVer);const l2=ctx.lang2||lg_l2();const draft=!!ctx.draft;
+function lg_render(type,ctx){ctx=ctx||{};let tpl=ctx.tpl||lg_tplFor(type,ctx.tplVer);const l2=ctx.lang2||lg_l2();const draft=!!ctx.draft;
  const out={html:'',text:'',missing:[],blocks:[],error:null,untranslated:[],title:'',header:'',footer:'',number:ctx.docNo||'',used:[]};
  if(!tpl){out.error='no_template';out.html=`<div class="note bad">${esc(t('lg.e.noTpl',{t:type}))}</div>`;return out;}
  out.title=(tpl.title&&tpl.title.en)||type;out.tplVer=tpl.ver;
  const V=ctx.vals?lg_frozenMap(ctx.vals):lg_values(ctx);
  const st={missing:new Set(),used:new Set()};const pub=ctx.public||null;
+ // ТЗ 2.9: Document 06 Annex 1 = OTA's sub-processor directory (subprocRows: e-mail row only when filled, merged AWS row) — frozen at issue
+ if(type==='DPA'&&Array.isArray(V.SUBPROC_ROWS)){const tb=tpl.blocks.find(b=>b.id==='DPA-t3');if(tb){const c=k=>({en:'{{'+k+'}}',ru:'{{'+k+'}}'});
+  tpl=Object.assign({},tpl,{blocks:tpl.blocks.map(b=>b===tb?Object.assign({},b,{rowCond:null,rows:[b.rows[0],[c('SP_NAME'),c('SP_SERVICE'),c('SP_LOCATION')]],repeat:{row:1,list:'SUBPROC_ROWS'}}):b)});}}
  // ТЗ §10.10: a paragraph without LANG2 translation stops generation
  if(!pub){tpl.blocks.forEach(b=>{const bad=b.rows?b.rows.some(r=>r.some(c=>String(c.en||'').trim()&&!String(c[l2]||'').trim())):(String(b.en||'').trim()&&!String(b[l2]||'').trim());if(bad)out.untranslated.push(b.id);});
   if(out.untranslated.length){out.error='no_translation';out.html=`<div class="note bad lg-genstop">${icon('alert','sm')}<div><b>${t('lg.e.stopT')}</b><br>${esc(t('lg.e.stopD',{l:LG_LANG2[l2].en,ids:out.untranslated.join(', ')}))}</div></div>`;return out;}}
@@ -211,6 +245,7 @@ function lg_render(type,ctx){ctx=ctx||{};const tpl=ctx.tpl||lg_tplFor(type,ctx.t
   if(/-ref$/.test(b.id)){refSeen=true;
    const hasClause=String(b.en||'').includes('This document is made in English');
    if(!hasClause)addPara(b.id+'-lang','para',`This document is made in English and ${LG_LANG2[l2].en}. In case of any discrepancy, the English version prevails.`,LG_CLAUSE[l2](LG_LANG2[l2].l2));
+   if(ctx.ofRepl&&!pub&&!lg_tplHasKey(tpl,'OF_SUPERSEDES'))addPara(b.id+'-repl','para lgd-repl',lg_sub(LG_OF_REPL.en,'en',V,st),lg_sub(LG_OF_REPL[l2]||'[wording to be approved]','l2',V,st));
    if(ctx.replaces&&!pub){const r=ctx.replaces;addPara(b.id+'-repl','para lgd-repl',LG_REPL.en(r.ver,lg_fmtDate(r.date,'en'),ctx.effective?lg_fmtDate(ctx.effective,'en'):''),(LG_REPL[l2]||LG_REPL.ru)(r.ver,lg_fmtDate(r.date,l2),ctx.effective?lg_fmtDate(ctx.effective,l2):''));}}
  });
  if(!refSeen&&!pub)addPara('lang','para',`This document is made in English and ${LG_LANG2[l2].en}. In case of any discrepancy, the English version prevails.`,LG_CLAUSE[l2](LG_LANG2[l2].l2));
@@ -220,6 +255,10 @@ function lg_render(type,ctx){ctx=ctx||{};const tpl=ctx.tpl||lg_tplFor(type,ctx.t
  out.html=pub?`<article class="lgd lgd-pub" lang="${pub}"><div class="lgd-flow">${rows.join('')}</div></article>`
   :`<article class="lgd ${draft?'lgd-draft':''}" data-paginate="1" data-header="${esc(header)}" data-footer="${esc(footer)}"><div class="lgd-flow">${rows.join('')}${cert}</div></article>`;
  out.__V=V;return out;}
+// ТЗ 2.4 (approved): paragraph before section 1 of a new Order Form version (v2+ only)
+const LG_OF_REPL={en:'This version replaces Order Form No. {{OF_SUPERSEDES}} from {{OF_EFFECTIVE}} under clause 16.5 of the Master Agreement. Orders paid before that date remain governed by the version under which they were paid.',
+ ru:'Настоящая версия заменяет Заказ № {{OF_SUPERSEDES}} с {{OF_EFFECTIVE}} согласно п. 16.5 Рамочного соглашения. Заказы, оплаченные до этой даты, регулируются версией, по которой они были оплачены.'};
+function lg_tplHasKey(tpl,k){const re=new RegExp('\\b'+k+'\\b');return (tpl.blocks||[]).some(b=>re.test(String(b.en||''))||(b.rows||[]).some(r=>r.some(c=>re.test(String(c.en||'')))));}
 function lg_frozenMap(vals){const V=Object.assign({},vals);const NA=new Set(vals.__naList||[]);delete V.__naList;Object.defineProperty(V,'__na',{value:NA,enumerable:false});return V;}
 // tables & signature blocks
 function lg_table(b,V,st,l2,draft,ctx,pub){let rows=b.rows.map((r,i)=>({cells:r,i,scope:null}));
@@ -228,7 +267,7 @@ function lg_table(b,V,st,l2,draft,ctx,pub){let rows=b.rows.map((r,i)=>({cells:r,
   if(!arr.length&&lg_absent(b.repeat.list,V)==='missing')st.missing.add(b.repeat.list);
   rows=rows.filter(r=>r.i!==ri);rows.splice(ri,0,...exp);}
  if(b.rowCond){Object.keys(b.rowCond).forEach(ix=>{const k=b.rowCond[ix];if(!lg_truthy(lg_get(V,k,'en',null,st)))rows=rows.filter(r=>r.scope||r.i!==+ix);});}
- const sigParty=b.kind==='signature'?(b.rows[0]||[]).map(c=>/OTA_NAME/.test(c.en||'')?'ota':/P_TM_OWNER_NAME/.test(c.en||'')?'owner':/P_NAME/.test(c.en||'')?'partner':null):null;
+ const sigParty=b.kind==='signature'?(b.rows[0]||[]).map(c=>/OTA_NAME/.test(c.en||'')?'ota':/P_TM_OWNER_NAME/.test(c.en||'')?'owner':/P_NAME|CHG_SIG_COMPANY/.test(c.en||'')?'partner':null):null;
  const sigs=(ctx.signatures||[]);
  const outRows=[];const txt=[];
  rows.forEach((r,ri)=>{const lbl=String((r.cells[0]||{}).en||'');let naRow=false;
@@ -292,8 +331,11 @@ function lg_newDoc(o){const tp=lg_tplFor(o.type);const d=Object.assign({id:uid('
  d.ver=lg_docVer(d.number);lg_docs().push(d);return d;}
 function lg_freezeVals(r){const V=r.__V||{};const o={};r.used.forEach(k=>{if(V[k]!=null)o[k]=V[k];});['DOC_NO','DATE','DATE_L2','LANG2','LANG2_NAME_EN','LANG2_NAME_L2','OTA_NAME'].forEach(k=>{if(V[k]!=null)o[k]=V[k];});o.__naList=[...(V.__na||[])];return o;}
 function lg_renderDoc(d,o){o=o||{};const prev=d.supersedes?lg_doc(d.supersedes):null;
+ // Order Form: ТЗ 2.4 paragraph with OF_SUPERSEDES / OF_EFFECTIVE, only for v2+ (v1 never has it); other types keep the generic line
+ const ofRepl=d.type==='OF'&&!!prev&&d.ver>=2;const extra=Object.assign({},d.extra||{});
+ if(ofRepl){extra.OF_SUPERSEDES=prev.number;extra.OF_EFFECTIVE=d.effective||d.effPlanned||d.date||iso(now());}
  const ctx={cc:d.cc,docNo:d.number,date:d.date||iso(now()),tplVer:d.templateVer,priceVer:d.priceVer,effective:d.effective||d.effPlanned||null,lang2:d.lang2||undefined,
-  signatures:d.signatures,scan:d.scan,replaces:prev?{ver:'v'+prev.ver,date:prev.date||prev.createdAt}:null,draft:!!o.draft,extra:d.extra||null};
+  signatures:d.signatures,scan:d.scan,replaces:prev&&d.type!=='OF'&&d.type!=='BOA'?{ver:'v'+prev.ver,date:prev.date||prev.createdAt}:null,ofRepl,draft:!!o.draft,extra};
  if(d.vals&&!o.live)ctx.vals=d.vals;
  if(o.cert&&((d.signatures&&d.signatures.length)||d.scan))ctx.cert={d};
  return lg_render(d.type,ctx);}
@@ -322,7 +364,11 @@ function lg_generate(o){o=o||{};const at=o.at||iso(now());const spec=lg_pkgSpec(
 function lg_then(v,fn){return v&&typeof v.then==='function'?v.then(fn):fn(v);}
 function lg_issueDocs(docs,o){o=o||{};const at=o.at||iso(now());const ok=[],fails=[];
  docs.forEach(d=>{if(d.status!=='draft')return;d.date=at;d.lang2=lg_l2();if(!d.templateVer)d.templateVer=lg_tplCurVer(d.type);if(d.type==='OF'&&d.priceVer==null){const pl=priceList(d.cc);d.priceVer=pl?pl.ver:null;}});
- docs.forEach(d=>{if(d.status!=='draft')return;const r=lg_renderDoc(d,{live:true});if(r.error||r.missing.length)fails.push({d,r});else ok.push({d,r});});
+ docs.forEach(d=>{if(d.status!=='draft')return;
+  // ТЗ 2.4: Order Form clause 3.2 — country fee X% may not exceed 3%
+  if(d.type==='OF'){const pl=lg_plFor(d.cc,d.priceVer);if(pl&&+(pl.fee||0)>0.03){fails.push({d,r:{missing:[],error:'fee',fee:pl.fee}});return;}}
+  const ed=lg_tplEdition(d.type);if(ed&&ed!==LG_PACK){fails.push({d,r:{missing:[],error:'edition',ed}});return;}
+  const r=lg_renderDoc(d,{live:true});if(r.error||r.missing.length)fails.push({d,r});else ok.push({d,r});});
  if(fails.length){docs.forEach(d=>{if(d.status==='draft')d.date=null;});const res={err:fails};return o.sync?res:Promise.resolve(res);}
  const commit=hs=>{ok.forEach((x,i)=>{const d=x.d;d.vals=lg_freezeVals(x.r);d.hash=hs[i];d.textLen=x.r.text.length;d.status='issued';d.issuedAt=at;d.issuedBy=actorName();
    if(o.uid)lg_auditAt('doc.issue',d.number,{hash:d.hash,tpl:d.templateVer,cls:d.cls},at,o.uid);else lg_audit('doc.issue',d.number,{hash:d.hash,tpl:d.templateVer,cls:d.cls});});return{ok:ok.map(x=>x.d)};};
@@ -333,12 +379,14 @@ function lg_signDocs(docs,party,o){o=o||{};const a=o.user||lg_actor();const at=o
  docs.forEach(d=>{const sg={party,name:a.name,title:party==='ota'?(otaVal('OTA_TITLE_EN')||a.title||''):(lg_fval('P_TITLE_EN')||a.title||''),email:a.email||'',at,ip:lg_ip(a.role),
    ua:(o.ua||(typeof navigator!=='undefined'?navigator.userAgent:'')).slice(0,160),auth:'E-mail OTP + 2FA',otp:'email',id:sid,viewedAt:o.viewedAt||((S.ui.lg_viewed||{})[d.id])||at};
   d.signatures.push(sg);
-  if(party==='partner'){if(d.type==='CHG'){d.status='acknowledged';d.effective=d.effective||at;}else d.status='signed_partner';}
+  if(party==='partner'){if(d.type==='CHG'){d.status='acknowledged';d.effective=d.effective||at;lg_chgApply(d,at);}else d.status='signed_partner';}
   else{d.status='signed_both';if(!d.effective||(d.sub&&d.sub!=='increase'&&d.effective<at))d.effective=d.effective&&d.effective>at?d.effective:at;}
   if(o.uid)lg_auditAt('doc.sign.'+party,d.number,{sig:sid,hash:d.hash,otp:'email'},at,o.uid);else lg_audit('doc.sign.'+party,d.number,{sig:sid,hash:d.hash,otp:'email'});});
  if(party==='ota'||docs.some(d=>d.type==='CHG'))lg_tick();return sid;}
 // status housekeeping: class B auto-effective; previous versions superseded once the new one is in force
-function lg_tick(){const ts=iso(now());let ch=false;
+function lg_ofTermSync(){let ch=false;(S.notices||[]).filter(n=>n.type==='of_terminate').forEach(n=>{lg_docs().forEach(d=>{if(d.type!=='OF'||d.cc!==n.cc||d.status==='terminated'||d.status==='superseded'||d.status==='draft')return;
+  d.status='terminated';d.terminatedAt=n.createdAt;d.terminatedBy=n.id;lg_audit('doc.terminate',d.number,{notice:n.id,reason:n.reason||''});ch=true;});});return ch;}
+function lg_tick(){const ts=iso(now());let ch=lg_ofTermSync();
  lg_docs().forEach(d=>{if(d.kind==='change'&&d.cls==='B'&&d.status==='issued'&&d.effective&&d.effective<=ts){d.status='acknowledged';d.ack={auto:true,at:d.effective};lg_audit('doc.auto_effective',d.number,{effective:d.effective});ch=true;}});
  lg_docs().forEach(d=>{if(!d.supersedes||!(d.status==='signed_both'||d.status==='acknowledged'))return;if(d.effective&&d.effective>ts)return;const p=lg_doc(d.supersedes);
   if(p&&p.status!=='superseded'&&p.status!=='terminated'){p.status='superseded';p.supersededAt=d.effective||ts;p.supersededBy=d.id;lg_audit('doc.superseded',p.number,{by:d.number});ch=true;}});
@@ -352,28 +400,37 @@ HOOKS.orderBlock=HOOKS.orderBlock||[];HOOKS.orderBlock.push(lg_blockReason);
 
 /* ---------- changes (ТЗ §7) ---------- */
 function lg_detected(){const out=[];if(!lg_inForce('MPA'))return out;
- orgCountries().forEach(cc=>{const ofs=lg_docs().filter(d=>d.type==='OF'&&d.cc===cc&&d.status!=='draft'&&d.status!=='terminated').sort((a,b)=>b.ver-a.ver);const last=ofs[0];const pl=plLatest(cc);
+ orgCountries().forEach(cc=>{if(typeof ofTerminated==='function'&&ofTerminated(cc))return;const ofs=lg_docs().filter(d=>d.type==='OF'&&d.cc===cc&&d.status!=='draft'&&d.status!=='terminated').sort((a,b)=>b.ver-a.ver);const last=ofs[0];const pl=plLatest(cc);
   if(!last){out.push({kind:'country',cc,pl});return;}
   if(pl&&pl.ver>(last.priceVer||0))out.push({kind:'price',cc,pl,last,increase:!!pl.increase});});
  return out;}
 function lg_issueOF(cc,o){o=o||{};const det=lg_detected().find(x=>x.cc===cc);if(!det)return{err:'none'};const at=o.at||iso(now());const pl=det.pl;
+ // ТЗ 3.2: no version with an increase > 10% in 12 months or a notice < 90 days (commercial agent's check)
+ if(det.kind==='price'&&pl&&typeof plCheckVersion==='function'){const ck=plCheckVersion(cc,pl.ver);if(!ck.ok){lg_audit('change.refused',cc,{priceVer:pl.ver,cap:ck.cap,noticeOk:ck.noticeOk});const res={err:[{d:{number:'OF '+cc},r:{missing:[],error:'plcheck',ck}}]};return o.sync?res:Promise.resolve(res);}}
  let last=det.last||null,sup=last;
  if(last&&lg_isPending(last)){last.status='terminated';last.withdrawnAt=at;lg_audit('doc.withdraw',last.number,{reason:'replaced by a newer price list'});sup=last.supersedes?lg_doc(last.supersedes):null;}
  const number=last?docNo('OF',{base:last.number}):lg_number('OF',cc);const sub=!last?'new_country':(det.increase?'increase':'decrease');
- const eff=sub==='increase'?(pl.from>at?pl.from:iso(addDays(at,PRICE_NOTICE_DAYS))):null;
- const d=lg_newDoc({kind:'change',type:'OF',cc,number,cls:'A',sub,supersedes:sup?sup.id:null,priceVer:pl?pl.ver:null,effective:eff,createdAt:at,templateVer:lg_tplCurVer('OF')});
+ const cls=o.cls==='B'?'B':'A';let eff=sub==='increase'?(pl.from>at?pl.from:iso(addDays(at,PRICE_NOTICE_DAYS))):null;
+ if(cls==='B'){const b30=iso(addDays(at,CLASS_A_NOTICE_DAYS));if(!eff||eff<b30)eff=b30;} // class B: effective after 30 days
+ const d=lg_newDoc({kind:'change',type:'OF',cc,number,cls,sub,supersedes:sup?sup.id:null,priceVer:pl?pl.ver:null,effective:eff,createdAt:at,templateVer:lg_tplCurVer('OF')});
  return lg_then(lg_issueDocs([d],{at,uid:o.uid,sync:o.sync}),res=>{if(res.err){d.status='terminated';d.withdrawnAt=at;d.archived=true;return res;}
- const L=lg_st();const ch={id:uid('chg'),kind:sub==='new_country'?'country':'price',type:'OF',cc,cls:'A',sub,effective:eff,note:(pl&&pl.note)||'',docIds:[d.id],plVer:pl?pl.ver:null,createdAt:at,by:actorName()};L.changes.unshift(ch);d.changeId=ch.id;
- if(o.uid)lg_auditAt('change.release',number,{cls:'A',sub,cc,effective:eff},at,o.uid);else lg_audit('change.release',number,{cls:'A',sub,cc,effective:eff});return{ok:[d],change:ch};});}
+ const L=lg_st();const ch={id:uid('chg'),kind:sub==='new_country'?'country':'price',type:'OF',cc,cls,sub,effective:eff,note:(pl&&pl.note)||'',docIds:[d.id],plVer:pl?pl.ver:null,createdAt:at,by:actorName()};L.changes.unshift(ch);d.changeId=ch.id;
+ if(o.uid)lg_auditAt('change.release',number,{cls,sub,cc,effective:eff},at,o.uid);else lg_audit('change.release',number,{cls,sub,cc,effective:eff});return{ok:[d],change:ch};});}
 function lg_tplSave(type,changes,o){const L=lg_st();const vs=lg_tplVersions(type);const n=Math.max(...vs.map(v=>v.n||0))+1;const ver='T-'+type+'-v'+n;
  const v={ver,n,changes:changes||{},cls:o.cls||(lg_baseTpl(type)||{}).cls||'B',effective:o.effective,note:o.note||'',status:'draft',createdAt:o.at||iso(now()),by:o.by||actorName()};
  (L.tpl[type]=L.tpl[type]||[]).push(v);lg_audit('tpl.version',ver,{cls:v.cls,effective:v.effective,blocks:Object.keys(v.changes)});return v;}
 function lg_tplAffected(type,ver){const live=lg_docs().filter(d=>d.type===type&&!d.archived&&['signed_both','acknowledged','issued','signed_partner'].includes(d.status)&&d.templateVer!==ver);
  return live.filter(d=>!lg_docs().some(x=>x.supersedes===d.id&&x.status!=='terminated'));}
 function lg_tplRelease(type,ver,o){o=o||{};const v=lg_tplVersions(type).find(x=>x.ver===ver);if(!v)return{err:'none'};const at=o.at||iso(now());const L=lg_st();
+ // ТЗ part 5: before the first partner signature (01–06, 09) / first publication (07, 08) v10 is the first edition —
+ // no change class, no notices, no 30-day periods: the text is simply updated
+ if(lg_firstEdition(type)){v.status='released';v.releasedAt=at;v.cls=null;v.first=true;lg_tplSync(type);delete lg__tc[type];const back=[];
+  lg_docs().forEach(d=>{if(d.type!==type||d.kind!=='pkg'||(d.signatures||[]).length||!(d.status==='draft'||d.status==='issued'))return;
+   if(d.status==='issued'){d.status='draft';d.vals=null;d.hash=null;d.issuedAt=null;d.date=null;back.push(d.number);lg_audit('doc.reissue_required',d.number,{tpl:ver});}d.templateVer=ver;});
+  lg_audit('tpl.release.first',ver,{docs:back});return{ok:[],pub:[],first:true,back};}
  if(type==='EUT'||type==='PN'){v.status='released';v.releasedAt=at;const made=[];lg_pubCurrent(type).forEach(p=>made.push(lg_pubPublish(type,p.cc,p.lang,{tplVer:ver,note:v.note,at})));
   L.changes.unshift({id:uid('chg'),kind:'template',type,cls:'C',effective:v.effective,note:v.note,docIds:[],pubIds:made.map(p=>p.id),tplVer:ver,createdAt:at,by:actorName()});lg_tplSync(type);lg_audit('change.release',ver,{cls:'C'});return{ok:[],pub:made};}
- const aff=lg_tplAffected(type,ver).filter(d=>d.type!=='BOA');const docs=[];
+ const aff=lg_tplAffected(type,ver).filter(d=>d.type!=='BOA'&&d.type!=='CHG');const docs=[];
  aff.forEach(p=>{const number=docNo(p.type,{base:p.number});docs.push(lg_newDoc({kind:'change',type:p.type,cc:p.cc,number,cls:v.cls,sub:'text',supersedes:p.id,priceVer:p.priceVer,effective:v.effective,createdAt:at,templateVer:ver}));});
  // render check first (missing LANG2 translation stops everything)
  const probe=docs.map(d=>lg_renderDoc(d,{live:true})).find(r=>r.error);
@@ -387,6 +444,10 @@ function lg_reminders(d){if(!d.effective||!lg_isPending(d))return [];const ts=is
  return [30,14,7,1].map(n=>{const at=iso(addDays(d.effective,-n));const man=L.reminders.find(r=>r.docId===d.id&&r.n===n);return{n,at,sent:!!man||at<=ts,manual:man||null};});}
 function lg_ack(d,o){o=o||{};const a=lg_actor();const at=o.at||iso(now());d.status='acknowledged';d.ack={at,by:a.name,role:a.role,email:a.email};lg_audit('doc.ack',d.number,{hash:d.hash});lg_tick();}
 
+// ТЗ part 5: change classes / notices / 30-day periods exist only after the first partner signature or first publication
+function lg_firstSigned(){return lg_docs().some(d=>(d.signatures||[]).some(x=>x.party==='partner'));}
+function lg_firstPublished(){return lg_st().pub.length>0;}
+function lg_firstEdition(type){return (type==='EUT'||type==='PN')?!lg_firstPublished():!lg_firstSigned();}
 /* ---------- public documents 07/08 (class C): versions per country + language ---------- */
 function lg_pubCurrent(type){return lg_st().pub.filter(p=>p.type===type&&p.status==='current');}
 function lg_pubPublish(type,cc,lang,o){o=o||{};const L=lg_st();const at=o.at||iso(now());const cur=L.pub.find(p=>p.type===type&&p.cc===cc&&p.lang===lang&&p.status==='current');
@@ -394,25 +455,94 @@ function lg_pubPublish(type,cc,lang,o){o=o||{};const L=lg_st();const at=o.at||is
  const p={id:uid('pub'),type,cc,lang,ver,number:docNo(type,{cc,lang,ver}),tplVer:o.tplVer||lg_tplCurVer(type),publishedAt:at,effective:o.effective||at,notifiedAt:o.notified?at:null,status:'current',note:o.note||'',by:o.by||actorName()};
  L.pub.unshift(p);if(!o.silent)lg_audit('pub.version',p.number,{tpl:p.tplVer});return p;}
 
+// ТЗ 3.4: 07/08 are published in the country's language(s): UA — uk; KZ — kk AND ru. A language is available when the template
+// carries its text or OTA uploaded the professional translation (ТЗ 4.12). Publishing a country is all-or-nothing.
+function lg_tplHasLang(type,lang){const tt=lg_tpl(type);if(!tt)return false;const has=x=>!String(x.en||'').trim()||String(x[lang]||'').trim();
+ return tt.blocks.every(b=>b.rows?b.rows.every(r=>r.every(has)):has(b));}
+function lg_pubLangAvail(type,lang){if(lang==='en'||lg_tplHasLang(type,lang))return 'tpl';return (((lg_st().tr||{})[type]||{})[lang])?'file':null;}
+function lg_pubMissing(cc){const out=[];['EUT','PN'].forEach(tp=>lg_pubLangs(cc).forEach(l=>{if(!lg_pubLangAvail(tp,l))out.push({type:tp,lang:l});}));return out;}
+function lg_pubCur(type,cc,lang){return lg_st().pub.find(p=>p.type===type&&p.cc===cc&&p.lang===lang&&p.status==='current')||null;}
+function lg_pubCountryDone(cc){return ['EUT','PN'].every(tp=>lg_pubLangs(cc).every(l=>!!lg_pubCur(tp,cc,l)));}
+function lg_pubCountry(cc,o){o=o||{};const miss=lg_pubMissing(cc);
+ if(miss.length){lg_audit('pub.blocked',cc,{missing:miss.map(m=>m.type+':'+m.lang)});return{err:'langs',missing:miss};}
+ const made=[];['EUT','PN'].forEach(tp=>lg_pubLangs(cc).forEach(l=>{if(!lg_pubCur(tp,cc,l))made.push(lg_pubPublish(tp,cc,l,o));}));return{ok:made};}
+function lg_pubBlockedMsg(cc,miss){miss=miss||lg_pubMissing(cc);const langs=[...new Set(miss.map(m=>m.lang))];
+ return t('lg.pub.blocked',{c:ctyName(cc),req:lg_pubLangs(cc).map(lg_langName).join(' + '),m:langs.map(lg_langName).join(', ')});}
+// ТЗ part 6: the country opens for end users when the package is signed, 07/08 are published in all mandatory languages and
+// the technical flag S.ota.countries[CC].ownership_v10_enabled (commercial agent's field, read only here) is on
+function lg_countryLaunch(cc){const co=((S.ota&&S.ota.countries)||{})[cc]||null;const flag=!!(co&&co.ownership_v10_enabled);
+ const pkg=!!(lg_inForce('MPA')&&lg_inForce('OF',cc));const pub=lg_pubCountryDone(cc);return{cc,pkg,pub,flag,flagKnown:!!co,open:pkg&&pub&&flag,missing:lg_pubMissing(cc)};}
+function lg_countryOpen(cc){return lg_countryLaunch(cc).open;}
+
 /* ---------- change of partner details → OTA check → notice for partner signature ---------- */
 function lg_fieldLabel(k,lang){const d=I18N.d[lang]||I18N.d.en;return d['lg.f.'+k]||I18N.d.en['lg.f.'+k]||k;}
-function lg_approveDetails(o){o=o||{};const L=lg_st();const rq=L.detailReq;if(!rq||rq.status!=='pending')return null;const at=o.at||iso(now());
- const rows=Object.keys(rq.fields).map(k=>({CHG_LABEL:lg_fieldLabel(k,'en')+' / '+lg_fieldLabel(k,lg_l2()),CHG_OLD:rq.fields[k].old||'—',CHG_NEW:rq.fields[k].new||'—'}));
- Object.keys(rq.fields).forEach(k=>lg_fset(k,rq.fields[k].new,{}));lg_syncOrg();
- const number=lg_number('CHG');const d=lg_newDoc({kind:'notice',type:'CHG',number,cls:'A',createdAt:at,extra:{CHG_LIST:rows,EFFECTIVE_DATE:at}});d.effPlanned=at;
- rq.status='approved';rq.decidedAt=at;rq.decidedBy=actorName();rq.noticeId=d.id;lg_audit('details.approve',number,{fields:Object.keys(rq.fields)});
- return lg_issueDocs([d],{at,sync:o.sync});}
+// ТЗ 2.5 (template E): the partner's authorised signatory signs the notice with a one-time code. Non-bank details apply on signature;
+// bank details apply only after the signature AND OTA Finance's call-back to a contact from the PREVIOUS details. Until then
+// S.org.bank and the questionnaire keep the old details (payments use them). Previously signed documents are never reissued.
+function lg_chgPending(){return lg_docs().find(d=>d.type==='CHG'&&d.status==='issued'&&!d.archived)||null;}
+function lg_chgCreate(o){const at=o.at||iso(now());const fields=o.fields;const keys=Object.keys(fields);
+ const rows=keys.map(k=>({CHG_LABEL:lg_fieldLabel(k,'en')+' / '+lg_fieldLabel(k,lg_l2()),CHG_OLD:fields[k].old||'—',CHG_NEW:fields[k].new||'—'}));
+ const party=lg_fval('P_NAME')||(S.org&&S.org.name)||'';
+ const number=lg_number('CHG');const d=lg_newDoc({kind:'notice',type:'CHG',number,cls:null,createdAt:at,
+  extra:{CHG_LIST:rows,CHG_PARTY_NAME:party,CHG_EFFECTIVE_DATE:at,CHG_SIG_COMPANY:party,CHG_SIG_NAME:lg_fval('P_SIGNATORY')||'',CHG_SIG_TITLE_EN:lg_fval('P_TITLE_EN')||'',CHG_SIG_TITLE_L2:lg_fval('P_TITLE_L2')||lg_fval('P_TITLE_EN')||''}});
+ d.effPlanned=at;d.chg={group:o.group||'',fields,proof:o.proof||null,by:actorName(),at};
+ const bank=keys.filter(k=>LG_BANK_KEYS.includes(k));
+ return lg_then(lg_issueDocs([d],{at,sync:o.sync}),res=>{
+  if(res.err){d.status='terminated';d.archived=true;d.withdrawnAt=at;return res;}
+  lg_audit('details.notice',number,{fields:keys,proof:o.proof?o.proof.file:null,hash:d.hash});
+  if(bank.length){const bf={};bank.forEach(k=>{bf[k]=fields[k];});
+   S.bankChange={id:uid('bank'),noticeId:d.id,number,fields:bf,prev:Object.assign({},(S.org&&S.org.bank)||{}),
+    prevContact:{phone:lg_fval('P_PHONE')||'',email:lg_fval('P_EMAIL_FIN')||'',name:lg_fval('P_SIGNATORY')||''},
+    status:'awaiting_signature',createdAt:at,by:actorName(),signedAt:null,callback:null};
+   lg_audit('details.bank.pending',number,{fields:bank});}
+  return{ok:[d]};});}
+function lg_chgApply(d,at){if(!d||!d.chg||d.chg.applied)return;const f=d.chg.fields||{};const nonBank=Object.keys(f).filter(k=>!LG_BANK_KEYS.includes(k));
+ nonBank.forEach(k=>lg_fset(k,f[k].new,{}));d.chg.applied=at;lg_syncOrg();
+ if(nonBank.length)lg_audit('details.apply',d.number,{fields:nonBank});
+ const bc=S.bankChange;if(bc&&bc.noticeId===d.id&&bc.status==='awaiting_signature'){bc.signedAt=at;bc.status='awaiting_callback';lg_audit('details.bank.signed',d.number,{fields:Object.keys(bc.fields)});}}
+// OTA Finance: call-back to the contact on record (previous details) → the new bank details take effect
+function lg_bankCallback(o){const bc=S.bankChange;if(!bc||bc.status!=='awaiting_callback')return null;const a=lg_actor();const at=o.at||iso(now());
+ bc.callback={by:a.name||actorName(),role:a.role||'',at,phone:o.phone,contact:o.contact||'',result:o.ok?'confirmed':'failed'};
+ const L=lg_st();
+ if(o.ok){Object.keys(bc.fields).forEach(k=>lg_fset(k,bc.fields[k].new,{}));lg_syncOrg();bc.status='confirmed';bc.effectiveAt=at;
+  lg_audit('details.bank.callback',bc.number,{phone:o.phone,contact:o.contact||'',by:bc.callback.by,result:'confirmed'});}
+ else{bc.status='rejected';lg_audit('details.bank.callback_failed',bc.number,{phone:o.phone,contact:o.contact||'',by:bc.callback.by,note:o.note||''});}
+ L.bankHist.unshift(JSON.parse(JSON.stringify(bc)));S.bankChange=null;return bc;}
+function lg_bankBanner(){const bc=S.bankChange;if(!bc)return '';
+ return ui.note('warn',`<b>${t('lg.bank.pending')}</b> · ${t(bc.status==='awaiting_signature'?'lg.bank.stSign':'lg.bank.stCall',{n:esc(bc.number)})}`);}
+
+/* ---------- 05B Brand Owner Authorisation Letter (ТЗ 2.7): class A, signed by the brand owner (third party) ---------- */
+function lg_boaInForce(){return lg_docs().filter(d=>d.type==='BOA'&&d.status==='signed_both').sort((a,b)=>String(b.number).localeCompare(String(a.number)))[0]||null;}
+function lg_boaNew(o){o=o||{};const at=o.at||iso(now());const cur=lg_boaInForce();
+ if(lg_docs().some(d=>d.type==='BOA'&&d.status==='issued'&&d.kind==='change'))return{err:'pending'};
+ const d=lg_newDoc({kind:'change',type:'BOA',number:lg_number('BOA'),cls:'A',sub:'text',supersedes:cur?cur.id:null,createdAt:at,templateVer:lg_tplCurVer('BOA')});
+ return lg_then(lg_issueDocs([d],{at,sync:o.sync}),res=>{if(res.err){d.status='terminated';d.archived=true;return res;}lg_audit('doc.boa.new',d.number,{replaces:cur?cur.number:null,hash:d.hash});return{ok:[d]};});}
+function lg_boaOwnerSign(d,o){o=o||{};const at=o.at||iso(now());
+ const sg={party:'owner',name:lg_fval('P_TM_OWNER_SIGNATORY')||lg_fval('P_TM_OWNER_NAME')||'Brand owner',title:lg_fval('P_TM_OWNER_TITLE')||'',email:(d.ownerLink&&d.ownerLink.email)||'',at,ip:'198.51.100.24',
+  ua:(typeof navigator!=='undefined'?navigator.userAgent:'').slice(0,160),auth:'E-mail OTP (brand owner link)',otp:'email',id:'SIG-'+rndB32(4)+'-'+rndB32(4),viewedAt:(d.ownerLink&&d.ownerLink.openedAt)||at};
+ d.signatures.push(sg);d.status='signed_both';d.effective=at;lg_audit('doc.sign.owner',d.number,{sig:sg.id,hash:d.hash,otp:'email',to:sg.email});lg_tick();return sg;}
+function lg_boaRevoke(d,o){const at=o.at||iso(now());d.revoked={at,by:actorName(),note:o.note||'',file:o.file||null};d.status='terminated';d.withdrawnAt=at;
+ const L=lg_st();L.notices.unshift({id:uid('ntc'),kind:'boa_revoked',docId:d.id,number:d.number,at,by:actorName(),to:'OTA Legal',handled:null});
+ lg_audit('doc.boa.revoke',d.number,{note:o.note||'',file:o.file||null,notice:'OTA Legal'});}
+
+/* ---------- sub-processor change notices (ТЗ 2.9): records created by the commercial agent, shown without signature ---------- */
+function lg_subprocNotices(){const src=[].concat(S.subprocNotices||[],(S.subproc&&S.subproc.notices)||[],(S.ota&&Array.isArray(S.ota.subprocNotices)?S.ota.subprocNotices:[]));
+ const seen=new Set();return src.filter(n=>n&&typeof n==='object'&&!seen.has(n.id||JSON.stringify(n))&&seen.add(n.id||JSON.stringify(n)))
+  .map(n=>({id:n.id,at:n.at||n.createdAt||n.date||n.sentAt||null,effective:n.effective||n.effectiveAt||n.from||null,
+   text:n.text||n.note||n.change||n.summary||n.title||[].concat(n.added?['+ '+[].concat(n.added).map(x=>typeof x==='string'?x:(x.name||'')).join(', ')]:[],n.removed?['− '+[].concat(n.removed).map(x=>typeof x==='string'?x:(x.name||'')).join(', ')]:[]).join(' · ')}))
+  .sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));}
 
 /* ---------- tasks (sidebar badge, signing page) ---------- */
 function lg_tasks(side){side=side||(S.admin?'ota':'partner');const L=lg_st();const ds=lg_docs().filter(d=>!d.archived&&d.status!=='terminated');const out=[];
  if(side==='partner'){const pk=lg_pkgDocs().filter(d=>d.status==='issued'&&d.type!=='BOA');if(pk.length)out.push({kind:'sign',key:'pkg',docs:pk});
-  ds.filter(d=>d.kind!=='pkg'&&d.status==='issued'&&!(d.kind==='change'&&d.cls==='B')).forEach(d=>out.push({kind:'sign',key:d.id,docs:[d]}));
+  ds.filter(d=>d.kind!=='pkg'&&d.type!=='BOA'&&d.status==='issued'&&!(d.kind==='change'&&d.cls==='B')).forEach(d=>out.push({kind:'sign',key:d.id,docs:[d]}));
   ds.filter(d=>d.kind==='change'&&d.cls==='B'&&d.status==='issued').forEach(d=>out.push({kind:'ack',key:d.id,docs:[d]}));
   ds.filter(d=>d.type==='BOA'&&d.status==='issued'&&!d.scan).forEach(d=>out.push({kind:'scan',key:d.id,docs:[d]}));}
  else{const pk=lg_pkgDocs().filter(d=>d.status==='signed_partner');if(pk.length)out.push({kind:'osign',key:'pkg',docs:pk});
   ds.filter(d=>d.kind!=='pkg'&&d.status==='signed_partner').forEach(d=>out.push({kind:'osign',key:d.id,docs:[d]}));
   if(L.submitted&&!L.review)out.push({kind:'review',key:'review',docs:[]});
-  if(L.detailReq&&L.detailReq.status==='pending')out.push({kind:'details',key:'details',docs:[]});
+  if(S.bankChange&&S.bankChange.status==='awaiting_callback')out.push({kind:'callback',key:'callback',docs:[]});
+  L.notices.filter(n=>n.kind==='boa_revoked'&&!n.handled).forEach(n=>out.push({kind:'revoked',key:n.id,docs:[],notice:n}));
   ds.filter(d=>d.decline&&!d.decline.handled).forEach(d=>out.push({kind:'decline',key:d.id,docs:[d]}));
   lg_detected().forEach(x=>out.push({kind:'detected',key:'det_'+x.cc,docs:[],det:x}));}
  return out;}
@@ -442,25 +572,28 @@ function lg_certRows(c){const d=c.d;const L2=d.lang2||lg_l2();
   ${S.admin?`<p class="lgd-small lg-noprint lgd-demo">${esc(t('lg.cert.demo'))}</p>`:''}</div>`;}
 /* ======================= UI ======================= */
 const LG_GROUPS=[
- {id:'company',ic:'factory',fields:['P_NAME','P_FORM_EN','P_FORM_L2','P_COUNTRY','P_REGNO','P_TAXNO','P_ADDR_EN','P_ADDR_L2']},
+ {id:'company',ic:'factory',fields:['P_NAME','P_FORM_EN','P_FORM_L2','P_COUNTRY','P_TAX_COUNTRY','P_REGNO','P_TAXNO','P_ADDR_EN','P_ADDR_L2','P_GCC_CONFIRM']},
  {id:'sign',ic:'lg_pen',fields:['P_SIGNATORY','P_TITLE_EN','P_TITLE_L2','P_TITLE_L2_GEN','P_AUTHORITY','P_AUTHORITY_FILE']},
  {id:'lang',ic:'globe',fields:['LANG2']},
  {id:'brand',ic:'tag',fields:['P_BRAND','P_PROGRAMME','P_TM_OWNER_IS_PARTNER','P_TM_LIST','P_BRAND_CONTACT','P_BRAND_RULES','P_TM_OWNER_NAME','P_TM_OWNER_COUNTRY_EN','P_TM_OWNER_COUNTRY_L2','P_TM_OWNER_REGNO','P_TM_OWNER_ADDR','P_TM_OWNER_RELATION_EN','P_TM_OWNER_RELATION_L2','P_TM_OWNER_TERRITORY_EN','P_TM_OWNER_TERRITORY_L2','P_TM_OWNER_SIGNATORY','P_TM_OWNER_TITLE']},
  {id:'domain',ic:'globe',fields:['P_DOMAIN','P_DNS_CONTACT','P_LOGO','P_BRANDBOOK']},
  {id:'contacts',ic:'mail',fields:['P_EMAIL_OPS','P_EMAIL_LEGAL','P_EMAIL_FIN','P_EMAIL_SUPPORT','P_PHONE']},
  {id:'bank',ic:'card',fields:['P_BANK_BENEFICIARY','P_BANK_IBAN','P_BANK_NAME','P_BANK_ADDR','P_BANK_SWIFT','P_BANK_INTERMEDIARY']}];
-const LG_FTYPE={P_COUNTRY:'country',P_AUTHORITY:'authority',P_AUTHORITY_FILE:'file',LANG2:'lang2',P_TM_OWNER_IS_PARTNER:'tmowner',P_TM_LIST:'tmlist',P_LOGO:'file',P_BRANDBOOK:'file',
+const LG_FTYPE={P_COUNTRY:'country',P_TAX_COUNTRY:'country',P_GCC_CONFIRM:'confirm',P_AUTHORITY:'authority',P_AUTHORITY_FILE:'file',LANG2:'lang2',P_TM_OWNER_IS_PARTNER:'tmowner',P_TM_LIST:'tmlist',P_LOGO:'file',P_BRANDBOOK:'file',
  P_EMAIL_OPS:'email',P_EMAIL_LEGAL:'email',P_EMAIL_FIN:'email',P_EMAIL_SUPPORT:'email',P_DNS_CONTACT:'email',P_BRAND_CONTACT:'email',P_PHONE:'tel',P_BRAND_RULES:'textarea',P_ADDR_EN:'textarea',P_ADDR_L2:'textarea',P_TM_OWNER_ADDR:'textarea',
  LAUNCH_DATE:'date',INIT_SIMS:'number',INIT_KEYS:'number',INIT_TOKENS:'number',ANNUAL_TARGET:'number',RETAIL_CUR:'cur',DELIVERY_ADDR:'textarea',OF_EXCEPTIONS_EN:'textarea',OF_EXCEPTIONS_L2:'textarea'};
 const LG_MONO=['P_REGNO','P_TAXNO','P_BANK_IBAN','P_BANK_SWIFT','P_BANK_INTERMEDIARY','P_DOMAIN'];
-const LG_ISO=['GB','UA','KZ','AE','PL','MD','GE','RO','DE','CY','EE','LT','LV','CZ','SK','NL','US'];
+const LG_ISO=['GB','UA','KZ','PL','MD','GE','RO','DE','CY','EE','LT','LV','CZ','SK','NL','US'].concat(LG_GCC);
 function lg_tmOwner(){return lg_fval('P_TM_OWNER_IS_PARTNER');}
 function lg_fieldOn(k){const tm=lg_tmOwner();if(k.startsWith('P_TM_OWNER_')&&k!=='P_TM_OWNER_IS_PARTNER')return tm==='no';if(k==='P_BRAND_CONTACT'||k==='P_BRAND_RULES')return tm!=='no';
  if(k==='P_AUTHORITY_FILE')return lg_fval('P_AUTHORITY')==='poa';return true;}
-function lg_req(k){if(!lg_fieldOn(k))return false;const base=k.split('@')[0];if(['P_BRANDBOOK','P_BRAND_RULES','OF_EXCEPTIONS_EN','OF_EXCEPTIONS_L2'].includes(base))return false;if(base==='P_AUTHORITY_FILE'||base==='DEVICES'||LG_COUNTRY_PARTNER.includes(base))return true;
+function lg_req(k){if(!lg_fieldOn(k))return false;const base=k.split('@')[0];if(base==='P_TAXNO')return false;
+ if(base==='OF_EXCEPTIONS_EN'||base==='OF_EXCEPTIONS_L2'){const cc=k.split('@')[1];const other=base==='OF_EXCEPTIONS_EN'?'OF_EXCEPTIONS_L2':'OF_EXCEPTIONS_EN';return !!(cc&&lg_fval(lg_ccKey(other,cc)));}
+ if(['P_BRANDBOOK','P_BRAND_RULES'].includes(base))return false;if(base==='P_AUTHORITY_FILE'||base==='DEVICES'||LG_COUNTRY_PARTNER.includes(base))return true;
  const m=lg_meta(base);if(!m)return true;return m.req==='required'||m.req==='na';}
 function lg_listOk(arr,cols){return Array.isArray(arr)&&arr.length>0&&arr.every(r=>cols.every(c=>r&&r[c]!=null&&String(r[c]).trim()!==''));}
 function lg_fstat(k){const f=lg_form(k);if(f&&f.status==='na')return 'na';const base=k.split('@')[0];const v=f?f.value:null;
+ if(base==='P_GCC_CONFIRM')return v===true?'filled':'empty';
  if(base==='P_TM_LIST')return lg_listOk(v,LG_TM_COLS)?'filled':'empty';if(base==='DEVICES')return lg_listOk(v,LG_DEV_COLS)?'filled':'empty';
  return (v!=null&&String(v).trim()!=='')?'filled':'empty';}
 function lg_reqList(){const out=[];LG_GROUPS.forEach(g=>g.fields.forEach(k=>{if(lg_req(k))out.push({k,g:g.id,st:lg_fstat(k)});}));
@@ -471,14 +604,14 @@ function lg_locked(k){if(!lg_issuedAny())return false;return !LG_FREE_AFTER.incl
 function lg_canEditForm(){return can('p.form');}
 // questionnaire → S.org (invoices, demo users, delivery)
 function lg_syncOrg(){const o=S.org;if(!o)return;const v=k=>lg_fval(k);
- if(v('P_NAME'))o.name=v('P_NAME');if(v('P_COUNTRY'))o.country=v('P_COUNTRY');if(v('P_REGNO'))o.regNo=v('P_REGNO');o.taxId=v('P_TAXNO')||'';if(v('P_ADDR_EN'))o.address=v('P_ADDR_EN');
+ if(v('P_NAME'))o.name=v('P_NAME');if(v('P_COUNTRY'))o.country=v('P_COUNTRY');if(v('P_TAX_COUNTRY'))o.taxCountry=v('P_TAX_COUNTRY');if(v('P_REGNO'))o.regNo=v('P_REGNO');o.taxId=v('P_TAXNO')||'';if(v('P_ADDR_EN'))o.address=v('P_ADDR_EN');
  if(v('P_SIGNATORY'))o.signatory=v('P_SIGNATORY');if(v('P_TITLE_EN'))o.title=v('P_TITLE_EN');if(v('P_EMAIL_LEGAL')&&!o.signatoryEmail)o.signatoryEmail=v('P_EMAIL_LEGAL');
  if(v('LANG2'))o.lang2=v('LANG2');if(v('P_BRAND'))o.brand=v('P_BRAND');if(v('P_PROGRAMME'))o.programme=v('P_PROGRAMME');if(v('P_DOMAIN'))o.domain=v('P_DOMAIN');if(v('P_PHONE'))o.phone=v('P_PHONE');
  o.bank=Object.assign({},o.bank||{},{benef:v('P_BANK_BENEFICIARY')||'',iban:v('P_BANK_IBAN')||'',bank:v('P_BANK_NAME')||'',bankAddr:v('P_BANK_ADDR')||'',swift:v('P_BANK_SWIFT')||'',interSwift:v('P_BANK_INTERMEDIARY')||''});
  o.delivery=o.delivery||{};orgCountries().forEach(cc=>{const dv=o.delivery[cc]=o.delivery[cc]||{company:o.name,country:cc};const a=lg_fval(lg_ccKey('DELIVERY_ADDR',cc)),im=lg_fval(lg_ccKey('IMPORTER',cc));if(a)dv.address=a;if(im)dv.importer=im;});}
 // first visit: start the questionnaire from what signup already knows
 function lg_formInit(){const o=S.org||{};const put=(k,v)=>{if(!S.form[k]&&v)S.form[k]={value:v,status:'filled',comment:'',by:'',at:iso(now())};};
- put('P_NAME',o.name);put('P_COUNTRY',o.country&&o.country!=='XX'?o.country:'');put('P_REGNO',o.regNo);put('LANG2',o.lang2||'ru');put('P_BRAND',o.brand);put('P_DOMAIN',o.domain);
+ put('P_NAME',o.name);put('P_COUNTRY',o.country&&o.country!=='XX'?o.country:'');put('P_TAX_COUNTRY',o.taxCountry&&o.taxCountry!=='XX'?o.taxCountry:'');put('P_REGNO',o.regNo);put('LANG2',o.lang2||'ru');put('P_BRAND',o.brand);put('P_DOMAIN',o.domain);
  orgCountries().forEach(cc=>{const d=(o.delivery||{})[cc]||{};put(lg_ccKey('INIT_SIMS',cc),'1000');put(lg_ccKey('INIT_KEYS',cc),String(orgMin().first));put(lg_ccKey('INIT_TOKENS',cc),'300');put(lg_ccKey('ANNUAL_TARGET',cc),String(o.commit||3000));
   put(lg_ccKey('RETAIL_CUR',cc),(CC_META[cc]||{}).cur||'USD');if(d.address&&!/^\[/.test(d.address))put(lg_ccKey('DELIVERY_ADDR',cc),[d.address,d.city].filter(Boolean).join(', '));if(d.importer&&!/^\[/.test(d.importer))put(lg_ccKey('IMPORTER',cc),d.importer);});}
 function lg_chip(st){return `<span class="lg-chip lg-chip-${st}">${t('lg.st.f.'+st)}</span>`;}
@@ -493,6 +626,7 @@ function lg_inp(k,o){o=o||{};const f=lg_form(k)||{};const base=k.split('@')[0];c
  else if(tp==='authority')ctl=`<select class="inp" ${common}><option value="">${t('lg.sel')}</option><option value="director" ${v==='director'?'selected':''}>${t('lg.auth.director')}</option><option value="poa" ${v==='poa'?'selected':''}>${t('lg.auth.poa')}</option></select>`;
  else if(tp==='lang2')ctl=`<select class="inp" ${common}>${lg_lang2Options().map(x=>`<option value="${x.l}" ${v===x.l?'selected':''} ${x.ok?'':'disabled'}>${esc(LG_LANG2[x.l].name)}${x.ok?'':' — '+t('lg.lang2.na')}</option>`).join('')}</select>`;
  else if(tp==='tmowner')ctl=`<div class="lg-yn" role="radiogroup" aria-labelledby="${id}-l">${['yes','no'].map(x=>`<label class="lg-ynopt ${v===x?'on':''}"><input type="radio" name="${id}" value="${x}" data-lgf="${esc(k)}" ${v===x?'checked':''} ${dis}><span><b>${t('lg.tm.'+x)}</b><span class="xs muted">${t('lg.tm.'+x+'.d')}</span></span></label>`).join('')}</div>`;
+ else if(tp==='confirm')ctl=`<label class="chk small lg-confirm"><input type="checkbox" ${common} ${v===true?'checked':''}><span>${esc(t('lg.gcc.confirm'))}</span></label>`;
  else if(tp==='file')ctl=`<div class="lg-file"><span class="lg-fname ${v?'':'faint'}">${icon('file','sm')}${v?esc(v):t('lg.file.none')}</span>${ro?'':`<label class="btn sm"><input type="file" class="lg-sr" data-lgfile="${esc(k)}" id="${id}">${icon('upload','sm')}<span>${v?t('lg.file.replace'):t('lg.file.choose')}</span></label>`}</div>`;
  else ctl=`<input class="inp ${LG_MONO.includes(base)?'mono':''}" type="${tp==='email'?'email':tp==='tel'?'tel':tp==='date'?'date':tp==='number'?'number':'text'}" ${tp==='number'?'min="0" step="1" inputmode="numeric"':''} value="${esc(tp==='date'?String(v).slice(0,10):v)}" ${common} autocomplete="off">`;
  let hint='';if(na)hint=`<span class="hint lg-nahint" id="${id}-h">${icon('shield','sm')} ${t('lg.na.by')}${f.naReason?': '+esc(f.naReason):''}</span>`;
@@ -537,8 +671,8 @@ function lg_formHtml(){lg_st();lg_formInit();const L=lg_st();const edit=lg_canEd
   <div style="margin-top:10px" id="lg-progBar">${ui.bar(pr.total?pr.done/pr.total:0,pr.ok?'ok':'')}</div>
   <div class="small muted" id="lg-progLeft" style="margin-top:8px">${pr.ok?'':t('lg.form.left',{n:pr.left.length})+' '+pr.left.slice(0,4).map(x=>`<a href="#" data-act="lg_jump" data-arg="${esc(x.k)}">${esc(t('lg.f.'+x.k.split('@')[0]))}${x.k.includes('@')?' ('+x.k.split('@')[1]+')':''}</a>`).join(', ')+(pr.left.length>4?'…':'')}</div></div></div>`;
  const notes=[];if(!edit)notes.push(ui.note(S.admin?'admin':'info',S.admin?t('lg.form.otaRo'):t('c.noPerm',{r:esc(roleName(lg_role()))})+(typeof ord_asBtn==='function'?' '+ord_asBtn('p_admin'):'')));
- if(L.detailReq&&L.detailReq.status==='pending')notes.push(ui.note('warn',t('lg.chg.pending')));
- if(L.detailReq&&L.detailReq.status==='approved'&&L.detailReq.noticeId){const nd=lg_doc(L.detailReq.noticeId);if(nd&&nd.status==='issued')notes.push(ui.note('info',t('lg.chg.toSign',{n:esc(nd.number)})+' <a href="'+link('lg-sign')+'">'+t('lg.nav.sign')+'</a>'));}
+ {const nd=lg_chgPending();if(nd)notes.push(ui.note('info',t('lg.chg.toSign',{n:esc(nd.number)})+' <a href="'+link('lg-signing',nd.id)+'">'+t('lg.nav.sign')+'</a>'));}
+ if(S.bankChange)notes.push(lg_bankBanner());
  return ui.page({title:t('lg.form.title'),sub:t('lg.form.sub'),crumbs:[[t('lg.sec'),link('lg-docs')],[t('lg.form.title')]],
   body:`<div class="stack">${notes.join('')}${prog}${LG_GROUPS.map(grp).join('')}${ccs}</div>`});}
 // update chips & progress without re-rendering (keeps focus while typing through the form)
@@ -547,6 +681,7 @@ function lg_refreshProgress(){const pr=lg_progress();const el=$('#lg-progT');if(
  $$('[data-chip]').forEach(c=>{const k=c.dataset.chip;const s=lg_fstat(k);c.innerHTML=lg_chip(s);});
  const rl=lg_reqList();$$('[data-gp]').forEach(e=>{const gl=rl.filter(x=>x.g===e.dataset.gp);e.textContent=gl.filter(x=>x.st!=='empty').length+'/'+gl.length;});}
 function lg_validate(k,v){const base=k.split('@')[0];const tp=LG_FTYPE[base];if(v==null||String(v).trim()==='')return '';const s=String(v).trim();
+ if((base==='P_COUNTRY'||base==='P_TAX_COUNTRY')&&lg_isGcc(s))return t('lg.gcc.msg');
  if(tp==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s))return t('lg.e.email');
  if(base==='P_BANK_IBAN'&&!/^[A-Z]{2}\d{2}[A-Z0-9]{8,30}$/.test(s.replace(/\s/g,'').toUpperCase()))return t('lg.e.iban');
  if((base==='P_BANK_SWIFT'||base==='P_BANK_INTERMEDIARY')&&!/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(s.toUpperCase()))return t('lg.e.swift');
@@ -554,20 +689,21 @@ function lg_validate(k,v){const base=k.split('@')[0];const tp=LG_FTYPE[base];if(
  if(tp==='number'&&!(+s>=0))return t('lg.e.num');return '';}
 function lg_setFieldErr(k,msg){const id=lg_fid(k);const el=document.getElementById(id);const h=document.getElementById(id+'-h');if(el){if(msg)el.setAttribute('aria-invalid','true');else el.removeAttribute('aria-invalid');}
  if(h){if(msg){h.className='err';h.textContent=msg;}else if(h.className==='err'){h.className='hint';h.textContent='';}}}
-function lg_onField(k,el){if(!lg_canEditForm()&&!(S.admin&&k.includes('@')&&LG_COUNTRY_OTA.includes(k.split('@')[0])))return;let v=el.type==='radio'?el.value:el.value;
+function lg_onField(k,el){if(!lg_canEditForm()&&!(S.admin&&k.includes('@')&&LG_COUNTRY_OTA.includes(k.split('@')[0])))return;let v=el.type==='checkbox'?(el.checked?true:null):el.value;
  const base=k.split('@')[0];if(['P_BANK_IBAN','P_BANK_SWIFT','P_BANK_INTERMEDIARY'].includes(base))v=String(v).replace(/\s/g,'').toUpperCase();if(base==='P_DOMAIN')v=String(v).trim().toLowerCase();
- const err=lg_validate(k,v);lg_setFieldErr(k,err);if(err)return;
+ const err=lg_validate(k,v);lg_setFieldErr(k,err);if(err){if(err===t('lg.gcc.msg'))lg_audit('form.gcc_block',k,{value:v});return;}
  const f=lg_fset(k,typeof v==='string'?v.trim():v);if(f.comment&&f.status==='filled')f.comment='';if(!lg_issuedAny())lg_syncOrg();save();
  if(['P_TM_OWNER_IS_PARTNER','P_AUTHORITY','LANG2'].includes(k)){rerender();return;}lg_refreshProgress();}
 /* ---------- OTA review ---------- */
 function lg_noOta(){return ui.page({title:t('lg.ota.only'),body:ui.empty('shield',t('lg.ota.only'),t('lg.ota.onlyD'))});}
 function lg_reviewReady(){const L=lg_st();const o=S.org||{};const kyc=LG_KYC.every(k=>L.kyc[k]);const pr=lg_progress();
- return{submitted:!!L.submitted,form:pr.ok,kyc,code:o.codeStatus==='approved',brand:!!lg_tmOwner(),prices:orgCountries().every(cc=>!!priceList(cc)),devices:orgCountries().every(cc=>lg_devices(cc).length>0)};}
+ const gcc=!lg_isGcc(lg_fval('P_COUNTRY'))&&!lg_isGcc(lg_fval('P_TAX_COUNTRY'))&&lg_fval('P_GCC_CONFIRM')===true;
+ return{submitted:!!L.submitted,form:pr.ok,gcc,kyc,code:o.codeStatus==='approved',brand:!!lg_tmOwner(),prices:orgCountries().every(cc=>!!priceList(cc)),devices:orgCountries().every(cc=>lg_devices(cc).length>0)};}
 function lg_valShow(k){const f=lg_form(k);if(!f)return '<span class="faint">—</span>';const v=f.value;if(f.status==='na')return `<span class="faint">N/A</span>`;
  if(Array.isArray(v))return esc(t('lg.rows',{n:v.length}));if(v==null||String(v).trim()==='')return '<span class="faint">—</span>';const base=k.split('@')[0];
- if(base==='P_TM_OWNER_IS_PARTNER')return esc(t('lg.tm.'+v));if(base==='P_AUTHORITY')return esc(t('lg.auth.'+v));if(base==='LANG2')return esc((LG_LANG2[v]||{}).name||v);if(base==='P_COUNTRY')return esc(ctyName(v));return esc(v);}
+ if(base==='P_TM_OWNER_IS_PARTNER')return esc(t('lg.tm.'+v));if(base==='P_AUTHORITY')return esc(t('lg.auth.'+v));if(base==='LANG2')return esc((LG_LANG2[v]||{}).name||v);if(base==='P_COUNTRY'||base==='P_TAX_COUNTRY')return esc(ctyName(v))+(lg_isGcc(v)?' '+ui.badge('GCC','bad'):'');if(v===true)return esc(t('lg.gcc.yes'));return esc(v);}
 function lg_reviewHtml(){if(!S.admin)return lg_noOta();const L=lg_st();const o=S.org||{};const rr=lg_reviewReady();const allOk=Object.values(rr).every(Boolean);
- const steps=[['submitted',rr.submitted],['form',rr.form],['kyc',rr.kyc],['code',rr.code],['brand',rr.brand],['prices',rr.prices],['devices',rr.devices]];
+ const steps=[['submitted',rr.submitted],['form',rr.form],['gcc',rr.gcc],['kyc',rr.kyc],['code',rr.code],['brand',rr.brand],['prices',rr.prices],['devices',rr.devices]];
  const head=ui.card({title:t('lg.rv.status'),actions:L.review?ui.badge(t('lg.rv.approvedAt',{d:fmtDate(L.review.at)}),'ok',true):'',body:`<div class="lg-checks">${steps.map(([k,ok])=>`<div class="lg-ck ${ok?'ok':''}">${icon(ok?'check':'clock','sm')}<span>${t('lg.rv.ck.'+k)}</span></div>`).join('')}</div>`,
   foot:L.review?`<span class="small muted grow">${t('lg.rv.next')}</span>${ui.btn(t('lg.rv.toPkg'),{kind:'primary',href:link('lg-docs'),icon:'right'})}`
    :`${ui.btn(t('lg.rv.approve'),{kind:'primary',icon:'check',act:'lg_approveReview',disabled:!allOk||!(can('ota.settings')||can('ota.release'))})}`});
@@ -595,18 +731,49 @@ function lg_reviewHtml(){if(!S.admin)return lg_noOta();const L=lg_st();const o=S
    ${pend.length?`<dt>${t('lg.rv.plPend')}</dt><dd>${pend.map(p=>`v${p.ver} · ${t('lg.rv.from')} ${fmtDate(p.from)}${p.increase?' · '+ui.badge(t('lg.ch.increase'),'warn'):''}`).join('<br>')}</dd>`:''}</dl>
    <div class="lg-fgrid">${LG_COUNTRY_OTA.map(b=>{const k=lg_ccKey(b,cc);if(!lg_form(k)){const dv=lg_ccDefault(cc,b);if(dv!=null)S.form[k]={value:dv,status:'filled',comment:'',by:'OTA',at:iso(now())};}return lg_inp(k,{edit:can('ota.countries')||can('ota.settings')});}).join('')}</div>
    ${lg_devTable(cc,false,true)}</div>`});}).join('');
- const otaRows=otaKeys().map(k=>{const v=otaVal(k);return `<div class="lg-ota-r"><span class="mono xs">${esc(k)}</span><span class="small">${v?esc(v):`<span class="badge">N/A</span>`}</span></div>`;}).join('');
+ const otaRows=otaKeys().filter(k=>k!=='OTA_CUSTOMS_CODE').map(k=>{const v=otaVal(k);return `<div class="lg-ota-r"><span class="mono xs">${esc(k)}</span><span class="small">${v?esc(v):`<span class="badge">N/A</span>`}</span></div>`;}).join('');
  const otaCard=ui.card({title:t('lg.rv.ota'),actions:`<a class="btn sm" href="#requisites">${icon('edit','sm')}<span>${t('lg.rv.otaEdit')}</span></a>`,body:`<p class="small muted" style="margin-bottom:10px">${t('lg.rv.otaD')}</p><div class="lg-ota">${otaRows}</div>`});
- const dr=L.detailReq&&L.detailReq.status==='pending'?ui.card({title:t('lg.chg.reqT'),actions:ui.badge(t('lg.chg.pendingB'),'warn',true),body:ui.table([{label:t('lg.rv.f')},{label:t('lg.chg.old')},{label:t('lg.chg.new')}],Object.keys(L.detailReq.fields).map(k=>({cells:[esc(t('lg.f.'+k)),esc(L.detailReq.fields[k].old||'—'),`<b>${esc(L.detailReq.fields[k].new||'—')}</b>`]}))),
-  foot:`${ui.btn(t('lg.chg.reject'),{kind:'ghost',act:'lg_chgReject'})}${ui.btn(t('lg.chg.approve'),{kind:'primary',icon:'check',act:'lg_chgApprove',disabled:!(can('ota.settings')||can('ota.release'))})}`}):'';
+ const dr=lg_bankCard(true)+lg_revokedCard();
  const decl=lg_docs().filter(d=>d.decline&&!d.decline.handled);
  const declCard=decl.length?ui.card({title:t('lg.dec.title'),body:`<div class="col g12">${decl.map(d=>`<div class="lg-decl"><div class="grow"><b class="mono small">${esc(d.number)}</b> · ${esc(d.decline.by)} · ${fmtDateTime(d.decline.at)}<div class="small">“${esc(d.decline.comment)}”</div><div class="xs faint">${t('lg.dec.rule')}</div></div>${ui.btn(t('lg.dec.handled'),{size:'sm',act:'lg_declHandled',arg:d.id})}</div>`).join('')}</div>`}):'';
  return ui.page({title:t('lg.rv.title'),sub:t('lg.rv.sub',{n:esc(o.name||'—')}),crumbs:[[t('lg.otasec'),link('lg-review')],[t('lg.rv.title')]],
   actions:`${ui.btn(t('lg.rv.openForm'),{href:link('lg-form'),icon:'file'})}`,
   body:`<div class="stack">${ui.note('admin',t('lg.rv.adminNote'))}${dr}${declCard}${head}<div class="grid2">${kyc}<div class="stack">${code}${brand}</div></div>${fields}${ccCards}${otaCard}</div>`});}
+/* ---------- v10 cards: bank change (2.5), 05B revocation (2.7), launch by country (part 6), sub-processor notices (2.9) ---------- */
+function lg_bankCard(ota){const bc=S.bankChange;const L=lg_st();const hist=L.bankHist.slice(0,5);if(!bc&&!(ota&&hist.length))return '';
+ let body='',foot='';
+ if(bc){const rows=Object.keys(bc.fields).map(k=>({cells:[esc(t('lg.f.'+k)),`<span class="mono small">${esc(bc.fields[k].old||'—')}</span>`,`<b class="mono small">${esc(bc.fields[k].new||'—')}</b>`]}));
+  const nd=lg_doc(bc.noticeId);
+  body=`<div class="col g12">${ui.note('warn',t('lg.bank.rule'))}
+   <dl class="dl small"><dt>${t('lg.bank.notice')}</dt><dd>${nd?`<a class="mono" href="${link('lg-doc',nd.id)}">${esc(bc.number)}</a>`:esc(bc.number)}</dd>
+   <dt>${t('lg.bank.step1')}</dt><dd>${bc.signedAt?ui.badge(t('lg.bank.signedAt',{d:fmtDateTime(bc.signedAt)}),'ok',true):ui.badge(t('lg.bank.waitSign'),'warn',true)}</dd>
+   <dt>${t('lg.bank.step2')}</dt><dd>${ui.badge(t('lg.bank.waitCall'),bc.signedAt?'warn':'',true)}</dd>
+   <dt>${t('lg.bank.prevContact')}</dt><dd>${esc(bc.prevContact.phone||'—')}${bc.prevContact.name?' · '+esc(bc.prevContact.name):''}</dd></dl>
+   <div class="tblwrap">${ui.table([{label:t('lg.rv.f')},{label:t('lg.bank.inForce')},{label:t('lg.bank.new')}],rows)}</div></div>`;
+  if(ota&&bc.status==='awaiting_callback'){
+   if(can('ota.payments'))foot=`<form data-form="lg_callback" id="lg-cbf" class="col g12 grow" novalidate>
+     <div class="grid2">${ui.field({id:'phone',label:t('lg.bank.phone'),type:'select',value:bc.prevContact.phone||'',options:(bc.prevContact.phone?[[bc.prevContact.phone,bc.prevContact.phone]]:[['','—']]),hint:t('lg.bank.phoneH')})}
+     ${ui.field({id:'contact',label:t('lg.bank.contact'),value:bc.prevContact.name||'',hint:t('lg.bank.contactH')})}</div>
+     <div class="row wrap g8">${ui.btn(t('lg.bank.confirm'),{kind:'primary',icon:'check',type:'submit'})}${ui.btn(t('lg.bank.fail'),{kind:'danger',act:'lg_callbackFail'})}</div></form>`;
+   else foot=`<span class="small muted grow">${t('lg.bank.finOnly')}</span>${typeof ord_asBtn==='function'?ord_asBtn('ota_finance'):''}`;}}
+ if(ota&&hist.length)body+=`<div class="col g8" style="margin-top:12px"><b class="small">${t('lg.bank.hist')}</b>${hist.map(h=>`<div class="small">${h.status==='confirmed'?ui.badge(t('lg.bank.hConf'),'ok'):ui.badge(t('lg.bank.hRej'),'bad')} <span class="mono">${esc(h.number)}</span> · ${esc(h.callback?h.callback.by:'')} · ${h.callback?fmtDateTime(h.callback.at):''} · ${t('lg.bank.called',{p:esc(h.callback?h.callback.phone:'')})}</div>`).join('')}</div>`;
+ return ui.card({title:bc?t('lg.bank.pending'):t('lg.bank.hist'),actions:bc?ui.badge(t(bc.status==='awaiting_signature'?'lg.bank.waitSign':'lg.bank.waitCall'),'warn',true):'',body,foot});}
+function lg_revokedCard(){const L=lg_st();const ns=L.notices.filter(n=>n.kind==='boa_revoked'&&!n.handled);if(!ns.length)return '';
+ return ui.card({title:t('lg.boa.revT'),actions:ui.badge(t('lg.boa.revB'),'bad',true),body:`<div class="col g12">${ns.map(n=>{const d=lg_doc(n.docId);return `<div class="lg-decl"><div class="grow"><b class="mono small">${esc(n.number)}</b> · ${esc(n.by)} · ${fmtDateTime(n.at)}${d&&d.revoked&&d.revoked.note?`<div class="small">“${esc(d.revoked.note)}”</div>`:''}<div class="xs faint">${t('lg.boa.revRule')}</div></div>${ui.btn(t('lg.dec.handled'),{size:'sm',act:'lg_revHandled',arg:n.id,disabled:!can('ota.release')})}</div>`;}).join('')}</div>`});}
+function lg_launchCard(){const ccs=orgCountries();if(!ccs.length)return '';
+ const yes=(ok,txt)=>ok?ui.badge(txt||t('lg.ln.yes'),'ok',true):ui.badge(txt||t('lg.ln.no'),'warn',true);
+ const rows=ccs.map(cc=>{const x=lg_countryLaunch(cc);const pubTxt=lg_pubLangs(cc).map(lg_langName).join(' + ');
+  return{cells:[`<b>${esc(ctyName(cc))}</b>`,yes(x.pkg),`${yes(x.pub,x.pub?t('lg.ln.pubOk',{l:esc(pubTxt)}):(x.missing.length?t('lg.ln.pubMiss',{l:esc([...new Set(x.missing.map(m=>lg_langName(m.lang)))].join(', '))}):t('lg.ln.pubNot')))}`,
+   x.flagKnown?yes(x.flag,x.flag?t('lg.ln.flagOn'):t('lg.ln.flagOff')):`<span class="small faint">${t('lg.ln.flagNa')}</span>`,x.open?ui.badge(t('lg.ln.open'),'ok',true):ui.badge(t('lg.ln.closed'),'',true)]};});
+ return ui.card({title:t('lg.ln.title'),pad:false,body:`<div class="bd small muted" style="padding-bottom:0">${t('lg.ln.d')}</div>`+ui.table([{label:t('lg.pub.cc')},{label:t('lg.ln.pkg')},{label:t('lg.ln.pub')},{label:'ownership_v10_enabled'},{label:t('c.status')}],rows),
+  foot:S.admin?`<span class="small muted grow">${t('lg.ln.flagHow')}</span><a class="btn sm" href="#requisites">${icon('edit','sm')}<span>${t('lg.rv.otaEdit')}</span></a>`:''});}
+function lg_ofTermCard(){const ns=(S.notices||[]).filter(n=>n.type==='of_terminate');if(!ns.length)return '';
+ return ui.card({title:t('lg.oft.title'),actions:ui.badge(t('lg.sp.noSign'),'info'),body:`<div class="col g8">${ns.map(n=>`<div class="lg-chg"><div class="row between wrap g8"><b class="small">${esc(t('lg.oft.row',{c:ctyName(n.cc),n:n.of||'—'}))}</b><span class="xs muted">${fmtDateTime(n.createdAt)} · ${esc(n.by||'')}</span></div><div class="xs muted">${t('lg.oft.d')}</div></div>`).join('')}</div>`});}
+function lg_subprocCard(){const ns=lg_subprocNotices();if(!ns.length)return '';
+ return ui.card({title:t('lg.sp.title'),actions:ui.badge(t('lg.sp.noSign'),'info'),body:`<div class="col g8"><p class="small muted">${t('lg.sp.d')}</p>${ns.slice(0,10).map(n=>`<div class="lg-chg"><div class="row between wrap g8"><b class="small">${esc(n.text||t('lg.sp.change'))}</b><span class="xs muted">${n.at?fmtDate(n.at):''}</span></div>${n.effective?`<div class="xs muted">${t('lg.col.eff')}: ${fmtDate(n.effective)}</div>`:''}</div>`).join('')}</div>`});}
 /* ---------- documents list ---------- */
 function lg_stBadge(d){let s=d.status;let label=t('lg.st.'+s);if(d.type==='BOA'&&s==='signed_both')label=t('lg.st.scan');if(d.type==='CHG'&&s==='acknowledged')label=t('lg.st.signedP');
- if(d.ack&&d.ack.auto&&s==='acknowledged')label=t('lg.st.autoEff');
+ if(d.ack&&d.ack.auto&&s==='acknowledged')label=t('lg.st.autoEff');if(s==='terminated'&&d.terminatedBy)label=t('lg.oft.badge');
  const ts=iso(now());if((s==='signed_both'||s==='acknowledged')&&d.effective&&d.effective>ts){return ui.badge(t('lg.st.signedFuture',{d:fmtDate(d.effective)}),'info',true);}
  return ui.badge(label,LG_ST_TONE[s]||'',true);}
 function lg_docTitle(d,lang){lang=lang||S.lang;const base=lang==='en'?lg_tplTitle(d.type,'en'):(I18N.d[lang]&&I18N.d[lang]['lg.tt.'+d.type])||lg_tplTitle(d.type,lang==='uk'||lang==='ru'?'ru':'en');return base+(d.cc?' — '+ctyName(d.cc):'');}
@@ -627,7 +794,7 @@ function lg_docsHtml(){lg_st();lg_tick();const L=lg_st();const st=lg_pkgStage();
  else{const rows=pk.map(d=>{let miss='';if(d.status==='draft'){const r=lg_renderDoc(d,{live:true});miss=r.error?ui.badge(t('lg.pkg.noTr'),'bad'):(r.missing.length?ui.badge(t('lg.pkg.miss',{n:r.missing.length}),'warn'):ui.badge(t('lg.pkg.ready'),'ok'));}
    return{href:link('lg-doc',d.id),cells:[`<span class="mono small">${esc(lg_docNoLbl(d))}</span>`,`<b>${esc(lg_docTitle(d))}</b>${d.type==='BOA'?`<div class="xs muted">${t('lg.boa.hint')}</div>`:''}`,`<span class="mono small">${esc(d.number)}</span>`,lg_stBadge(d)+(miss?' '+miss:'')]};});
   pkgBody=ui.table([{label:t('lg.col.no')},{label:t('lg.col.doc')},{label:t('lg.col.num')},{label:t('c.status')}],rows);}
- const pkgCard=ui.card({title:t('lg.pkg.title'),actions:pk.length?`<span class="small muted">${t('lg.pkg.lang',{l:esc(LG_LANG2[lg_l2()].name)})}</span>`:'',pad:!pk.length,body:pkgBody,
+ const pkgCard=ui.card({title:t('lg.pkg.title'),actions:`${ui.badge(t('lg.pkg.edition',{v:LG_PACK}),'accent')}${pk.length?` <span class="small muted">${t('lg.pkg.lang',{l:esc(LG_LANG2[lg_l2()].name)})}</span>`:''}`,pad:!pk.length,body:pkgBody,
   foot:pk.length&&st==='draft'&&S.admin?`<span class="small muted grow">${t('lg.pkg.draftNote')}</span>`:(pk.length&&st==='signed'?`<span class="small muted grow">${t('lg.pkg.signedNote')}</span>`:'')});
  // pending changes
  const chg=lg_docs().filter(d=>d.kind!=='pkg'&&lg_isPending(d)&&!d.archived);
@@ -644,9 +811,9 @@ function lg_docsHtml(){lg_st();lg_tick();const L=lg_st();const st=lg_pkgStage();
  // public docs
  const pub=lg_st().pub.filter(p=>p.status==='current');
  const pubCard=ui.card({title:t('lg.pub.title'),actions:S.admin?`<a class="btn sm" href="${link('lg-tpl')}" data-act="lg_tplTab" data-arg="public">${t('lg.pub.manage')}</a>`:'',pad:false,
-  body:pub.length?ui.table([{label:t('lg.col.doc')},{label:t('lg.col.num')},{label:t('lg.pub.lang')},{label:t('lg.pub.date')},{label:''}],pub.map(p=>({cells:[`<b>${esc(lg_docTitle({type:p.type,cc:p.cc}))}</b>`,`<span class="mono small">${esc(p.number)}</span>`,esc((LG_LANG2[p.lang]||{name:'English'}).name),fmtDate(p.publishedAt),ui.btn(t('lg.pub.web'),{size:'sm',icon:'globe',act:'lg_pubView',arg:p.id})]}))):`<div class="bd small muted">${t('lg.pub.none')}</div>`});
+  body:pub.length?ui.table([{label:t('lg.col.doc')},{label:t('lg.col.num')},{label:t('lg.pub.lang')},{label:t('lg.pub.date')},{label:''}],pub.map(p=>({cells:[`<b>${esc(lg_docTitle({type:p.type,cc:p.cc}))}</b>`,`<span class="mono small">${esc(p.number)}</span>`,esc(lg_langName(p.lang)),fmtDate(p.publishedAt),ui.btn(t('lg.pub.web'),{size:'sm',icon:'globe',act:'lg_pubView',arg:p.id})]}))):`<div class="bd small muted">${t('lg.pub.none')}</div>`});
  const kp=`<div class="grid4">${ui.kpi(t('lg.k.pkg'),t('lg.stage.'+st),'')}${ui.kpi(t('lg.k.live'),fmtNum(lg_docs().filter(d=>LG_LEGAL_TYPES.includes(d.type)&&(d.status==='signed_both'||d.status==='acknowledged')).length),'')}${ui.kpi(t('lg.k.tasks'),fmtNum(lg_tasks().length),'',{href:link('lg-sign')})}${ui.kpi(t('lg.k.chg'),fmtNum(chg.length),'')}</div>`;
- return ui.page({title:t('lg.docs.title'),sub:t('lg.docs.sub'),actions:acts.join(''),body:`<div class="stack">${S.admin?ui.note('admin',t('lg.docs.admin')):''}${kp}${ui.card({body:lg_stepper()})}${chgCard}${pkgCard}${allCard}${pubCard}</div>`});}
+ return ui.page({title:t('lg.docs.title'),sub:t('lg.docs.sub'),actions:acts.join(''),body:`<div class="stack">${S.admin?ui.note('admin',t('lg.docs.admin')):''}${lg_bankBanner()}${kp}${ui.card({body:lg_stepper()})}${!lg_firstSigned()?ui.note('info',t('lg.first.note',{v:LG_PACK})):''}${chgCard}${lg_ofTermCard()}${pkgCard}${lg_subprocCard()}${allCard}${lg_launchCard()}${pubCard}</div>`});}
 function lg_chgDesc(d){if(d.type==='CHG')return t('lg.chg.notice');if(d.sub==='increase')return t('lg.ch.d.increase');if(d.sub==='decrease')return t('lg.ch.d.decrease');if(d.sub==='new_country')return t('lg.ch.d.country');
  const v=lg_tplVersions(d.type).find(x=>x.ver===d.templateVer);return t('lg.ch.d.text',{v:d.templateVer||''})+(v&&v.note?' — '+v.note:'');}
 
@@ -681,10 +848,19 @@ function lg_docHtml(id){lg_tick();const d=lg_doc(id);if(!d)return ui.page({title
  return ui.page({title:esc(lg_docTitle(d)),sub:`<span class="mono">${esc(d.number)}</span>`,crumbs:[[t('lg.docs.title'),link('lg-docs')],[d.number]],actions:acts.join(''),
   body:`<div class="stack">${notes.join('')}<div class="lg-dvgrid"><div class="lgd-wrap">${r.error?'':r.html}</div>${side}</div></div>`});}
 function lg_docExtraCard(d){const parts=[];
- if(d.type==='BOA'&&(d.status==='issued'||d.status==='signed_both')){parts.push(`<p class="small muted">${t('lg.boa.d')}</p>`);
-  parts.push(`<div class="row wrap g8">${ui.btn(t('lg.boa.dl'),{size:'sm',icon:'download',act:'lg_print',arg:d.id})}${d.scan?ui.badge(t('lg.boa.got',{f:esc(d.scan.file)}),'ok',true):(can('p.form')||can('p.sign')?`<label class="btn sm primary"><input type="file" class="lg-sr" data-lgscan="${d.id}" accept=".pdf,.jpg,.png">${icon('upload','sm')}<span>${t('lg.boa.up')}</span></label>`:'')}</div>`);}
+ if(d.type==='BOA'){const mayP=can('p.form')||can('p.sign')||can('ota.release');
+  if(d.status==='issued'){parts.push(`<p class="small muted">${t('lg.boa.d2')}</p>`);
+   if(d.supersedes){const pv=lg_doc(d.supersedes);if(pv)parts.push(ui.note('info',t('lg.boa.prevStays',{n:esc(pv.number)})));}
+   if(d.ownerLink)parts.push(`<div class="small">${icon('send','sm')} ${t('lg.boa.linkSent',{e:esc(d.ownerLink.email),d:fmtDateTime(d.ownerLink.sentAt)})}</div>`);
+   parts.push(`<div class="row wrap g8">${mayP?ui.btn(d.ownerLink?t('lg.boa.linkAgain'):t('lg.boa.linkBtn'),{size:'sm',kind:d.ownerLink?'':'primary',icon:'send',act:'lg_boaLink',arg:d.id}):''}${d.ownerLink?ui.btn(t('lg.boa.ownerOpen'),{size:'sm',icon:'lg_pen',act:'lg_boaOwner',arg:d.id})+ui.badge(t('lg.demo'),'violet'):''}</div>
+    <div class="row wrap g8">${ui.btn(t('lg.boa.dl'),{size:'sm',icon:'download',act:'lg_print',arg:d.id})}${mayP?`<label class="btn sm"><input type="file" class="lg-sr" data-lgscan="${d.id}" accept=".pdf,.jpg,.png">${icon('upload','sm')}<span>${t('lg.boa.up')}</span></label>`:''}</div>`);}
+  if(d.status==='signed_both'){parts.push(d.scan?ui.badge(t('lg.boa.got',{f:esc(d.scan.file)}),'ok',true):ui.badge(t('lg.boa.signedOwner'),'ok',true));
+   const pend=lg_docs().find(x=>x.type==='BOA'&&x.status==='issued'&&x.supersedes===d.id);
+   parts.push(`<p class="small muted">${t('lg.boa.chgD')}</p><div class="row wrap g8">${pend?`<a class="btn sm" href="${link('lg-doc',pend.id)}">${esc(pend.number)}</a>`:(mayP?ui.btn(t('lg.boa.newBtn'),{size:'sm',icon:'plus',act:'lg_boaNew'}):'')}${mayP?ui.btn(t('lg.boa.revBtn'),{size:'sm',kind:'danger',act:'lg_boaRevoke',arg:d.id}):''}</div>`);}
+  if(d.revoked)parts.push(ui.note('bad',t('lg.boa.revoked',{d:fmtDateTime(d.revoked.at),b:esc(d.revoked.by)})+' '+t('lg.boa.revRule')));}
  if(d.status==='signed_both'||(d.type==='CHG'&&d.status==='acknowledged')){parts.push(`<p class="small muted">${t('lg.kep.d')}</p>${(d.kep||[]).map(k=>`<div class="small">${icon('file','sm')} ${esc(k.file)} · <span class="muted">${esc(k.by)} · ${fmtDate(k.at)}</span></div>`).join('')}
   ${can('p.form')||can('p.sign')||can('ota.sign')?`<div><label class="btn sm"><input type="file" class="lg-sr" data-lgkep="${d.id}" accept=".pdf,.p7s,.asice,.zip">${icon('upload','sm')}<span>${t('lg.kep.up')}</span></label></div>`:''}`);}
+ if(d.type==='OF'&&lg_isPending(d)&&(d.sub==='increase'||d.sub==='decrease')&&!S.admin&&(can('p.sign')||can('p.form'))&&typeof ofTerminate==='function')parts.push(`<p class="small muted">${t('lg.oft.btnD')}</p><div>${ui.btn(t('lg.oft.btn',{c:esc(ctyName(d.cc))}),{size:'sm',kind:'danger',act:'lg_ofTermAsk',arg:d.id})}</div>`);
  if(lg_isPending(d)&&d.kind==='change'&&d.cls==='A'&&!S.admin&&!d.decline&&(can('p.sign')||can('p.form')))parts.push(`<p class="small muted">${t('lg.dec.d')}</p><div>${ui.btn(t('lg.dec.btn'),{size:'sm',kind:'danger',act:'lg_decline',arg:d.id})}</div>`);
  if(d.status!=='draft'&&!d.archived&&(S.admin?can('ota.versions'):can('p.form')))parts.push(`<div>${ui.btn(t('lg.arch.btn'),{size:'sm',kind:'ghost',icon:'box',act:'lg_archive',arg:d.id})}</div><p class="xs faint">${t('lg.arch.d')}</p>`);
  return parts.length?ui.card({title:t('lg.dv.more'),body:`<div class="col g12">${parts.join('')}</div>`}):'';}
@@ -702,10 +878,12 @@ function lg_signListHtml(){lg_tick();const side=S.admin?'ota':'partner';const ta
   else if(x.kind==='scan'){title=lg_docTitle(d0);desc=t('lg.boa.hint');btn=ui.btn(t('lg.sg.openDoc'),{href:link('lg-doc',d0.id)});}
   else if(x.kind==='review'){title=t('lg.sg.review');desc=t('lg.sg.reviewD');btn=ui.btn(t('lg.rv.title'),{kind:'primary',href:link('lg-review')});}
   else if(x.kind==='details'){title=t('lg.chg.reqT');desc=t('lg.sg.detailsD');btn=ui.btn(t('lg.rv.title'),{kind:'primary',href:link('lg-review')});}
+  else if(x.kind==='callback'){title=t('lg.bank.pending');desc=t('lg.bank.taskD',{n:S.bankChange?S.bankChange.number:''});btn=ui.btn(t('lg.rv.title'),{kind:'primary',href:link('lg-review')});}
+  else if(x.kind==='revoked'){title=t('lg.boa.revT');desc=x.notice.number;btn=ui.btn(t('lg.rv.title'),{href:link('lg-review')});}
   else if(x.kind==='decline'){title=t('lg.dec.title');desc=d0.number+' — “'+d0.decline.comment+'”';btn=ui.btn(t('lg.rv.title'),{href:link('lg-review')});}
   else if(x.kind==='detected'){title=t('lg.det.'+x.det.kind,{c:ctyName(x.det.cc)});desc=x.det.pl?t('lg.det.d',{v:x.det.pl.ver,d:fmtDate(x.det.pl.from)}):'';btn=ui.btn(t('lg.det.go'),{kind:'primary',href:link('lg-tpl'),act:'lg_tplTab',arg:'changes'});}
   const eff=d0&&d0.effective&&lg_isPending(d0)?`<span class="badge ${d0.cls==='A'?'warn':'info'}">${t('lg.col.eff')}: ${fmtDate(d0.effective)}</span>`:'';
-  return `<div class="card lg-task"><div class="bd row wrap g12"><span class="lg-taskic">${icon(x.kind==='ack'?'check':x.kind==='scan'?'upload':x.kind==='review'||x.kind==='details'?'shield':x.kind==='detected'?'bolt':'lg_pen')}</span><div class="grow"><b>${esc(title)}</b><div class="small muted lg-ell">${esc(desc)}</div>${eff}</div>${btn}</div></div>`;};
+  return `<div class="card lg-task"><div class="bd row wrap g12"><span class="lg-taskic">${icon(x.kind==='ack'?'check':x.kind==='scan'?'upload':x.kind==='review'||x.kind==='details'||x.kind==='callback'||x.kind==='revoked'?'shield':x.kind==='detected'?'bolt':'lg_pen')}</span><div class="grow"><b>${esc(title)}</b><div class="small muted lg-ell">${esc(desc)}</div>${eff}</div>${btn}</div></div>`;};
  const who=lg_actor();
  const roleNote=side==='partner'&&lg_signCheck('partner')&&tasks.some(x=>x.kind==='sign')?ui.note('warn',t('lg.sg.who',{n:esc(lg_fval('P_SIGNATORY')||'—'),ti:esc(lg_fval('P_TITLE_EN')||'—')})+' '+(typeof ord_asBtn==='function'?ord_asBtn('p_sign'):'')):'';
  const otaNote=side==='ota'&&!can('ota.sign')&&tasks.some(x=>x.kind==='osign')?ui.note('admin',t('lg.sg.otaWho')+' '+(typeof ord_asBtn==='function'?ord_asBtn('ota_legal'):'')):'';
@@ -740,12 +918,12 @@ function lg_tplHtml(){if(!S.admin)return lg_noOta();lg_tick();const tab=S.ui.lg_
  const tabs=`<div class="lg-tabs" role="tablist">${[['templates',t('lg.tp.tab.t')],['changes',t('lg.tp.tab.c')+(det.length?` <span class="lg-dot">${det.length}</span>`:'')],['public',t('lg.tp.tab.p')]].map(([k,l])=>`<button type="button" role="tab" aria-selected="${tab===k}" data-act="lg_tplTab" data-arg="${k}">${l}</button>`).join('')}</div>`;
  let body='';
  if(tab==='templates'){body=ui.card({pad:false,body:ui.table([{label:t('lg.col.no')},{label:t('lg.tp.type')},{label:t('lg.col.doc')},{label:t('lg.tp.cur')},{label:t('lg.col.eff')},{label:t('lg.col.cls')},{label:t('lg.tp.vers')}],
-   LG_ALL_TYPES.map(tp=>{const b=lg_baseTpl(tp);const vs=lg_tplVersions(tp);const cur=vs.filter(v=>v.status==='released').pop();const dr=vs.find(v=>v.status==='draft');
+   LG_ALL_TYPES.filter(tp=>lg_baseTpl(tp)).map(tp=>{const b=lg_baseTpl(tp);const vs=lg_tplVersions(tp);const cur=vs.filter(v=>v.status==='released').pop();const dr=vs.find(v=>v.status==='draft');
     return{href:link('lg-tpled',tp),cells:[`<span class="mono small">${esc(b.docNo)}</span>`,`<span class="mono small">${tp}</span>`,`<b>${esc(lg_tplTitle(tp,'en'))}</b><div class="xs muted">${esc(lg_tplTitle(tp,'ru'))}</div>`,`<span class="mono small">${esc(cur.ver)}</span>${dr?' '+ui.badge(t('lg.tp.draftB',{v:dr.ver}),'warn'):''}`,fmtDate(cur.effective),lg_clsBadge(cur.cls||b.cls),String(vs.length)]};}))});}
  else if(tab==='changes'){
   const detCard=ui.card({title:t('lg.det.title'),body:det.length?`<div class="col g12">${det.map(x=>`<div class="lg-det"><div class="grow"><b>${esc(t('lg.det.'+x.kind,{c:ctyName(x.cc)}))}</b><div class="small muted">${x.pl?t('lg.det.d',{v:x.pl.ver,d:fmtDate(x.pl.from)}):''}${x.last?' · '+t('lg.det.cur',{n:esc(x.last.number),v:x.last.priceVer||'—'}):''}</div>
      <div class="row g8 wrap" style="margin-top:6px">${lg_clsBadge('A')} ${ui.badge(t(x.kind==='country'?'lg.ch.country':x.increase?'lg.ch.increase':'lg.ch.decrease'),x.increase?'warn':'info')} <span class="xs muted">${x.kind==='country'?t('lg.ch.r.country'):x.increase?t('lg.ch.r.increase',{d:fmtDate(x.pl.from)}):t('lg.ch.r.decrease')}</span></div></div>
-     ${ui.btn(t('lg.det.issue'),{kind:'primary',icon:'send',act:'lg_issueOF',arg:x.cc,disabled:!(can('ota.release')||can('ota.prices'))})}</div>`).join('')}</div>`:`<p class="small muted">${t('lg.det.none')}</p>`,foot:`<span class="small muted grow">${t('lg.det.how')}</span><a class="btn sm" href="#prices">${icon('price','sm')}<span>${t('lg.rv.prices')}</span></a>`});
+     ${ui.btn(t('lg.det.issue'),{kind:'primary',icon:'send',act:'lg_issueOFAsk',arg:x.cc,disabled:!(can('ota.release')||can('ota.prices'))})}</div>`).join('')}</div>`:`<p class="small muted">${t('lg.det.none')}</p>`,foot:`<span class="small muted grow">${t('lg.det.how')}</span><a class="btn sm" href="#prices">${icon('price','sm')}<span>${t('lg.rv.prices')}</span></a>`});
   const chs=lg_st().changes;
   const chRows=chs.map(c=>{const ds=c.docIds.map(lg_doc).filter(Boolean);return `<div class="lg-chg"><div class="row wrap between g8"><div class="row wrap g8">${lg_clsBadge(c.cls)}<b>${esc(c.type==='OF'?lg_docTitle({type:'OF',cc:c.cc}):lg_tplTitle(c.type,S.lang==='en'?'en':'ru'))}</b><span class="small muted">${esc(lg_chgKind(c))}</span></div><span class="xs muted">${fmtDateTime(c.createdAt)} · ${esc(c.by||'')}</span></div>
    ${c.note?`<div class="small">${esc(c.note)}</div>`:''}<div class="small muted">${t('lg.col.eff')}: ${c.effective?fmtDate(c.effective):t('lg.eff.onSign')}</div>
@@ -762,34 +940,46 @@ function lg_tplEdHtml(type){if(!S.admin)return lg_noOta();const b=lg_baseTpl(typ
  const blocks=cur.blocks.filter(x=>x.kind!=='table'&&x.kind!=='signature');const sel=S.ui.lg_edB&&blocks.find(x=>x.id===S.ui.lg_edB)?S.ui.lg_edB:(blocks.find(x=>x.kind==='clause')||blocks[0]).id;const blk=blocks.find(x=>x.id===sel);
  const src=draft&&draft.changes[sel]?Object.assign({},blk,draft.changes[sel]):blk;
  const hist=ui.table([{label:t('lg.tp.ver')},{label:t('lg.col.eff')},{label:t('lg.col.cls')},{label:t('lg.tp.note')},{label:t('c.status')}],vs.slice().reverse().map(v=>({cells:[`<span class="mono small">${esc(v.ver)}</span>`,fmtDate(v.effective),lg_clsBadge(v.cls),`<span class="small">${esc(v.note||(v.base?t('lg.tp.base'):''))}${Object.keys(v.changes||{}).length?` <span class="xs muted">(${Object.keys(v.changes).join(', ')})</span>`:''}</span>`,ui.badge(t('lg.tp.st.'+v.status),v.status==='released'?'ok':'warn')]})));
- const defCls=type==='EUT'||type==='PN'?'C':(b.cls||'B');const minEff=iso(addDays(now(),CLASS_A_NOTICE_DAYS)).slice(0,10);
+ const first=lg_firstEdition(type);const defCls=type==='EUT'||type==='PN'?'C':(b.cls||'B');const minEff=iso(addDays(now(),CLASS_A_NOTICE_DAYS)).slice(0,10);
  const editor=ui.card({title:draft?t('lg.tp.edDraft',{v:draft.ver}):t('lg.tp.edNew'),body:`<form data-form="lg_tplSave" class="col g12" novalidate>
    ${ui.field({id:'blk',label:t('lg.tp.block'),type:'select',value:sel,options:blocks.map(x=>[x.id,x.id+' — '+String(x.en||'').replace(/\{\{|\}\}/g,'').slice(0,60)]),attrs:'data-act="lg_edB"'})}
    <div class="grid2">${ui.field({id:'en',label:'EN',type:'textarea',value:src.en||'',rows:6,attrs:ed?'':'disabled'})}${ui.field({id:'ru',label:'RU ('+t('lg.tp.l2')+')',type:'textarea',value:src.ru||'',rows:6,attrs:ed?'':'disabled',hint:t('lg.tp.ruH')})}</div>
-   <div class="grid3">${ui.field({id:'cls',label:t('lg.col.cls'),type:'select',value:draft?draft.cls:defCls,options:(type==='EUT'||type==='PN'?['C']:['A','B']).map(c=>[c,t('lg.cls.'+c)]),attrs:ed?'':'disabled'})}
+   ${first?ui.note('info',t(type==='EUT'||type==='PN'?'lg.first.pub':'lg.first.tpl',{v:LG_PACK}))+ui.field({id:'note',label:t('lg.tp.note'),value:draft?draft.note:'',placeholder:t('lg.tp.notePh'),attrs:ed?'':'disabled'})
+   :`<div class="grid3">${ui.field({id:'cls',label:t('lg.col.cls'),type:'select',value:draft&&draft.cls?draft.cls:defCls,options:(type==='EUT'||type==='PN'?['C']:['A','B']).map(c=>[c,t('lg.cls.'+c)]),attrs:ed?'':'disabled',hint:type==='EUT'||type==='PN'?'':t('lg.cls.hint')})}
     ${ui.field({id:'eff',label:t('lg.col.eff'),type:'date',value:(draft&&draft.effective||minEff).slice(0,10),attrs:(ed?'':'disabled ')+`min="${iso(now()).slice(0,10)}"`,hint:t('lg.tp.effH')})}
-    ${ui.field({id:'note',label:t('lg.tp.note'),value:draft?draft.note:'',placeholder:t('lg.tp.notePh'),attrs:ed?'':'disabled'})}</div>
+    ${ui.field({id:'note',label:t('lg.tp.note'),value:draft?draft.note:'',placeholder:t('lg.tp.notePh'),attrs:ed?'':'disabled'})}</div>`}
    <div class="row wrap g8">${ui.btn(draft?t('lg.tp.saveDraft'):t('lg.tp.saveNew'),{kind:'primary',type:'submit',disabled:!ed})}${draft?'':ui.btn(t('lg.tp.bump'),{act:'lg_tplBump',arg:type,disabled:!ed})}</div></form>`});
  let rel='';if(draft){const aff=lg_tplAffected(type,draft.ver);const r=type==='CHG'?null:lg_render(type,{tplVer:draft.ver,cc:orgCountries()[0],docNo:'[preview]'});
   rel=ui.card({title:t('lg.tp.rel',{v:draft.ver}),body:`<div class="col g12">${r&&r.error?r.html:ui.note('ok',t('lg.tp.relOk'))}
-   <p class="small">${type==='EUT'||type==='PN'?t('lg.tp.affPub',{n:lg_pubCurrent(type).length}):t('lg.tp.aff',{n:aff.filter(d=>d.type!=='BOA').length})}</p>
-   ${aff.length?`<ul class="lg-affl">${aff.map(d=>`<li><span class="mono small">${esc(d.number)}</span> → <span class="mono small">${esc(d.type==='BOA'?'—':docNo(d.type,{base:d.number}))}</span> ${lg_stBadge(d)}</li>`).join('')}</ul>`:''}</div>`,
+   <p class="small">${first?t('lg.first.rel'):(type==='EUT'||type==='PN'?t('lg.tp.affPub',{n:lg_pubCurrent(type).length}):t('lg.tp.aff',{n:aff.filter(d=>d.type!=='BOA').length}))}</p>
+   ${aff.length&&!first?`<ul class="lg-affl">${aff.map(d=>`<li><span class="mono small">${esc(d.number)}</span> → <span class="mono small">${esc(d.type==='BOA'?'—':docNo(d.type,{base:d.number}))}</span> ${lg_stBadge(d)}</li>`).join('')}</ul>`:''}</div>`,
    foot:`${ui.btn(t('lg.tp.preview'),{icon:'eye',act:'lg_tplPreview',arg:type})}${ui.btn(t('lg.tp.issue'),{kind:'primary',icon:'send',act:'lg_tplRelease',arg:type,disabled:!can('ota.release')||!!(r&&r.error)})}`});}
  return ui.page({title:`${esc(type)} · ${esc(lg_tplTitle(type,'en'))}`,sub:t('lg.tp.edSub',{v:cur.ver}),crumbs:[[t('lg.tp.title'),link('lg-tpl')],[type]],
   body:`<div class="stack">${ed?'':ui.note('admin',t('lg.tp.legalOnly')+' '+(typeof ord_asBtn==='function'?ord_asBtn('ota_legal'):''))}${rel}${editor}${ui.card({title:t('lg.tp.hist'),pad:false,body:hist})}</div>`});}
 /* public docs 07/08 */
 function lg_pubHtml(){const L=lg_st();const groups={};L.pub.forEach(p=>{const k=p.type+'|'+p.cc+'|'+p.lang;(groups[k]=groups[k]||[]).push(p);});
+ const rel=can('ota.release');
+ // per approved country: mandatory languages (ТЗ 3.4) → availability → publish 07 + 08 together (first time = version 1.0)
+ const ccCards=orgCountries().map(cc=>{const langs=lg_pubLangs(cc);const miss=lg_pubMissing(cc);const done=lg_pubCountryDone(cc);
+  const rows=['EUT','PN'].map(tp=>({cells:[`<b class="small">${tp==='EUT'?'07':'08'} · ${esc(lg_tplTitle(tp,S.lang==='en'?'en':'ru'))}</b>`].concat(langs.map(l=>{const av=lg_pubLangAvail(tp,l);const cur=lg_pubCur(tp,cc,l);const tr=((L.tr[tp]||{})[l]);
+   const st=cur?ui.badge(t('lg.pub.curV',{v:cur.ver}),'ok',true):av==='tpl'?ui.badge(t('lg.pub.avTpl'),'info'):av==='file'?ui.badge(t('lg.pub.avFile'),'info'):ui.badge(t('lg.pub.avMiss'),'bad',true);
+   return `${st}${tr?`<div class="xs faint">${icon('file','sm')} ${esc(tr.file)}</div>`:''}${!av&&rel?`<div style="margin-top:6px"><label class="btn sm"><input type="file" class="lg-sr" data-lgtr="${tp}|${l}" accept=".docx,.pdf">${icon('upload','sm')}<span>${t('lg.pub.trUp')}</span></label></div>`:''}`;}))}));
+  const head=[{label:t('lg.col.doc')}].concat(langs.map(l=>({label:lg_langName(l)+' *'})));
+  return `<div class="lg-pubg"><div class="row between wrap g8"><div><b>${esc(ctyName(cc))}</b> <span class="small muted">· ${t('lg.pub.req',{l:esc(langs.map(lg_langName).join(' + '))})}</span></div>
+   ${done?ui.badge(t('lg.pub.doneB'),'ok',true):ui.btn(t('lg.pub.goCountry'),{size:'sm',kind:'primary',icon:'globe',act:'lg_pubCountry',arg:cc,disabled:!rel||miss.length>0})}</div>
+   ${!done&&miss.length?ui.note('bad',esc(lg_pubBlockedMsg(cc,miss))):''}<div class="tblwrap">${ui.table(head,rows)}</div></div>`;}).join('');
  const keys=Object.keys(groups).sort();
- const cards=keys.map(k=>{const [tp,cc,lang]=k.split('|');const list=groups[k].slice().sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));const cur=list.find(p=>p.status==='current');
-  return `<div class="lg-pubg"><div class="row between wrap g8"><div><b>${esc(lg_tplTitle(tp,S.lang==='en'?'en':'ru'))}</b> · ${esc(ctyName(cc))} · ${esc((LG_LANG2[lang]||{name:'English'}).name)}</div>
-   <div class="row g8 wrap">${ui.btn(t('lg.pub.minor'),{size:'sm',act:'lg_pubNew',arg:k+'|minor',disabled:!can('ota.release')})}${ui.btn(t('lg.pub.major'),{size:'sm',act:'lg_pubNew',arg:k+'|major',disabled:!can('ota.release')})}</div></div>
+ const hist=keys.map(k=>{const [tp,cc,lang]=k.split('|');const list=groups[k].slice().sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));
+  return `<div class="lg-pubg"><div class="row between wrap g8"><div><b>${esc(lg_tplTitle(tp,S.lang==='en'?'en':'ru'))}</b> · ${esc(ctyName(cc))} · ${esc(lg_langName(lang))}</div>
+   <div class="row g8 wrap">${ui.btn(t('lg.pub.minor'),{size:'sm',act:'lg_pubNew',arg:k+'|minor',disabled:!rel})}${ui.btn(t('lg.pub.major'),{size:'sm',act:'lg_pubNew',arg:k+'|major',disabled:!rel})}</div></div>
    ${ui.table([{label:t('lg.col.num')},{label:t('lg.pub.date')},{label:t('lg.tp.ver')},{label:t('lg.pub.notified')},{label:''}],list.map(p=>({cells:[`<span class="mono small">${esc(p.number)}</span>${p.status==='current'?' '+ui.badge(t('lg.pub.cur'),'ok'):''}`,fmtDate(p.publishedAt),`<span class="mono xs">${esc(p.tplVer)}</span>`,
-    p.notifiedAt?ui.badge(t('lg.pub.notifiedAt',{d:fmtDate(p.notifiedAt)}),'ok'):(p.status==='current'?ui.btn(t('lg.pub.notify'),{size:'sm',act:'lg_pubNotify',arg:p.id,disabled:!can('ota.release')}):'<span class="faint">—</span>'),ui.btn(t('lg.pub.web'),{size:'sm',kind:'ghost',icon:'globe',act:'lg_pubView',arg:p.id})]})))}</div>`;}).join('');
- const add=`<form data-form="lg_pubAdd" class="row wrap g8" style="align-items:flex-end">${ui.field({id:'type',label:t('lg.col.doc'),type:'select',value:'EUT',options:[['EUT','07 · End User Terms'],['PN','08 · Privacy Notice']]})}${ui.field({id:'cc',label:t('lg.pub.cc'),type:'select',value:orgCountries()[0],options:orgCountries().map(c=>[c,ctyName(c)])})}
-  ${ui.field({id:'lang',label:t('lg.pub.lang'),type:'select',value:'ru',options:[['en','English']].concat(Object.keys(LG_LANG2).filter(l=>lg_langComplete(l)).map(l=>[l,LG_LANG2[l].name]))})}${ui.btn(t('lg.pub.add'),{type:'submit',icon:'plus',disabled:!can('ota.release')})}</form>`;
- return `<div class="stack">${ui.card({title:t('lg.pub.title'),body:`<div class="col g16"><p class="small muted">${t('lg.pub.d')}</p>${cards||`<p class="small muted">${t('lg.pub.none')}</p>`}</div>`,foot:add})}</div>`;}
-function lg_pubView(id){const p=lg_st().pub.find(x=>x.id===id);if(!p)return;const r=lg_render(p.type,{cc:p.cc,public:p.lang==='en'?'en':p.lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:p.lang==='en'?lg_l2():p.lang});
- modal(esc(lg_tplTitle(p.type,p.lang==='en'?'en':p.lang))+` <span class="xs muted mono">v${esc(p.ver)}</span>`,`<div class="lg-web"><div class="lg-webbar">${icon('globe','sm')}<span class="mono xs">https://${esc(lg_fval('P_DOMAIN')||'connect.brand.com')}/${p.type==='EUT'?'terms':'privacy'}</span></div><div class="lg-webbody">${r.html}</div>
+    p.ver==='1.0'?`<span class="xs faint">${t('lg.pub.firstEd')}</span>`:(p.notifiedAt?ui.badge(t('lg.pub.notifiedAt',{d:fmtDate(p.notifiedAt)}),'ok'):(p.status==='current'?ui.btn(t('lg.pub.notify'),{size:'sm',act:'lg_pubNotify',arg:p.id,disabled:!rel}):'<span class="faint">—</span>')),ui.btn(t('lg.pub.web'),{size:'sm',kind:'ghost',icon:'globe',act:'lg_pubView',arg:p.id})]})))}</div>`;}).join('');
+ return `<div class="stack">${lg_launchCard()}${ui.card({title:t('lg.pub.title'),body:`<div class="col g16"><p class="small muted">${t('lg.pub.d2')}</p>${ccCards||`<p class="small muted">${t('lg.pub.none')}</p>`}</div>`})}
+  ${hist?ui.card({title:t('lg.pub.hist'),body:`<div class="col g16">${hist}</div>`}):''}</div>`;}
+function lg_pubView(id){const p=lg_st().pub.find(x=>x.id===id);if(!p)return;const tplLang=p.lang==='en'||lg_tplHasLang(p.type,p.lang);const tr=((lg_st().tr[p.type]||{})[p.lang]);
+ const lang=tplLang?p.lang:'en';const r=lg_render(p.type,{cc:p.cc,public:lang==='en'?'en':lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:lang==='en'?lg_l2():lang});
+ modal(esc(lg_tplTitle(p.type,lang==='en'?'en':'ru'))+` <span class="xs muted mono">${esc(lg_langName(p.lang))} · v${esc(p.ver)}</span>`,`<div class="lg-web"><div class="lg-webbar">${icon('globe','sm')}<span class="mono xs">https://${esc(lg_fval('P_DOMAIN')||'connect.brand.com')}/${p.type==='EUT'?'terms':'privacy'}</span></div>
+  ${tplLang?'':ui.note('info',t('lg.pub.trView',{f:esc(tr?tr.file:'—'),l:esc(lg_langName(p.lang))}))}<div class="lg-webbody">${r.html}</div>
   ${r.missing.length&&S.admin?ui.note('admin',t('lg.pub.miss',{k:r.missing.join(', ')})):''}</div>`,ui.btn(t('c.close'),{act:'ovclose'}),{wide:true});lg_audit('doc.view',p.number,{public:true});}
 
 /* ---------- diff (side by side, changed blocks highlighted) ---------- */
@@ -859,17 +1049,18 @@ document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)ret
  if(ds.lgui){if((S.ui[ds.lgui]||'')===el.value)return;S.ui[ds.lgui]=el.value;if(ds.lgui==='lg_auq')S.ui.lg_aupg=1;setTimeout(rerender,0);return;}
  if(el.type==='file'){const name=lg_fileName(el.value);if(!name)return;
   if(ds.lgfile){if(!lg_canEditForm())return;lg_fset(ds.lgfile,name);lg_audit('form.file',ds.lgfile,{file:name});if(!lg_issuedAny())lg_syncOrg();toast(t('lg.t.file',{f:esc(name)}));rerender();return;}
-  if(ds.lgscan){const d=lg_doc(ds.lgscan);if(!d)return;d.scan={file:name,at:iso(now()),by:actorName()};d.status='signed_both';d.effective=d.effective||iso(now());lg_audit('doc.boa.upload',d.number,{file:name,hash:d.hash});toast(t('lg.t.scan',{f:esc(name)}));rerender();return;}
+  if(ds.lgscan){const d=lg_doc(ds.lgscan);if(!d)return;d.scan={file:name,at:iso(now()),by:actorName()};d.status='signed_both';d.effective=d.effective||iso(now());lg_audit('doc.boa.upload',d.number,{file:name,hash:d.hash});lg_tick();toast(t('lg.t.scan',{f:esc(name)}));rerender();return;}
+  if(ds.lgtr){if(!can('ota.release'))return;const [tp,lang]=ds.lgtr.split('|');const L=lg_st();(L.tr[tp]=L.tr[tp]||{})[lang]={file:name,at:iso(now()),by:actorName()};lg_audit('pub.translation.upload',tp+':'+lang,{file:name});toast(t('lg.t.trUp',{f:esc(name)}));rerender();return;}
   if(ds.lgkep){const d=lg_doc(ds.lgkep);if(!d)return;d.kep=d.kep||[];d.kep.push({file:name,at:iso(now()),by:actorName()});lg_audit('doc.kep.upload',d.number,{file:name,hash:d.hash});toast(t('lg.t.kep',{f:esc(name)}));rerender();return;}}});
 function lg_busy(on){const b=document.activeElement;if(b&&b.tagName==='BUTTON')b.disabled=!!on;}
-function lg_failNote(res){const f=(res&&res.err)||[];if(!Array.isArray(f))return t('lg.e.generic');const tr=f.find(x=>x.r&&x.r.error==='no_translation');if(tr)return t('lg.e.stopD',{l:LG_LANG2[lg_l2()].en,ids:tr.r.untranslated.join(', ')});
+function lg_failNote(res){const f=(res&&res.err)||[];if(!Array.isArray(f))return t('lg.e.generic');const pc=f.find(x=>x.r&&x.r.error==='plcheck');if(pc)return t(pc.r.ck.noticeOk?'lg.e.plcap':'lg.e.plnotice');const fe=f.find(x=>x.r&&x.r.error==='fee');if(fe)return t('lg.e.fee',{n:fe.d.number,x:r2(fe.r.fee*100)});const ee=f.find(x=>x.r&&x.r.error==='edition');if(ee)return t('lg.e.edition',{n:ee.d.number,e:ee.r.ed,v:LG_PACK});const tr=f.find(x=>x.r&&x.r.error==='no_translation');if(tr)return t('lg.e.stopD',{l:LG_LANG2[lg_l2()].en,ids:tr.r.untranslated.join(', ')});
  return f.map(x=>`${x.d?x.d.number:''}: ${(x.r.missing||[]).join(', ')}`).join(' · ');}
 
 Object.assign(ACT,{
  lg_jump(k){const el=document.querySelector(`[data-k="${CSS.escape(k)}"]`);if(el){el.scrollIntoView({block:'center',behavior:'smooth'});const i=el.querySelector('input,select,textarea');if(i)setTimeout(()=>i.focus({preventScroll:true}),300);}},
  lg_comment(k){const f=lg_form(k)||{};modal(t('lg.cmt.title'),`<form data-form="lg_cmt" class="col g12" id="lg-cmtf"><input type="hidden" name="k" value="${esc(k)}"><p class="small muted">${t('lg.cmt.d',{f:esc(t('lg.f.'+k.split('@')[0]))})}</p>${ui.field({id:'cmt',label:t('lg.cmt.lbl'),type:'textarea',value:f.comment||t('lg.cmt.def'),rows:3})}</form>`,
   `${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn primary" type="submit" form="lg-cmtf">${t('lg.cmt.send')}</button>`);},
- lg_submit(){if(!lg_canEditForm())return;const p=lg_progress();if(!p.ok){toast(t('lg.t.notDone',{n:p.left.length}),'bad');ACT.lg_jump(p.left[0].k);return;}
+ lg_submit(){if(!lg_canEditForm())return;if(lg_isGcc(lg_fval('P_COUNTRY'))||lg_isGcc(lg_fval('P_TAX_COUNTRY'))){toast(t('lg.gcc.msg'),'bad');return;}const p=lg_progress();if(!p.ok){toast(t('lg.t.notDone',{n:p.left.length}),'bad');ACT.lg_jump(p.left[0].k);return;}
   const L=lg_st();L.submitted={at:iso(now()),by:actorName()};lg_syncOrg();lg_audit('form.submit',(S.org&&S.org.code)||'',{fields:p.total});log(t('lg.log.submitted'));toast(t('lg.t.submitted'));rerender();},
  lg_tmAdd(){if(!lg_canEditForm())return;const f=lg_form('P_TM_LIST');const arr=(f&&Array.isArray(f.value)?f.value:[]).slice();arr.push({TM_MARK:lg_fval('P_BRAND')||'',TM_REGNO:'',TM_COUNTRIES:'',TM_CLASSES:''});lg_fset('P_TM_LIST',arr);rerender();},
  lg_tmDel(i){if(!lg_canEditForm())return;const f=lg_form('P_TM_LIST');const arr=(f&&Array.isArray(f.value)?f.value:[]).slice();arr.splice(+i,1);lg_fset('P_TM_LIST',arr);rerender();},
@@ -878,11 +1069,37 @@ Object.assign(ACT,{
  lg_devPrefill(cc){if(!lg_canEditForm())return;const arr=lg_devices(cc,true).slice();let n=0;allModels().forEach(x=>{if(arr.some(d=>d.DEV_MODEL===x.model.name))return;
    arr.push({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'',DEV_FW:'',DEV_PLAN:x.model.plan?PLAN_EN[x.model.plan]:'',DEV_MB:'',DEV_SIM:'',ok:false});n++;});
   lg_fset(lg_ccKey('DEVICES',cc),arr);toast(n?t('lg.t.prefill',{n}):t('lg.t.prefill0'),n?'':'bad');rerender();},
- lg_chgReq(g){const grp=LG_GROUPS.find(x=>x.id===g);if(!grp)return;const L=lg_st();if(L.detailReq&&L.detailReq.status==='pending'){toast(t('lg.chg.pending'),'bad');return;}
-  modal(t('lg.chg.reqT'),`<form data-form="lg_chgReq" id="lg-chgf" class="col g12"><input type="hidden" name="g" value="${g}">${ui.note('info',t('lg.chg.reqD'))}${grp.fields.filter(k=>lg_fieldOn(k)&&!['P_AUTHORITY','P_AUTHORITY_FILE','P_COUNTRY','P_REGNO','P_FORM_EN','P_FORM_L2','P_TAXNO'].includes(k)).map(k=>ui.field({id:'f_'+k,label:t('lg.f.'+k),value:lg_fval(k)||'',type:LG_FTYPE[k]==='textarea'?'textarea':'text',rows:2})).join('')}</form>`,
+ lg_chgReq(g){const grp=LG_GROUPS.find(x=>x.id===g);if(!grp||!lg_canEditForm())return;
+  if(lg_chgPending()||S.bankChange){toast(t('lg.chg.pending'),'bad');return;}
+  const keys=grp.fields.filter(k=>lg_fieldOn(k)&&!['P_AUTHORITY','P_AUTHORITY_FILE','P_COUNTRY','P_TAX_COUNTRY','P_GCC_CONFIRM'].includes(k));
+  const proofNeeded=keys.some(k=>LG_CHG_PROOF.includes(k));
+  modal(t('lg.chg.reqT'),`<form data-form="lg_chgReq" id="lg-chgf" class="col g12" novalidate><input type="hidden" name="g" value="${g}">${ui.note('info',t('lg.chg.reqD'))}
+   ${g==='bank'?ui.note('warn',t('lg.bank.rule')):''}${g==='company'?`<p class="xs muted">${t('lg.chg.control')}</p>`:''}
+   ${keys.map(k=>ui.field({id:'f_'+k,label:t('lg.f.'+k),value:lg_fval(k)||'',type:LG_FTYPE[k]==='textarea'?'textarea':'text',rows:2,mono:LG_MONO.includes(k)})).join('')}
+   ${proofNeeded?`<div class="field"><span class="lbl">${t('lg.chg.proof')}</span><input type="file" class="inp" name="proof" id="lg-chgproof" accept=".pdf,.jpg,.png"><span class="hint" id="lg-chgproof-h">${t('lg.chg.proofH')}</span></div>`:''}</form>`,
    `${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn primary" type="submit" form="lg-chgf">${t('lg.chg.send')}</button>`,{wide:true});},
- lg_chgApprove(){if(!(can('ota.settings')||can('ota.release')))return;lg_then(lg_approveDetails({}),res=>{if(res&&res.err){toast(lg_failNote(res),'bad');}else toast(t('lg.t.chgOk'));rerender();});},
- lg_chgReject(){const L=lg_st();if(!L.detailReq)return;L.detailReq.status='rejected';L.detailReq.decidedAt=iso(now());L.detailReq.decidedBy=actorName();lg_audit('details.reject','',{});toast(t('lg.t.chgRej'));rerender();},
+ lg_ofTermAsk(id){const d=lg_doc(id);if(!d)return;modal(t('lg.oft.btn',{c:esc(ctyName(d.cc))}),ui.note('bad',t('lg.oft.q',{c:esc(ctyName(d.cc))})),`${ui.btn(t('c.cancel'),{act:'ovclose'})}${ui.btn(t('lg.oft.go'),{kind:'danger',act:'lg_ofTermGo',arg:id})}`);},
+ lg_ofTermGo(id){const d=lg_doc(id);if(!d||!(can('p.sign')||can('p.form')))return;const n=ofTerminate(d.cc,{priceVer:d.priceVer});lg_tick();closeOverlay();if(n)toast(t('lg.oft.done',{c:esc(ctyName(d.cc))}));go('lg-docs');},
+ lg_callbackFail(){const f=$('#lg-cbf');if(!f||!can('ota.payments'))return;const d=formData(f);lg_bankCallback({ok:false,phone:d.phone,contact:String(d.contact||'').trim()});toast(t('lg.t.cbFail'),'bad');rerender();},
+ lg_revHandled(id){if(!can('ota.release'))return;const n=lg_st().notices.find(x=>x.id===id);if(!n)return;n.handled={at:iso(now()),by:actorName()};lg_audit('notice.handled',n.number,{kind:n.kind});rerender();},
+ lg_boaLink(id){const d=lg_doc(id);if(!d)return;modal(t('lg.boa.linkT'),`<form data-form="lg_boaLinkF" id="lg-blf" class="col g12" novalidate><input type="hidden" name="id" value="${esc(id)}"><p class="small muted">${t('lg.boa.linkD',{n:esc(lg_fval('P_TM_OWNER_NAME')||'—')})}</p>
+   ${ui.field({id:'email',label:t('lg.boa.ownerEmail'),type:'email',value:(d.ownerLink&&d.ownerLink.email)||'',attrs:'autocomplete="off"'})}</form>`,`${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn primary" type="submit" form="lg-blf">${icon('send','sm')}<span>${t('lg.boa.linkSend')}</span></button>`);},
+ lg_boaOwner(id){const d=lg_doc(id);if(!d||!d.ownerLink)return;d.ownerLink.openedAt=d.ownerLink.openedAt||iso(now());const code=String(Math.floor(100000+Math.random()*900000));S.ui.lg_boaOtp={id,code};
+  lg_audit('doc.otp.sent',d.number,{to:d.ownerLink.email,channel:'email',party:'owner'});const r=lg_renderDoc(d,{});
+  modal(t('lg.boa.ownerT'),`<div class="col g12">${ui.note('admin',t('lg.boa.ownerDemo'))}<div class="lgd-wrap lgd-flat lg-boaprev">${r.html}</div>
+   <form data-form="lg_boaOtp" id="lg-botp" class="col g12" novalidate><p class="small">${t('lg.otp.d',{e:`<b>${esc(lg_mask(d.ownerLink.email))}</b>`,n:1})}</p>${ui.field({id:'otp',label:t('lg.otp.lbl'),mono:true,attrs:'inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="max-width:180px;letter-spacing:.3em;font-size:18px"'})}</form></div>`,
+   `${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn primary" type="submit" form="lg-botp">${icon('lg_pen','sm')}<span>${t('lg.boa.ownerSign')}</span></button>`,{wide:true});
+  toast(t('lg.otp.toast',{e:esc(lg_mask(d.ownerLink.email)),c:code})+' · demo');},
+ lg_boaNew(){if(!(can('ota.release')||can('p.form')))return;lg_then(lg_boaNew({}),res=>{if(res.err){toast(res.err==='pending'?t('lg.boa.newPending'):lg_failNote(res),'bad');return;}toast(t('lg.t.boaNew',{n:esc(res.ok[0].number)}));go('lg-doc',res.ok[0].id);});},
+ lg_boaRevoke(id){const d=lg_doc(id);if(!d)return;modal(t('lg.boa.revBtn'),`<form data-form="lg_boaRev" id="lg-brf" class="col g12" novalidate><input type="hidden" name="id" value="${esc(id)}">${ui.note('bad',t('lg.boa.revRule'))}
+   ${ui.field({id:'note',label:t('lg.boa.revNote'),type:'textarea',rows:2})}<div class="field"><span class="lbl">${t('lg.boa.revFile')}</span><input type="file" class="inp" name="file" accept=".pdf,.jpg,.png"></div></form>`,
+   `${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn danger" type="submit" form="lg-brf">${t('lg.boa.revSend')}</button>`);},
+ lg_pubCountry(cc){if(!can('ota.release'))return;const r=lg_pubCountry(cc,{});if(r.err){modal(t('lg.pub.blockedT'),ui.note('bad',esc(lg_pubBlockedMsg(cc,r.missing))),ui.btn(t('c.close'),{act:'ovclose'}));rerender();return;}
+  toast(t('lg.t.pubCountry',{c:esc(ctyName(cc)),n:r.ok.length}));rerender();},
+ lg_issueOFAsk(cc){const det=lg_detected().find(x=>x.cc===cc);if(!det)return;const def='A';
+  modal(t('lg.det.issue'),`<form data-form="lg_issueOFF" id="lg-oif" class="col g12" novalidate><input type="hidden" name="cc" value="${esc(cc)}"><p class="small">${esc(t('lg.det.'+det.kind,{c:ctyName(cc)}))}</p>
+   ${ui.field({id:'cls',label:t('lg.cls.choose'),type:'select',value:def,options:[['A',t('lg.cls.A')],['B',t('lg.cls.B')]],hint:t('lg.cls.hint')})}</form>`,
+   `${ui.btn(t('c.cancel'),{act:'ovclose'})}<button class="btn primary" type="submit" form="lg-oif">${icon('send','sm')}<span>${t('lg.det.issue')}</span></button>`);},
  lg_approveReview(){const rr=lg_reviewReady();if(!Object.values(rr).every(Boolean))return;const L=lg_st();L.review={at:iso(now()),by:actorName()};lg_audit('review.approve',(S.org&&S.org.code)||'',{kyc:Object.keys(L.kyc)});log(t('lg.log.review'));toast(t('lg.t.review'));rerender();},
  lg_setBrandDoc(v){if(!(can('ota.settings')||can('ota.na')))return;if(lg_issuedAny()){toast(t('lg.locked.d'),'bad');return;}lg_fset('P_TM_OWNER_IS_PARTNER',v);lg_audit('form.brand_doc',v==='yes'?'05A':'05B',{});rerender();},
  lg_naSet(k){if(!can('ota.na'))return;modal(t('lg.na.title'),`<form data-form="lg_na" id="lg-naf" class="col g12"><input type="hidden" name="k" value="${esc(k)}"><p class="small">${t('lg.na.d',{f:`<b>${esc(t('lg.f.'+k.split('@')[0]))}</b>`})}</p>${ui.field({id:'reason',label:t('lg.na.reason'),value:(lg_form(k)||{}).comment||'',attrs:'required'})}</form>`,
@@ -914,7 +1131,7 @@ Object.assign(ACT,{
  lg_otpResend(){const o=S.ui.lg_otp;if(!o)return;o.code=String(Math.floor(100000+Math.random()*900000));o.at=iso(now());toast(t('lg.otp.toast',{e:esc(lg_mask(o.to)),c:o.code}));},
  lg_ackGo(key){const d=lg_doc(key);if(!d||!can('p.confirm'))return;lg_ack(d);toast(t('lg.t.ack',{n:esc(d.number)}));go('lg-doc',d.id);},
  lg_auFor(n){S.ui.lg_auq=n;S.ui.lg_auc='all';S.ui.lg_aupg=1;go('lg-audit');},
- lg_issueOF(cc){if(!(can('ota.release')||can('ota.prices')))return;lg_busy(true);lg_then(lg_issueOF(cc),res=>{if(res.err){toast(lg_failNote(res),'bad');lg_busy(false);rerender();return;}
+ lg_issueOF(cc,cls){if(!(can('ota.release')||can('ota.prices')))return;lg_busy(true);lg_then(lg_issueOF(cc,{cls}),res=>{if(res.err){toast(lg_failNote(res),'bad');lg_busy(false);rerender();return;}
   toast(t('lg.t.ofIssued',{n:esc(res.ok[0].number)}));log(t('lg.t.ofIssued',{n:res.ok[0].number}));rerender();});},
  lg_edB(v){S.ui.lg_edB=v;rerender();},
  lg_tplBump(type){if(!can('ota.templates'))return;lg_tplSave(type,{},{cls:type==='EUT'||type==='PN'?'C':((lg_baseTpl(type)||{}).cls||'B'),effective:iso(addDays(now(),CLASS_A_NOTICE_DAYS)),note:t('lg.tp.bumpNote')});toast(t('lg.t.tplSaved'));rerender();},
@@ -937,8 +1154,24 @@ Object.assign(FORM,{
   fl.status='na';fl.naReason=d.reason.trim();fl.naBy=actorName();fl.naAt=iso(now());lg_audit('form.na',d.k,{reason:fl.naReason});closeOverlay();toast(t('lg.t.na',{f:esc(t('lg.f.'+d.k.split('@')[0]))}));rerender();},
  lg_code(f){if(!can('ota.codes'))return;clearErrs(f);const v=String(formData(f).code||'').trim().toUpperCase();const o=S.org;const e=codeAvailable(v,o.code);if(e){setErr(f,'code',t('lg.rv.codeBad.'+e));return;}
   const was=o.code;o.code=v;o.codeStatus='approved';codeRegister(v);audit('partner.code.approve',v,{was});log(t('lg.log.code',{c:v}));toast(t('lg.t.code',{c:v}));rerender();},
- lg_chgReq(f){const d=formData(f);const grp=LG_GROUPS.find(x=>x.id===d.g);const fields={};Object.keys(d).forEach(n=>{if(!n.startsWith('f_'))return;const k=n.slice(2);const nv=String(d[n]).trim();const ov=lg_fval(k)||'';if(nv!==ov)fields[k]={old:ov,new:nv};});
-  if(!Object.keys(fields).length){toast(t('lg.chg.none'),'bad');return;}const L=lg_st();L.detailReq={id:uid('req'),g:grp.id,fields,status:'pending',at:iso(now()),by:actorName()};lg_audit('details.request',grp.id,{fields:Object.keys(fields)});closeOverlay();toast(t('lg.t.chgSent'));rerender();},
+ lg_chgReq(f){if(!lg_canEditForm())return;const d=formData(f);clearErrs(f);const grp=LG_GROUPS.find(x=>x.id===d.g);if(!grp)return;const fields={};let bad=false;
+  Object.keys(d).forEach(n=>{if(!n.startsWith('f_'))return;const k=n.slice(2);let nv=String(d[n]).trim();if(['P_BANK_IBAN','P_BANK_SWIFT','P_BANK_INTERMEDIARY'].includes(k))nv=nv.replace(/\s/g,'').toUpperCase();
+   const err=lg_validate(k,nv);if(err){setErr(f,n,err);bad=true;return;}const ov=lg_fval(k)||'';if(nv!==ov)fields[k]={old:ov,new:nv};});
+  if(bad)return;if(!Object.keys(fields).length){toast(t('lg.chg.none'),'bad');return;}
+  // template E clause 3: name / legal form / registration no. / signatory need an extract or power of attorney
+  const proofFile=lg_fileName(d.proof||'');if(Object.keys(fields).some(k=>LG_CHG_PROOF.includes(k))&&!proofFile){setErr(f,'proof',t('lg.chg.proofReq'));return;}
+  const proof=proofFile?{file:proofFile,at:iso(now()),by:actorName()}:null;if(proof)lg_audit('details.proof',grp.id,{file:proofFile});
+  lg_then(lg_chgCreate({group:grp.id,fields,proof}),res=>{if(res.err){toast(lg_failNote(res),'bad');return;}closeOverlay();toast(t('lg.t.chgSent',{n:esc(res.ok[0].number)}));go('lg-doc',res.ok[0].id);});},
+ lg_callback(f){if(!can('ota.payments'))return;const d=formData(f);clearErrs(f);const bc=S.bankChange;if(!bc)return;
+  if(!d.phone||d.phone!==bc.prevContact.phone){setErr(f,'phone',t('lg.bank.phoneReq'));return;}
+  if(!String(d.contact||'').trim()){setErr(f,'contact',t('lg.bank.contactReq'));return;}
+  const r=lg_bankCallback({ok:true,phone:d.phone,contact:String(d.contact).trim()});if(r){log(t('lg.t.cbOk',{n:r.number}));toast(t('lg.t.cbOk',{n:esc(r.number)}));}rerender();},
+ lg_boaLinkF(f){const d=formData(f);clearErrs(f);const doc=lg_doc(d.id);if(!doc)return;const em=String(d.email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){setErr(f,'email',t('lg.e.email'));return;}
+  doc.ownerLink={email:em,sentAt:iso(now()),token:rndB32(8),by:actorName()};lg_audit('doc.boa.link',doc.number,{to:em});closeOverlay();toast(t('lg.t.boaLink',{e:esc(em)}));rerender();},
+ lg_boaOtp(f){const o=S.ui.lg_boaOtp;clearErrs(f);if(!o){closeOverlay();return;}const doc=lg_doc(o.id);const v=digits(formData(f).otp);if(v!==o.code){setErr(f,'otp',t('lg.otp.bad'));if(doc)lg_audit('doc.otp.fail',doc.number,{party:'owner'});return;}
+  const sg=lg_boaOwnerSign(doc,{});S.ui.lg_boaOtp=null;closeOverlay();toast(t('lg.t.boaSigned',{n:esc(doc.number),id:sg.id}));rerender();},
+ lg_boaRev(f){const d=formData(f);const doc=lg_doc(d.id);if(!doc)return;lg_boaRevoke(doc,{note:String(d.note||'').trim(),file:lg_fileName(d.file||'')||null});closeOverlay();toast(t('lg.t.boaRev'));rerender();},
+ lg_issueOFF(f){const d=formData(f);closeOverlay();ACT.lg_issueOF(d.cc,d.cls==='B'?'B':'A');},
  lg_decl(f){const d=formData(f);clearErrs(f);if(!String(d.cmt||'').trim()){setErr(f,'cmt',t('lg.dec.req'));return;}const doc=lg_doc(d.id);if(!doc)return;doc.decline={at:iso(now()),by:actorName(),role:lg_role(),comment:d.cmt.trim()};
   lg_audit('doc.decline',doc.number,{comment:doc.decline.comment});closeOverlay();toast(t('lg.t.decl'));go('lg-doc',doc.id);},
  lg_otp(f){const o=S.ui.lg_otp;clearErrs(f);const v=digits(formData(f).otp);if(!o){closeOverlay();return;}if(v!==o.code){setErr(f,'otp',t('lg.otp.bad'));lg_audit('doc.otp.fail',o.key,{});return;}
@@ -946,26 +1179,29 @@ Object.assign(FORM,{
   log(t(party==='ota'?'lg.log.signedO':'lg.log.signedP',{n:docs.length}));toast(t('lg.t.signed',{n:docs.length,id:sid}));if(docs.length>1)go('lg-docs');else go('lg-doc',docs[0].id);},
  lg_tplSave(f){const d=formData(f);clearErrs(f);const parts=parseHash().params;const type=parts[0];if(!can('ota.templates'))return;const vs=lg_tplVersions(type);let dr=vs.find(v=>v.status==='draft');
   const cur=lg_tpl(type);const blk=cur.blocks.find(b=>b.id===d.blk);const ch={};if(blk&&(d.en!==blk.en||d.ru!==(blk.ru||'')))ch[d.blk]={en:d.en,ru:d.ru};
+  const first=lg_firstEdition(type);if(first){d.cls=null;d.eff=iso(now()).slice(0,10);}
   const eff=d.eff?new Date(d.eff+'T09:00:00Z'):addDays(now(),30);if(eff<new Date(iso(now()).slice(0,10)+'T00:00:00Z')){setErr(f,'eff',t('lg.tp.effPast'));return;}
+  if(!first&&(d.cls==='B'||d.cls==='A')&&eff<new Date(iso(addDays(now(),CLASS_A_NOTICE_DAYS-1)).slice(0,10)+'T00:00:00Z')){setErr(f,'eff',t(d.cls==='B'?'lg.tp.effB':'lg.tp.effA'));return;}
   if(dr){Object.assign(dr.changes,ch);dr.cls=d.cls;dr.effective=iso(eff);dr.note=d.note;lg_audit('tpl.version.edit',dr.ver,{blocks:Object.keys(ch)});}else dr=lg_tplSave(type,ch,{cls:d.cls,effective:iso(eff),note:d.note});
   delete lg__tc[type];toast(t('lg.t.tplSaved'));rerender();},
- lg_pubAdd(f){if(!can('ota.release'))return;const d=formData(f);if(lg_st().pub.some(p=>p.type===d.type&&p.cc===d.cc&&p.lang===d.lang&&p.status==='current')){toast(t('lg.pub.exists'),'bad');return;}const p=lg_pubPublish(d.type,d.cc,d.lang,{});toast(t('lg.t.pub',{n:esc(p.number)}));rerender();},
+ lg_pubAdd(f){if(!can('ota.release'))return;const d=formData(f);if(!lg_pubLangAvail(d.type,d.lang)){toast(lg_pubBlockedMsg(d.cc),'bad');return;}if(lg_st().pub.some(p=>p.type===d.type&&p.cc===d.cc&&p.lang===d.lang&&p.status==='current')){toast(t('lg.pub.exists'),'bad');return;}const p=lg_pubPublish(d.type,d.cc,d.lang,{});toast(t('lg.t.pub',{n:esc(p.number)}));rerender();},
 });
 
-/* ---------- demo seed: ARV questionnaire, signed package, one pending class-A and one class-B change ---------- */
+/* ---------- demo seed: ARV questionnaire, package signed in v10 (first edition), 07/08 v1.0 for UA; KZ blocked (no Kazakh text) ---------- */
 function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const ago=d=>iso(new Date(n.getTime()-d*864e5));const F=S.form;
  const mark=()=>S.audit.length;const fix=(m,at,uidd)=>{const u=users().find(x=>x.id===uidd)||{};S.audit.slice(m).forEach(e=>{e.ts=at;if(u.id){e.actor=u.name;e.email=u.email;e.role=u.role;e.ip=lg_ip(u.role);}});};
  const set=(k,v,o)=>{F[k]=Object.assign({value:v,status:(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length))?'filled':'empty',comment:'',by:'Maria Lind',at:ago(60)},o||{});};
  S.org.signatoryEmail='daniel.hart@arvelo.example';
  set('P_TAXNO',null,{status:'na',comment:'No VAT registration',naReason:'Partner has no VAT number (partner comment)',naBy:'Platform Admin',naAt:ago(59)});
  set('P_AUTHORITY','director');set('P_TM_OWNER_IS_PARTNER','yes',{by:'Platform Admin',at:ago(59)});
+ set('P_TAX_COUNTRY',S.org.taxCountry||S.org.country||'GB');set('P_GCC_CONFIRM',true); // ТЗ 1.1
  // demo values (marked "demo" in the questionnaire): realistic shape, not real registrations
  const tml=(D&&D.partner&&D.partner.P_TM_LIST)||[{TM_MARK:'ARVELO (word / словесный)'},{TM_MARK:'ARVELO (logo / логотип)'}];const tmNo=['UK00003456789','UK00003456790'];
  set('P_TM_LIST',tml.map((x,i)=>({TM_MARK:x.TM_MARK,TM_REGNO:x.TM_REGNO||(tmNo[i]||tmNo[0])+' (UKIPO)',TM_COUNTRIES:x.TM_COUNTRIES||'United Kingdom; Ukraine; Kazakhstan',TM_CLASSES:x.TM_CLASSES||'9, 38, 42'})),{demo:true});
  set('P_BRAND_RULES','Logo on white or #1F6FEB only, clear space = height of “A”; colours #1F6FEB / #101828; font Onest',{demo:true});
  S.ota.OTA_SUBPROC_EMAIL='Amazon Web Services EMEA SARL (Amazon SES)';S.ota.OTA_SUBPROC_EMAIL_LOC='Luxembourg (EU) / Люксембург (ЕС)';
  set('P_DNS_CONTACT','it@arvelo.example');set('P_LOGO','arvelo_logo_v1.svg');set('P_BRANDBOOK','arvelo_brandbook_2026.pdf');set('P_BRAND_CONTACT','marketing@arvelo.example');
- set('P_EMAIL_OPS','ops@arvelo.example');set('P_EMAIL_LEGAL','legal@arvelo.example');set('P_EMAIL_FIN','finance@arvelo.example');set('P_EMAIL_SUPPORT','support@arvelo.example');set('P_PHONE','[+44 …]');
+ set('P_EMAIL_OPS','ops@arvelo.example');set('P_EMAIL_LEGAL','legal@arvelo.example');set('P_EMAIL_FIN','finance@arvelo.example');set('P_EMAIL_SUPPORT','support@arvelo.example');set('P_PHONE','+44 20 7946 0000'); // fictional (Ofcom drama range)
  const devs=allModels().filter(x=>x.model.plan&&x.model.planStatus==='approved').map(x=>({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'rev. A',DEV_FW:'1.0',DEV_PLAN:PLAN_EN[x.model.plan],DEV_MB:x.model.plan==='light'?'5':'50',DEV_SIM:'Industrial IoT SIM (2FF/3FF/4FF)',ok:true}));
  orgCountries().forEach(cc=>{const C=(D&&D.countries&&D.countries[cc])||{};const dv=(S.org.delivery||{})[cc]||{};
   ['CC_NAME_L2','CC_NAME_FULL_EN','CC_NAME_FULL_L2','CC_NAME_LOC_L2','CC_EXCLUSION_EN','CC_EXCLUSION_L2'].forEach(k=>set(lg_ccKey(k,cc),C[k]==null?null:C[k],{by:'Platform Admin'}));
@@ -981,17 +1217,11 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
   m=mark();lg_signDocs(es,'ota',{at:ago(57),user:ol,viewedAt:iso(new Date(new Date(ago(57)).getTime()-15*60000))});fix(m,ago(57),'u_ota_legal');}
  // OTA invoices issued after signing refer to the MPA and the Order Form in force
  (S.invoices||[]).forEach(inv=>{if(!inv.mpa)inv.mpa=lg_docRef('MPA');if(!inv.of)inv.of=lg_docRef('OF',inv.cc);});
- // public documents 07/08 (class C)
- m=mark();orgCountries().forEach(cc=>['EUT','PN'].forEach(tp=>['en','ru'].forEach(l=>lg_pubPublish(tp,cc,l,{at:ago(57),notified:true,by:'Anna Petrova'}))));fix(m,ago(57),'u_ota_legal');
- // class A: Kazakhstan price increase (+5%), effective after the 90-day notice
- if(orgCountries().includes('KZ')&&plLatest('KZ')){m=mark();const b=plLatest('KZ');const up=x=>r2(x*1.05);const tok={};PLANS.forEach(p=>{tok[p]={};TERMS.forEach(tm=>{tok[p][tm]=up(b.tokens[p][tm]);});});
-  const ret={};PLANS.forEach(p=>{ret[p]=up(b.retained[p]);});plAdd('KZ',{key:b.key,tokens:tok,retained:ret,fee:b.fee||0},{note:'Upstream connectivity cost increase in Kazakhstan (+5%)'});fix(m,ago(1),'u_ota_admin');
-  m=mark();lg_issueOF('KZ',{at:ago(1),sync:true});fix(m,ago(1),'u_ota_legal');}
- // class B: editorial update of the Service Terms (04), acknowledgment within 30 days
- const sla=lg_tpl('SLA');const b71=sla&&sla.blocks.find(x=>x.id==='SLA-7.1');
- if(b71){m=mark();const v=lg_tplSave('SLA',{'SLA-7.1':{en:b71.en.replace("email to OTA's support address","email to OTA's support address published in the cabinet"),ru:b71.ru.replace('e-mail на адрес поддержки OTA','e-mail на адрес поддержки OTA, указанный в кабинете')}},
-   {cls:'B',effective:iso(addDays(n,28)),note:'Support e-mail address: reference to the cabinet (editorial)',at:ago(2),by:'Anna Petrova'});
-  S.actor='u_ota_legal';lg_tplRelease('SLA',v.ver,{at:ago(2),sync:true});fix(m,ago(2),'u_ota_legal');}
+ // public documents 07/08 — v10 first edition, version 1.0, in the country's mandatory languages (ТЗ 3.4, part 5):
+ // UA: the professional Ukrainian translation is uploaded (demo file) → published; KZ: no Kazakh text yet → publishing stays blocked
+ m=mark();if(orgCountries().includes('UA')){['EUT','PN'].forEach(tp=>{(L.tr[tp]=L.tr[tp]||{}).uk={file:(tp==='EUT'?'07_End_User_Terms':'08_Privacy_Notice')+'_UK_professional_translation_demo.docx',at:ago(58),by:'Anna Petrova'};lg_audit('pub.translation.upload',tp+':uk',{file:L.tr[tp].uk.file});});
+  lg_pubCountry('UA',{at:ago(57),by:'Anna Petrova'});}fix(m,ago(57),'u_ota_legal');
+ // v10 is the first edition: no change notices, classes or 30-day periods in the demo (ТЗ part 5, criterion 22)
  S.actor=prevActor||'u_p_admin';}
 HOOKS.seedDemo.push(lg_seed);
 
@@ -1054,14 +1284,14 @@ uk:{'lg.sec':'Документи','lg.otasec':'OTA · Юридичне','lg.nav.
 'lg.tp.tab.t':'Шаблони','lg.tp.tab.c':'Зміни','lg.tp.tab.p':'Публічні 07/08','lg.tp.type':'Тип','lg.tp.cur':'Поточна версія','lg.tp.vers':'Версій','lg.tp.draftB':'чернетка {v}',
 'lg.det.title':'Знайдено зміни прайс-листів','lg.det.cur':'зараз {n} (ціни v{v})','lg.ch.country':'нова країна','lg.ch.decrease':'зниження цін','lg.ch.r.country':'Продажі в країні відкриються після підписання.','lg.ch.r.increase':'Повідомлення ≥ 90 днів: чинність з {d}; без підпису — блокування замовлень по країні.','lg.ch.r.decrease':'Чинність одразу після підписів; до того діють попередні ціни.',
 'lg.det.issue':'Випустити нову версію Замовлення','lg.det.none':'Усі Замовлення відповідають чинним прайс-листам.','lg.det.how':'Портал порівнює прайс-лист країни з версією в чинному Замовленні.','lg.ch.title':'Випущені зміни','lg.ch.none':'Змін ще не було','lg.cls.title':'Класи змін (п. 16.5 Рамкової угоди)',
-'lg.tp.title':'Шаблони і версії','lg.tp.sub':'Тексти пакета v09 поабзацно (EN + переклади), версії, класи змін і випуск оновлень.','lg.tp.admin':'OTA Legal: шаблони, версії, класи змін, випуск оновлень. Старі версії не видаляються.','lg.ch.k.tpl':'новий текст {v}',
+'lg.tp.title':'Шаблони і версії','lg.tp.sub':'Тексти пакета v10 поабзацно (EN + переклади), версії, класи змін і випуск оновлень.','lg.tp.admin':'OTA Legal: шаблони, версії, класи змін, випуск оновлень. Старі версії не видаляються.','lg.ch.k.tpl':'новий текст {v}',
 'lg.cls.what':'Що змінюється','lg.cls.need':'Від партнера','lg.cls.term':'Строк','lg.cls.miss':'Якщо не підписав',
 'lg.cls.r.A.n':'критичне','lg.cls.r.A.w':'Ціни й комерційні умови (нова версія Замовлення); права й обов’язки в 01, 03, 05A, 06, 09','lg.cls.r.A.q':'Підпис','lg.cls.r.A.t':'Підвищення цін ≥ 90 днів; інше ≥ 30 днів','lg.cls.r.A.m':'Блокуються нові ключі й токени по країні',
 'lg.cls.r.Anew.n':'нова країна','lg.cls.r.Anew.w':'Нове Замовлення','lg.cls.r.Anew.q':'Підпис','lg.cls.r.Anew.t':'—','lg.cls.r.Anew.m':'Продажі в країні не відкриваються',
 'lg.cls.r.Adown.n':'зниження цін','lg.cls.r.Adown.w':'Нова версія Замовлення на користь партнера','lg.cls.r.Adown.q':'Підпис','lg.cls.r.Adown.t':'Одразу після підписів','lg.cls.r.Adown.m':'Діють попередні ціни',
 'lg.cls.r.B.n':'некритичне','lg.cls.r.B.w':'Уточнення 04, субобробники 06, редакційні правки, шаблони 10–14','lg.cls.r.B.q':'Позначка «Ознайомлений»','lg.cls.r.B.t':'30 днів','lg.cls.r.B.m':'Набирає чинності автоматично, без блокування',
 'lg.cls.r.C.n':'публічні','lg.cls.r.C.w':'07, 08 для кінцевих користувачів','lg.cls.r.C.q':'Повідомлення партнера','lg.cls.r.C.t':'Суттєві — 30 днів','lg.cls.r.C.m':'—',
-'lg.tp.ver':'Версія','lg.tp.note':'Опис змін','lg.tp.base':'Пакет v09','lg.tp.st.draft':'чернетка','lg.tp.st.released':'випущено','lg.tp.edDraft':'Чернетка {v}','lg.tp.edNew':'Нова версія шаблону','lg.tp.block':'Пункт','lg.tp.l2':'друга мова','lg.tp.ruH':'Порожній переклад зупинить генерацію (перевірка ТЗ §10.10).','lg.tp.effH':'Клас A — не раніше ніж через 30 днів','lg.tp.notePh':'Коротко: що змінилось','lg.tp.saveDraft':'Зберегти чернетку','lg.tp.saveNew':'Створити нову версію','lg.tp.bump':'Нова версія без змін тексту',
+'lg.tp.ver':'Версія','lg.tp.note':'Опис змін','lg.tp.base':'Пакет v10','lg.tp.st.draft':'чернетка','lg.tp.st.released':'випущено','lg.tp.edDraft':'Чернетка {v}','lg.tp.edNew':'Нова версія шаблону','lg.tp.block':'Пункт','lg.tp.l2':'друга мова','lg.tp.ruH':'Порожній переклад зупинить генерацію (перевірка ТЗ §10.10).','lg.tp.effH':'Клас A — не раніше ніж через 30 днів','lg.tp.notePh':'Коротко: що змінилось','lg.tp.saveDraft':'Зберегти чернетку','lg.tp.saveNew':'Створити нову версію','lg.tp.bump':'Нова версія без змін тексту',
 'lg.tp.rel':'Випуск {v}','lg.tp.relOk':'Усі абзаци мають переклад — генерацію перевірено.','lg.tp.affPub':'Буде опубліковано нові версії публічних документів: {n}.','lg.tp.aff':'Зачеплено чинних документів: {n}. Для кожного буде створено нову версію з тим самим номером.','lg.tp.preview':'Переглянути','lg.tp.issue':'Випустити',
 'lg.tp.edSub':'Поточна версія {v}. Шаблон зберігається поабзацно: EN + переклад кожного пункту.','lg.tp.hist':'Історія версій','lg.tp.legalOnly':'Редагувати шаблони може OTA Legal.','lg.tp.bumpNote':'Нова версія без змін тексту','lg.tp.effPast':'Дата не може бути в минулому',
 'lg.pub.minor':'Нова версія x.+1','lg.pub.major':'Суттєва зміна +1.0','lg.pub.cur':'поточна','lg.pub.notified':'Партнера повідомлено','lg.pub.notifiedAt':'повідомлено {d}','lg.pub.notify':'Позначити «повідомлено»','lg.pub.cc':'Країна','lg.pub.add':'Опублікувати',
@@ -1145,14 +1375,14 @@ en:{'lg.sec':'Documents','lg.otasec':'OTA · Legal','lg.nav.docs':'Documents','l
 'lg.tp.tab.t':'Templates','lg.tp.tab.c':'Changes','lg.tp.tab.p':'Public 07/08','lg.tp.type':'Type','lg.tp.cur':'Current version','lg.tp.vers':'Versions','lg.tp.draftB':'draft {v}',
 'lg.det.title':'Price-list changes found','lg.det.cur':'now {n} (prices v{v})','lg.ch.country':'new country','lg.ch.decrease':'price decrease','lg.ch.r.country':'Sales in the country open after signing.','lg.ch.r.increase':'Notice ≥ 90 days: effective {d}; unsigned → country orders blocked.','lg.ch.r.decrease':'Effective right after signatures; old prices apply until then.',
 'lg.det.issue':'Issue new Order Form version','lg.det.none':'All Order Forms match the price lists in force.','lg.det.how':'The portal compares each country price list with the version in its Order Form.','lg.ch.title':'Released changes','lg.ch.none':'No changes yet','lg.cls.title':'Change classes (MPA clause 16.5)',
-'lg.tp.title':'Templates & versions','lg.tp.sub':'v09 texts paragraph by paragraph (EN + translations), versions, change classes and releases.','lg.tp.admin':'OTA Legal: templates, versions, change classes, releases. Old versions are never deleted.','lg.ch.k.tpl':'new text {v}',
+'lg.tp.title':'Templates & versions','lg.tp.sub':'v10 texts paragraph by paragraph (EN + translations), versions, change classes and releases.','lg.tp.admin':'OTA Legal: templates, versions, change classes, releases. Old versions are never deleted.','lg.ch.k.tpl':'new text {v}',
 'lg.cls.what':'What changes','lg.cls.need':'From the partner','lg.cls.term':'Term','lg.cls.miss':'If not signed',
 'lg.cls.r.A.n':'critical','lg.cls.r.A.w':'Prices and commercial terms (new Order Form version); rights and obligations in 01, 03, 05A, 06, 09','lg.cls.r.A.q':'Signature','lg.cls.r.A.t':'Price increase ≥ 90 days; other ≥ 30 days','lg.cls.r.A.m':'New keys and tokens blocked for the country',
 'lg.cls.r.Anew.n':'new country','lg.cls.r.Anew.w':'New Order Form','lg.cls.r.Anew.q':'Signature','lg.cls.r.Anew.t':'—','lg.cls.r.Anew.m':'Sales in the country don’t open',
 'lg.cls.r.Adown.n':'price decrease','lg.cls.r.Adown.w':'New Order Form version in the partner’s favour','lg.cls.r.Adown.q':'Signature','lg.cls.r.Adown.t':'Right after signatures','lg.cls.r.Adown.m':'Old prices apply',
 'lg.cls.r.B.n':'non-critical','lg.cls.r.B.w':'Clarifications of 04, sub-processors (06), editorial edits, templates 10–14','lg.cls.r.B.q':'“Acknowledged” mark','lg.cls.r.B.t':'30 days','lg.cls.r.B.m':'Takes effect automatically, nothing blocked',
 'lg.cls.r.C.n':'public','lg.cls.r.C.w':'07, 08 for end users','lg.cls.r.C.q':'Partner notified','lg.cls.r.C.t':'Material — 30 days','lg.cls.r.C.m':'—',
-'lg.tp.ver':'Version','lg.tp.note':'Summary of changes','lg.tp.base':'Pack v09','lg.tp.st.draft':'draft','lg.tp.st.released':'released','lg.tp.edDraft':'Draft {v}','lg.tp.edNew':'New template version','lg.tp.block':'Clause','lg.tp.l2':'second language','lg.tp.ruH':'An empty translation stops generation (spec §10.10 check).','lg.tp.effH':'Class A — no sooner than 30 days','lg.tp.notePh':'In short: what changed','lg.tp.saveDraft':'Save draft','lg.tp.saveNew':'Create new version','lg.tp.bump':'New version, same text',
+'lg.tp.ver':'Version','lg.tp.note':'Summary of changes','lg.tp.base':'Pack v10','lg.tp.st.draft':'draft','lg.tp.st.released':'released','lg.tp.edDraft':'Draft {v}','lg.tp.edNew':'New template version','lg.tp.block':'Clause','lg.tp.l2':'second language','lg.tp.ruH':'An empty translation stops generation (spec §10.10 check).','lg.tp.effH':'Class A — no sooner than 30 days','lg.tp.notePh':'In short: what changed','lg.tp.saveDraft':'Save draft','lg.tp.saveNew':'Create new version','lg.tp.bump':'New version, same text',
 'lg.tp.rel':'Release {v}','lg.tp.relOk':'Every paragraph is translated — generation checked.','lg.tp.affPub':'New public document versions to publish: {n}.','lg.tp.aff':'Documents in force affected: {n}. Each gets a new version with the same number.','lg.tp.preview':'Preview','lg.tp.issue':'Release',
 'lg.tp.edSub':'Current version {v}. The template is stored paragraph by paragraph: EN + a translation of every clause.','lg.tp.hist':'Version history','lg.tp.legalOnly':'Templates are edited by OTA Legal.','lg.tp.bumpNote':'New version, text unchanged','lg.tp.effPast':'The date can’t be in the past',
 'lg.pub.minor':'New version x.+1','lg.pub.major':'Material change +1.0','lg.pub.cur':'current','lg.pub.notified':'Partner notified','lg.pub.notifiedAt':'notified {d}','lg.pub.notify':'Mark “notified”','lg.pub.cc':'Country','lg.pub.add':'Publish',
@@ -1237,14 +1467,14 @@ ru:{'lg.sec':'Документы','lg.otasec':'OTA · Юридическое','l
 'lg.tp.tab.t':'Шаблоны','lg.tp.tab.c':'Изменения','lg.tp.tab.p':'Публичные 07/08','lg.tp.type':'Тип','lg.tp.cur':'Текущая версия','lg.tp.vers':'Версий','lg.tp.draftB':'черновик {v}',
 'lg.det.title':'Найдены изменения прайс-листов','lg.det.cur':'сейчас {n} (цены v{v})','lg.ch.country':'новая страна','lg.ch.decrease':'снижение цен','lg.ch.r.country':'Продажи в стране откроются после подписания.','lg.ch.r.increase':'Уведомление ≥ 90 дней: в силе с {d}; без подписи — блокировка заказов по стране.','lg.ch.r.decrease':'В силе сразу после подписей; до этого действуют прежние цены.',
 'lg.det.issue':'Выпустить новую версию Заказа','lg.det.none':'Все Заказы соответствуют действующим прайс-листам.','lg.det.how':'Портал сравнивает прайс-лист страны с версией в действующем Заказе.','lg.ch.title':'Выпущенные изменения','lg.ch.none':'Изменений ещё не было','lg.cls.title':'Классы изменений (п. 16.5 Рамочного соглашения)',
-'lg.tp.title':'Шаблоны и версии','lg.tp.sub':'Тексты пакета v09 поабзацно (EN + переводы), версии, классы изменений и выпуск обновлений.','lg.tp.admin':'OTA Legal: шаблоны, версии, классы изменений, выпуск обновлений. Старые версии не удаляются.','lg.ch.k.tpl':'новый текст {v}',
+'lg.tp.title':'Шаблоны и версии','lg.tp.sub':'Тексты пакета v10 поабзацно (EN + переводы), версии, классы изменений и выпуск обновлений.','lg.tp.admin':'OTA Legal: шаблоны, версии, классы изменений, выпуск обновлений. Старые версии не удаляются.','lg.ch.k.tpl':'новый текст {v}',
 'lg.cls.what':'Что меняется','lg.cls.need':'От партнёра','lg.cls.term':'Срок','lg.cls.miss':'Если не подписал',
 'lg.cls.r.A.n':'критичное','lg.cls.r.A.w':'Цены и коммерческие условия (новая версия Заказа); права и обязанности в 01, 03, 05A, 06, 09','lg.cls.r.A.q':'Подпись','lg.cls.r.A.t':'Повышение цен ≥ 90 дней; прочее ≥ 30 дней','lg.cls.r.A.m':'Блокируются новые ключи и токены по стране',
 'lg.cls.r.Anew.n':'новая страна','lg.cls.r.Anew.w':'Новый Заказ','lg.cls.r.Anew.q':'Подпись','lg.cls.r.Anew.t':'—','lg.cls.r.Anew.m':'Продажи в стране не открываются',
 'lg.cls.r.Adown.n':'снижение цен','lg.cls.r.Adown.w':'Новая версия Заказа в пользу партнёра','lg.cls.r.Adown.q':'Подпись','lg.cls.r.Adown.t':'Сразу после подписей','lg.cls.r.Adown.m':'Действуют прежние цены',
 'lg.cls.r.B.n':'некритичное','lg.cls.r.B.w':'Уточнения 04, субобработчики 06, редакционные правки, шаблоны 10–14','lg.cls.r.B.q':'Отметка «Ознакомлен»','lg.cls.r.B.t':'30 дней','lg.cls.r.B.m':'Вступает в силу автоматически, без блокировки',
 'lg.cls.r.C.n':'публичные','lg.cls.r.C.w':'07, 08 для конечных пользователей','lg.cls.r.C.q':'Уведомление партнёра','lg.cls.r.C.t':'Существенные — 30 дней','lg.cls.r.C.m':'—',
-'lg.tp.ver':'Версия','lg.tp.note':'Описание изменений','lg.tp.base':'Пакет v09','lg.tp.st.draft':'черновик','lg.tp.st.released':'выпущена','lg.tp.edDraft':'Черновик {v}','lg.tp.edNew':'Новая версия шаблона','lg.tp.block':'Пункт','lg.tp.l2':'второй язык','lg.tp.ruH':'Пустой перевод остановит генерацию (проверка ТЗ §10.10).','lg.tp.effH':'Класс A — не раньше чем через 30 дней','lg.tp.notePh':'Кратко: что изменилось','lg.tp.saveDraft':'Сохранить черновик','lg.tp.saveNew':'Создать новую версию','lg.tp.bump':'Новая версия без изменения текста',
+'lg.tp.ver':'Версия','lg.tp.note':'Описание изменений','lg.tp.base':'Пакет v10','lg.tp.st.draft':'черновик','lg.tp.st.released':'выпущена','lg.tp.edDraft':'Черновик {v}','lg.tp.edNew':'Новая версия шаблона','lg.tp.block':'Пункт','lg.tp.l2':'второй язык','lg.tp.ruH':'Пустой перевод остановит генерацию (проверка ТЗ §10.10).','lg.tp.effH':'Класс A — не раньше чем через 30 дней','lg.tp.notePh':'Кратко: что изменилось','lg.tp.saveDraft':'Сохранить черновик','lg.tp.saveNew':'Создать новую версию','lg.tp.bump':'Новая версия без изменения текста',
 'lg.tp.rel':'Выпуск {v}','lg.tp.relOk':'Все абзацы переведены — генерация проверена.','lg.tp.affPub':'Будут опубликованы новые версии публичных документов: {n}.','lg.tp.aff':'Затронуто действующих документов: {n}. Для каждого будет создана новая версия с тем же номером.','lg.tp.preview':'Просмотреть','lg.tp.issue':'Выпустить',
 'lg.tp.edSub':'Текущая версия {v}. Шаблон хранится поабзацно: EN + перевод каждого пункта.','lg.tp.hist':'История версий','lg.tp.legalOnly':'Редактировать шаблоны может OTA Legal.','lg.tp.bumpNote':'Новая версия без изменения текста','lg.tp.effPast':'Дата не может быть в прошлом',
 'lg.pub.minor':'Новая версия x.+1','lg.pub.major':'Существенное изменение +1.0','lg.pub.cur':'текущая','lg.pub.notified':'Партнёр уведомлён','lg.pub.notifiedAt':'уведомлён {d}','lg.pub.notify':'Отметить «уведомлён»','lg.pub.cc':'Страна','lg.pub.add':'Опубликовать',
@@ -1276,3 +1506,118 @@ ru:{'lg.sec':'Документы','lg.otasec':'OTA · Юридическое','l
 
 function lg_actLabel(a){const k='lg.act.'+a;const v=t(k);return v&&v!==k?v:a;}
 I18N.add({"uk": {"lg.act.doc.sign.partner": "Підписано партнером", "lg.act.doc.sign.ota": "Підписано OTA", "lg.act.doc.issue": "Випущено на підпис", "lg.act.doc.view": "Переглянуто", "lg.act.doc.download": "Завантажено PDF", "lg.act.doc.otp.sent": "Надіслано код підтвердження", "lg.act.doc.otp.fail": "Невірний код", "lg.act.doc.ack": "Ознайомлено", "lg.act.doc.archive": "Архівовано", "lg.act.doc.auto_effective": "Набрав чинності автоматично", "lg.act.doc.superseded": "Замінено новою версією", "lg.act.doc.decline": "Відмова від змін", "lg.act.doc.decline.handled": "Відмову опрацьовано", "lg.act.doc.kep.upload": "Додано примірник з КЕП", "lg.act.doc.boa.upload": "Завантажено лист правовласника", "lg.act.doc.reminder": "Нагадування", "lg.act.doc.withdraw": "Відкликано", "lg.act.pkg.generate": "Пакет сформовано", "lg.act.form.edit": "Змінено поле анкети", "lg.act.form.na": "Позначено «не застосовно»", "lg.act.form.na.clear": "Знято «не застосовно»", "lg.act.form.submit": "Анкету надіслано", "lg.act.form.comment": "Коментар до поля", "lg.act.form.file": "Завантажено файл", "lg.act.review.approve": "Перевірку OTA пройдено", "lg.act.kyc.check": "Перевірка KYC", "lg.act.change.release": "Випущено зміну", "lg.act.tpl.version": "Нова версія шаблону", "lg.act.invoice.issue": "Рахунок виставлено", "lg.act.invoice.paid": "Рахунок оплачено", "lg.act.keys.issue": "Ключі видано", "lg.act.tokens.issue": "Токени видано", "lg.act.order.place": "Замовлення оформлено", "lg.act.activation": "Активація", "lg.act.statement.confirm": "Акт звірки підтверджено", "lg.act.statement.dispute": "Рядок акта оскаржено", "lg.act.user.switch": "Зміна ролі (демо)", "lg.act.audit.export": "Експорт журналу", "lg.act.partner.signup": "Реєстрація партнера"}, "en": {"lg.act.doc.sign.partner": "Signed by partner", "lg.act.doc.sign.ota": "Signed by OTA", "lg.act.doc.issue": "Issued for signature", "lg.act.doc.view": "Viewed", "lg.act.doc.download": "PDF downloaded", "lg.act.doc.otp.sent": "Confirmation code sent", "lg.act.doc.otp.fail": "Wrong code", "lg.act.doc.ack": "Acknowledged", "lg.act.doc.archive": "Archived", "lg.act.doc.auto_effective": "Took effect automatically", "lg.act.doc.superseded": "Superseded", "lg.act.doc.decline": "Change declined", "lg.act.doc.decline.handled": "Decline handled", "lg.act.doc.kep.upload": "Qualified e-signature copy added", "lg.act.doc.boa.upload": "Brand owner letter uploaded", "lg.act.doc.reminder": "Reminder", "lg.act.doc.withdraw": "Withdrawn", "lg.act.pkg.generate": "Package generated", "lg.act.form.edit": "Questionnaire field edited", "lg.act.form.na": "Marked N/A", "lg.act.form.na.clear": "N/A cleared", "lg.act.form.submit": "Questionnaire submitted", "lg.act.form.comment": "Field comment", "lg.act.form.file": "File uploaded", "lg.act.review.approve": "OTA review approved", "lg.act.kyc.check": "KYC check", "lg.act.change.release": "Change released", "lg.act.tpl.version": "New template version", "lg.act.invoice.issue": "Invoice issued", "lg.act.invoice.paid": "Invoice paid", "lg.act.keys.issue": "Keys issued", "lg.act.tokens.issue": "Tokens issued", "lg.act.order.place": "Order placed", "lg.act.activation": "Activation", "lg.act.statement.confirm": "Statement confirmed", "lg.act.statement.dispute": "Statement line disputed", "lg.act.user.switch": "Role switch (demo)", "lg.act.audit.export": "Audit export", "lg.act.partner.signup": "Partner signup"}, "ru": {"lg.act.doc.sign.partner": "Подписано партнёром", "lg.act.doc.sign.ota": "Подписано OTA", "lg.act.doc.issue": "Выпущено на подпись", "lg.act.doc.view": "Просмотрено", "lg.act.doc.download": "Скачан PDF", "lg.act.doc.otp.sent": "Отправлен код подтверждения", "lg.act.doc.otp.fail": "Неверный код", "lg.act.doc.ack": "Ознакомлен", "lg.act.doc.archive": "Архивировано", "lg.act.doc.auto_effective": "Вступил в силу автоматически", "lg.act.doc.superseded": "Заменён новой версией", "lg.act.doc.decline": "Отказ от изменений", "lg.act.doc.decline.handled": "Отказ обработан", "lg.act.doc.kep.upload": "Добавлен экземпляр с КЭП", "lg.act.doc.boa.upload": "Загружено письмо правообладателя", "lg.act.doc.reminder": "Напоминание", "lg.act.doc.withdraw": "Отозвано", "lg.act.pkg.generate": "Пакет сформирован", "lg.act.form.edit": "Изменено поле анкеты", "lg.act.form.na": "Отмечено «не применимо»", "lg.act.form.na.clear": "Снято «не применимо»", "lg.act.form.submit": "Анкета отправлена", "lg.act.form.comment": "Комментарий к полю", "lg.act.form.file": "Загружен файл", "lg.act.review.approve": "Проверка OTA пройдена", "lg.act.kyc.check": "Проверка KYC", "lg.act.change.release": "Выпущено изменение", "lg.act.tpl.version": "Новая версия шаблона", "lg.act.invoice.issue": "Счёт выставлен", "lg.act.invoice.paid": "Счёт оплачен", "lg.act.keys.issue": "Ключи выданы", "lg.act.tokens.issue": "Токены выданы", "lg.act.order.place": "Заказ оформлен", "lg.act.activation": "Активация", "lg.act.statement.confirm": "Акт сверки подтверждён", "lg.act.statement.dispute": "Строка акта оспорена", "lg.act.user.switch": "Смена роли (демо)", "lg.act.audit.export": "Экспорт журнала", "lg.act.partner.signup": "Регистрация партнёра"}});
+
+/* ---------- strings: legal pack v10 (GCC, change of details E, 05B, publication languages, launch, first edition) ---------- */
+(function(){const R=[
+// ТЗ 1.1 — the EN message is verbatim; uk/ru are UI translations
+['gcc.msg','OTA не укладає договорів із партнерами, заснованими в державах ССАГПЗ','OTA does not contract with partners established in GCC states','OTA не заключает договоры с партнёрами, учреждёнными в странах ССАГПЗ'],
+['gcc.confirm','Підтверджую, що компанія не заснована, не є резидентом, не зареєстрована як платник ПДВ і не має постійного представництва в державах ССАГПЗ','I confirm that the company is not incorporated, resident or registered for VAT in any member state of the Gulf Cooperation Council and has no fixed establishment there','Подтверждаю, что компания не учреждена, не является резидентом, не зарегистрирована по НДС и не имеет постоянного представительства в странах ССАГПЗ'],
+['gcc.yes','Підтверджено','Confirmed','Подтверждено'],
+['f.P_TAX_COUNTRY','Країна податкової (ПДВ) реєстрації','Country of tax (VAT) registration','Страна налоговой (НДС) регистрации'],
+['f.P_GCC_CONFIRM','Заява щодо держав ССАГПЗ (п. 2.6 Рамкової угоди)','GCC representation (Master Agreement, clause 2.6)','Заверение о странах ССАГПЗ (п. 2.6 Рамочного соглашения)'],
+['h.P_TAX_COUNTRY','Якщо компанія не зареєстрована як платник ПДВ — країна податкового резидентства.','If the company has no VAT registration, the country of tax residence.','Если компания не зарегистрирована по НДС — страна налогового резидентства.'],
+['h.P_GCC_CONFIRM','Обов’язково. Якщо ситуація зміниться, повідомте OTA без затримки.','Required. Tell OTA without delay if this changes.','Обязательно. Если ситуация изменится, сообщите OTA без промедления.'],
+['h.P_TAXNO','Необов’язково. Якщо номера немає, у Рамковій угоді він просто не друкується.','Optional. If there is none, it is simply not printed in the Master Agreement.','Необязательно. Если номера нет, в Рамочном соглашении он просто не печатается.'],
+['h.OF_EXCEPTIONS_EN','Порожньо → у п. 1.5 Замовлення буде «none / нет». Якщо є винятки, заповніть обидві мови.','Empty → Order Form clause 1.5 says “none”. If there are exceptions, fill in both languages.','Пусто → в п. 1.5 Заказа будет «none / нет». Если есть исключения, заполните оба языка.'],
+['h.OF_EXCEPTIONS_L2','Той самий перелік другою мовою документів.','The same list in the second document language.','Тот же перечень на втором языке документов.'],
+['rv.ck.gcc','Не ССАГПЗ, заяву підтверджено','Not GCC, representation confirmed','Не ССАГПЗ, заверение подтверждено'],
+['e.fee','{n}: збір на країну {x}% більший за 3% — п. 3.2 Замовлення допускає не більше 3%. Виправте прайс-лист.','{n}: country fee {x}% is above 3% — Order Form clause 3.2 allows at most 3%. Fix the price list.','{n}: сбор на страну {x}% больше 3% — п. 3.2 Заказа допускает не более 3%. Исправьте прайс-лист.'],
+['e.edition','{n}: шаблон з пакета {e}, а пакет на підпис збирається лише в редакції {v}.','{n}: the template is from pack {e}; the signing package is assembled only in edition {v}.','{n}: шаблон из пакета {e}, а пакет на подпись собирается только в редакции {v}.'],
+// ТЗ 2.5 — change of details (template E)
+['bank.pending','Зміна банківських реквізитів очікує підтвердження','Bank details change pending confirmation','Смена банковских реквизитов ожидает подтверждения'],
+['bank.stSign','повідомлення {n} ще не підписано. Платежі йдуть за попередніми реквізитами.','notice {n} is not signed yet. Payments use the previous details.','уведомление {n} ещё не подписано. Платежи идут по прежним реквизитам.'],
+['bank.stCall','повідомлення {n} підписано, чекаємо зворотного дзвінка OTA Finance. Платежі йдуть за попередніми реквізитами.','notice {n} is signed; waiting for the OTA Finance call-back. Payments use the previous details.','уведомление {n} подписано, ждём обратного звонка OTA Finance. Платежи идут по прежним реквизитам.'],
+['bank.rule','Нові банківські реквізити діють лише після підпису повідомлення уповноваженим підписантом з одноразовим кодом і зворотного дзвінка OTA контактній особі з попередніх реквізитів. До того всі платежі — за попередніми реквізитами.','New bank details apply only after the notice is signed by the authorised signatory with a one-time code and OTA calls back a contact person from the previous details. Until then all payments use the previous details.','Новые банковские реквизиты действуют только после подписи уведомления уполномоченным подписантом с одноразовым кодом и обратного звонка OTA контактному лицу из прежних реквизитов. До этого все платежи — по прежним реквизитам.'],
+['bank.notice','Повідомлення','Notice','Уведомление'],['bank.step1','1. Підпис з кодом','1. Signed with code','1. Подпись с кодом'],['bank.step2','2. Зворотний дзвінок','2. Call-back','2. Обратный звонок'],
+['bank.signedAt','підписано {d}','signed {d}','подписано {d}'],['bank.waitSign','чекає підпису','awaiting signature','ждёт подписи'],['bank.waitCall','чекає дзвінка OTA Finance','awaiting OTA Finance call-back','ждёт звонка OTA Finance'],
+['bank.prevContact','Контакт із попередніх реквізитів','Contact on record (previous details)','Контакт из прежних реквизитов'],['bank.inForce','Діють зараз','In force now','Действуют сейчас'],['bank.new','Нові (після підтвердження)','New (after confirmation)','Новые (после подтверждения)'],
+['bank.phone','Номер, на який телефонували','Number called','Номер, по которому звонили'],['bank.phoneH','Лише номер із попередніх реквізитів — не з повідомлення.','Only a number from the previous details — never one from the notice.','Только номер из прежних реквизитов — не из уведомления.'],
+['bank.contact','З ким говорили','Person spoken to','С кем говорили'],['bank.contactH','ПІБ контактної особи партнера.','Name of the partner’s contact person.','ФИО контактного лица партнёра.'],
+['bank.confirm','Зміну підтверджено дзвінком','Change confirmed by call-back','Изменение подтверждено звонком'],['bank.fail','Не підтверджено','Not confirmed','Не подтверждено'],
+['bank.finOnly','Зворотний дзвінок відмічає фінансист OTA.','The call-back is recorded by OTA Finance.','Обратный звонок отмечает финансист OTA.'],
+['bank.hist','Журнал змін банківських реквізитів','Bank details change log','Журнал смены банковских реквизитов'],['bank.hConf','підтверджено','confirmed','подтверждено'],['bank.hRej','не підтверджено','not confirmed','не подтверждено'],
+['bank.called','дзвінок на {p}','called {p}','звонок на {p}'],['bank.phoneReq','Оберіть номер із попередніх реквізитів','Choose the number from the previous details','Выберите номер из прежних реквизитов'],['bank.contactReq','Вкажіть, з ким говорили','Enter who you spoke to','Укажите, с кем говорили'],
+['bank.taskD','Повідомлення {n} підписано — зателефонуйте контактній особі з попередніх реквізитів','Notice {n} is signed — call the contact from the previous details','Уведомление {n} подписано — позвоните контактному лицу из прежних реквизитов'],
+['t.cbOk','Банківські реквізити оновлено після дзвінка ({n})','Bank details updated after call-back ({n})','Банковские реквизиты обновлены после звонка ({n})'],
+['t.cbFail','Зміну не підтверджено — діють попередні реквізити','Change not confirmed — the previous details stay in force','Изменение не подтверждено — действуют прежние реквизиты'],
+['chg.pending','Попереднє повідомлення про зміну реквізитів ще не завершено.','The previous change-of-details notice isn’t completed yet.','Предыдущее уведомление об изменении реквизитов ещё не завершено.'],
+['chg.reqD','Ми підготуємо Повідомлення про зміну реквізитів (шаблон E). Його підписує уповноважений підписант з одноразовим кодом. Раніше підписані документи не переоформлюються.','We’ll prepare a Notice of Change of Details (template E). Your authorised signatory signs it with a one-time code. Documents signed earlier are not reissued.','Мы подготовим Уведомление об изменении реквизитов (шаблон E). Его подписывает уполномоченный подписант с одноразовым кодом. Ранее подписанные документы не переоформляются.'],
+['chg.control','Зміна контролю — не зміна реквізитів: вона проходить за процедурою Рамкової угоди.','A change of control is not a change of details — it follows the Master Agreement procedure.','Смена контроля — не смена реквизитов: она проходит по процедуре Рамочного соглашения.'],
+['chg.proof','Виписка з реєстру або довіреність','Register extract or power of attorney','Выписка из реестра или доверенность'],
+['chg.proofH','Обов’язково, якщо змінюється назва, форма, реєстраційний номер або підписант.','Required if the name, legal form, registration number or signatory changes.','Обязательно, если меняется наименование, форма, регистрационный номер или подписант.'],
+['chg.proofReq','Завантажте виписку або довіреність','Upload the extract or power of attorney','Загрузите выписку или доверенность'],
+['chg.send','Підготувати повідомлення','Prepare the notice','Подготовить уведомление'],
+['t.chgSent','Повідомлення {n} готове — його має підписати підписант','Notice {n} is ready for the signatory','Уведомление {n} готово — его должен подписать подписант'],
+['chg.toSign','Повідомлення про зміну реквізитів {n} чекає підпису.','Change-of-details notice {n} is waiting for signature.','Уведомление об изменении реквизитов {n} ждёт подписи.'],
+// ТЗ 2.7 — 05B
+['boa.d2','Лист підписує власник бренду (третя особа): надішліть йому посилання для підпису з одноразовим кодом або завантажте скан із підписом.','The brand owner (a third party) signs this letter: send them a signing link with a one-time code, or upload the signed scan.','Письмо подписывает правообладатель (третье лицо): отправьте ему ссылку для подписи с одноразовым кодом или загрузите скан с подписью.'],
+['boa.prevStays','Поки новий лист не підписано, діє попередній лист {n}.','Until the new letter is signed, the previous letter {n} stays in force.','Пока новое письмо не подписано, действует предыдущее письмо {n}.'],
+['boa.linkBtn','Надіслати посилання власнику','Send link to the owner','Отправить ссылку правообладателю'],['boa.linkAgain','Надіслати ще раз','Send again','Отправить ещё раз'],
+['boa.linkSent','Посилання надіслано на {e} · {d}','Link sent to {e} · {d}','Ссылка отправлена на {e} · {d}'],['boa.ownerOpen','Відкрити посилання власника','Open the owner’s link','Открыть ссылку правообладателя'],
+['boa.linkT','Посилання для підпису власником бренду','Signing link for the brand owner','Ссылка для подписи правообладателем'],['boa.linkD','Власник бренду ({n}) відкриє лист за посиланням і підпише його з одноразовим кодом на свою пошту.','The brand owner ({n}) opens the letter from the link and signs it with a one-time code sent to their e-mail.','Правообладатель ({n}) откроет письмо по ссылке и подпишет его одноразовым кодом на свою почту.'],
+['boa.ownerEmail','Пошта власника бренду','Brand owner’s e-mail','Почта правообладателя'],['boa.linkSend','Надіслати','Send','Отправить'],
+['boa.ownerT','Підпис власника бренду','Brand owner signature','Подпись правообладателя'],['boa.ownerDemo','Демо: так бачить сторінку власник бренду за посиланням.','Demo: this is what the brand owner sees from the link.','Демо: так видит страницу правообладатель по ссылке.'],['boa.ownerSign','Підписати лист','Sign the letter','Подписать письмо'],
+['boa.signedOwner','Підписано власником бренду','Signed by the brand owner','Подписано правообладателем'],
+['boa.chgD','Зміна листа = новий лист, підписаний власником бренду. Відкликання листа власником — повідомлення юристу OTA.','A change = a new letter signed by the brand owner. Revocation by the owner = a notice to OTA Legal.','Изменение = новое письмо, подписанное правообладателем. Отзыв письма правообладателем — уведомление юристу OTA.'],
+['boa.newBtn','Новий лист (зміна)','New letter (change)','Новое письмо (изменение)'],['boa.newPending','Новий лист уже чекає підпису власника','A new letter is already waiting for the owner’s signature','Новое письмо уже ждёт подписи правообладателя'],
+['boa.revBtn','Власник відкликав лист','Owner revoked the letter','Правообладатель отозвал письмо'],['boa.revNote','Що повідомив власник','What the owner said','Что сообщил правообладатель'],['boa.revFile','Лист про відкликання (якщо є)','Revocation letter (if any)','Письмо об отзыве (если есть)'],['boa.revSend','Зафіксувати й повідомити OTA','Record and notify OTA','Зафиксировать и уведомить OTA'],
+['boa.revRule','Ліцензія на бренд припиняється за п. 3 Рамкової угоди.','The brand licence ends under clause 3 of the Master Agreement.','Лицензия на бренд прекращается по п. 3 Рамочного соглашения.'],
+['boa.revoked','Лист відкликано {d} ({b}). Юриста OTA повідомлено.','Letter revoked on {d} ({b}). OTA Legal was notified.','Письмо отозвано {d} ({b}). Юрист OTA уведомлён.'],
+['boa.revT','Відкликання листа власника бренду (05B)','Brand owner letter revoked (05B)','Отзыв письма правообладателя (05B)'],['boa.revB','до юриста OTA','for OTA Legal','юристу OTA'],
+['t.boaNew','Новий лист {n} випущено — надішліть посилання власнику','New letter {n} issued — send the link to the owner','Новое письмо {n} выпущено — отправьте ссылку правообладателю'],
+['t.boaLink','Посилання надіслано на {e}','Link sent to {e}','Ссылка отправлена на {e}'],['t.boaSigned','Лист {n} підписано власником бренду · {id}','Letter {n} signed by the brand owner · {id}','Письмо {n} подписано правообладателем · {id}'],
+['t.boaRev','Відкликання зафіксовано, юриста OTA повідомлено','Revocation recorded, OTA Legal notified','Отзыв зафиксирован, юрист OTA уведомлён'],
+// ТЗ 3.3 — change class
+['cls.choose','Клас зміни (обирає юрист OTA за змістом)','Change class (OTA Legal chooses by content)','Класс изменения (выбирает юрист OTA по содержанию)'],
+['cls.hint','A — зміна зменшує права партнера або збільшує його обов’язки: потрібен підпис (п. 16.5(b)). B — зміна вимагається законом, регулятором, платіжними системами або постачальником: набирає чинності через 30 днів.','A — the change reduces the partner’s rights or increases its obligations: signature needed (clause 16.5(b)). B — required by law, a regulator, payment schemes or a supplier: effective after 30 days.','A — изменение уменьшает права партнёра или увеличивает его обязанности: нужна подпись (п. 16.5(b)). B — изменение требуется законом, регулятором, платёжными системами или поставщиком: вступает в силу через 30 дней.'],
+['cls.r.A.w','Будь-яка зміна, що зменшує права партнера або збільшує його обов’язки (за змістом, не за типом документа); нова версія Замовлення з цінами','Any change that reduces the partner’s rights or increases its obligations (by content, not by document type); new Order Form version with prices','Любое изменение, которое уменьшает права партнёра или увеличивает его обязанности (по содержанию, а не по типу документа); новая версия Заказа с ценами'],
+['cls.r.B.w','Зміни на вимогу закону, регулятора, платіжних систем або постачальника','Changes required by law, a regulator, payment schemes or a supplier','Изменения по требованию закона, регулятора, платёжных систем или поставщика'],
+['cls.r.B.t','30 днів','30 days','30 дней'],
+['tp.effB','Клас B — не раніше ніж через 30 днів','Class B — no sooner than 30 days','Класс B — не раньше чем через 30 дней'],['tp.effA','Клас A — не раніше ніж через 30 днів','Class A — no sooner than 30 days','Класс A — не раньше чем через 30 дней'],
+// ТЗ part 5 — first edition
+['pkg.edition','Пакет {v}','Pack {v}','Пакет {v}'],
+['first.note','Редакція {v} — перша для всіх: пакет підписується одразу в {v}, Замовлення v1 без абзацу про заміну, класів змін і повідомлень ще немає.','Edition {v} is the first for everyone: the package is signed directly in {v}, Order Form v1 has no “replaces” paragraph, there are no change classes or notices yet.','Редакция {v} — первая для всех: пакет подписывается сразу в {v}, Заказ v1 без абзаца о замене, классов изменений и уведомлений пока нет.'],
+['first.tpl','Пакет ще ніхто не підписав: редакція {v} — перша. Новий текст просто оновлює шаблон — без класу, повідомлень і 30 днів. Випущені, але не підписані документи повернуться в чернетку з тими самими номерами.','Nobody has signed the package yet: edition {v} is the first. The new text just updates the template — no class, notices or 30 days. Issued but unsigned documents return to draft with the same numbers.','Пакет ещё никто не подписал: редакция {v} — первая. Новый текст просто обновляет шаблон — без класса, уведомлений и 30 дней. Выпущенные, но не подписанные документы вернутся в черновик с теми же номерами.'],
+['first.pub','Документи 07/08 ще не опубліковані: редакція {v} — перша, публікація буде версією 1.0 без повідомлень.','Documents 07/08 are not published yet: edition {v} is the first; publication will be version 1.0 without notices.','Документы 07/08 ещё не опубликованы: редакция {v} — первая, публикация будет версией 1.0 без уведомлений.'],
+['first.rel','Перша редакція: повідомлень і нових версій документів не буде.','First edition: no notices and no new document versions.','Первая редакция: уведомлений и новых версий документов не будет.'],
+// ТЗ 3.4 — publication languages
+['pub.d2','Документи 07 і 08 публікуються мовами країни: Україна — українська; Казахстан — казахська і російська. Поки немає всіх обов’язкових мов, публікація для країни заблокована. Перша публікація — версія 1.0.','Documents 07 and 08 are published in the country’s languages: Ukraine — Ukrainian; Kazakhstan — Kazakh and Russian. Until every mandatory language exists, publishing for the country is blocked. First publication is version 1.0.','Документы 07 и 08 публикуются на языках страны: Украина — украинский; Казахстан — казахский и русский. Пока нет всех обязательных языков, публикация для страны заблокирована. Первая публикация — версия 1.0.'],
+['pub.blocked','Публікацію для країни «{c}» заблоковано: документи 07 і 08 мають бути всіма обов’язковими мовами ({req}). Бракує: {m}. Завантажте професійний переклад.','Publishing for {c} is blocked: Documents 07 and 08 must exist in every mandatory language ({req}). Missing: {m}. Upload the professional translation.','Публикация для страны «{c}» заблокирована: документы 07 и 08 должны быть на всех обязательных языках ({req}). Не хватает: {m}. Загрузите профессиональный перевод.'],
+['pub.blockedT','Публікацію заблоковано','Publishing blocked','Публикация заблокирована'],
+['pub.curV','опубліковано v{v}','published v{v}','опубликовано v{v}'],['pub.avTpl','текст у шаблоні','text in template','текст в шаблоне'],['pub.avFile','професійний переклад','professional translation','профессиональный перевод'],['pub.avMiss','немає тексту','no text','нет текста'],
+['pub.trUp','Завантажити переклад','Upload translation','Загрузить перевод'],['pub.req','обов’язково: {l}','mandatory: {l}','обязательно: {l}'],['pub.doneB','07 і 08 опубліковано','07 and 08 published','07 и 08 опубликованы'],
+['pub.goCountry','Опублікувати 07 і 08','Publish 07 and 08','Опубликовать 07 и 08'],['pub.firstEd','перша редакція','first edition','первая редакция'],['pub.hist','Версії публікацій','Published versions','Версии публикаций'],
+['pub.trView','Мова «{l}»: професійний переклад у файлі {f} (у демо файл не показується). Нижче — англійський текст для довідки.','{l}: professional translation in file {f} (the demo doesn’t display the file). The English text is shown below for reference.','Язык «{l}»: профессиональный перевод в файле {f} (в демо файл не показывается). Ниже — английский текст для справки.'],
+['t.trUp','Переклад {f} завантажено','Translation {f} uploaded','Перевод {f} загружен'],['t.pubCountry','{c}: опубліковано {n} док.','{c}: {n} documents published','{c}: опубликовано {n} док.'],
+// part 6 — launch for end users
+['ln.title','Запуск для кінцевих користувачів','Launch for end users','Запуск для конечных пользователей'],
+['ln.d','Країна відкривається для покупців, коли пакет підписано, 07 і 08 опубліковано всіма обов’язковими мовами і OTA увімкнула технічний прапорець країни.','A country opens to buyers once the package is signed, 07 and 08 are published in every mandatory language and OTA turns on the country’s technical flag.','Страна открывается для покупателей, когда пакет подписан, 07 и 08 опубликованы на всех обязательных языках и OTA включила технический флаг страны.'],
+['ln.yes','так','yes','да'],['ln.no','ні','no','нет'],['ln.pubOk','{l}','{l}','{l}'],['ln.pubMiss','бракує: {l}','missing: {l}','не хватает: {l}'],['ln.pubNot','не опубліковано','not published','не опубликовано'],
+['ln.flagOn','увімкнено','on','включён'],['ln.flagOff','вимкнено','off','выключен'],['ln.flagNa','не задано в даних OTA','not set in OTA data','не задан в данных OTA'],['ln.open','відкрито','open','открыта'],['ln.closed','закрито','closed','закрыта'],
+['ln.pkg','Пакет підписано','Package signed','Пакет подписан'],['ln.pub','07 / 08','07 / 08','07 / 08'],['ln.flagHow','Прапорець задається для кожної країни в «Дані OTA».','The flag is set per country in “OTA data”.','Флаг задаётся для каждой страны в «Данные OTA».'],
+// ТЗ 2.9 — sub-processor notices
+['sp.title','Повідомлення про субобробників','Sub-processor notices','Уведомления о субобработчиках'],['sp.noSign','без підпису','no signature','без подписи'],
+['sp.d','Зміна переліку субобробників (Документ 06, п. 5.1) — повідомлення всім партнерам за 30 днів, підписувати не потрібно.','A change of the sub-processor list (Document 06, clause 5.1) is notified to all partners 30 days ahead; no signature needed.','Изменение списка субобработчиков (Документ 06, п. 5.1) — уведомление всем партнёрам за 30 дней, подписывать не нужно.'],
+['sp.change','Зміна переліку субобробників','Sub-processor list change','Изменение списка субобработчиков'],
+];const o={uk:{},en:{},ru:{}};R.forEach(([k,uk,en,ru])=>{o.uk['lg.'+k]=uk;o.en['lg.'+k]=en;o.ru['lg.'+k]=ru;});
+const A={'details.notice':['Повідомлення про зміну реквізитів','Change-of-details notice','Уведомление об изменении реквизитов'],'details.apply':['Реквізити оновлено','Details updated','Реквизиты обновлены'],'details.proof':['Завантажено виписку / довіреність','Extract / POA uploaded','Загружена выписка / доверенность'],
+ 'details.bank.pending':['Зміна банківських реквізитів (очікує)','Bank details change (pending)','Смена банковских реквизитов (ожидает)'],'details.bank.signed':['Повідомлення про банк підписано','Bank change notice signed','Уведомление о банке подписано'],
+ 'details.bank.callback':['Зворотний дзвінок: підтверджено','Call-back: confirmed','Обратный звонок: подтверждено'],'details.bank.callback_failed':['Зворотний дзвінок: не підтверджено','Call-back: not confirmed','Обратный звонок: не подтверждено'],
+ 'doc.boa.link':['Посилання власнику бренду','Link to brand owner','Ссылка правообладателю'],'doc.sign.owner':['Підписано власником бренду','Signed by brand owner','Подписано правообладателем'],'doc.boa.new':['Новий лист 05B','New 05B letter','Новое письмо 05B'],'doc.boa.revoke':['Лист 05B відкликано','05B letter revoked','Письмо 05B отозвано'],
+ 'notice.handled':['Повідомлення опрацьовано','Notice handled','Уведомление обработано'],'pub.translation.upload':['Завантажено переклад 07/08','07/08 translation uploaded','Загружен перевод 07/08'],'pub.blocked':['Публікацію заблоковано (мови)','Publishing blocked (languages)','Публикация заблокирована (языки)'],
+ 'tpl.release.first':['Шаблон оновлено (перша редакція)','Template updated (first edition)','Шаблон обновлён (первая редакция)'],'doc.reissue_required':['Документ повернуто в чернетку','Document returned to draft','Документ возвращён в черновик'],'form.gcc_block':['Відмова: держава ССАГПЗ','Blocked: GCC state','Отказ: страна ССАГПЗ']};
+Object.keys(A).forEach(k=>{o.uk['lg.act.'+k]=A[k][0];o.en['lg.act.'+k]=A[k][1];o.ru['lg.act.'+k]=A[k][2];});I18N.add(o);})();
+(function(){const R=[
+['e.plcap','Версію не випущено: підвищення перевищує 10% за будь-які 12 місяців (п. 9.1).','Version not issued: the increase exceeds 10% in any rolling 12 months (clause 9.1).','Версия не выпущена: повышение превышает 10% за любые 12 месяцев (п. 9.1).'],
+['e.plnotice','Версію не випущено: підвищення діє раніше ніж через 90 днів після повідомлення (п. 9.1).','Version not issued: the increase takes effect less than 90 days after notice (clause 9.1).','Версия не выпущена: повышение вступает в силу раньше чем через 90 дней после уведомления (п. 9.1).'],
+['oft.title','Розірвання Замовлення по країні','Order Form terminated for a country','Расторжение Заказа по стране'],
+['oft.row','{c}: Замовлення {n} розірвано партнером','{c}: Order Form {n} terminated by the partner','{c}: Заказ {n} расторгнут партнёром'],
+['oft.d','Замість підписання нової версії з цінами. Нові замовлення ключів і токенів для країни закрито.','Instead of signing the new price version. New key and token orders for the country are closed.','Вместо подписания новой версии с ценами. Новые заказы ключей и токенов для страны закрыты.'],
+['oft.badge','Розірвано (повідомлення)','Terminated (notice)','Расторгнут (уведомление)'],
+['oft.btn','Розірвати Замовлення по країні «{c}»','Terminate the Order Form for {c}','Расторгнуть Заказ по стране «{c}»'],
+['oft.btnD','Замість підписання нової версії ви можете розірвати Замовлення цієї країни — OTA отримає повідомлення.','Instead of signing the new version you may terminate this country’s Order Form — OTA receives a notice.','Вместо подписания новой версии вы можете расторгнуть Заказ этой страны — OTA получит уведомление.'],
+['oft.q','Замовлення для країни «{c}» буде розірвано, нові замовлення ключів і токенів для неї закриються. OTA отримає повідомлення.','The Order Form for {c} will be terminated and new key and token orders for it will close. OTA receives a notice.','Заказ для страны «{c}» будет расторгнут, новые заказы ключей и токенов для неё закроются. OTA получит уведомление.'],
+['oft.go','Розірвати й повідомити OTA','Terminate and notify OTA','Расторгнуть и уведомить OTA'],['oft.done','Замовлення по країні «{c}» розірвано, OTA повідомлено','Order Form for {c} terminated, OTA notified','Заказ по стране «{c}» расторгнут, OTA уведомлён'],
+];const o={uk:{},en:{},ru:{}};R.forEach(([k,uk,en,ru])=>{o.uk['lg.'+k]=uk;o.en['lg.'+k]=en;o.ru['lg.'+k]=ru;});
+o.uk['lg.act.doc.terminate']='Документ розірвано';o.en['lg.act.doc.terminate']='Document terminated';o.ru['lg.act.doc.terminate']='Документ расторгнут';
+o.uk['lg.act.change.refused']='Версію Замовлення відхилено (п. 9.1)';o.en['lg.act.change.refused']='Order Form version refused (cl. 9.1)';o.ru['lg.act.change.refused']='Версия Заказа отклонена (п. 9.1)';I18N.add(o);})();

@@ -5,8 +5,8 @@
   "en": "Data Protection Addendum",
   "ru": "Соглашение о защите данных"
  },
- "ver": "T-DPA-v3",
- "effective": "2026-11-06",
+ "ver": "T-DPA-v10",
+ "effective": "2026-11-07",
  "cls": "A",
  "blocks": [
   {
@@ -150,8 +150,8 @@
   {
    "id": "DPA-3.1",
    "kind": "clause",
-   "en": "3.1 OTA makes available to Partner in the cabinet: the End User's name and contact details, device identifiers, Service Plan status and expiry date, and support history, for: (a) device support and warranty; (b) renewal reminders and offers; (c) Partner's own marketing.",
-   "ru": "3.1 OTA предоставляет Партнёру в кабинете: имя и контактные данные Конечного пользователя, идентификаторы устройства, статус и срок Тарифного плана, историю обращений – для: (a) поддержки устройств и гарантии; (b) напоминаний о продлении и предложений; (c) собственного маркетинга Партнёра."
+   "en": "3.1 OTA makes available to Partner in the cabinet: the End User's name and contact details, device identifiers, binding and transfer events of devices sold by Partner, Service Plan status and expiry date, and support history, for: (a) device support and warranty; (b) renewal reminders and offers; (c) Partner's own marketing.",
+   "ru": "3.1 OTA предоставляет Партнёру в кабинете: имя и контактные данные Конечного пользователя, идентификаторы устройства, события привязки и передачи проданных Партнёром устройств, статус и срок Тарифного плана, историю обращений – для: (a) поддержки устройств и гарантии; (b) напоминаний о продлении и предложений; (c) собственного маркетинга Партнёра."
   },
   {
    "id": "DPA-3.2",
@@ -164,6 +164,18 @@
    "kind": "clause",
    "en": "3.3 Each controller is responsible for its own notices, legal bases, requests of data subjects, security and breach notifications for its own processing, and forwards to the other Party within five (5) business days any request relating to the other Party's processing.",
    "ru": "3.3 Каждый контролёр отвечает за свои уведомления, правовые основания, запросы субъектов данных, безопасность и уведомления об инцидентах по своей обработке и в течение пяти (5) рабочих дней пересылает другой Стороне запросы, относящиеся к её обработке."
+  },
+  {
+   "id": "DPA-3.4",
+   "kind": "clause",
+   "en": "3.4 Dealers and installers. Partner may give its dealers and installers access to the cabinet; they act on behalf of Partner and Partner is responsible for them as for itself. Their access is limited by OTA's role settings to the technical status of the devices they sold or installed (bound or not, online or offline, installation test results); they do not receive location data or device events. Partner ensures that they keep the data confidential, use it only for installation and support, and that their access is revoked when they stop working with Partner. OTA keeps access logs.",
+   "ru": "3.4 Дилеры и монтажники. Партнёр вправе предоставить доступ к кабинету своим дилерам и монтажникам; они действуют от имени Партнёра, и Партнёр отвечает за них как за себя. Их доступ ограничен ролевыми настройками OTA техническим статусом проданных или установленных ими устройств (привязано или нет, в сети или нет, результаты проверки установки); данные о местоположении и события устройства они не получают. Партнёр обеспечивает, чтобы они сохраняли конфиденциальность данных, использовали их только для установки и поддержки и чтобы их доступ отзывался при прекращении сотрудничества с Партнёром. OTA ведёт журналы доступа."
+  },
+  {
+   "id": "DPA-3.5",
+   "kind": "clause",
+   "en": "3.5 Change of owner. When a device is transferred to a new Owner (End User Terms, clause 3.5), the cabinet shows the new Owner's data from the transfer date; the previous Owner's data remains available to Partner only to the extent needed for its own sale, warranty and accounting records. In an ownership dispute, each Party discloses to the other only the data needed to resolve it.",
+   "ru": "3.5 Смена владельца. При передаче устройства новому Владельцу (Условия для пользователей, п. 3.5) кабинет показывает данные нового Владельца с даты передачи; данные прежнего Владельца остаются доступными Партнёру только в объёме, необходимом для его собственных записей о продаже, гарантии и учёте. При споре о владении каждая Сторона раскрывает другой только данные, необходимые для его разрешения."
   },
   {
    "id": "DPA-s4",
@@ -499,8 +511,8 @@
       "bi": true
      },
      {
-      "en": "Role-based access, least privilege, multi-factor authentication for administrators, quarterly access review",
-      "ru": "Ролевой доступ, минимально необходимые права, многофакторная аутентификация администраторов, ежеквартальный пересмотр доступа",
+      "en": "Role-based access, least privilege, multi-factor authentication for administrators, quarterly access review; one-time-code login for End Users; limited roles for dealers and installers (no location or events)",
+      "ru": "Ролевой доступ, минимально необходимые права, многофакторная аутентификация администраторов, ежеквартальный пересмотр доступа; вход Конечных пользователей по одноразовому коду; ограниченные роли для дилеров и монтажников (без местоположения и событий)",
       "bi": true
      }
     ],
@@ -513,6 +525,18 @@
      {
       "en": "TLS 1.2 or higher in transit; encryption of databases and backups at rest",
       "ru": "TLS 1.2 и выше при передаче; шифрование баз данных и резервных копий при хранении",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Binding and codes",
+      "ru": "Привязка и коды",
+      "bi": true
+     },
+     {
+      "en": "One binding per ICCID; rate limiting and lockout on ICCID and activation code entry; activation codes stored as hashes; OTP confirmation and security delay for transfers; notification of the Owner on any reset",
+      "ru": "Одна привязка на ICCID; ограничение частоты и блокировка при вводе ICCID и кодов активации; коды активации хранятся в виде хешей; подтверждение OTP и защитная задержка при передаче; уведомление Владельца о любом снятии привязки",
       "bi": true
      }
     ],

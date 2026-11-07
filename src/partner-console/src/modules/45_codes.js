@@ -275,6 +275,7 @@ function cx_simActModal(preIccid){const mm={};allModels().forEach(x=>{mm[x.model
  const sims=S.sims.filter(s=>s.status==='active'&&!s.plan);const shown=sims.slice(0,300);if(preIccid&&!shown.some(s=>s.iccid===preIccid)){const ps=sims.find(s=>s.iccid===preIccid);if(ps)shown.unshift(ps);}
  const simOpts=shown.map(s=>{const x=mm[s.modelId];return [s.iccid,'···'+s.iccid.slice(-6)+' · '+(x?x.model.name+' ('+(x.model.plan?PLAN_NAME[x.model.plan]:'—')+')':'—')];});
  modal(t('cod.a.title'),`<form id="cx_actF" data-form="cx_act" class="stack" novalidate>${ui.note('admin',t('cod.a.demoNote'))}
+  <div class="field"><span class="lbl">${t('cx.via')}</span><div class="radio-cards"><label class="rc"><span class="row g8"><input type="radio" name="cx_via" value="token" checked><b>${t('cx.via.token')}</b></span><span class="xs muted">${t('cx.via.tokenD')}</span></label><label class="rc"><span class="row g8"><input type="radio" name="cx_via" value="sub"><b>${t('cx.via.sub')}</b></span><span class="xs muted">${t('cx.via.subD')}</span></label></div></div>
   ${ui.field({id:'cx_ac',label:t('cod.a.code'),type:'select',options:[['',codes.length?t('cod.a.pick'):t('cod.a.noAssigned')]].concat(codes.map(c=>{const r=cx_res(c.reseller);return [c.code,fmtCode(c.code)+' · '+pkgLabel(c.plan,c.term)+(r?' · '+r.name:'')];}))})}
   ${ui.field({id:'cx_ap',label:t('cod.a.paste'),mono:true,placeholder:S.org?S.org.prefix+'4-XXXX-XXXX-XXXX':'',attrs:'autocomplete="off" spellcheck="false" maxlength="24"',hint:t('cod.a.pasteHint')})}
   ${simOpts.length?ui.field({id:'cx_as',label:t('cod.a.sim'),type:'select',value:preIccid||'',options:simOpts,hint:t('cod.a.simHint',{n:fmtNum(sims.length)})}):ui.note('warn',t('cod.a.noSims'))}
@@ -290,14 +291,25 @@ function cx_tryActivate(raw,iccid){
  if(s.plan)return{err:t('cod.e.simHasPkg',{p:esc(pkgLabel(s.plan,s.term))})};
  const x=findModel(s.modelId);if(!x||x.model.planStatus!=='approved'||!x.model.plan)return{err:t('cod.e.notApproved',{m:esc(x?x.model.name:'—')})};
  if(x.model.plan!==c.plan)return{err:t('cod.e.plan',{c:PLAN_NAME[c.plan],m:esc(x.model.name),mp:PLAN_NAME[x.model.plan]})};
- const k=pkgKey(c.plan,c.term);const needKey=!s.keyLotId&&!deviceKeyed(s.imei);
- if(needKey&&keysAvail()<=0)return{err:t('cx.e.noKey'),credits:true};
- if(tokensAvail(k)<=0)return{err:t('cod.e.credits',{p:esc(pkgLabel(c.plan,c.term))})+(tokenStats(k).expired?' '+t('cx.e.expiredToo'):''),credits:true};
- const ts=now();const lot=consumeToken(k);c.lotId=lot?lot.id:null;if(needKey){const kl=consumeKey();s.keyLotId=kl?kl.id:null;}c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
- audit('activation',fmtCode(c.code),{iccid:s.iccid,imei:s.imei,token:k,key:needKey});
- s.plan=c.plan;s.term=c.term;s.code=c.code;const until=new Date(ts.getTime());until.setMonth(until.getMonth()+c.term);s.paidUntil=iso(until);s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'package']);
+ const k=pkgKey(c.plan,c.term);
+ // ТЗ v10 3.1: the key is consumed at activation; the plan comes from the Service Token of this code (or from a Direct Subscription — see cx_trySub)
+ const r=deviceActivate(s,{via:'token',code:c});
+ if(r.err==='no_key')return{err:t('cx.e.noKey'),credits:true};
+ if(r.err==='no_token')return{err:t('cod.e.credits',{p:esc(pkgLabel(c.plan,c.term))})+(tokenStats(k).expired?' '+t('cx.e.expiredToo'):''),credits:true};
+ if(r.err)return{err:t('cod.e.invalid')};
  log(t('cod.a.log',{c:fmtCode(c.code),p:pkgLabel(c.plan,c.term),s:fmtIccid(s.iccid)}));return{ok:true,c,s};}
+// demo: the end user pays a Direct Subscription by card on the portal (OTA = seller) → activation without a Service Token; no key → rejected
+function cx_trySub(iccid){const s=S.sims.find(x=>x.iccid===iccid);if(!s)return{err:t('cod.e.noSim')};if(s.status!=='active')return{err:t('cod.e.simInactive')};
+ if(s.plan)return{err:t('cod.e.simHasPkg',{p:esc(pkgLabel(s.plan,s.term))})};
+ const x=findModel(s.modelId);if(!x||x.model.planStatus!=='approved'||!x.model.plan)return{err:t('cod.e.notApproved',{m:esc(x?x.model.name:'—')})};
+ const needKey=!s.keyLotId&&!deviceKeyed(s.imei);if(needKey&&keysAvail()<=0)return{err:t('cx.e.noKey'),credits:true};
+ const sub=subActive(s)||subCreate(s,x.model.plan);const r=deviceActivate(s,{via:'subscription',sub});
+ if(r.err==='no_key')return{err:t('cx.e.noKey'),credits:true};if(r.err)return{err:t('cod.e.invalid')};
+ log(t('cx.sub.log',{p:PLAN_NAME[sub.plan],s:fmtIccid(s.iccid)}));return{ok:true,s,sub};}
 FORM.cx_act=f=>{const d=formData(f);const raw=String(d.cx_ap||'').trim()||d.cx_ac;const out=$('#cx_actRes');
+ const via=(f.querySelector('input[name=cx_via]:checked')||{}).value||'token';
+ if(via==='sub'){const r=cx_trySub(d.cx_as);if(r.err){out.innerHTML=ui.note('bad',`<b>${t('cod.e.title')}</b><br>${r.err}${r.credits?`<br><a href="#order-new">${t('cod.e.topUp')} →</a>`:''}`);return;}
+  closeOverlay();toast(t('cx.sub.toast',{s:'···'+r.s.iccid.slice(-6),p:PLAN_NAME[r.sub.plan]}));rerender();return;}
  if(!raw){out.innerHTML=ui.note('warn',t('cod.e.none'));return;}
  const r=cx_tryActivate(raw,d.cx_as);
  if(r.err){out.innerHTML=ui.note('bad',`<b>${t('cod.e.title')}</b><br>${r.err}${r.credits?`<br><a href="#order-new">${t('cod.e.topUp')} →</a>`:''}`);return;}
@@ -383,3 +395,20 @@ ru:{'cx.nav':'Коды активации','cx.title':'Коды активаци
 ['cat.priceNote','ціна сервісного токена на один пристрій, USD без ПДВ','price of one Service Token for one device, USD net','цена сервисного токена на одно устройство, USD без НДС'],['cat.cPrice','Ціна токена','Token price','Цена токена'],['cat.cTerm','Термін','Term','Срок'],['cat.indiv','ціна змінена','custom price','цена изменена'],
 ['cat.reviewNote','Ми перевіряємо цей пристрій, щоб призначити тариф (Light, Standard або Premium). Зазвичай це займає до 1 робочого дня. Список IMEI можна завантажити вже зараз.','We are checking this device to assign a plan (Light, Standard or Premium). This usually takes up to 1 business day. You can upload the IMEI list already.','Мы проверяем это устройство, чтобы назначить тариф (Light, Standard или Premium). Обычно это занимает до 1 рабочего дня. Список IMEI можно загрузить уже сейчас.'],
 ];const o={uk:{},en:{},ru:{}};R.forEach(([k,uk,en,ru])=>{o.uk[k]=uk;o.en[k]=en;o.ru[k]=ru;});I18N.add(o);})();
+I18N.add({uk:{'cx.via':'Звідки тариф','cx.via.token':'Код активації (сервісний токен)','cx.via.tokenD':'Списується 1 токен пакета коду і, якщо пристрій новий, 1 ключ активації.','cx.via.sub':'Пряма підписка','cx.via.subD':'Покупець оплачує карткою на порталі, продавець — OTA. Токен не потрібен, ключ активації списується.','cx.sub.log':'Активація за прямою підпискою {p}: SIM {s}','cx.sub.toast':'SIM {s}: активовано за прямою підпискою {p}'},
+en:{'cx.via':'Plan source','cx.via.token':'Activation code (Service Token)','cx.via.tokenD':'Uses 1 token of the code’s package and, for a new device, 1 Activation Key.','cx.via.sub':'Direct Subscription','cx.via.subD':'The customer pays by card on the portal; OTA is the seller. No token needed; an Activation Key is used.','cx.sub.log':'Activation with Direct Subscription {p}: SIM {s}','cx.sub.toast':'SIM {s}: activated with Direct Subscription {p}'},
+ru:{'cx.via':'Откуда тариф','cx.via.token':'Код активации (сервисный токен)','cx.via.tokenD':'Списывается 1 токен пакета кода и, если устройство новое, 1 ключ активации.','cx.via.sub':'Прямая подписка','cx.via.subD':'Покупатель оплачивает картой на портале, продавец — OTA. Токен не нужен, ключ активации списывается.','cx.sub.log':'Активация по прямой подписке {p}: SIM {s}','cx.sub.toast':'SIM {s}: активировано по прямой подписке {p}'}});
+/* ---------- customer-portal bridge (ТЗ v10 3.1 / 4.4): codes redeemed in /portal (localStorage cfb-demo-ownership.codes[CODE].status='redeemed')
+   are activated here with the same rules: 1 Service Token of the code's package + 1 Activation Key for a new device; no key / no token → stays pending. */
+function cx_bridgeSync(){if(!S||!S.authed||!S.codes||!S.codes.length)return 0;let b=null;try{b=JSON.parse(localStorage.getItem('cfb-demo-ownership')||'null');}catch(e){}
+ if(!b||!b.codes)return 0;let n=0;const byCode={};for(const c of S.codes)byCode[c.code]=c;
+ Object.keys(b.codes).forEach(code=>{const r=b.codes[code];if(!r||r.status!=='redeemed')return;const c=byCode[code];if(!c||c.status!=='issued')return;
+  const dev=String(r.device_id||'');const bd=(b.bindings||[]).find(x=>x.device_id===dev&&x.status!=='ended');
+  const s=S.sims.find(x=>x.imei===dev||x.iccid===dev||(bd&&x.iccid===bd.iccid));
+  const fail=why=>{if(!c.bridgePending||c.bridgePending.reason!==why){c.bridgePending={reason:why,at:iso(now())};n++;}};
+  if(!s)return fail('no_sim');if(s.plan)return fail('has_plan');
+  const res=deviceActivate(s,{via:'token',code:c});if(res.err)return fail(res.err);
+  delete c.bridgePending;c.redeemedIn='portal';c.redeemedBy=r.redeemed_by_account_id||null;log(t('cod.a.log',{c:fmtCode(c.code),p:pkgLabel(c.plan,c.term),s:fmtIccid(s.iccid)}));n++;});
+ return n;}
+let cx_bridgeBusy=false;
+HOOKS.afterRender.push(()=>{if(cx_bridgeBusy)return;try{if(cx_bridgeSync()){cx_bridgeBusy=true;save();rerender();cx_bridgeBusy=false;}}catch(e){cx_bridgeBusy=false;console.error(e);}});

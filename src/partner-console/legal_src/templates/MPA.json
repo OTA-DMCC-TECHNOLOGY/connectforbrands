@@ -5,8 +5,8 @@
   "en": "Master Partner Agreement",
   "ru": "Рамочное партнёрское соглашение"
  },
- "ver": "T-MPA-v3",
- "effective": "2026-11-06",
+ "ver": "T-MPA-v10",
+ "effective": "2026-11-07",
  "cls": "A",
  "blocks": [
   {
@@ -206,6 +206,12 @@
    "kind": "clause",
    "en": "2.5 Documents of the Agreement, Order Forms, new versions and acknowledgments may be generated, issued, signed and stored in OTA's partner portal. Signature in the portal by a Party's authorised signatory, confirmed by a one-time code, together with the portal's audit trail (signatory, time, IP address and document hash), is a valid electronic signature binding on that Party. The PDF bearing both Parties' signatures and the signature certificate, as stored in the portal, is the original of the document and is available to both Parties for download. Each Party keeps its portal access secure and is responsible for the authority of the signatories it designates.",
    "ru": "2.5 Документы Договора, Заказы, их новые версии и подтверждения могут формироваться, выпускаться, подписываться и храниться на партнёрском портале OTA. Подпись на портале уполномоченным подписантом Стороны, подтверждённая одноразовым кодом, вместе с журналом портала (подписант, время, IP-адрес и хэш документа) является действительной электронной подписью и обязательна для этой Стороны. PDF с подписями обеих Сторон и сертификатом подписания, хранящийся на портале, является оригиналом документа и доступен обеим Сторонам для скачивания. Каждая Сторона обеспечивает безопасность своего доступа к порталу и отвечает за полномочия назначенных ею подписантов."
+  },
+  {
+   "id": "MPA-2.6",
+   "kind": "clause",
+   "en": "2.6 Partner represents that it is not incorporated, resident or registered for VAT in any member state of the Gulf Cooperation Council (the United Arab Emirates, the Kingdom of Saudi Arabia, the State of Qatar, the State of Kuwait, the Kingdom of Bahrain and the Sultanate of Oman) and has no fixed establishment there, and that it acquires Activation Keys and Service Tokens for use outside those states. Partner shall notify OTA without delay if this changes; in that case OTA may terminate the Agreement on thirty (30) days' notice, and Partner bears any tax that becomes payable because the representation was or became untrue.",
+   "ru": "2.6 Партнёр заверяет, что он не учреждён, не является резидентом и не зарегистрирован плательщиком НДС ни в одном государстве – члене Совета сотрудничества стран Персидского залива (Объединённые Арабские Эмираты, Королевство Саудовская Аравия, Государство Катар, Государство Кувейт, Королевство Бахрейн и Султанат Оман), не имеет там постоянного представительства и приобретает Ключи активации и Сервисные токены для использования за пределами этих государств. Партнёр незамедлительно уведомляет OTA об изменении этих обстоятельств; в этом случае OTA вправе расторгнуть Договор с уведомлением за тридцать (30) дней, а Партнёр несёт любые налоги, ставшие подлежащими уплате из-за того, что заверение было или стало недостоверным."
   },
   {
    "id": "MPA-s3",

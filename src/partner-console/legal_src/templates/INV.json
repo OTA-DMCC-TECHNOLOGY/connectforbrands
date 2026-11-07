@@ -5,8 +5,8 @@
   "en": "Tax Invoice (OTA)",
   "ru": "Налоговый счёт (счёт OTA)"
  },
- "ver": "T-INV-v3",
- "effective": "2026-11-06",
+ "ver": "T-INV-v10",
+ "effective": "2026-11-07",
  "cls": "B",
  "blocks": [
   {
@@ -182,8 +182,8 @@
       "ru": "2"
      },
      {
-      "en": "Service Token {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} months",
-      "ru": "Сервисный токен {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} мес.",
+      "en": "Service Tokens {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} months",
+      "ru": "Сервисные токены {{INV_TOK_PLAN}}, {{INV_TOK_TERM}} мес.",
       "bi": true
      },
      {
@@ -265,6 +265,29 @@
      {
       "en": "0.00",
       "ru": "0.00"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "VAT amount in AED at the UAE Central Bank rate {{AED_RATE}} on the invoice date",
+      "ru": "Сумма НДС в AED по курсу ЦБ ОАЭ {{AED_RATE}} на дату счёта",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "AED 0.00",
+      "ru": "AED 0.00"
      }
     ],
     [

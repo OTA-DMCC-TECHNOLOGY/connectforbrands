@@ -1,0 +1,163 @@
+{
+ "type": "CHG",
+ "docNo": "E",
+ "title": {
+  "en": "Notice of Change of Details",
+  "ru": "Уведомление об изменении реквизитов"
+ },
+ "ver": "T-CHG-v10",
+ "effective": "2026-11-07",
+ "cls": "A",
+ "blocks": [
+  {
+   "id": "CHG-title",
+   "kind": "heading",
+   "en": "NOTICE OF CHANGE OF DETAILS",
+   "ru": "УВЕДОМЛЕНИЕ ОБ ИЗМЕНЕНИИ РЕКВИЗИТОВ"
+  },
+  {
+   "id": "CHG-ref",
+   "kind": "para",
+   "en": "Notice of Change of Details · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Уведомление об изменении реквизитов · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "CHG-p1",
+   "kind": "para",
+   "en": "Under clause 16.3 of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} (the \"Master Agreement\"), {{CHG_PARTY_NAME}} notifies the other Party of the following change of its details, effective from {{CHG_EFFECTIVE_DATE}}:",
+   "ru": "В соответствии с п. 16.3 Рамочного партнёрского соглашения CONNECT FOR BRANDS № {{DOC_NO_MPA}} («Рамочное соглашение») {{CHG_PARTY_NAME}} уведомляет другую Сторону о следующем изменении своих реквизитов с {{CHG_EFFECTIVE_DATE}}:"
+  },
+  {
+   "id": "CHG-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Detail",
+      "ru": "Реквизит",
+      "bi": true
+     },
+     {
+      "en": "Previous",
+      "ru": "Прежнее значение",
+      "bi": true
+     },
+     {
+      "en": "New",
+      "ru": "Новое значение",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{CHG_LABEL}}",
+      "ru": "{{CHG_LABEL}}"
+     },
+     {
+      "en": "{{CHG_OLD}}",
+      "ru": "{{CHG_OLD}}"
+     },
+     {
+      "en": "{{CHG_NEW}}",
+      "ru": "{{CHG_NEW}}"
+     }
+    ]
+   ],
+   "repeat": {
+    "row": 1,
+    "list": "CHG_LIST"
+   }
+  },
+  {
+   "id": "CHG-1",
+   "kind": "clause",
+   "en": "1. This notice does not amend the Master Agreement or any Order Form; previously signed documents are not reissued and remain valid with the new details.",
+   "ru": "1. Настоящее уведомление не изменяет Рамочное соглашение и Заказы; ранее подписанные документы не переоформляются и действуют с новыми реквизитами."
+  },
+  {
+   "id": "CHG-2",
+   "kind": "clause",
+   "en": "2. Bank details. A change of bank details takes effect only after (a) this notice is signed in the portal by an authorised signatory of the notifying Party with a one-time code, and (b) the receiving Party has confirmed the change through a call-back to a contact person already on record. Until both steps are completed, payments are made to the previous bank details and such payments discharge the paying Party. A Party is not liable for a payment made in good faith to bank details recorded in the portal at the time of payment.",
+   "ru": "2. Банковские реквизиты. Изменение банковских реквизитов вступает в силу только после того, как (a) настоящее уведомление подписано на портале уполномоченным подписантом уведомляющей Стороны с подтверждением одноразовым кодом и (b) получающая Сторона подтвердила изменение обратным звонком контактному лицу, уже указанному в реквизитах. До выполнения обоих условий платежи производятся по прежним реквизитам, и такие платежи считаются надлежащим исполнением. Сторона не несёт ответственности за платёж, добросовестно произведённый по реквизитам, указанным на портале на момент платежа."
+  },
+  {
+   "id": "CHG-3",
+   "kind": "clause",
+   "en": "3. A change of the Party's name, legal form, registration number or authorised signatory must be supported by an official document (extract from the register or power of attorney) uploaded to the portal. A change of control is governed by the Master Agreement and is not a mere change of details.",
+   "ru": "3. Изменение наименования, организационно-правовой формы, регистрационного номера или уполномоченного подписанта Стороны подтверждается официальным документом (выпиской из реестра или доверенностью), загружаемым на портал. Смена контроля регулируется Рамочным соглашением и не является простым изменением реквизитов."
+  },
+  {
+   "id": "CHG-sig2",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{CHG_SIG_COMPANY}}",
+      "ru": "{{CHG_SIG_COMPANY}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{CHG_SIG_NAME}}",
+      "ru": "{{CHG_SIG_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{CHG_SIG_TITLE_EN}}",
+      "ru": "{{CHG_SIG_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

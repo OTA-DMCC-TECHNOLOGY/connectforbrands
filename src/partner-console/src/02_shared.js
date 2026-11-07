@@ -19,12 +19,13 @@ function makePrefix(country){const pc=b32(1000+Math.floor(Math.random()*90000),4
 function imeiCheck(d14){let s=0;for(let i=0;i<14;i++){let n=+d14[i];if(i%2===1){n*=2;if(n>9)n-=9;}s+=n;}return String((10-s%10)%10);}
 function genImei(tac,serial){const d14=tac+pad(serial,6);return d14+imeiCheck(d14);}
 function validImei(s){return /^\d{15}$/.test(s)&&luhnOk(s);}
-// ICCID: 8938 0012 + 11 digits (demo)
-function genIccid(n){return '89380012'+pad(n,11);}
+// ICCID (demo): 8938 0012 + 10-digit index + Luhn check digit = 19 digits (the customer portal validates Luhn)
+function luhnDigit(body){let s=0;for(let i=body.length-1,alt=true;i>=0;i--,alt=!alt){let n=+body[i];if(alt){n*=2;if(n>9)n-=9;}s+=n;}return String((10-s%10)%10);}
+function genIccid(n){const b='89380012'+pad(n,10);return b+luhnDigit(b);}
 function fmtIccid(s){return s.replace(/(\d{4})(?=\d)/g,'$1 ');}
 // order reference (not a legal document number): K-0001 for key orders, T-0001 for token orders
 function orderNo(type){return (type==='key'?'K-':'T-')+pad(seqNext(((S.org&&S.org.code)||'PPP')+(type==='key'?':KO':':TO')),4);}
-function iccidIndex(s){return parseInt(String(s).slice(8),10);}
+function iccidIndex(s){return parseInt(String(s).slice(8,18),10);}
 // legacy status vocabulary (orders no longer ship SIMs; kept for older code)
 const ORDER_FLOW=['awaiting_payment','paid'];
 const SHIP_FLOW=['prepared','shipped','delivered','received'];
@@ -35,34 +36,38 @@ function orderBlock(cc){for(const f of HOOKS.orderBlock){try{const r=f(cc);if(r)
 function docRef(type,cc){if(typeof lg_docRef==='function'){try{return lg_docRef(type,cc);}catch(e){}}const ts=iso(now());const d=(S.docs||[]).filter(x=>x.type===type&&(!cc||x.cc===cc)&&(x.status==='signed_both'||x.status==='acknowledged')&&(!x.effective||x.effective<=ts)).sort((a,b)=>String(a.createdAt)<String(b.createdAt)?1:-1)[0];return d?d.number:null;}
 
 /* ---------- OTA Tax Invoices (USD only) ---------- */
-const VAT0_EN='VAT 0% – zero-rated export of services (Article 31 of the Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)';
-const VAT0_L2={ru:'НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 года об НДС)',uk:'ПДВ 0% – експорт послуг (ст. 31 Виконавчого регламенту Федерального декрету-закону № 8 від 2017 року про ПДВ)'};
-// VAT by the partner's country of registration (S.org.country): outside the UAE → 0% zero-rated export; UAE → 5% + warning to OTA Finance
-function invVat(country){country=country||(S.org&&S.org.country)||'';
- return country==='AE'?{rate:0.05,label:'VAT 5%',labelL2:{ru:'НДС 5%',uk:'ПДВ 5%'},warn:true}:{rate:0,label:VAT0_EN,labelL2:VAT0_L2,warn:false};}
+// ТЗ v10 1.1 / 2.2: OTA never charges 5% — GCC partners cannot register, every OTA invoice and credit note has ONE VAT line, always 0%.
+const VAT0_EN='VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)';
+const VAT0_L2={ru:'НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)',uk:'ПДВ 0% – експорт послуг (ст. 31 Виконавчого регламенту Федерального декрету-закону № 8 від 2017 р. про ПДВ)'};
+function invVat(){return{rate:0,label:VAT0_EN,labelL2:VAT0_L2,warn:false};}
+// mandatory AED line (ТЗ 2.2) and the credit-note AED correction line (template 13A); {r} = rate stored with the document
+const AED_LINE={en:'VAT amount in AED at the UAE Central Bank rate {r} on the invoice date',ru:'Сумма НДС в AED по курсу ЦБ ОАЭ {r} на дату счёта',uk:'Сума ПДВ в AED за курсом ЦБ ОАЕ {r} на дату рахунку'};
+const AED_LINE_CN={en:'VAT adjustment in AED at the UAE Central Bank rate {r}',ru:'Корректировка НДС в AED по курсу ЦБ ОАЭ {r}',uk:'Коригування ПДВ в AED за курсом ЦБ ОАЕ {r}'};
+function aedLine(rate,lang,cn){const T=cn?AED_LINE_CN:AED_LINE;return (T[lang]||T.en).replace('{r}',fmtAed(rate));}
 const LINE_KEY_EN='Activation Keys – copies of the CONNECT computer program (licence activation keys)';
 const LINE_KEY_L2={ru:'Ключи активации – экземпляры компьютерной программы CONNECT (лицензионные ключи активации)',uk:'Ключі активації – примірники комп’ютерної програми CONNECT (ліцензійні ключі активації)'};
-// line: {type:'key'|'token'|'xchg', cc, plan, term, fromPlan, fromTerm, qty, unit, amount}
-function lineDescEn(l){if(l.type==='key')return LINE_KEY_EN;
+function ccNameIn(cc,lang){try{return new Intl.DisplayNames([lang],{type:'region'}).of(cc)||cc;}catch(e){return cc;}}
+// line: {type:'key'|'token'|'xchg', cc, plan, term, fromPlan, fromTerm, qty, unit, amount}. Key line ends with " – {Approved Country}" (ТЗ 2.2)
+function lineDescEn(l){if(l.type==='key')return LINE_KEY_EN+(l.cc?' – '+ctyNameEn(l.cc):'');
  if(l.type==='token')return `Service Tokens ${PLAN_EN[l.plan]}, ${l.term} months`;
  if(l.type==='xchg')return `Service Tokens ${PLAN_EN[l.plan]}, ${l.term} months – exchange of ${PLAN_EN[l.fromPlan]}, ${l.fromTerm} months (price difference)`;return l.desc||'';}
 function lineDescL2(l,lang){lang=lang||(S.org&&S.org.lang2)||'ru';if(lang==='en')return lineDescEn(l);const ru=lang==='ru';
- if(l.type==='key')return LINE_KEY_L2[lang]||LINE_KEY_L2.ru;
+ if(l.type==='key')return (LINE_KEY_L2[lang]||LINE_KEY_L2.ru)+(l.cc?' – '+ccNameIn(l.cc,lang==='uk'?'uk':'ru'):'');
  const tok=(p,tm)=>(ru?'Сервисные токены ':'Сервісні токени ')+PLAN_EN[p]+', '+tm+(ru?' мес.':' міс.');
  if(l.type==='token')return tok(l.plan,l.term);
  if(l.type==='xchg')return tok(l.plan,l.term)+(ru?' – обмен ':' – обмін ')+PLAN_EN[l.fromPlan]+', '+l.fromTerm+(ru?' мес. (разница в цене)':' міс. (різниця в ціні)');return l.desc||'';}
 function lineDesc(l){return S.lang==='uk'||S.lang==='ru'?lineDescL2(l,S.lang):lineDescEn(l);} // UI language
 function invNextNo(){return docNo('INV',{peek:true});}
 // create and issue an OTA Tax Invoice. o: {cc, lines, kind:'keys'|'tokens'|'combined'|'exchange', orderIds, exchangeId, created, dueDays}
-function mkInvoice(o){const created=o.created||iso(now());const v=invVat();const o2=S.org||{};
+function mkInvoice(o){const created=o.created||iso(now());const v=invVat();const o2=S.org||{};const fx=aedRate(created);
  const lines=o.lines.map(l=>Object.assign({},l,{cc:l.cc||o.cc,unit:r2(l.unit),amount:r2(l.unit*l.qty)}));
  const net=r2(lines.reduce((a,l)=>a+l.amount,0));const vat=r2(net*v.rate);
  const inv={id:uid('inv'),number:docNo('INV',{date:created}),title:'Tax Invoice',kind:o.kind,cc:o.cc,currency:'USD',lines,net,vatRate:v.rate,vat,total:r2(net+vat),vatLabel:v.label,vatLabelL2:v.labelL2,vatWarn:v.warn,
   buyer:{name:o2.name||'',address:o2.address||'',regNo:o2.regNo||'',taxId:o2.taxId||'',country:o2.country||'',code:o2.code||''},
   seller:Object.assign({},S.ota),mpa:docRef('MPA'),of:docRef('OF',o.cc),priceVer:((o.created?priceList(o.cc,new Date(created)):priceList(o.cc))||{}).ver||null,
-  status:'open',createdAt:created,dueAt:iso(addDays(created,o.dueDays||5)),paidAt:null,orderIds:o.orderIds||[],exchangeId:o.exchangeId||null,issued:false,cnId:null};
- S.invoices.unshift(inv);audit('invoice.issue',inv.number,{kind:inv.kind,cc:inv.cc,total:inv.total,vatRate:inv.vatRate});
- if(v.warn){audit('invoice.vat_warning',inv.number,{rate:v.rate});log(t('c.vatWarnLog',{n:inv.number}));}
+  status:'open',createdAt:created,dueAt:iso(addDays(created,o.dueDays||5)),paidAt:null,orderIds:o.orderIds||[],exchangeId:o.exchangeId||null,issued:false,cnId:null,
+  aedRate:fx.rate,aedRateDate:fx.date,aedSrc:fx.src,vatAed:0};
+ S.invoices.unshift(inv);audit('invoice.issue',inv.number,{kind:inv.kind,cc:inv.cc,total:inv.total,vatRate:0,aedRate:inv.aedRate});
  return inv;}
 function invById(id){return S.invoices.find(i=>i.id===id)||null;}
 function invStatus(i){if(i.status==='paid'||i.status==='cancelled')return i.status;return new Date(i.dueAt)<now()?'overdue':'open';}
@@ -79,15 +84,31 @@ function invoicePaid(inv,at){if(!inv||inv.status!=='open')return false;const ts=
  if(k)audit('keys.issue',inv.number,{qty:k});if(tk)audit('tokens.issue',inv.number,{qty:tk});return true;}
 // how many keys/tokens issued from this invoice have been used already
 function invUsed(inv){let n=0;(S.keyLots||[]).forEach(l=>{if(l.invoiceId===inv.id)n+=l.used;});(S.tokenLots||[]).forEach(l=>{if(l.invoiceId===inv.id)n+=l.used+(l.reserved||0);});return n;}
-// cancel an issued invoice with a credit note (numbers are never reused; nothing is deleted)
-function creditNote(inv,reason){if(!inv||inv.status==='cancelled')return null;if(inv.status==='paid'&&invUsed(inv)>0)return null;
- const cn={id:uid('cn'),number:docNo('CN'),invoiceId:inv.id,invoiceNo:inv.number,currency:'USD',net:inv.net,vat:inv.vat,total:inv.total,vatRate:inv.vatRate,reason:reason||'',wasPaid:inv.status==='paid',createdAt:iso(now()),by:actorName()};
+/* ---------- Tax Credit Notes (template 13A, OTA-CN-YYYY-NNNNNN, global, never reused) ----------
+   Reason (ТЗ v10 2.3): cancel_unpaid | error | refund. Lines are the invoice lines with negative amounts, VAT 0%, AED correction 0.00 at the rate of the
+   credit-note date. Unpaid invoice → status 'cancelled', nothing is ever issued under it. Paid invoice (only while none of its keys/tokens is used) →
+   lots revoked and the amount is refunded to the partner's bank account or set off against the next order (o.settle: 'refund' | 'setoff'). */
+const CN_REASONS={cancel_unpaid:{en:'Cancellation of an unpaid invoice',ru:'Отмена неоплаченного счёта',uk:'Скасування неоплаченого рахунку'},
+ error:{en:'Correction of an error',ru:'Исправление ошибки',uk:'Виправлення помилки'},
+ refund:{en:'Refund under clause 4.3 of Document 03 or clause 10.3 of the Master Agreement',ru:'Возврат по п. 4.3 Документа 03 или п. 10.3 Рамочного соглашения',uk:'Повернення за п. 4.3 Документа 03 або п. 10.3 Рамкової угоди'}};
+// 13A body text (template wording, EN / RU)
+const CN_TEXT={en:"This credit note reduces or cancels the original invoice stated above. Where the original invoice was not paid, no payment is due under it and no Activation Keys or Service Tokens are issued under it. Where it was paid, the credited amount is refunded to Partner's bank account or set off against Partner's next order, as stated in the Reason. Credit note numbers are never reused.",
+ ru:'Настоящая кредит-нота уменьшает или аннулирует указанный выше исходный счёт. Если исходный счёт не был оплачен, платёж по нему не причитается и Ключи активации и Сервисные токены по нему не выпускаются. Если он был оплачен, сумма к уменьшению возвращается на банковский счёт Партнёра или засчитывается в следующий заказ Партнёра, как указано в Основании. Номера кредит-нот повторно не используются.'};
+function cnReasonsFor(inv){return inv&&inv.status==='paid'?['refund','error']:['cancel_unpaid','error'];}
+function cnReasonText(cn,lang){const r=CN_REASONS[cn&&cn.reason];if(r)return r[lang]||r.en;return String((cn&&(cn.reasonNote||cn.reason))||'');}
+function creditNote(inv,reason,o){o=o||{};if(!inv||inv.status==='cancelled')return null;if(inv.status==='paid'&&invUsed(inv)>0)return null;
+ const paid=inv.status==='paid';let code=CN_REASONS[reason]?reason:(paid?'error':'cancel_unpaid');const note=CN_REASONS[reason]?String(o.note||''):String(reason||'');
+ if(!cnReasonsFor(inv).includes(code))return null;
+ const ts=iso(now());const fx=aedRate(ts);
+ const cn={id:uid('cn'),number:docNo('CN',{date:ts}),invoiceId:inv.id,invoiceNo:inv.number,invoiceDate:inv.createdAt,currency:'USD',
+  lines:inv.lines.map(l=>Object.assign({},l,{amount:-Math.abs(l.amount)})),net:inv.net,vat:0,total:inv.net,vatRate:0,aedRate:fx.rate,aedRateDate:fx.date,aedSrc:fx.src,vatAed:0,
+  reason:code,reasonNote:note,wasPaid:paid,settle:paid?(o.settle==='setoff'?'setoff':'refund'):null,createdAt:ts,by:actorName()};
  S.creditNotes=S.creditNotes||[];S.creditNotes.unshift(cn);
  if(inv.status==='paid'){(S.keyLots||[]).forEach(l=>{if(l.invoiceId===inv.id)l.revoked=iso(now());});(S.tokenLots||[]).forEach(l=>{if(l.invoiceId===inv.id)l.revoked=iso(now());});}
  inv.status='cancelled';inv.cancelledAt=cn.createdAt;inv.cnId=cn.id;
  [S.keyOrders,S.tokenOrders].forEach(list=>list.forEach(o=>{if(o.invoiceId===inv.id&&o.status!=='cancelled'){o.status='cancelled';o.cancelledAt=cn.createdAt;}}));
  if(inv.exchangeId){const x=(S.exchanges||[]).find(e=>e.id===inv.exchangeId);if(x&&x.status==='awaiting_payment')exchangeCancel(x);}
- audit('creditnote.issue',cn.number,{invoice:inv.number,total:cn.total,reason:cn.reason});return cn;}
+ audit('creditnote.issue',cn.number,{invoice:inv.number,total:-cn.total,reason:cn.reason,settle:cn.settle,aedRate:cn.aedRate});return cn;}
 
 /* ---------- Service Token exchange: pay the difference if more expensive, no refund if cheaper ---------- */
 function exchangeQuote(from,to,cc){const a=pkgSplit(from),b=pkgSplit(to);return r2(tokenPrice(b.plan,b.term,cc)-tokenPrice(a.plan,a.term,cc));}
@@ -104,20 +125,96 @@ function exchangeComplete(x,at){if(x.status!=='awaiting_payment')return;const ts
  x.status='done';x.doneAt=ts;audit('tokens.exchange.done',x.from+'→'+x.to,{qty:x.qty});}
 function exchangeCancel(x){x.res.forEach(r=>{const l=(S.tokenLots||[]).find(q=>q.id===r.lotId);if(l)l.reserved=Math.max(0,(l.reserved||0)-r.n);});x.status='cancelled';audit('tokens.exchange.cancel',x.from+'→'+x.to,{qty:x.qty});}
 
-/* ---------- SIM shipments in custody (free of charge, DAP; never invoiced) ---------- */
+/* ---------- SIM shipments in custody (free of charge, DAP; never invoiced) ----------
+   ТЗ v10 1.2: SIMs never enter or transit the UAE. They ship only from an EU warehouse of OTA's supplier or logistics provider (ship_from) and the
+   export declaration names an EU exporter of record acting for OTA with its EORI (exporter). OTA TECHNOLOGY DMCC is shown as owner of the goods. */
+const EU_CC=['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE'];
+const SHIP_FROM_DEMO={name:'Demo EU Logistics Warehouse',addr:'Demo Logistics Park 1, 5600 AA Eindhoven',country:'NL'};   // fictional demo values
+const EXPORTER_DEMO={name:'Demo EU Logistics B.V., acting for OTA TECHNOLOGY DMCC',eori:'NL000000001'};
+function validEori(x){return /^[A-Z]{2}[A-Z0-9]{1,15}$/.test(String(x||'').replace(/\s/g,'').toUpperCase());}
+function shipFromLine(h){const f=(h&&h.ship_from)||{};return [f.name,f.addr,f.country?ctyNameEn(f.country):''].filter(Boolean).join(', ');}
 function nextIccidIndex(){let max=0;for(const s of S.sims){const n=iccidIndex(s.iccid);if(n>max)max=n;}for(const h of S.shipments||[])if(h.iccidTo>max)max=h.iccidTo;return max+1;}
-// o: {cc, qty, iccidFrom, simType, unitValue, dap:{company,recipient,phone,address,city,country}, importer, cartons, gross, net, created}
+// o: {cc, qty, iccidFrom, simType, unitValue, dap:{company,recipient,phone,address,city,country}, importer, cartons, gross, net, created,
+//     ship_from:{name,addr,country (EU)}, exporter:{name,eori}}
 function shipCreate(o){const ts=o.created||iso(now());const pf=docNo('PF',{date:ts});
+ const sf=Object.assign({},SHIP_FROM_DEMO,o.ship_from||{}),ex=Object.assign({},EXPORTER_DEMO,o.exporter||{});
  const h={id:uid('sh'),pf,sr:docNo('SR',{pf}),cc:o.cc,qty:o.qty,iccidFrom:o.iccidFrom,iccidTo:o.iccidFrom+o.qty-1,simType:o.simType||'',hs:'8523.52',unitValue:o.unitValue,
+  ship_from:{name:sf.name,addr:sf.addr,country:sf.country},ship_from_country:sf.country,exporter:{name:ex.name,eori:String(ex.eori||'').replace(/\s/g,'').toUpperCase()},
   dap:Object.assign({},o.dap),importer:o.importer||'',cartons:o.cartons||'',gross:o.gross||'',netw:o.net||'',carrier:'',waybill:'',
   status:'prepared',events:[['prepared',ts]],createdAt:ts,by:actorName(),receipt:null};
- S.shipments=S.shipments||[];S.shipments.unshift(h);audit('shipment.create',pf,{qty:h.qty,cc:h.cc,sr:h.sr});return h;}
+ S.shipments=S.shipments||[];S.shipments.unshift(h);audit('shipment.create',pf,{qty:h.qty,cc:h.cc,sr:h.sr,ship_from:h.ship_from_country,eori:h.exporter.eori});return h;}
 function shipAdvance(h,status,extra,at){const ts=at||iso(now());Object.assign(h,extra||{});h.status=status;h.events.push([status,ts]);audit('shipment.'+status,h.pf,extra||{});}
 // partner confirms receipt & condition (SR) → SIMs enter inventory, in custody until installed
 function shipReceive(h,r,at){const ts=at||iso(now());const n=clamp(r.received|0,0,h.qty);
  h.receipt={received:n,diff:h.qty-n,condition:r.condition||'intact',note:r.note||'',storage:r.storage||'',person:r.person||'',customsDecl:r.customsDecl||'',at:ts,by:actorName()};
  for(let i=0;i<n;i++)S.sims.push({iccid:genIccid(h.iccidFrom+i),shipmentId:h.id,status:'stock',imei:null,modelId:null,plan:null,term:null,paidUntil:null,code:null,keyLotId:null,linked:false,lastSeen:null,reseller:null,events:[[ts,'in_stock']]});
  h.status='received';h.events.push(['received',ts]);audit('shipment.received',h.sr,{received:n,diff:h.qty-n,condition:h.receipt.condition});return n;}
+
+/* ---------- activation (ТЗ v10 3.1) ----------
+   An Activation Key is consumed at activation (one per device for life). The plan comes EITHER from a Service Token (the activation code) OR from an
+   active Direct Subscription (card payment on the portal, OTA = seller) — then no token is needed. No key → rejected (code stays valid).
+   deviceActivate(sim, {via:'token', code} | {via:'subscription', sub}) → {ok, key:bool} | {err:'no_key'|'no_token'|'no_sub'|'plan'|…} */
+function subActive(s,at){const x=(S.subs||[]).find(q=>q.iccid===(s&&s.iccid)&&q.status==='active'&&(!q.paidUntil||q.paidUntil>iso(at||now())));return x||null;}
+function deviceActivate(s,o){o=o||{};if(!s)return{err:'no_sim'};const needKey=!s.keyLotId&&!deviceKeyed(s.imei);
+ if(needKey&&keysAvail()<=0)return{err:'no_key'};
+ const ts=now();let lot=null;
+ if(o.via==='subscription'){const sub=o.sub||subActive(s);if(!sub)return{err:'no_sub'};
+  if(needKey){const kl=consumeKey();s.keyLotId=kl?kl.id:null;}
+  s.plan=sub.plan;s.term=1;s.sub=sub.id;s.paidUntil=sub.paidUntil;s.code=null;s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'subscription']);
+  audit('activation',s.iccid,{iccid:s.iccid,imei:s.imei,via:'subscription',sub:sub.id,key:needKey});return{ok:true,key:needKey,sub};}
+ const c=o.code;if(!c)return{err:'no_code'};const k=pkgKey(c.plan,c.term);
+ if(tokensAvail(k)<=0)return{err:'no_token'};
+ lot=consumeToken(k);c.lotId=lot?lot.id:null;if(needKey){const kl=consumeKey();s.keyLotId=kl?kl.id:null;}c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
+ audit('activation',fmtCode(c.code),{iccid:s.iccid,imei:s.imei,via:'token',token:k,key:needKey});
+ s.plan=c.plan;s.term=c.term;s.code=c.code;const until=new Date(ts.getTime());until.setMonth(until.getMonth()+c.term);s.paidUntil=iso(until);s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'package']);
+ return{ok:true,key:needKey,lot};}
+// demo: the end user pays a Direct Subscription by card on the portal (OTA is the seller) — monthly, auto-renewing
+function subCreate(s,plan,o){o=o||{};const ts=o.at||iso(now());const shCc=((S.shipments||[]).find(h=>h.id===s.shipmentId)||{}).cc||primaryCc();
+ const sub={id:uid('sub'),iccid:s.iccid,imei:s.imei,plan,cc:shCc,status:'active',startedAt:ts,paidUntil:iso(addMonths(ts,1)),autoRenew:true,src:'card'};
+ S.subs=S.subs||[];S.subs.unshift(sub);audit('subscription.start',s.iccid,{plan,cc:sub.cc});return sub;}
+
+/* ---------- notices without signature (shown by the legal module) ---------- */
+function noticeAdd(n){S.notices=S.notices||[];const x=Object.assign({id:uid('nt'),createdAt:iso(now()),by:actorName(),signature:false,status:'sent'},n);S.notices.unshift(x);return x;}
+
+/* ---------- sub-processor directory (Document 06, Annex 1) maintained by OTA (ТЗ v10 2.9) ----------
+   Rows {id,name:{en,ru},service:{en,ru},location:{en,ru}}. If the e-mail provider is Amazon SES, OTA may merge it into ONE row
+   "Amazon Web Services — Hosting, storage, backups, transactional email — {region}" (S.subproc.awsMerged + region).
+   Every change → notice to ALL partners 30 days ahead (Document 06 clause 5.1), no signature. */
+const SUBPROC_NOTICE_DAYS=30;
+function subprocSeed(){const R=(id,n,nr,sv,svr,l,lr)=>({id,name:{en:n,ru:nr},service:{en:sv,ru:svr},location:{en:l,ru:lr}});
+ return{awsMerged:false,awsRegion:{en:'UAE',ru:'ОАЭ'},rows:[
+  R('aws','Amazon Web Services','Amazon Web Services','Hosting, storage, backups','Хостинг, хранение, резервные копии','UAE','ОАЭ'),
+  R('local','Local hosting providers','Местные хостинг-провайдеры','Storage of data where local law requires it (list in the cabinet)','Хранение данных, где этого требует местный закон (перечень в кабинете)','Country concerned','Соответствующая страна'),
+  R('twilio','Twilio','Twilio','SMS and messenger notifications','Уведомления по SMS и в мессенджерах','USA, EU','США, ЕС'),
+  R('ni','Network International','Network International','Card acquiring and payment processing','Эквайринг и обработка платежей','UAE','ОАЭ'),
+  R('net','Network infrastructure provider (name disclosed confidentially)','Поставщик сетевой инфраструктуры (раскрывается конфиденциально)','Connectivity, SIM management, network-based location (LBS)','Связь, управление SIM, определение местоположения по сети (LBS)','EU','ЕС'),
+  R('email','','','Transactional emails','Транзакционные письма','','')],updatedAt:null,history:[]};}
+function subprocDir(){if(!S.subproc||!Array.isArray(S.subproc.rows))S.subproc=subprocSeed();return S.subproc;}
+// rows as printed in Document 06 Annex 1 (the e-mail row only when OTA filled it; AWS merged row when awsMerged)
+function subprocRows(){const d=subprocDir();const f=x=>x&&String(x.en||'').trim();let rows=d.rows.map(r=>JSON.parse(JSON.stringify(r)));
+ if(d.awsMerged){rows=rows.filter(r=>r.id!=='email');const a=rows.find(r=>r.id==='aws');if(a){a.name={en:'Amazon Web Services',ru:'Amazon Web Services'};
+   a.service={en:'Hosting, storage, backups, transactional email',ru:'Хостинг, хранение, резервные копии, транзакционные письма'};a.location=Object.assign({},d.awsRegion);}}
+ return rows.filter(r=>f(r.name)&&f(r.service));}
+const subprocSig=rows=>JSON.stringify(rows.map(r=>[r.name.en,r.service.en,r.location.en]));
+// apply a new directory state; when the printed list changes → notice to all partners (30 days, no signature). Returns the notice or null.
+function subprocUpdate(next,note){const d=subprocDir();const before=subprocRows();Object.assign(d,next);const after=subprocRows();
+ const em=d.rows.find(r=>r.id==='email');if(S.ota){S.ota.OTA_SUBPROC_EMAIL=d.awsMerged?'':(em&&em.name.en)||'';S.ota.OTA_SUBPROC_EMAIL_LOC=d.awsMerged?'':(em&&em.location.en)||'';}
+ if(subprocSig(before)===subprocSig(after))return null;
+ const key=r=>r.name.en;const added=after.filter(r=>!before.some(b=>key(b)===key(r))),removed=before.filter(b=>!after.some(r=>key(r)===key(b)));
+ const changed=after.filter(r=>{const b=before.find(x=>key(x)===key(r));return b&&(b.service.en!==r.service.en||b.location.en!==r.location.en);});
+ const ts=iso(now());d.updatedAt=ts;d.history=d.history||[];
+ const n=noticeAdd({type:'subproc',doc:'DPA',to:'all_partners',effective:iso(addDays(ts,SUBPROC_NOTICE_DAYS)),noticeDays:SUBPROC_NOTICE_DAYS,
+  clause:'Document 06, clause 5.1',rows:after,before,added:added.map(key),removed:removed.map(key),changed:changed.map(key),note:note||''});
+ S.subprocNotices=S.subprocNotices||[];S.subprocNotices.unshift({id:n.id,at:ts,effective:n.effective,text:'Changes to the list of sub-processors (Document 06, Annex 1): '+[n.added.length?'added '+n.added.join(', '):'',n.removed.length?'removed '+n.removed.join(', '):'',n.changed.length?'changed '+n.changed.join(', '):''].filter(Boolean).join('; ')+'. Effective '+n.effective.slice(0,10)+' (30 days notice, clause 5.1 of Document 06).'+(note?' '+note:''),added:n.added,removed:n.removed,changed:n.changed,rows:after});
+ d.history.unshift({at:ts,notice:n.id,rows:after});audit('subproc.notice',n.id,{added:n.added,removed:n.removed,changed:n.changed,effective:n.effective});return n;}
+
+/* ---------- terminate the Order Form of one country instead of signing a price-changed version (ТЗ v10 3.5) ---------- */
+function ofTerminated(cc){return ((S.org&&S.org.ofTerminated)||{})[cc]||null;}
+function ofTerminate(cc,o){o=o||{};if(!S.org||ofTerminated(cc))return null;const of=docRef('OF',cc);const ts=iso(now());
+ const n=noticeAdd({type:'of_terminate',cc,of:of||'',from:'partner',to:'OTA',reason:'price_change',priceVer:o.priceVer||null,note:o.note||''});
+ S.org.ofTerminated=S.org.ofTerminated||{};S.org.ofTerminated[cc]={at:ts,by:actorName(),notice:n.id,of:of||'',priceVer:o.priceVer||null};
+ audit('orderform.terminate',of||cc,{cc,notice:n.id,priceVer:o.priceVer||null});return n;}
+HOOKS.orderBlock.push(cc=>ofTerminated(cc)?t('c.ofTermBlock',{c:ctyName(cc),d:fmtDate(ofTerminated(cc).at)}):null);
 
 /* ---------- demo seed: a fully lived-in partner (ARVELO LIMITED, code ARV) ---------- */
 function seedDemo(){
@@ -132,7 +229,8 @@ function seedDemo(){
    KZ:{company:'ARVELO LIMITED',recipient:'Warehouse manager',phone:'',address:'Warehouse No. 2',city:'Almaty',country:'KZ',importer:'ARVELO LIMITED'}},
   currency:'USD',prefix:'K02N5',createdAt:daysAgo(60),commit:3000,serials:{},phone:'',color:'#1F6FEB'};
  codeRegister('ARV');
- S.actor='u_p_admin';S.ota=otaSeed();
+ S.actor='u_p_admin';S.ota=otaSeed();fxSeed();
+ otaCountrySet('UA',Object.assign(otaCountryDemo('UA'),{delay_hours:24,ownership_v10_enabled:true}));otaCountrySet('KZ',Object.assign(otaCountryDemo('KZ'),{delay_hours:24,ownership_v10_enabled:false}));subprocDir();
  // questionnaire values from the Partner Data Form (legal module owns editing & review)
  const F=(v)=>({value:v,status:v?'filled':'empty',comment:'',by:'Maria Lind',at:daysAgo(58)});
  if(legalDemo()&&legalDemo().partner){const P=legalDemo().partner,ST=legalDemo().status||{};S.form={};Object.keys(P).forEach(k=>{S.form[k]={value:P[k],status:ST[k]||(P[k]==null?'empty':'filled'),comment:'',by:'Maria Lind',at:daysAgo(58)};});}else
@@ -199,15 +297,30 @@ function seedDemo(){
   c.status='activated';c.activatedAt=daysAgo(40-(k*37/count|0));c.iccid=sim.iccid;sim.code=c.code;sim.plan=plan;sim.term=term;const d=new Date(c.activatedAt);d.setMonth(d.getMonth()+term);sim.paidUntil=iso(d);sim.events.push([c.activatedAt,'package']);
   const lot=consumeToken(pkgKey(plan,term));c.lotId=lot?lot.id:null;const kl=consumeKey();sim.keyLotId=kl?kl.id:null;c.keyLotId=sim.keyLotId;k++;}}};
  activate('std',24,118);activate('light',24,61);activate('std',36,22);
+ // Direct Subscriptions: end users paid by card on the portal — these devices activate without a Service Token (the key is still consumed)
+ S.sims.filter(s=>s.status==='active'&&!s.code&&findModel(s.modelId)&&findModel(s.modelId).model.planStatus==='approved').slice(0,25).forEach((s,i)=>{const pl=findModel(s.modelId).model.plan;
+  const sub=subCreate(s,pl,{at:daysAgo(20-(i%15))});sub.paidUntil=iso(addMonths(daysAgo(20-(i%15)),2));deviceActivate(s,{via:'subscription',sub});});
  // deactivate the last 15 unused Standard·3y codes of r2
  let left=15;for(let i=S.codes.length-1;i>=0&&left>0;i--){const c=S.codes[i];if(c.reseller==='r2'&&c.status==='issued'){c.status='void';c.voidAt=daysAgo(5);left--;}}
  S.activity=[];log(t('c.demoLoaded'));audit('demo.seed','ARV',{});
  HOOKS.seedDemo.forEach(f=>{try{f();}catch(e){console.error(e);}});
  save();}
-I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.vatWarnLog':'Рахунок {n}: партнер зареєстрований в ОАЕ — ПДВ 5%, перевірте разом із фінансовою службою OTA'},
- en:{'c.demoLoaded':'Demo data loaded','c.vatWarnLog':'Invoice {n}: partner is registered in the UAE — VAT 5%, check with OTA Finance'},
- ru:{'c.demoLoaded':'Демо-данные загружены','c.vatWarnLog':'Счёт {n}: партнёр зарегистрирован в ОАЭ — НДС 5%, проверьте с финансовой службой OTA'}});
+I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.ofTermBlock':'Замовлення (Order Form) для країни {c} розірвано {d}. Нові замовлення для цієї країни недоступні.'},
+ en:{'c.demoLoaded':'Demo data loaded','c.ofTermBlock':'The Order Form for {c} was terminated on {d}. New orders for this country are not available.'},
+ ru:{'c.demoLoaded':'Демо-данные загружены','c.ofTermBlock':'Заказ (Order Form) по стране {c} расторгнут {d}. Новые заказы по этой стране недоступны.'}});
+// AED reference table seed (demo): the AED/USD peg 3.6725 published by the UAE Central Bank, one row per month start
+function fxSeed(){const a=fxAed();if(a.length)return;const n=now();for(let k=12;k>=0;k--){const d=new Date(n.getFullYear(),n.getMonth()-k,1);aedRateSet(d.getFullYear()+'-'+pad(d.getMonth()+1)+'-01',AED_DEMO_RATE,'CBUAE (demo)');}}
 
 // boot: fill OTA keys added later (e.g. from LEGAL_DEMO_VALUES) without touching values OTA already edited
 HOOKS.onBoot.push(()=>{if(!S.ota)S.ota={};const sd=otaSeed();const full=!S.otaSeeded&&!!legalDemo();let ch=0;
- Object.keys(sd).forEach(k=>{if(!(k in S.ota)||(full&&!S.ota[k]&&sd[k])){S.ota[k]=sd[k];ch++;}});if(legalDemo())S.otaSeeded=true;if(ch||full)save();});
+ Object.keys(sd).forEach(k=>{if(!(k in S.ota)||(full&&!S.ota[k]&&sd[k])){S.ota[k]=sd[k];ch++;}});if(legalDemo())S.otaSeeded=true;
+ // v10 migration of saved states: no customs code, per-country settings, AED rates, rates frozen into documents, EU ship-from on shipments
+ if(!S.ota.countries||typeof S.ota.countries!=='object'){Array.from(new Set(plCountries().concat(S.org?orgCountries():[]))).forEach(cc=>{const dm=otaCountryDemo(cc);otaCountrySet(cc,{vat_local:S.ota['OTA_VAT_'+cc]||dm.vat_local,rep_local:S.ota['OTA_REP_'+cc]||dm.rep_local,ownership_v10_enabled:cc==='UA'});});otaCountries();ch++;}
+ Object.keys(S.ota).forEach(k=>{if(otaRemovedKey(k)){delete S.ota[k];ch++;}});
+ if(!S.fx||!Array.isArray(S.fx.aed)||!S.fx.aed.length){fxSeed();ch++;}
+ if(!S.subs)S.subs=[];if(!S.notices)S.notices=[];
+ (S.invoices||[]).forEach(i=>{if(i.aedRate==null){const r=aedRate(i.createdAt);i.aedRate=r.rate;i.aedRateDate=r.date;i.aedSrc=r.src;i.vatAed=0;ch++;}if(i.vatRate){i.vatRate=0;i.vat=0;i.total=i.net;i.vatLabel=VAT0_EN;i.vatLabelL2=VAT0_L2;i.vatWarn=false;ch++;}});
+ (S.creditNotes||[]).forEach(c=>{if(c.aedRate==null){const r=aedRate(c.createdAt);c.aedRate=r.rate;c.aedRateDate=r.date;c.aedSrc=r.src;c.vatAed=0;c.vat=0;c.vatRate=0;
+  const i=(S.invoices||[]).find(x=>x.id===c.invoiceId);if(!CN_REASONS[c.reason]){c.reasonNote=c.reason||'';c.reason=c.wasPaid?'error':'cancel_unpaid';}if(i){c.invoiceDate=i.createdAt;if(!c.lines)c.lines=i.lines.map(l=>Object.assign({},l,{amount:-Math.abs(l.amount)}));c.total=c.net=i.net;}ch++;}});
+ (S.shipments||[]).forEach(h=>{if(!h.ship_from){h.ship_from=Object.assign({},SHIP_FROM_DEMO);h.ship_from_country=SHIP_FROM_DEMO.country;h.exporter=Object.assign({},EXPORTER_DEMO);ch++;}});
+ if(ch||full)save();});

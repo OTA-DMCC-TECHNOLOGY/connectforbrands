@@ -129,7 +129,7 @@ function ops_render(blocks,v){const miss=new Set(),txt=[];const html=blocks.map(
 function ops_compose(type,T,v,o,expect){let eng=null;
  if(typeof lg_render==='function'&&!o.noEngine){try{const r=lg_render(type.toUpperCase(),{tpl:T,vals:v,docNo:o.no,date:o.date,cc:o.cc||null});
   if(r&&!r.error&&r.html){const tx=String(r.text||'');if(expect.every(e=>tx.indexOf(e)>=0))eng=r;}}catch(e){console.error(e);}}
- const r=eng||ops_render(T.blocks,v);return{html:ops_wrap(T,o,r,eng),text:r.text||String(r.html).replace(/<[^>]+>/g,' '),missing:r.missing||[]};}
+ const r=eng||ops_render(T.blocks,v);return{html:ops_wrap(T,o,r,eng),text:r.text||String(r.html).replace(/<[^>]+>/g,' '),missing:r.missing||[],engine:!!eng};}
 
 function ops_wrap(T,o,r,eng){const ota=o.ota||S.ota||{};const name=String(ota.OTA_NAME||'OTA TECHNOLOGY DMCC');
  const hd=`${name} · CONNECT FOR BRANDS · Doc ${T.docNo||''} of 14 · ${o.titleEn} · ${o.no} · ${T.ver||''}`;
@@ -140,9 +140,11 @@ function ops_wrap(T,o,r,eng){const ota=o.ota||S.ota||{};const name=String(ota.OT
 
 /* ---------- values ---------- */
 function ops_F(k,fb){const f=S.form&&S.form[k];let x=f&&f.status!=='na'&&f.value!=null&&typeof f.value!=='object'?String(f.value).trim():'';if(!x&&fb!=null&&!(f&&f.status==='na'))x=String(fb||'').trim();return x;}
+// bank details in force = S.org.bank (legal module: a pending change in S.bankChange never applies before signature + callback)
+const ops_bk=(b,k,fk)=>{const x=b&&b[k]!=null?String(b[k]).trim():'';return x||ops_F(fk,'');};
 function ops_vP(){const o=S.org||{},b=o.bank||{};return{P_NAME:ops_F('P_NAME',o.name),P_REGNO:ops_F('P_REGNO',o.regNo),P_TAXNO:ops_F('P_TAXNO',o.taxId),P_ADDR_EN:ops_F('P_ADDR_EN',o.address),P_SIGNATORY:ops_F('P_SIGNATORY',o.signatory),P_TITLE_EN:ops_F('P_TITLE_EN',o.title),P_TITLE_L2:ops_F('P_TITLE_L2',o.title),
- P_BANK_BENEFICIARY:ops_F('P_BANK_BENEFICIARY',b.benef),P_BANK_IBAN:ops_F('P_BANK_IBAN',b.iban),P_BANK_NAME:ops_F('P_BANK_NAME',b.bank),P_BANK_ADDR:ops_F('P_BANK_ADDR',b.bankAddr),P_BANK_SWIFT:ops_F('P_BANK_SWIFT',b.swift),P_BANK_INTERMEDIARY:ops_F('P_BANK_INTERMEDIARY',b.interSwift),P_CODE:o.code||''};}
-const OPS_OTA_KEYS=['OTA_NAME','OTA_ADDR_EN','OTA_REGNO','OTA_LICENCE','OTA_TRN','OTA_BANK_ACCOUNT','OTA_BANK_IBAN','OTA_BANK_NAME','OTA_BANK_ADDR','OTA_BANK_SWIFT','OTA_SIGNATORY','OTA_TITLE_EN','OTA_TITLE_L2','OTA_CUSTOMS_CODE'];
+ P_BANK_BENEFICIARY:ops_bk(b,'benef','P_BANK_BENEFICIARY'),P_BANK_IBAN:ops_bk(b,'iban','P_BANK_IBAN'),P_BANK_NAME:ops_bk(b,'bank','P_BANK_NAME'),P_BANK_ADDR:ops_bk(b,'bankAddr','P_BANK_ADDR'),P_BANK_SWIFT:ops_bk(b,'swift','P_BANK_SWIFT'),P_BANK_INTERMEDIARY:ops_bk(b,'interSwift','P_BANK_INTERMEDIARY'),P_CODE:o.code||''};}
+const OPS_OTA_KEYS=['OTA_NAME','OTA_ADDR_EN','OTA_REGNO','OTA_LICENCE','OTA_TRN','OTA_BANK_ACCOUNT','OTA_BANK_IBAN','OTA_BANK_NAME','OTA_BANK_ADDR','OTA_BANK_SWIFT','OTA_SIGNATORY','OTA_TITLE_EN','OTA_TITLE_L2'];   // v10: no customs code
 function ops_vO(src){src=src||S.ota||{};const v={};OPS_OTA_KEYS.forEach(k=>{const x=src[k];v[k]=x==null||String(x).trim().toUpperCase()==='N/A'?'':String(x).trim();});return v;}
 function ops_vSys(){const l=(S.org&&S.org.lang2)||'ru';return{LANG2_NAME_EN:l==='uk'?'Ukrainian':'Russian',LANG2_NAME_L2:l==='uk'?'украинском':'русском'};}
 function ops_vCc(cc){return{CC:cc||'',CC_NAME_EN:ctyNameEn(cc),CC_NAME_L2:ops_ccL2(cc)};}
@@ -150,40 +152,72 @@ function ops_vRef(cc){return{DOC_NO_MPA:docRef('MPA')||'[MPA no.]',DOC_NO_OF:doc
 const ops_seqOf=no=>String(no).replace(/^[A-Z]+-(INV|CN|PF|SR)-/,'');
 const OPS_IC='';
 
-/* ---------- INV / CN ---------- */
-function ops_invTpl(inv,cn){const T=JSON.parse(JSON.stringify(ops_tpl('INV')));const sg=cn?-1:1;const by=id=>T.blocks.find(b=>b.id===id);
- const C=(en,ru,bi)=>({en,ru:ru==null?en:ru,bi:!!bi});const num=n=>ops_n(sg*n);
- // lines
- const t4=by('INV-t4');const hdr=t4.rows[0],keyRow=t4.rows[1],tokRow=t4.rows[2],subRow=t4.rows[4],vatRow=t4.rows[5],totRow=t4.rows[6];const rows=[hdr];let n=0;
- const clone=(row,m)=>row.map((c,j)=>({en:Object.keys(m).reduce((a,k)=>a.split(k).join(m[k]),c.en),ru:Object.keys(m).reduce((a,k)=>a.split(k).join(m[k]),c.ru),bi:c.bi}));
+/* ---------- INV (13) / CN (13A) ----------
+   ТЗ v10 2.2: one VAT line (0%, 0.00) + mandatory "VAT amount in AED at the UAE Central Bank rate {AED_RATE} on the invoice date — AED 0.00"
+   (rate stored with the invoice). 2.3: credit notes come ONLY from the 13A template LEGAL_TPL.CN (keys CN_NUMBER, CN_DATE, CN_INV_NUMBER, CN_INV_DATE,
+   CN_REASON, CN_LINES, AED_RATE); while it is missing, a fallback built from the 13A wording is rendered and OTA mode says so. Rows are found by content. */
+const ops_hasKey=(row,re)=>row.some(c=>re.test(String(c.en||'')+String(c.ru||'')));
+function ops_invTpl(inv){const T=JSON.parse(JSON.stringify(ops_tpl('INV')));const by=id=>T.blocks.find(b=>b.id===id);
+ const C=(en,ru,bi)=>({en,ru:ru==null?en:ru,bi:!!bi});
+ const t4=T.blocks.find(b=>b.rows&&b.rows.some(r=>ops_hasKey(r,/INV_KEY_QTY/)));const R=t4.rows;const find=re=>R.find(r=>ops_hasKey(r,re));
+ const hdr=R[0],keyRow=find(/INV_KEY_QTY/),tokRow=find(/INV_TOK_QTY/),subRow=find(/INV_SUBTOTAL/),totRow=find(/INV_TOTAL\b/),vatRow=find(/VAT 0%/),aedRow=find(/\bAED\b/);
+ const rows=[hdr];let n=0;
+ const clone=(row,m)=>row.map(c=>({en:Object.keys(m).reduce((a,k)=>a.split(k).join(m[k]),c.en||''),ru:Object.keys(m).reduce((a,k)=>a.split(k).join(m[k]),c.ru||''),bi:c.bi}));
  const numRow=r=>{r[0]=C(String(++n),String(n));return r;};
- inv.lines.filter(l=>l.type==='key').forEach(l=>rows.push(numRow(clone(keyRow,{'{{INV_KEY_QTY}}':ops_q(l.qty),'{{INV_KEY_PRICE}}':ops_u(l.unit),'{{INV_KEY_AMOUNT}}':num(l.amount)}))));
- inv.lines.filter(l=>l.type==='token').forEach(l=>{const r=clone(tokRow,{'{{INV_TOK_PLAN}}':PLAN_EN[l.plan],'{{INV_TOK_TERM}}':String(l.term),'{{INV_TOK_QTY}}':ops_q(l.qty),'{{INV_TOK_PRICE}}':ops_u(l.unit),'{{INV_TOK_AMOUNT}}':num(l.amount)});
-  r[1]={en:r[1].en.replace('Service Token ',OPS_TOK_WORD_EN),ru:r[1].ru.replace('Сервисный токен ',OPS_TOK_WORD_RU),bi:true};rows.push(numRow(r));});
- inv.lines.filter(l=>l.type==='xchg').forEach(l=>rows.push(numRow([C(''),C(lineDescEn(l),lineDescL2(l,'ru'),true),C(ops_q(l.qty)),C(ops_u(l.unit)),C(num(l.amount))])));
- rows.push(clone(subRow,{'{{INV_SUBTOTAL}}':num(inv.net)}));
- if(inv.vatRate>0){const p=Math.round(inv.vatRate*100);rows.push([C(''),C(`VAT ${p}% [wording to be approved]`,`НДС ${p}% [формулировка на утверждении]`,true),C(''),C(''),C(num(inv.vat))]);}
- else rows.push(vatRow.map(c=>({en:c.en,ru:c.ru,bi:c.bi})));
- rows.push(cn?[C(''),C('Total credited','Итого к зачёту',true),C(''),C(''),C(num(inv.total))]:clone(totRow,{'{{INV_TOTAL}}':num(inv.total)}));
+ inv.lines.filter(l=>l.type==='key').forEach(l=>rows.push(numRow(clone(keyRow,{'{{INV_KEY_QTY}}':ops_q(l.qty),'{{INV_KEY_PRICE}}':ops_u(l.unit),'{{INV_KEY_AMOUNT}}':ops_n(l.amount),'{{CC_NAME_EN}}':ctyNameEn(l.cc||inv.cc),'{{CC_NAME_L2}}':ops_ccL2(l.cc||inv.cc)}))));
+ inv.lines.filter(l=>l.type==='token').forEach(l=>{const r=clone(tokRow,{'{{INV_TOK_PLAN}}':PLAN_EN[l.plan],'{{INV_TOK_TERM}}':String(l.term),'{{INV_TOK_QTY}}':ops_q(l.qty),'{{INV_TOK_PRICE}}':ops_u(l.unit),'{{INV_TOK_AMOUNT}}':ops_n(l.amount)});
+  r[1]={en:r[1].en.replace(/Service Token(?!s) /,OPS_TOK_WORD_EN),ru:r[1].ru.replace(/Сервисный токен /,OPS_TOK_WORD_RU),bi:r[1].bi};rows.push(numRow(r));});
+ inv.lines.filter(l=>l.type==='xchg').forEach(l=>rows.push(numRow([C(''),C(lineDescEn(l),lineDescL2(l,'ru'),true),C(ops_q(l.qty)),C(ops_u(l.unit)),C(ops_n(l.amount))])));
+ rows.push(clone(subRow,{'{{INV_SUBTOTAL}}':ops_n(inv.net)}));
+ rows.push(vatRow?vatRow.map(c=>({en:c.en,ru:c.ru,bi:c.bi})):[C(''),C(VAT0_EN,VAT0_L2.ru,true),C(''),C(''),C('0.00')]);   // always exactly one VAT line, 0%
+ rows.push(aedRow?aedRow.map(c=>({en:c.en,ru:c.ru,bi:c.bi})):[C(''),C(AED_LINE.en.replace('{r}','{{AED_RATE}}'),AED_LINE.ru.replace('{r}','{{AED_RATE}}'),true),C(''),C(''),C('AED 0.00')]);
+ rows.push(clone(totRow,{'{{INV_TOTAL}}':ops_n(inv.total)}));
  t4.rows=rows;delete t4.rowCond;
  // references (MPA / Order Form): columns only when present
- const t3=by('INV-t3');const mpa=inv.mpa||docRef('MPA')||'',of=inv.of||docRef('OF',inv.cc)||'';
- if(cn){T.blocks=T.blocks.filter(b=>!['INV-p2','INV-t5'].includes(b.id)&&b.id!=='INV-t3');
-  const t2=by('INV-t2');t2.rows=[[C('Credit note no.','№ кредит-ноты',true),C('Credit note date','Дата',true),C('Cancelled invoice','Аннулируемый счёт',true),C('Currency','Валюта',true)],[C(cn.number),C(ops_dl(cn.createdAt,'en'),ops_dl(cn.createdAt,'ru')),C(inv.number),C('USD')]];
-  by('INV-title').en='TAX CREDIT NOTE';by('INV-title').ru='НАЛОГОВАЯ КРЕДИТ-НОТА';
-  const ref=by('INV-ref');ref.en=ref.en.replace('OTA-INV-{{DOC_SEQ}}','OTA-CN-{{DOC_SEQ}}');ref.ru=ref.ru.replace('OTA-INV-{{DOC_SEQ}}','OTA-CN-{{DOC_SEQ}}');
-  const i1=T.blocks.findIndex(b=>b.id==='INV-p1');
-  T.blocks.splice(i1,0,{id:'CN-p1',kind:'para',en:`This credit note cancels Tax Invoice ${inv.number}. Reason: ${cn.reason||'—'}.`+(cn.wasPaid?' Activation Keys and Service Tokens issued under that invoice are revoked.':''),ru:`Настоящая кредит-нота аннулирует налоговый счёт ${inv.number}. Основание: ${cn.reason||'—'}.`+(cn.wasPaid?' Ключи активации и Сервисные токены, выпущенные по этому счёту, аннулируются.':'')});}
- else{const cols=[];if(mpa)cols.push([t3.rows[0][0],C(mpa)]);if(of)cols.push([t3.rows[0][1],C(of)]);
-  if(!cols.length)T.blocks=T.blocks.filter(b=>b.id!=='INV-t3');else t3.rows=[cols.map(c=>c[0]),cols.map(c=>c[1])];}
+ const t3=T.blocks.find(b=>b.rows&&b.rows.some(r=>ops_hasKey(r,/DOC_NO_MPA/))&&b.kind==='table'&&b!==t4);const mpa=inv.mpa||docRef('MPA')||'',of=inv.of||docRef('OF',inv.cc)||'';
+ if(t3){const cols=[];if(mpa)cols.push([t3.rows[0][0],C(mpa)]);if(of)cols.push([t3.rows[0][1],C(of)]);
+  if(!cols.length)T.blocks=T.blocks.filter(b=>b!==t3);else t3.rows=[cols.map(c=>c[0]),cols.map(c=>c[1])];}
  return T;}
-function ops_vInv(inv,cn){const b=inv.buyer||{};const v=Object.assign({},ops_vO(inv.seller),ops_vSys(),ops_vCc(inv.cc),{P_NAME:b.name||'',P_ADDR_EN:b.address||'',P_REGNO:b.regNo||'',P_TAXNO:b.taxId||'',
-  DOC_SEQ:ops_seqOf(cn?cn.number:inv.number)});ops_dv(v,'DATE',cn?cn.createdAt:inv.createdAt);ops_dv(v,'DUE_DATE',inv.dueAt);return v;}
+function ops_vInv(inv,cn){const b=inv.buyer||{};const d=cn||inv;const v=Object.assign({},ops_vO(inv.seller),ops_vSys(),ops_vCc(inv.cc),{P_NAME:b.name||'',P_ADDR_EN:b.address||'',P_REGNO:b.regNo||'',P_TAXNO:b.taxId||'',
+  DOC_SEQ:ops_seqOf(cn?cn.number:inv.number),AED_RATE:fmtAed(d.aedRate!=null?d.aedRate:aedRate(d.createdAt).rate)});ops_dv(v,'DATE',cn?cn.createdAt:inv.createdAt);ops_dv(v,'DUE_DATE',inv.dueAt);return v;}
+// CN lines as repeat items; keys of the template's repeat row are discovered (…DESC/QTY/PRICE|UNIT/AMOUNT), plus the documented CN_LINE_* names
+function ops_cnItems(T,cn,inv){const lines=cn.lines||inv.lines.map(l=>Object.assign({},l,{amount:-Math.abs(l.amount)}));
+ const rb=T&&T.blocks.find(b=>b.repeat&&/CN_LINES/.test(b.repeat.list||''));const keys=new Set();
+ if(rb){const row=rb.rows[rb.repeat.row]||[];row.forEach(c=>String((c.en||'')+(c.ru||'')).replace(/\{\{(\w+)\}\}/g,(m,k)=>{keys.add(k);return m;}));}
+ const pick=(re,dflt)=>[...keys].find(k=>re.test(k))||dflt;
+ const kN=pick(/(^|_)(NO|NUM|N)$/,'CN_LINE_NO'),kD=pick(/DESC/,'CN_LINE_DESC'),kDl2=[...keys].find(k=>/DESC.*L2|L2.*DESC/.test(k)),kQ=pick(/QTY/,'CN_LINE_QTY'),kP=pick(/PRICE|UNIT/,'CN_LINE_PRICE'),kA=pick(/AMOUNT|SUM/,'CN_LINE_AMOUNT');
+ return lines.map((l,i)=>{const o={};o[kN]=String(i+1);o[kD]=lineDescEn(l)+(kDl2?'':' / '+lineDescL2(l,'ru'));if(kDl2)o[kDl2]=lineDescL2(l,'ru');o[kQ]=ops_q(l.qty);o[kP]=ops_u(l.unit);o[kA]=ops_n(Math.abs(l.amount));   // unsigned: the 13A template prints "–"
+  o.CN_LINE_DESC_EN=lineDescEn(l);o.CN_LINE_DESC_L2=lineDescL2(l,'ru');return o;});}
+function ops_vCn(cn,inv){const v=ops_vInv(inv,cn);const r=CN_REASONS[cn.reason];
+ Object.assign(v,{CN_NUMBER:cn.number,CN_INV_NUMBER:inv.number,CN_REASON:r?cn.reason:'error',CN_REASON_TEXT:r?r.en:(cn.reasonNote||''),CN_REASON_TEXT_L2:r?r.ru:(cn.reasonNote||''),CN_SUBTOTAL:ops_n(Math.abs(cn.net)),CN_TOTAL:ops_n(Math.abs(cn.total)),DOC_NO_MPA:inv.mpa||docRef('MPA')||''});
+ ops_dv(v,'CN_DATE',cn.createdAt);ops_dv(v,'CN_INV_DATE',inv.createdAt);
+ v['CN_REASON_'+String(v.CN_REASON).toUpperCase()]=true;try{if(typeof legalDerive==='function')legalDerive(v);}catch(e){}return v;}
+// fallback 13A body (wording of template 13A, v10 pack) — used only while LEGAL_TPL.CN is missing
+function ops_cnFallbackTpl(inv){const C=(en,ru,bi)=>({en,ru:ru==null?en:ru,bi:!!bi});const I=JSON.parse(JSON.stringify(ops_tpl('INV')||{blocks:[]}));const t1=I.blocks.find(b=>b.id==='INV-t1');const sig=I.blocks.find(b=>b.kind==='signature');
+ return{type:'CN',docNo:'13A',ver:'T-CN-fallback',title:{en:'Tax Credit Note',ru:'Налоговая кредит-нота'},blocks:[
+  {id:'CN-title',kind:'heading',en:'TAX CREDIT NOTE',ru:'НАЛОГОВАЯ КРЕДИТ-НОТА'},
+  {id:'CN-ref',kind:'para',en:'Document 13A of 14 · Ref. {{CN_NUMBER}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.',ru:'Документ 13A из 14 · № {{CN_NUMBER}}\nДокумент составлен на английском и русском языках. При расхождении текстов преимущественную силу имеет английский текст.'},
+  t1||{id:'CN-t1',kind:'table',rows:[[C('Supplier','Поставщик',true),C('Customer','Покупатель',true)],[C('{{OTA_NAME}}\n{{OTA_ADDR_EN}}'),C('{{P_NAME}}\n{{P_ADDR_EN}}')]]},
+  {id:'CN-t2',kind:'table',rows:[[C('Credit note no.','№ кредит-ноты',true),C('Date','Дата',true),C('Original invoice','Исходный счёт',true),C('Currency','Валюта',true)],[C('{{CN_NUMBER}}'),C('{{CN_DATE}}','{{CN_DATE}}'),C('{{CN_INV_NUMBER}} of {{CN_INV_DATE}}','{{CN_INV_NUMBER}} от {{CN_INV_DATE}}'),C('USD')]]},
+  {id:'CN-t3',kind:'table',rows:[[C('Reason','Основание',true),C('Master Agreement','Рамочное соглашение',true)],[C('{{CN_REASON_TEXT}}','{{CN_REASON_TEXT}}'),C('{{DOC_NO_MPA}}')]]},
+  {id:'CN-t4',kind:'table',repeat:{row:1,list:'CN_LINES'},rows:[[C('No.','№',true),C('Description','Описание',true),C('Qty','Кол-во',true),C('Unit price USD','Цена USD',true),C('Amount USD','Сумма USD',true)],
+   [C('{{CN_LINE_NO}}'),C('{{CN_LINE_DESC}}'),C('{{CN_LINE_QTY}}'),C('{{CN_LINE_PRICE}}'),C('–{{CN_LINE_AMOUNT}}')],
+   [C(''),C('Subtotal credited','Итого к уменьшению без НДС',true),C(''),C(''),C('–{{CN_SUBTOTAL}}')],[C(''),C(VAT0_EN,VAT0_L2.ru,true),C(''),C(''),C('0.00')],
+   [C(''),C(AED_LINE_CN.en.replace('{r}','{{AED_RATE}}'),AED_LINE_CN.ru.replace('{r}','{{AED_RATE}}'),true),C(''),C(''),C('AED –0.00')],[C(''),C('Total credited','Итого к уменьшению',true),C(''),C(''),C('–{{CN_TOTAL}}')]]},
+  {id:'CN-p1',kind:'para',en:CN_TEXT.en,ru:CN_TEXT.ru}].concat(sig?[sig]:[])};}
+function ops_cnTplOk(){try{return !!(LEGAL_TPL&&LEGAL_TPL.CN&&Array.isArray(LEGAL_TPL.CN.blocks));}catch(e){return false;}}
+// expand a repeat block locally (fallback renderer has no repeat support)
+function ops_expandRepeat(T,v){T.blocks.forEach(b=>{if(!b.repeat||!b.rows)return;const arr=v[b.repeat.list]||[];const ri=b.repeat.row;const tr=b.rows[ri];
+ const exp=arr.map(it=>tr.map(c=>({en:String(c.en||'').replace(/\{\{(\w+)\}\}/g,(m,k)=>k in it?it[k]:m),ru:String(c.ru||'').replace(/\{\{(\w+)\}\}/g,(m,k)=>k in it?it[k]:m),bi:c.bi})));
+ b.rows=b.rows.slice(0,ri).concat(exp,b.rows.slice(ri+1));delete b.repeat;});return T;}
 function ops_buildInv(type,id){let inv,cn=null;
  if(type==='cn'){cn=(S.creditNotes||[]).find(c=>c.id===id);if(!cn)return null;inv=invById(cn.invoiceId);if(!inv)return null;}else{inv=invById(id);if(!inv)return null;}
- const T=ops_invTpl(inv,cn),v=ops_vInv(inv,cn);const no=cn?cn.number:inv.number,date=cn?cn.createdAt:inv.createdAt;
- const o={no,date,cc:inv.cc,titleEn:cn?'Tax Credit Note':'Tax Invoice',ota:inv.seller,noEngine:!!cn};const r=ops_compose('INV',T,v,o,[no,ops_n((cn?-1:1)*inv.total)]);
- return{type,id,no,date,cc:inv.cc,html:r.html,text:r.text,missing:r.missing,tplVer:T.ver,inv,cn,src:cn?link('cnote',cn.id):link('invoice',inv.id),
+ const no=cn?cn.number:inv.number,date=cn?cn.createdAt:inv.createdAt;let T,v,r,fallback=false;
+ if(cn){const tplOk=ops_cnTplOk();T=JSON.parse(JSON.stringify(tplOk?ops_tpl('CN')||LEGAL_TPL.CN:ops_cnFallbackTpl(inv)));fallback=!tplOk;v=ops_vCn(cn,inv);v.CN_LINES=ops_cnItems(T,cn,inv);
+  const o={no,date,cc:inv.cc,titleEn:'Tax Credit Note',ota:inv.seller};
+  r=ops_compose('CN',T,v,o,[no]);if(!r.engine){const T2=ops_expandRepeat(JSON.parse(JSON.stringify(T)),v);r=ops_compose('CN',T2,v,Object.assign({},o,{noEngine:true}),[no]);}}
+ else{T=ops_invTpl(inv);v=ops_vInv(inv);r=ops_compose('INV',T,v,{no,date,cc:inv.cc,titleEn:'Tax Invoice',ota:inv.seller},[no,ops_n(inv.total)]);}
+ return{type,id,no,date,cc:inv.cc,html:r.html,text:r.text,missing:r.missing,tplVer:T.ver,inv,cn,fallback,src:cn?link('cnote',cn.id):link('invoice',inv.id),
   status:cn?'issued':invStatus(inv),title:cn?'Tax Credit Note':'Tax Invoice'};}
 
 /* ---------- RS ---------- */
@@ -203,41 +237,69 @@ function ops_buildRS(id){const s=S.statements.find(x=>x.id===id);if(!s)return nu
 
 /* ---------- CI ---------- */
 function ops_buildCI(id){const ci=S.commissionInvoices.find(x=>x.id===id);if(!ci||ci.mode==='upload')return null;const s=S.statements.find(x=>x.id===ci.rsId);const T=JSON.parse(JSON.stringify(ops_tpl('CI')));
- T.blocks.forEach(b=>{if(b.rows)b.rows=b.rows.map(r=>r.map(c=>({en:c.en.split('OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}').join('{{RS_NO}}'),ru:c.ru.split('OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}').join('{{RS_NO}}'),bi:c.bi})));});
- const v=Object.assign({},ops_vO(),ops_vP(),ops_vSys(),ops_vRef(ci.cc),{DOC_SEQ:ci.seq,RS_MONTH:ops_ymLabel(ci.ym),RS_YYYYMM:ci.ym,RS_NO:ci.rsNo,CI_AMOUNT:ops_n(ci.amount),
+ // ТЗ v10 2.1: one partner invoice may reference statements of several countries of the month: "per Statement(s) OTA-ARV-RS-UA-202610, OTA-ARV-RS-KZ-202610"
+ const RSRE=/OTA-(?:RS-)?\{\{P_CODE\}\}-(?:RS-)?(?:\{\{CC\}\}-)?\{\{RS_YYYYMM\}\}|OTA-(?:RS-)?\{\{P_CODE\}\}-(?:RS-)?\[CC-YYYYMM\]|\{\{RS_NOS?\}\}/g;
+ T.blocks.forEach(b=>{if(b.rows)b.rows=b.rows.map(r=>r.map(c=>({en:String(c.en||'').replace(RSRE,'{{RS_NO}}').replace(/per Statement \{\{RS_NO\}\}/,'per Statement(s) {{RS_NO}}'),ru:String(c.ru||'').replace(RSRE,'{{RS_NO}}'),bi:c.bi})));});
+ const nos=ci.rsNos&&ci.rsNos.length?ci.rsNos:[ci.rsNo];
+ const v=Object.assign({},ops_vO(),ops_vP(),ops_vSys(),ops_vRef(ci.cc),{DOC_SEQ:ci.seq,RS_MONTH:ops_ymLabel(ci.ym),RS_YYYYMM:ci.ym,RS_NO:nos.join(', '),RS_NOS:nos.join(', '),CI_AMOUNT:ops_n(ci.amount),
   CI_VAT_TREATMENT:ci.vatText||OPS_CI_VAT_DEFAULT,CI_VAT_AMOUNT:ops_n(ci.vat),CI_TOTAL:ops_n(ci.total)});
  ops_dv(v,'DATE',ci.date);ops_dv(v,'DUE_DATE',ci.due);const r=ops_compose('CI',T,v,{no:ci.number,date:ci.date,cc:ci.cc,titleEn:'Partner Commission Invoice'},[ci.number,ops_n(ci.total)]);
  return{type:'ci',id,no:ci.number,date:ci.date,cc:ci.cc,html:r.html,text:r.text,missing:r.missing,tplVer:T.ver,ci,src:s?link('statement',s.id):link('opsdocs'),status:ci.status,title:'Partner Commission Invoice'};}
 
-/* ---------- PF / SR ---------- */
+/* ---------- PF / SR / A2 label ----------
+   ТЗ v10 1.2: the pro forma shows OTA TECHNOLOGY DMCC as owner of the goods (no TRN), the EU ship-from address, the exporter of record and EORI and the
+   country of dispatch / destination. Until the template agent delivers PF v10, the v09 rows are replaced with the v10 wording of Document 11. */
+function ops_pfV10(T){const C=(en,ru)=>({en,ru,bi:true});const V=(en,ru)=>({en,ru:ru==null?en:ru});
+ T.blocks.forEach(b=>{if(b.rows)b.rows.forEach(r=>r.forEach(c=>{['en','ru'].forEach(l=>{if(c[l])c[l]=c[l].replace(/\s*·\s*TRN\s*\{\{OTA_TRN\}\}/g,'').replace(/\n?TRN( \(VAT\))?\s*\{\{OTA_TRN\}\}/g,'').replace(/\{\{OTA_CUSTOMS_CODE\}\}/g,'');});}));});
+ const t1=T.blocks.find(b=>b.id==='PF-t1'||(b.rows&&b.rows.some(r=>/Consignee/.test((r[0]||{}).en||''))));if(!t1)return;
+ if(t1.rows.some(r=>/Owner of the goods/.test((r[0]||{}).en||'')))return;   // already v10
+ const ix=t1.rows.findIndex(r=>/^Exporter/.test((r[0]||{}).en||''));const own=[C('Owner of the goods','Собственник товара'),V('{{OTA_NAME}}, {{OTA_ADDR_EN}}\nReg. no. {{OTA_REGNO}}')];
+ const add=[own,[C('Ship-from address','Адрес отправки'),V('{{SHIP_FROM}}')],[C('Exporter of record and EORI','Экспортёр и EORI'),V('{{EXPORTER_EU}}, EORI {{EXPORTER_EORI}}','{{EXPORTER_EU}}, № EORI {{EXPORTER_EORI}}')]];
+ if(ix>=0)t1.rows.splice(ix,1,...add);else t1.rows.splice(2,0,...add);
+ t1.rows.forEach((r,i)=>{if(/Country of export/.test((r[0]||{}).en||''))t1.rows[i]=[C('Country of dispatch / destination','Страна отправки / назначения'),V('{{SHIP_FROM_COUNTRY}} / {{CC_NAME_EN}}','{{SHIP_FROM_COUNTRY_L2}} / {{CC_NAME_L2}}')];});
+ const p3=T.blocks.find(b=>b.id==='PF-p3');if(p3&&/exporter's records/.test(p3.en||'')){p3.en='I declare that the information in this document is true and correct and is supported by the records of OTA as owner of the goods.';p3.ru='Подтверждаю, что сведения в настоящем документе достоверны и подтверждаются документами OTA как собственника товара.';}
+ const t1r=t1.rows.find(r=>/Reason for export/.test((r[0]||{}).en||''));if(t1r&&t1r[1]&&/property of the exporter/.test(t1r[1].en||''))t1r[1]={en:'Free-of-charge transfer into custody of SIM cards remaining the property of OTA or its supplier, for installation in approved IoT devices; not for retail sale',ru:'Безвозмездная передача на хранение SIM-карт, остающихся собственностью OTA или её поставщика, для установки в одобренные IoT-устройства; не для розничной продажи',bi:true};}
+// A2 box label: SHIPPER (OWNER OF GOODS) — OTA TECHNOLOGY DMCC + SHIP FROM block (warehouse, exporter, EORI). Label layout only; no legal text.
+function ops_buildA2(id){const h=(S.shipments||[]).find(x=>x.id===id);if(!h)return null;const v=ops_shipVals(h);const d=h.dap||{};const n=Math.max(1,+h.cartons||1);const name=v.OTA_NAME||'OTA TECHNOLOGY DMCC';
+ const box=i=>`<section class="ops_a2" aria-label="A2 label ${i}/${n}"><div class="ops_a2sh"><span class="ops_a2k">SHIPPER (OWNER OF GOODS)</span><b>— ${esc(name)}</b></div>
+  <div class="ops_a2g"><div><span class="ops_a2k">SHIP FROM</span><b>${esc(v.SHIP_FROM_NAME)}</b><span>${esc(v.SHIP_FROM_ADDR)}</span><span>${esc(v.SHIP_FROM_COUNTRY)}</span><span>Exporter: ${esc(v.EXPORTER_EU)}</span><span>EORI: <b class="mono">${esc(v.EXPORTER_EORI)}</b></span></div>
+  <div><span class="ops_a2k">SHIP TO (DAP)</span><b>${esc(d.company||'')}</b>${d.recipient?`<span>Attn: ${esc(d.recipient)}</span>`:''}<span>${esc([d.address,d.city].filter(Boolean).join(', '))}</span><span>${esc(ctyNameEn(d.country||h.cc))}</span>${d.phone?`<span>Tel. ${esc(d.phone)}</span>`:''}</div></div>
+  <div class="ops_a2f"><span>Pro forma <b class="mono">${esc(h.pf)}</b></span><span>Box <b>${i} / ${n}</b></span><span>${esc(ops_q(h.qty))} SIM · HS 8523.52</span></div></section>`;
+ const html=`<div class="ops_a2wrap">${Array.from({length:Math.min(n,20)},(_,i)=>box(i+1)).join('')}</div>`;
+ const text=['SHIPPER (OWNER OF GOODS) — '+name,'SHIP FROM',v.SHIP_FROM_NAME,v.SHIP_FROM_ADDR,v.SHIP_FROM_COUNTRY,'Exporter: '+v.EXPORTER_EU,'EORI: '+v.EXPORTER_EORI,'Pro forma '+h.pf].join('\n');
+ return{type:'a2',id,no:h.pf+' · A2',date:h.createdAt,cc:h.cc,html,text,missing:[],tplVer:'A2 label',h,src:link('shipment',h.id),status:h.status,title:'A2 box label'};}
 function ops_shipVals(h){const d=h.dap||{},cc=h.cc;const place=[d.address,d.city,ctyNameEn(d.country||cc)].filter(Boolean).join(', ');const rc=h.receipt;const blank='______________';
  const ff=String(h.simType||'').split(',').slice(1).join(',').trim()||h.simType||'[form factor]';const dl=(h.events||[]).find(e=>e[0]==='delivered');const ph='[  ]';
  const cond=rc?(rc.condition==='intact'?['intact, no visible damage','целая, без видимых повреждений']:['damaged'+(rc.note?' – '+rc.note:''),'повреждена'+(rc.note?' – '+rc.note:'')]):[blank,blank];
+ const sf=h.ship_from||SHIP_FROM_DEMO,ex=h.exporter||EXPORTER_DEMO;
  return Object.assign({},ops_vO(),ops_vP(),ops_vSys(),ops_vCc(cc),ops_vRef(cc),{DOC_SEQ:ops_seqOf(h.pf),
+  SHIP_FROM_NAME:sf.name||'',SHIP_FROM_ADDR:sf.addr||'',SHIP_FROM_COUNTRY:sf.country?ctyNameEn(sf.country):'',SHIP_FROM_COUNTRY_L2:sf.country?ops_ccL2(sf.country):'',
+  SHIP_FROM:[sf.name,sf.addr,sf.country?ctyNameEn(sf.country):''].filter(Boolean).join(', '),EXPORTER_EU:ex.name||'',EXPORTER_EORI:ex.eori||'',
   SHIP_CONSIGNEE:[d.company,d.recipient?'Attn: '+d.recipient:'',place,d.phone?'Tel. '+d.phone:''].filter(Boolean).join('\n'),SHIP_IMPORTER:h.importer||d.importer||'[importer of record and tax ID]',SHIP_PLACE:place,
   SHIP_WAYBILL:h.waybill?((h.carrier||'')+' '+h.waybill).trim():'[to be advised on dispatch]',SHIP_FORM_FACTOR:ff,SHIP_ORIGIN:'[per manufacturer / по документам производителя]',SHIP_QTY:ops_q(h.qty),SHIP_UNIT_VALUE:h.unitValue!=null?ops_u(h.unitValue):ph,SHIP_TOTAL_VALUE:h.unitValue!=null?ops_n(r2(h.unitValue*h.qty)):ph,
   SHIP_CARTONS:h.cartons||ph,SHIP_GROSS_KG:h.gross||ph,SHIP_NET_KG:h.netw||ph,SHIP_ICCID_REF:h.pf+'/ICCID',SHIP_ICCID_RANGE:genIccid(h.iccidFrom)+' – '+genIccid(h.iccidTo),
   SR_DELIVERY:(dl?ops_dl(dl[1],'en'):blank)+', '+place,SR_DELIVERY_L2:(dl?ops_dl(dl[1],'ru'):blank)+', '+place,SR_IMPORTER_DECL:(h.importer||d.importer||'[importer of record]')+' / '+(rc&&rc.customsDecl?rc.customsDecl:blank),SR_STORAGE:rc&&(rc.storage||rc.person)?[rc.storage,rc.person].filter(Boolean).join(', '):blank,
   SR_SIM_TYPE:h.simType||'[SIM type]',SR_RECEIVED:rc?ops_q(rc.received):blank,SR_DIFF:rc?ops_q(rc.diff):blank,SR_CONDITION_EN:cond[0],SR_CONDITION_L2:cond[1],SR_RECEIVER_NAME:rc&&rc.person?rc.person:OPS_BLANK,SR_RECEIVER_TITLE:OPS_BLANK});}
 function ops_buildShip(type,id){const h=(S.shipments||[]).find(x=>x.id===id);if(!h)return null;const pf=type==='pf';const T=JSON.parse(JSON.stringify(ops_tpl(pf?'PF':'SR')));const v=ops_shipVals(h);let custom=false;
- if(pf&&v.OTA_CUSTOMS_CODE){const t1=T.blocks.find(b=>b.id==='PF-t1');t1.rows.splice(3,0,[{en:'OTA customs code',ru:'Таможенный код OTA',bi:true},{en:'{{OTA_CUSTOMS_CODE}}',ru:'{{OTA_CUSTOMS_CODE}}'}]);}   // row exists only when the OTA customs code is not N/A
+ if(pf)ops_pfV10(T);
  const n=+h.cartons;if(pf&&n){const p2=T.blocks.find(b=>b.id==='PF-p2');const ruPl=n%10===1&&n%100!==11?'коробка':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'коробки':'коробок';
   p2.en=p2.en.replace('{{SHIP_CARTONS}} cartons','{{SHIP_CARTONS}} '+(n===1?'carton':'cartons'));p2.ru=p2.ru.replace('{{SHIP_CARTONS}} коробок','{{SHIP_CARTONS}} '+ruPl);}
  ops_dv(v,'DATE',h.createdAt);const no=pf?h.pf:h.sr;const date=pf?h.createdAt:(h.receipt?h.receipt.at:h.createdAt);
  const r=ops_compose(pf?'PF':'SR',T,v,{no,date,cc:h.cc,titleEn:pf?'Pro Forma Invoice for Customs':'SIM Receipt and Custody Acknowledgment'},[no,v.SHIP_QTY]);
  return{type,id,no,date,cc:h.cc,html:r.html,text:r.text,missing:r.missing,tplVer:T.ver,h,src:link('shipment',h.id),status:h.status,title:pf?'Pro Forma Invoice for Customs':'SIM Receipt and Custody Acknowledgment'};}
 function ops_build(type,id){type=String(type||'').toLowerCase();try{
- if(type==='inv'||type==='cn')return ops_buildInv(type,id);if(type==='rs')return ops_buildRS(id);if(type==='ci')return ops_buildCI(id);if(type==='pf'||type==='sr')return ops_buildShip(type,id);}catch(e){console.error(e);}return null;}
+ if(type==='inv'||type==='cn')return ops_buildInv(type,id);if(type==='rs')return ops_buildRS(id);if(type==='ci')return ops_buildCI(id);if(type==='pf'||type==='sr')return ops_buildShip(type,id);if(type==='a2')return ops_buildA2(id);}catch(e){console.error(e);}return null;}
 
 /* ---------- print view route ---------- */
 function ops_nf(){return ui.page({title:t('ops.nf'),crumbs:[[t('ops.docs.title'),'#opsdocs']],body:ui.card({body:ui.empty('search',t('ops.nf'),t('ops.nf.p'),ui.btn(t('ops.docs.title'),{href:'#opsdocs'}))})});}
-const OPS_TYPE_TONE={INV:'accent',CN:'bad',RS:'info',CI:'violet',PF:'warn',SR:'ok'};
+const OPS_TYPE_TONE={INV:'accent',CN:'bad',RS:'info',CI:'violet',PF:'warn',SR:'ok',A2:'warn'};
 function ops_typeBadge(T){return ui.badge(t('ops.type.'+T),OPS_TYPE_TONE[T]);}
 route('opsdoc',{nav:'opsdocs',render(type,id){ops_ensure();const d=ops_build(type,id);if(!d)return ops_nf();const T=d.type.toUpperCase();
  const notes=[];
- if(d.inv&&d.inv.vatWarn)notes.push(ui.note('warn',`<b>${t('ops.inv.vat5.h')}</b> ${t('ops.inv.vat5.p')}`));
- if(d.inv&&!d.cn&&!d.inv.vatRate)notes.push(ui.note('info',t('ops.inv.vat0',{cc:esc(ctyName(d.inv.cc))})));
+ if(d.inv&&!d.cn)notes.push(ui.note('info',t('ops.inv.vat0',{cc:esc(ctyName(d.inv.cc))})));
+ if(d.fallback&&S.admin)notes.push(ui.note('admin',t('ops.cn.fallback')));
  if(d.type==='ci'&&d.ci.status==='draft')notes.push(ui.note('info',t('ops.ci.draftNote')));
+ if(d.type==='ci'&&S.bankChange&&typeof lg_bankBanner==='function'){try{notes.push(lg_bankBanner());}catch(e){}}
  if(d.type==='sr'&&!d.h.receipt)notes.push(ui.note('info',t('ops.sr.blank')));
  if(d.missing&&d.missing.length)notes.push(ui.note('bad',t('ops.missing',{k:d.missing.map(esc).join(', ')})));
  const arg=d.type+':'+d.id;
@@ -251,7 +313,7 @@ HOOKS.afterRender.push((name,params)=>{try{
  let btns='';
  if(name==='invoice'){const i=invById(params[0]);if(i)btns=ops_pbtn('inv',i.id,t('ops.btn.inv'));}
  else if(name==='cnote'){const c=(S.creditNotes||[]).find(x=>x.id===params[0]);if(c)btns=ops_pbtn('cn',c.id,t('ops.btn.cn'));}
- else if(name==='shipment'){const h=(S.shipments||[]).find(x=>x.id===params[0]);if(h)btns=ops_pbtn('pf',h.id,t('ops.btn.pf'))+ops_pbtn('sr',h.id,t('ops.btn.sr'));}
+ else if(name==='shipment'){const h=(S.shipments||[]).find(x=>x.id===params[0]);if(h)btns=ops_pbtn('pf',h.id,t('ops.btn.pf'))+ops_pbtn('sr',h.id,t('ops.btn.sr'))+ops_pbtn('a2',h.id,t('ops.btn.a2'));}
  if(btns)ops_inject(btns);}catch(e){console.error(e);}});
 function ops_pbtn(type,id,label){return `<a class="btn ghost" data-ops-inj="1" href="${link('opsdoc',type,id)}"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">${ICONS.printer||''}</svg><span>${esc(label)}</span></a>`;}
 function ops_inject(html){const ph=$('#content .ph');if(!ph||ph.querySelector('[data-ops-inj],[data-ops-print]'))return;let box=ph.querySelector(':scope > .row.wrap');
@@ -338,13 +400,16 @@ FORM.ops_res=f=>{const d=formData(f);if(!can('ota.statements'))return;clearErrs(
  ops_audit('statement.dispute.resolve',s.no,{line:dp.line,answer:a});closeOverlay();toast(t('ops.disp.resDone'));rerender();};
 
 /* ---------- Commission invoice (CI) ---------- */
+function ops_ciRsList(ci){const ids=ci.rsIds&&ci.rsIds.length?ci.rsIds:[ci.rsId];return ids.map(id=>S.statements.find(x=>x.id===id)).filter(Boolean).map(x=>({id:x.id,no:x.no,cc:x.cc,com:x.calc.tot.commission}));}
+// other statements of the same month that can go on the same partner invoice (confirmed, commission > 0, not yet invoiced)
+function ops_ciPeers(s,ci){return S.statements.filter(x=>x.id!==s.id&&x.ym===s.ym&&(x.status==='confirmed'||x.status==='auto')&&x.calc.tot.commission>0&&(!x.ciId||(ci&&x.ciId===ci.id)));}
 function ops_ciCard(s,ci){const conf=s.status==='confirmed'||s.status==='auto';const com=s.calc.tot.commission;const by15=ops_ymDay(s.ym,15);
  let body='';const can_=can('p.docs');
  if(!conf)body=ui.note('info',t('ops.ci.wait'));
  else if(!ci&&com<=0)body=ui.note('info',t('ops.ci.none'));
  else if(!ci){body=`<p class="small muted">${t('ops.ci.intro',{a:money(com,'USD'),d:fmtDate(by15)})}</p>${now()>by15?ui.note('bad',t('ops.ci.overdue',{d:fmtDate(by15)})):''}<div class="row wrap g8" style="margin-top:12px">${ui.btn(t('ops.ci.propose'),{kind:'primary',icon:'file',act:'ops_ciEdit',arg:s.id+':',disabled:!can_})}${ui.btn(t('ops.ci.upload'),{icon:'upload',act:'ops_ciUp',arg:s.id,disabled:!can_})}</div>${can_?'':`<div style="margin-top:8px">${ops_noPerm()}</div>`}`;}
  else{const up=ci.mode==='upload';
-  body=`<dl class="dl ops_dl"><dt>${t('ops.ci.no')}</dt><dd class="mono">${esc(ci.number)}</dd><dt>${t('ops.ci.rs')}</dt><dd><a class="mono" href="${link('statement',s.id)}">${esc(ci.rsNo)}</a></dd><dt>${t('ops.col.amount')}</dt><dd class="num">${money(ci.total,'USD')}${ci.vat?` <span class="xs faint">(${t('ops.ci.vat')}: ${money(ci.vat,'USD')})</span>`:''}</dd><dt>${t('ops.ci.date')}</dt><dd>${fmtDate(ci.date)}</dd><dt>${t('ops.ci.due')}</dt><dd>${fmtDate(ci.due)}</dd>${up?`<dt>${t('ops.ci.file')}</dt><dd>${icon('file','sm')} ${esc(ci.file&&ci.file.name||'—')}</dd>`:`<dt>${t('ops.ci.vatT')}</dt><dd>${esc(ci.vatText||'—')}</dd>`}<dt>${t('ops.col.status')}</dt><dd>${ops_ciBadge(ci.status)}</dd></dl>`;
+  body=`<dl class="dl ops_dl"><dt>${t('ops.ci.no')}</dt><dd class="mono">${esc(ci.number)}</dd><dt>${t('ops.ci.rs')}</dt><dd>${ops_ciRsList(ci).map(x=>`<a class="mono" href="${link('statement',x.id)}">${esc(x.no)}</a>`).join('<br>')}</dd><dt>${t('ops.col.amount')}</dt><dd class="num">${money(ci.total,'USD')}${ci.vat?` <span class="xs faint">(${t('ops.ci.vat')}: ${money(ci.vat,'USD')})</span>`:''}</dd><dt>${t('ops.ci.date')}</dt><dd>${fmtDate(ci.date)}</dd><dt>${t('ops.ci.due')}</dt><dd>${fmtDate(ci.due)}</dd>${up?`<dt>${t('ops.ci.file')}</dt><dd>${icon('file','sm')} ${esc(ci.file&&ci.file.name||'—')}</dd>`:`<dt>${t('ops.ci.vatT')}</dt><dd>${esc(ci.vatText||'—')}</dd>`}<dt>${t('ops.col.status')}</dt><dd>${ops_ciBadge(ci.status)}</dd></dl>`;
   if(ci.status==='draft')body+=`<div class="row wrap g8" style="margin-top:12px">${ui.btn(t('ops.ci.submit'),{kind:'primary',icon:'send',act:'ops_ciSubmit',arg:ci.id,disabled:!can_})}${ui.btn(t('c.edit'),{icon:'edit',act:'ops_ciEdit',arg:s.id+':'+ci.id,disabled:!can_})}${ui.btn(t('ops.print'),{kind:'ghost',icon:'printer',href:link('opsdoc','ci',ci.id)})}${ui.btn(t('ops.ci.discard'),{kind:'ghost',icon:'trash',act:'ops_ciDiscard',arg:ci.id,disabled:!can_})}</div><p class="xs faint" style="margin-top:8px">${t('ops.ci.bankNote')}</p>${can_?'':`<div style="margin-top:8px">${ops_noPerm()}</div>`}`;
   else if(!up)body+=`<div class="row wrap g8" style="margin-top:12px">${ui.btn(t('ops.print'),{kind:'ghost',icon:'printer',href:link('opsdoc','ci',ci.id)})}</div>`;
   if(ci.reverseCharge&&ci.reverseCharge.done)body+=`<div style="margin-top:10px">${ui.badge(icon('check','sm')+t('ops.ci.rcDone'),'ok')}</div>`;}
@@ -352,12 +417,15 @@ function ops_ciCard(s,ci){const conf=s.status==='confirmed'||s.status==='auto';c
  if(S.admin&&ci&&ci.status!=='draft'){const ok=can('ota.payments'),okv=can('ota.vat');
   adm=ui.note('admin',`<div class="col g8"><b>${t('ops.adm.h')}</b><span class="row wrap g8">${ci.status==='submitted'?ui.btn(t('ops.ci.markRecv'),{size:'sm',kind:'primary',icon:'check',act:'ops_ciRecv',arg:ci.id,disabled:!ok}):''}${ci.status==='received'?ui.btn(t('ops.ci.markPaid'),{size:'sm',kind:'primary',icon:'check',act:'ops_ciPaid',arg:ci.id,disabled:!ok}):''}${ci.status==='paid'?`<span class="small muted">${t('ops.ci.closed')}</span>`:''}</span>
    <label class="chk small"><input type="checkbox" data-act="ops_ciRc" data-arg="${esc(ci.id)}" ${ci.reverseCharge&&ci.reverseCharge.done?'checked':''} ${okv?'':'disabled'}><span><b>${t('ops.ci.rc')}</b><br><span class="faint xs">${t('ops.ci.rcH')}</span></span></label>${ok&&okv?'':ops_asBtn('ota_finance')}</div>`);}
- return ui.card({title:t('ops.ci.t'),body:`<div class="stack">${body}${adm}</div>`});}
+ let bk='';if(S.bankChange&&typeof lg_bankBanner==='function'){try{bk=lg_bankBanner()||'';}catch(e){}}
+ return ui.card({title:t('ops.ci.t'),body:`<div class="stack">${bk}${body}${adm}</div>`});}
 ACT.ops_ciEdit=arg=>{const [rsId,ciId]=String(arg).split(':');const s=S.statements.find(x=>x.id===rsId);if(!s||!can('p.docs'))return;const ci=ciId?S.commissionInvoices.find(c=>c.id===ciId):null;
  const yr=ci?ci.seq.slice(0,4):String(now().getFullYear());const seq=ci?ci.seq:yr+'-'+pad(((ops_st().ciSeq[yr])||0)+1,4);
  modal(t(ci?'ops.ci.editT':'ops.ci.propT'),`<form id="ops_cF" data-form="ops_ciSave" class="stack" novalidate><input type="hidden" name="rs" value="${esc(rsId)}"><input type="hidden" name="id" value="${esc(ciId||'')}">${ui.note('info',t('ops.ci.propP',{rs:'<span class="mono">'+esc(s.no)+'</span>'}))}
   <div class="grid2">${ui.field({id:'ops_cseq',label:t('ops.ci.seq',{p:esc(S.org.code)}),value:seq,mono:true,hint:t('ops.ci.seqH'),attrs:'maxlength="12"'})}${ui.field({id:'ops_cdate',label:t('ops.ci.date'),type:'date',value:ci?ci.date:ymd0()})}</div>
-  <div class="grid2">${ui.field({id:'ops_camt',label:t('ops.col.amount')+' (USD)',value:money(s.calc.tot.commission,'USD'),attrs:'readonly'})}${ui.field({id:'ops_cvat',label:t('ops.ci.vatA'),type:'number',value:ci?ci.vat:0,attrs:'min="0" step="0.01" inputmode="decimal"'})}</div>
+  ${(()=>{const peers=ops_ciPeers(s,ci);if(!peers.length)return '';const inc=ci&&ci.rsIds?ci.rsIds:[];
+   return `<fieldset class="stack" style="border:0;padding:0;margin:0"><legend class="small"><b>${t('ops.ci.multi')}</b></legend><p class="xs faint" style="margin:0">${t('ops.ci.multiH')}</p>${peers.map(x=>`<label class="chk small"><input type="checkbox" name="ops_inc_${esc(x.id)}" ${inc.includes(x.id)?'checked':''}><span><span class="mono">${esc(x.no)}</span> · ${esc(ctyName(x.cc))} · <b class="num">${money(x.calc.tot.commission,'USD')}</b></span></label>`).join('')}</fieldset>`;})()}
+  <div class="grid2">${ui.field({id:'ops_camt',label:t('ops.col.amount')+' (USD)',value:money(s.calc.tot.commission,'USD'),attrs:'readonly',hint:ops_ciPeers(s,ci).length?t('ops.ci.amtH'):''})}${ui.field({id:'ops_cvat',label:t('ops.ci.vatA'),type:'number',value:ci?ci.vat:0,attrs:'min="0" step="0.01" inputmode="decimal"'})}</div>
   ${ui.field({id:'ops_cvt',label:t('ops.ci.vatT'),value:ci?ci.vatText:'',placeholder:'[…]',hint:t('ops.ci.vatH'),attrs:'maxlength="200"'})}</form>`,
   ui.btn(t('c.cancel'),{act:'ovclose'})+`<button class="btn primary" type="submit" form="ops_cF"><span>${t('ops.ci.saveDraft')}</span></button>`);};
 FORM.ops_ciSave=f=>{const d=formData(f);const s=S.statements.find(x=>x.id===d.rs);if(!s||!can('p.docs'))return;clearErrs(f);let bad=false;
@@ -366,10 +434,13 @@ FORM.ops_ciSave=f=>{const d=formData(f);const s=S.statements.find(x=>x.id===d.rs
  const vat=parseFloat(String(d.ops_cvat||'0').replace(',','.'));if(isNaN(vat)||vat<0){setErr(f,'ops_cvat',t('ops.ci.vatE'));bad=true;}if(bad)return;
  const o=ops_st();const yr=seq.slice(0,4);const n=parseInt(seq.slice(5),10);const ex=d.id?S.commissionInvoices.find(c=>c.id===d.id):null;
  if(S.commissionInvoices.some(c=>c.number===S.org.code+'-INV-'+seq&&c!==ex)){setErr(f,'ops_cseq',t('ops.ci.seqDup'));return;}
- o.ciSeq[yr]=Math.max(o.ciSeq[yr]||0,n);const amount=s.calc.tot.commission;
- const ci=ex||{id:uid('ci'),rsId:s.id,rsNo:s.no,cc:s.cc,ym:s.ym,mode:'draft',file:null,status:'draft',createdAt:iso(now()),createdBy:actorName(),reverseCharge:{done:false}};
- Object.assign(ci,{seq,number:S.org.code+'-INV-'+seq,date:d.ops_cdate,due:ops_ymd(ops_ymDay(s.ym,20)),amount,vat:r2(vat),total:r2(amount+vat),vatText:String(d.ops_cvt||'').trim()});
- if(!ex){S.commissionInvoices.unshift(ci);s.ciId=ci.id;}ops_audit(ex?'ci.draft.update':'ci.draft',ci.number,{rs:s.no,amount});closeOverlay();toast(t('ops.ci.draftDone',{n:ci.number}));rerender();};
+ o.ciSeq[yr]=Math.max(o.ciSeq[yr]||0,n);
+ const prim=ex?(S.statements.find(x=>x.id===ex.rsId)||s):s;const peers=ops_ciPeers(prim,ex).filter(x=>d['ops_inc_'+x.id]);const list=[prim].concat(peers);
+ const amount=r2(list.reduce((a,x)=>a+x.calc.tot.commission,0));
+ const ci=ex||{id:uid('ci'),rsId:prim.id,rsNo:prim.no,cc:prim.cc,ym:prim.ym,mode:'draft',file:null,status:'draft',createdAt:iso(now()),createdBy:actorName(),reverseCharge:{done:false}};
+ (ci.rsIds||[]).forEach(id=>{const x=S.statements.find(q=>q.id===id);if(x&&x.ciId===ci.id&&!list.includes(x))x.ciId=null;});
+ Object.assign(ci,{rsIds:list.map(x=>x.id),rsNos:list.map(x=>x.no),seq,number:S.org.code+'-INV-'+seq,date:d.ops_cdate,due:ops_ymd(ops_ymDay(prim.ym,20)),amount,vat:r2(vat),total:r2(amount+vat),vatText:String(d.ops_cvt||'').trim()});
+ if(!ex)S.commissionInvoices.unshift(ci);list.forEach(x=>{x.ciId=ci.id;});ops_audit(ex?'ci.draft.update':'ci.draft',ci.number,{rs:ci.rsNos.join(', '),amount});closeOverlay();toast(t('ops.ci.draftDone',{n:ci.number}));rerender();};
 ACT.ops_ciUp=rsId=>{const s=S.statements.find(x=>x.id===rsId);if(!s||!can('p.docs'))return;
  modal(t('ops.ci.upT'),`<form id="ops_uF" data-form="ops_ciUpload" class="stack" novalidate><input type="hidden" name="rs" value="${esc(rsId)}">${ui.note('info',t('ops.ci.upP',{a:money(s.calc.tot.commission,'USD')}))}
   <div class="field"><label for="ops_ufile">${t('ops.ci.file')}</label><input class="inp" id="ops_ufile" name="ops_ufile" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"><span class="hint" id="ops_ufile-h">${t('ops.ci.fileH')}</span></div>
@@ -380,7 +451,7 @@ FORM.ops_ciUpload=f=>{const d=formData(f);const s=S.statements.find(x=>x.id===d.
  const amount=s.calc.tot.commission;const ts=iso(now());const ci={id:uid('ci'),rsId:s.id,rsNo:s.no,cc:s.cc,ym:s.ym,mode:'upload',seq:'',number:num,date:d.ops_udate,due:ops_ymd(ops_ymDay(s.ym,20)),amount,vat:0,total:amount,vatText:'',file:{name:fi.name,size:fi.size},status:'submitted',createdAt:ts,createdBy:actorName(),submittedAt:ts,reverseCharge:{done:false}};
  S.commissionInvoices.unshift(ci);s.ciId=ci.id;ops_audit('ci.upload',num,{rs:s.no,file:fi.name,amount});const m=t('ops.ci.upDone',{n:esc(num)});log(m);closeOverlay();toast(m);rerender();};
 ACT.ops_ciSubmit=id=>{const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||ci.status!=='draft'||!can('p.docs'))return;ci.status='submitted';ci.submittedAt=iso(now());ops_audit('ci.submit',ci.number,{rs:ci.rsNo,amount:ci.total});const m=t('ops.ci.subDone',{n:ci.number});log(m);toast(m);rerender();};
-ACT.ops_ciDiscard=id=>{const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||ci.status!=='draft'||!can('p.docs'))return;const s=S.statements.find(x=>x.id===ci.rsId);if(s)s.ciId=null;S.commissionInvoices=S.commissionInvoices.filter(c=>c!==ci);ops_audit('ci.discard',ci.number,{rs:ci.rsNo});toast(t('ops.ci.disDone'));rerender();};
+ACT.ops_ciDiscard=id=>{const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||ci.status!=='draft'||!can('p.docs'))return;S.statements.forEach(x=>{if(x.ciId===ci.id)x.ciId=null;});S.commissionInvoices=S.commissionInvoices.filter(c=>c!==ci);ops_audit('ci.discard',ci.number,{rs:ci.rsNo});toast(t('ops.ci.disDone'));rerender();};
 ACT.ops_ciRecv=id=>{const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||ci.status!=='submitted'||!can('ota.payments'))return;ci.status='received';ci.receivedAt=iso(now());ops_audit('ci.received',ci.number,{rs:ci.rsNo});const m=t('ops.ci.recvDone',{n:ci.number});log(m);toast(m);rerender();};
 ACT.ops_ciPaid=id=>{const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||ci.status!=='received'||!can('ota.payments'))return;tick(5);ci.status='paid';ci.paidAt=iso(now());ops_audit('ci.paid',ci.number,{rs:ci.rsNo,amount:ci.total});const m=t('ops.ci.paidDone',{n:ci.number});log(m);toast(m);rerender();};
 ACT.ops_ciRc=(v,el)=>{const id=el&&el.dataset.arg;const ci=S.commissionInvoices.find(c=>c.id===id);if(!ci||!can('ota.vat'))return;ci.reverseCharge={done:!!v,by:actorName(),at:iso(now())};ops_audit('ci.reverse_charge',ci.number,{done:!!v});toast(t(v?'ops.ci.rcOn':'ops.ci.rcOff',{n:ci.number}));rerender();};
@@ -416,7 +487,7 @@ uk:{'ops.sec':'Документи','ops.nav.rs':'Акти звірки','ops.nav
  'ops.col.type':'Тип','ops.col.number':'Номер','ops.col.date':'Дата','ops.col.cc':'Країна','ops.col.status':'Статус','ops.col.month':'Місяць','ops.col.commission':'Винагорода','ops.col.deadline':'Термін / дата','ops.col.ci':'Рахунок партнера','ops.col.line':'Рядок','ops.col.total':'Разом','ops.col.confirm':'Підтвердження','ops.col.amount':'Сума','ops.col.paid':'Сплачено','ops.col.dueBy20':'До сплати до 20-го',
  'ops.st.inv.open':'Очікує оплати','ops.st.inv.paid':'Сплачено','ops.st.inv.overdue':'Прострочено','ops.st.inv.cancelled':'Скасовано','ops.st.issued':'Видано','ops.st.sh.prepared':'Підготовлено','ops.st.sh.shipped':'Відправлено','ops.st.sh.delivered':'Доставлено','ops.st.sh.received':'Отримано','ops.st.sr.await':'Очікує підпису','ops.st.sr.signed':'Підтверджено партнером',
  'ops.print':'Друк / PDF','ops.openSrc':'Відкрити джерело','ops.btn.inv':'Рахунок для друку / PDF','ops.btn.cn':'Кредит-нота для друку / PDF','ops.btn.pf':'Проформа (PF)','ops.btn.sr':'Акт приймання SIM (SR)','ops.nf':'Документ не знайдено','ops.nf.p':'Можливо, його видалено або посилання застаріло.','ops.missing':'У шаблоні немає значень для: {k}','ops.adm.h':'Дії OTA (демо)','ops.byAgreement':'за домовленістю сторін',
- 'ops.inv.vat5.h':'Увага, фінансова служба OTA: партнер зареєстрований в ОАЕ — застосовано ПДВ 5%.','ops.inv.vat5.p':'У шаблоні 13 немає формулювання для 5%, тому в документі стоїть позначка [wording to be approved]. Підтвердьте текст із бухгалтером.','ops.inv.vat0':'Партнер поза ОАЕ ({cc}): ПДВ 0% — експорт послуг, із правовою підставою (ст. 31 Виконавчого регламенту до Федерального декрету-закону № 8 від 2017 р.). Ключі й токени видаються лише після відмітки про оплату.','ops.ci.draftNote':'Це чернетка. Рахунок буде подано OTA після кнопки «Подати».','ops.sr.blank':'Партнер ще не підтвердив отримання: поля кількості, стану й місця зберігання залишено порожніми для заповнення від руки.',
+ 'ops.inv.vat0':'ПДВ завжди 0% — експорт послуг (ст. 31 Виконавчого регламенту до Федерального декрету-закону № 8 від 2017 р.); сума ПДВ в AED — за курсом ЦБ ОАЕ на дату рахунку, збереженим разом із рахунком. Країна: {cc}. Ключі й токени видаються лише після відмітки про оплату.','ops.ci.draftNote':'Це чернетка. Рахунок буде подано OTA після кнопки «Подати».','ops.sr.blank':'Партнер ще не підтвердив отримання: поля кількості, стану й місця зберігання залишено порожніми для заповнення від руки.',
  'ops.rs.title':'Акти звірки','ops.rs.sub':'Щомісяця до 10-го числа за попередній місяць, окремо по кожній країні.','ops.rs.how':'Підтвердьте акт або оскаржте окремі рядки протягом 5 робочих днів. Без відповіді акт вважається підтвердженим автоматично. Після підтвердження портал запропонує чернетку рахунку на винагороду (до 15-го).','ops.rs.empty':'Актів ще немає','ops.rs.emptyP':'Перший акт з’явиться після закриття місяця з платежами прямих підписок.',
  'ops.rs.k.wait':'Очікують підтвердження','ops.rs.k.waitS':'у вас на перевірці','ops.rs.k.disp':'Спірні акти','ops.rs.k.dispS':'очікують відповіді OTA','ops.rs.k.comm':'Винагорода за {m}','ops.rs.k.commS':'за всіма країнами','ops.rs.k.ci':'Рахунки до подачі','ops.rs.k.ciS':'винагорода без рахунку',
  'ops.rs.st.issued':'На перевірці','ops.rs.st.confirmed':'Підтверджено','ops.rs.st.auto':'Автопідтверджено','ops.rs.st.disputed':'Є спір',
@@ -442,7 +513,7 @@ en:{'ops.sec':'Documents','ops.nav.rs':'Statements','ops.nav.docs':'Documents �
  'ops.col.type':'Type','ops.col.number':'Number','ops.col.date':'Date','ops.col.cc':'Country','ops.col.status':'Status','ops.col.month':'Month','ops.col.commission':'Commission','ops.col.deadline':'Deadline / date','ops.col.ci':'Partner invoice','ops.col.line':'Line','ops.col.total':'Total','ops.col.confirm':'Confirmation','ops.col.amount':'Amount','ops.col.paid':'Paid','ops.col.dueBy20':'Due by the 20th',
  'ops.st.inv.open':'Awaiting payment','ops.st.inv.paid':'Paid','ops.st.inv.overdue':'Overdue','ops.st.inv.cancelled':'Cancelled','ops.st.issued':'Issued','ops.st.sh.prepared':'Prepared','ops.st.sh.shipped':'Shipped','ops.st.sh.delivered':'Delivered','ops.st.sh.received':'Received','ops.st.sr.await':'Awaiting signature','ops.st.sr.signed':'Confirmed by partner',
  'ops.print':'Print / PDF','ops.openSrc':'Open source page','ops.btn.inv':'Invoice print / PDF','ops.btn.cn':'Credit note print / PDF','ops.btn.pf':'Pro forma (PF)','ops.btn.sr':'SIM receipt (SR)','ops.nf':'Document not found','ops.nf.p':'It may have been removed or the link is out of date.','ops.missing':'The template has no values for: {k}','ops.adm.h':'OTA actions (demo)','ops.byAgreement':'by agreement of the parties',
- 'ops.inv.vat5.h':'Attention, OTA Finance: the partner is registered in the UAE — VAT 5% applied.','ops.inv.vat5.p':'Template 13 has no wording for 5%, so the document shows [wording to be approved]. Confirm the text with the accountant.','ops.inv.vat0':'Partner outside the UAE ({cc}): VAT 0% — zero-rated export of services, with the legal basis (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017). Keys and tokens are issued only after the payment mark.','ops.ci.draftNote':'This is a draft. The invoice is sent to OTA when you press “Submit”.','ops.sr.blank':'The partner has not confirmed receipt yet: quantity, condition and storage fields are left blank to be completed by hand.',
+ 'ops.inv.vat0':'VAT is always 0% — zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017); the VAT amount in AED uses the UAE Central Bank rate on the invoice date, stored with the invoice. Country: {cc}. Keys and tokens are issued only after the payment mark.','ops.ci.draftNote':'This is a draft. The invoice is sent to OTA when you press “Submit”.','ops.sr.blank':'The partner has not confirmed receipt yet: quantity, condition and storage fields are left blank to be completed by hand.',
  'ops.rs.title':'Reconciliation statements','ops.rs.sub':'Every month by the 10th for the previous month, per country.','ops.rs.how':'Confirm the statement or dispute individual lines within 5 business days. No answer means it is confirmed automatically. After confirmation the portal proposes a draft commission invoice (due by the 15th).','ops.rs.empty':'No statements yet','ops.rs.emptyP':'The first statement appears after a month with direct-subscription payments closes.',
  'ops.rs.k.wait':'Awaiting confirmation','ops.rs.k.waitS':'on your desk','ops.rs.k.disp':'Disputed statements','ops.rs.k.dispS':'waiting for OTA','ops.rs.k.comm':'Commission for {m}','ops.rs.k.commS':'all countries','ops.rs.k.ci':'Invoices to submit','ops.rs.k.ciS':'commission without an invoice',
  'ops.rs.st.issued':'Under review','ops.rs.st.confirmed':'Confirmed','ops.rs.st.auto':'Auto-confirmed','ops.rs.st.disputed':'Disputed',
@@ -468,7 +539,7 @@ ru:{'ops.sec':'Документы','ops.nav.rs':'Акты сверки','ops.nav
  'ops.col.type':'Тип','ops.col.number':'Номер','ops.col.date':'Дата','ops.col.cc':'Страна','ops.col.status':'Статус','ops.col.month':'Месяц','ops.col.commission':'Вознаграждение','ops.col.deadline':'Срок / дата','ops.col.ci':'Счёт партнёра','ops.col.line':'Строка','ops.col.total':'Итого','ops.col.confirm':'Подтверждение','ops.col.amount':'Сумма','ops.col.paid':'Оплачено','ops.col.dueBy20':'К оплате до 20-го',
  'ops.st.inv.open':'Ждёт оплаты','ops.st.inv.paid':'Оплачен','ops.st.inv.overdue':'Просрочен','ops.st.inv.cancelled':'Отменён','ops.st.issued':'Выдана','ops.st.sh.prepared':'Подготовлена','ops.st.sh.shipped':'Отправлена','ops.st.sh.delivered':'Доставлена','ops.st.sh.received':'Получена','ops.st.sr.await':'Ждёт подписи','ops.st.sr.signed':'Подтверждён партнёром',
  'ops.print':'Печать / PDF','ops.openSrc':'Открыть источник','ops.btn.inv':'Счёт для печати / PDF','ops.btn.cn':'Кредит-нота для печати / PDF','ops.btn.pf':'Проформа (PF)','ops.btn.sr':'Акт приёмки SIM (SR)','ops.nf':'Документ не найден','ops.nf.p':'Возможно, он удалён или ссылка устарела.','ops.missing':'В шаблоне нет значений для: {k}','ops.adm.h':'Действия OTA (демо)','ops.byAgreement':'по согласию сторон',
- 'ops.inv.vat5.h':'Внимание, финансовая служба OTA: партнёр зарегистрирован в ОАЭ — применён НДС 5%.','ops.inv.vat5.p':'В шаблоне 13 нет формулировки для 5%, поэтому в документе стоит пометка [wording to be approved]. Согласуйте текст с бухгалтером.','ops.inv.vat0':'Партнёр вне ОАЭ ({cc}): НДС 0% — экспорт услуг, с правовым основанием (ст. 31 Исполнительного регламента к Федеральному декрету-закону № 8 от 2017 г.). Ключи и токены выпускаются только после отметки об оплате.','ops.ci.draftNote':'Это черновик. Счёт уйдёт в OTA после кнопки «Подать».','ops.sr.blank':'Партнёр ещё не подтвердил получение: поля количества, состояния и места хранения оставлены пустыми для заполнения от руки.',
+ 'ops.inv.vat0':'НДС всегда 0% — экспорт услуг (ст. 31 Исполнительного регламента к Федеральному декрету-закону № 8 от 2017 г.); сумма НДС в AED — по курсу ЦБ ОАЭ на дату счёта, сохранённому вместе со счётом. Страна: {cc}. Ключи и токены выпускаются только после отметки об оплате.','ops.ci.draftNote':'Это черновик. Счёт уйдёт в OTA после кнопки «Подать».','ops.sr.blank':'Партнёр ещё не подтвердил получение: поля количества, состояния и места хранения оставлены пустыми для заполнения от руки.',
  'ops.rs.title':'Акты сверки','ops.rs.sub':'Ежемесячно до 10-го числа за предыдущий месяц, отдельно по каждой стране.','ops.rs.how':'Подтвердите акт или оспорьте отдельные строки в течение 5 рабочих дней. Без ответа акт считается подтверждённым автоматически. После подтверждения портал предложит черновик счёта на вознаграждение (до 15-го).','ops.rs.empty':'Актов пока нет','ops.rs.emptyP':'Первый акт появится после закрытия месяца с платежами по прямым подпискам.',
  'ops.rs.k.wait':'Ждут подтверждения','ops.rs.k.waitS':'у вас на проверке','ops.rs.k.disp':'Спорные акты','ops.rs.k.dispS':'ждут ответа OTA','ops.rs.k.comm':'Вознаграждение за {m}','ops.rs.k.commS':'по всем странам','ops.rs.k.ci':'Счета к подаче','ops.rs.k.ciS':'вознаграждение без счёта',
  'ops.rs.st.issued':'На проверке','ops.rs.st.confirmed':'Подтверждён','ops.rs.st.auto':'Автоподтверждён','ops.rs.st.disputed':'Есть спор',
@@ -489,3 +560,6 @@ ru:{'ops.sec':'Документы','ops.nav.rs':'Акты сверки','ops.nav
  'ops.ci.propT':'Черновик счёта на вознаграждение','ops.ci.editT':'Изменить черновик','ops.ci.propP':'Сумма взята из акта {rs}. Нумерация ваша собственная; портал хранит связь с актом.','ops.ci.seq':'Порядковый номер ({p}-INV-…)','ops.ci.seqH':'Формат ГГГГ-NNNN, например 2026-0001','ops.ci.seqE':'Укажите номер в формате ГГГГ-NNNN','ops.ci.seqDup':'Такой номер счёта уже есть','ops.ci.vatA':'Сумма НДС, USD','ops.ci.vatE':'Введите число от 0','ops.ci.vatH':'По заключению налогового консультанта партнёра.','ops.ci.saveDraft':'Сохранить черновик','ops.ci.draftDone':'Черновик {n} сохранён',
  'ops.ci.upT':'Загрузить собственный счёт','ops.ci.upP':'Счёт должен содержать те же сведения, что и шаблон 14. Сумма без НДС: {a}.','ops.ci.fileH':'В демо сохраняется только имя файла.','ops.ci.fileE':'Выберите файл счёта','ops.ci.theirNo':'Номер вашего счёта','ops.ci.upSubmit':'Загрузить и подать','ops.ci.upDone':'Счёт {n} подан в OTA','ops.ci.subDone':'Счёт {n} подан в OTA','ops.ci.disDone':'Черновик удалён','ops.ci.recvDone':'Счёт {n} получен OTA','ops.ci.paidDone':'Счёт {n} отмечен оплаченным',
  'ops.log.gen':'Сформирован акт сверки {n}','ops.log.auto':'Акт {n} подтверждён автоматически'}});
+I18N.add({uk:{'ops.type.A2':'Етикетка A2','ops.btn.a2':'Етикетка коробки A2','ops.cn.fallback':'Шаблон 13A не завантажено — показано резервну форму з тексту 13A.','ops.ci.multi':'Додати акти інших країн за цей місяць','ops.ci.multiH':'Один рахунок партнера може посилатися на кілька актів звірки: «per Statement(s) …».','ops.ci.amtH':'Сума — за основним актом; вибрані акти додаються при збереженні.'},
+en:{'ops.type.A2':'A2 label','ops.btn.a2':'A2 box label','ops.cn.fallback':'Template 13A is not loaded — showing the fallback built from the 13A wording.','ops.ci.multi':'Add statements of other countries for this month','ops.ci.multiH':'One partner invoice may reference several statements: “per Statement(s) …”.','ops.ci.amtH':'Amount of the main statement; the selected statements are added on save.'},
+ru:{'ops.type.A2':'Этикетка A2','ops.btn.a2':'Этикетка коробки A2','ops.cn.fallback':'Шаблон 13A не загружен — показана резервная форма из текста 13A.','ops.ci.multi':'Добавить акты других стран за этот месяц','ops.ci.multiH':'Один счёт партнёра может ссылаться на несколько актов сверки: «per Statement(s) …».','ops.ci.amtH':'Сумма — по основному акту; выбранные акты добавляются при сохранении.'}});

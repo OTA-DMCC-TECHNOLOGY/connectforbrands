@@ -1,7 +1,10 @@
 /* ===== 10_onboarding: signup → verify → setup, Home dashboard, Settings, org/user menus ===== */
 
 /* ---------- constants ---------- */
-const ONB_COUNTRIES=['GB','UA','KZ','AE','PL','MD','GE','RO','DE','XX'];
+const ONB_COUNTRIES=['GB','UA','KZ','PL','MD','GE','RO','DE','AE','SA','QA','KW','BH','OM','XX'];
+// v10 (ТЗ 1.1): registration is blocked when the country of incorporation or of tax registration is a GCC state
+const ONB_GCC=['AE','SA','QA','KW','BH','OM'];
+function onb_isGcc(c){return ONB_GCC.includes(c);}
 const ONB_ROLES=['admin','finance','warehouse','viewer'];
 const ONB_EVENTS=['sim.activated','sim.blocked','order.shipped','invoice.paid'];
 const ONB_EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -68,14 +71,16 @@ function onb_verifyHtml(){
 function onb_setupHtml(){
  if(!S.ui.onb_email)return onb_signupHtml();
  if(!S.ui.onb_verified)return onb_verifyHtml();
- const c=S.ui.onb_country||'UA';
+ const c=S.ui.onb_country||'UA';const tc=S.ui.onb_taxCountry||c;const gccErr=onb_isGcc(c)||onb_isGcc(tc);
  return onb_authShell(`<div class="col g8"><span class="xs faint onb-stepn">${t('onb.st.step')}</span><h1 class="onb-h1" tabindex="-1">${t('onb.st.title')}</h1><p class="muted">${t('onb.st.sub')}</p></div>
   <form data-form="onb_setup" class="col g16" novalidate>
    ${ui.field({id:'name',label:t('onb.f.company'),placeholder:t('onb.f.companyPh'),value:S.ui.onb_name||'',attrs:'autocomplete="organization" required'})}
    <div class="onb-2">
-    ${ui.field({id:'country',label:t('onb.f.country'),type:'select',value:c,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_country"'})}
-    ${ui.field({id:'taxId',label:t('onb.f.regno'),placeholder:t('onb.f.regnoPh'),hint:t('onb.f.optHint')})}
+    ${ui.field({id:'country',label:t('onb.f.countryInc'),type:'select',value:c,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_country"'+(onb_isGcc(c)?' aria-invalid="true"':''),err:onb_isGcc(c)?t('onb.e.gcc'):''})}
+    ${ui.field({id:'taxCountry',label:t('onb.f.taxCountry'),type:'select',value:tc,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_taxCountry"'+(onb_isGcc(tc)?' aria-invalid="true"':''),err:onb_isGcc(tc)?t('onb.e.gcc'):'',hint:onb_isGcc(tc)?'':t('onb.f.taxCountryH')})}
    </div>
+   ${gccErr?ui.note('bad',`<b>${t('onb.e.gcc')}</b>`):''}
+   ${ui.field({id:'taxId',label:t('onb.f.regno'),placeholder:t('onb.f.regnoPh'),value:S.ui.onb_taxId||'',hint:t('onb.f.optHint')})}
    <fieldset class="field" style="border:0;padding:0;margin:0"><legend class="lbl">${t('onb.f.ccs')}</legend><div class="row wrap g12">${Object.keys(CC_META).map(cc=>`<label class="chk small"><input type="checkbox" name="cc_${cc}" ${cc==='UA'?'checked':''}><span>${esc(ctyName(cc))}</span></label>`).join('')}</div><span class="hint" id="cc_UA-h">${t('onb.f.ccsH')}</span></fieldset>
    <div class="onb-2">${ui.field({id:'lang2',label:t('onb.f.lang2'),type:'select',value:'ru',options:LANG2_AVAILABLE.map(l=>[l,LANG_NAMES[l]||l]),hint:t('onb.f.lang2H')})}
    <div class="field"><span class="lbl">${t('onb.f.code')}</span><b class="mono onb-prefix" id="onb_codeP" style="font-size:20px">${esc(proposeCode(S.ui.onb_name||''))}</b><span class="hint">${t('onb.f.codeH')}</span></div></div>
@@ -84,6 +89,8 @@ function onb_setupHtml(){
    ${ui.btn(t('onb.st.submit'),{kind:'primary',size:'lg',type:'submit',block:true})}
   </form>`,false);}
 
+// re-render the setup step (GCC message) without losing what was typed
+function onb_keepSetup(){const f=$('form[data-form=onb_setup]');if(f){const d=formData(f);S.ui.onb_name=d.name||S.ui.onb_name||'';S.ui.onb_taxId=d.taxId||'';}rerender();}
 route('signup',{auth:false,render:onb_signupHtml});
 route('verify',{auth:false,render:onb_verifyHtml});
 route('setup',{auth:false,render:onb_setupHtml});
@@ -120,13 +127,15 @@ FORM.onb_setup=f=>{clearErrs(f);const d=formData(f);let bad=false;
  const name=d.name.trim(),tax=d.taxId.trim();
  if(name.length<2){setErr(f,'name',t('onb.e.company'));bad=true;}
  if(tax&&!/^[A-Za-z0-9 -]{6,16}$/.test(tax)){setErr(f,'taxId',t('onb.e.tax'));bad=true;}
+ if(onb_isGcc(d.country)){setErr(f,'country',t('onb.e.gcc'));bad=true;}
+ if(onb_isGcc(d.taxCountry)){setErr(f,'taxCountry',t('onb.e.gcc'));bad=true;}
  if(!d.agree){setErr(f,'agree',t('onb.e.agree'));bad=true;}
  if(bad){const x=f.querySelector('[aria-invalid="true"]');if(x)x.focus();return;}
  const ccs=Object.keys(CC_META).filter(cc=>d['cc_'+cc]);if(!ccs.length){setErr(f,'cc_UA',t('onb.e.ccs'));return;}
  const email=S.ui.onb_email,lang=S.lang;const code=proposeCode(name);
  S=freshState();S.lang=lang;
  S.user={email,name:''};
- S.org={name,code,codeStatus:'proposed',lang2:d.lang2||'ru',country:d.country,countries:ccs,regNo:tax,taxId:'',address:'',currency:'USD',prefix:makePrefix(ccs[0]),createdAt:iso(now()),commit:3000,serials:{},delivery:{}};
+ S.org={name,code,codeStatus:'proposed',lang2:d.lang2||'ru',country:d.country,taxCountry:d.taxCountry||d.country,countries:ccs,regNo:tax,taxId:'',address:'',currency:'USD',prefix:makePrefix(ccs[0]),createdAt:iso(now()),commit:3000,serials:{},delivery:{}};
  codeRegister(code);
  // demo: OTA's standard price list for the chosen countries (OTA reviews and adjusts it in OTA mode)
  ccs.forEach(cc=>{S.priceLists[cc]=[Object.assign({ver:1,from:iso(now()),to:null,createdAt:iso(now()),by:'OTA',note:'',increase:false},plSeed(cc))];});
@@ -137,7 +146,8 @@ Object.assign(ACT,{
  demo(){seedDemo();go('home');},
  onb_resume(){S.authed=true;go('home');},
  onb_resend(){toast(t('onb.t.resent',{email:esc(S.ui.onb_email||'')}));const f=$('.onb-code input');if(f){$$('.onb-code input').forEach(x=>x.value='');f.focus();}},
- onb_country(v){S.ui.onb_country=v;},
+ onb_country(v){const tc=S.ui.onb_taxCountry;if(!tc||tc===S.ui.onb_country)S.ui.onb_taxCountry=v;S.ui.onb_country=v;onb_keepSetup();},
+ onb_taxCountry(v){S.ui.onb_taxCountry=v;onb_keepSetup();},
  onb_curTouch(v,el){const f=el.closest('form');if(f)f.dataset.curTouched='1';},
  onb_terms(){modal(t('onb.terms'),`<div class="onb-terms small">${t('onb.termsBody')}</div>`,ui.btn(t('c.close'),{kind:'primary',act:'ovclose'}),{wide:true});},
 });
@@ -214,8 +224,8 @@ function onb_tabCompany(){const o=S.org;
   ${ui.field({id:'phone',label:t('onb.f.phone'),type:'tel',value:o.phone||'',placeholder:'+380 00 000 00 00',attrs:'autocomplete="tel"'})}
   <div class="row">${ui.btn(t('c.save'),{kind:'primary',type:'submit'})}</div></form>`});}
 
-function onb_entityDl(){const v=k=>otaVal(k);const vt=invVat();
- return `<dl class="dl small"><dt>${t('onb.b.seller')}</dt><dd><b>${esc(v('OTA_NAME')||'')}</b></dd>${v('OTA_REGNO')?`<dt>${t('onb.b.reg')}</dt><dd>${esc(v('OTA_REGNO'))}${v('OTA_LICENCE')?' · '+esc(v('OTA_LICENCE')):''}</dd>`:''}${v('OTA_TRN')?`<dt>TRN</dt><dd class="mono">${esc(v('OTA_TRN'))}</dd>`:''}<dt>${t('onb.b.addr')}</dt><dd>${esc(v('OTA_ADDR_EN')||'')}</dd>${v('OTA_BANK_IBAN')?`<dt>IBAN</dt><dd class="mono">${esc(v('OTA_BANK_IBAN'))}</dd>`:''}${v('OTA_BANK_NAME')?`<dt>${t('onb.b.bankName')}</dt><dd>${esc(v('OTA_BANK_NAME'))}${v('OTA_BANK_SWIFT')?' · <span class="mono">'+esc(v('OTA_BANK_SWIFT'))+'</span>':''}</dd>`:''}<dt>${t('onb.b.vat')}</dt><dd>${vt.rate?t('onb.b.vat5'):t('onb.b.vat0')}</dd></dl>`;}
+function onb_entityDl(){const v=k=>otaVal(k);
+ return `<dl class="dl small"><dt>${t('onb.b.seller')}</dt><dd><b>${esc(v('OTA_NAME')||'')}</b></dd>${v('OTA_REGNO')?`<dt>${t('onb.b.reg')}</dt><dd>${esc(v('OTA_REGNO'))}${v('OTA_LICENCE')?' · '+esc(v('OTA_LICENCE')):''}</dd>`:''}${v('OTA_TRN')?`<dt>TRN</dt><dd class="mono">${esc(v('OTA_TRN'))}</dd>`:''}<dt>${t('onb.b.addr')}</dt><dd>${esc(v('OTA_ADDR_EN')||'')}</dd>${v('OTA_BANK_IBAN')?`<dt>IBAN</dt><dd class="mono">${esc(v('OTA_BANK_IBAN'))}</dd>`:''}${v('OTA_BANK_NAME')?`<dt>${t('onb.b.bankName')}</dt><dd>${esc(v('OTA_BANK_NAME'))}${v('OTA_BANK_SWIFT')?' · <span class="mono">'+esc(v('OTA_BANK_SWIFT'))+'</span>':''}</dd>`:''}<dt>${t('onb.b.vat')}</dt><dd>${t('onb.b.vat0')}</dd></dl>`;}
 function onb_tabBilling(){const o=S.org;
  const ordered=onb_ordersLastYear();const frac=o.commit?ordered/o.commit:0;const cs=codeAvailable(o.code,o.code);
  const admin=S.admin?ui.card({title:`${t('onb.ad.title')} ${ui.badge('OTA','violet')}`,body:`<div class="col g12">${ui.note('admin',t('onb.ad.note'))}
@@ -250,7 +260,9 @@ function onb_settingsHtml(tab){
  tab=['billing','team','developers'].includes(tab)?tab:'company';
  const tabs=ui.tabs([['company',t('onb.s.company'),'#settings'],['billing',t('onb.s.billing'),'#settings--billing'],['team',t('onb.s.team'),'#settings--team'],['developers',t('onb.s.dev'),'#settings--developers']],tab);
  const body={company:onb_tabCompany,billing:onb_tabBilling,team:onb_tabTeam,developers:onb_tabDev}[tab]();
- return ui.page({title:t('onb.nav.settings'),sub:t('onb.s.sub'),body:tabs+`<div class="onb-set">${body}</div>`});}
+ // ТЗ 2.5: partner card shows the pending bank-details change (S.bankChange, owned by 70_legal)
+ const bank=(tab==='company'||tab==='billing')&&typeof lg_bankBanner==='function'?lg_bankBanner():'';
+ return ui.page({title:t('onb.nav.settings'),sub:t('onb.s.sub'),body:tabs+`<div class="onb-set">${bank?`<div style="margin-bottom:16px">${bank}</div>`:''}${body}</div>`});}
 
 route('settings',{nav:'settings',render:onb_settingsHtml});
 nav({key:'settings',label:()=>t('onb.nav.settings'),icon:'gear',href:'#settings',section:()=>t('onb.nav.account'),order:90});
@@ -436,7 +448,9 @@ ru:{'onb.logo.t':'Логотип компании','onb.logo.d':'Показыв�
 ['f.ccs','Країни, де ви продаватимете','Countries where you’ll sell','Страны, где вы будете продавать'],['f.ccsH','Для кожної країни буде окремий Заказ і прайс-лист.','Each country gets its own Order Form and price list.','Для каждой страны будет отдельный Заказ и прайс-лист.'],['e.ccs','Виберіть хоча б одну країну','Choose at least one country','Выберите хотя бы одну страну'],
 ['f.lang2','Друга мова документів','Second document language','Второй язык документов'],['f.lang2H','Перша мова — завжди англійська.','The first language is always English.','Первый язык — всегда английский.'],
 ['f.code','Код партнера (пропозиція)','Partner code (proposed)','Код партнёра (предложение)'],['f.codeH','3 латинські літери в номерах документів. Остаточно затверджує OTA.','3 Latin letters used in document numbers. OTA gives final approval.','3 латинские буквы в номерах документов. Окончательно утверждает OTA.'],
-['f.billingNote','Рахунки виставляє OTA TECHNOLOGY DMCC (Дубай) у доларах США. Для компаній поза ОАЕ — ПДВ 0% (експорт послуг).','Invoices are issued by OTA TECHNOLOGY DMCC (Dubai) in US dollars. Companies outside the UAE pay 0% VAT (export of services).','Счета выставляет OTA TECHNOLOGY DMCC (Дубай) в долларах США. Для компаний вне ОАЭ — НДС 0% (экспорт услуг).'],
+['f.billingNote','Рахунки виставляє OTA TECHNOLOGY DMCC (Дубай) у доларах США, ПДВ 0% (експорт послуг). OTA не укладає договорів із компаніями, заснованими в державах ССАГПЗ.','Invoices are issued by OTA TECHNOLOGY DMCC (Dubai) in US dollars, VAT 0% (export of services). OTA does not contract with companies established in GCC states.','Счета выставляет OTA TECHNOLOGY DMCC (Дубай) в долларах США, НДС 0% (экспорт услуг). OTA не заключает договоры с компаниями, учреждёнными в странах ССАГПЗ.'],
+['f.countryInc','Країна реєстрації компанії','Country of incorporation','Страна регистрации компании'],['f.taxCountry','Країна податкової реєстрації','Country of tax registration','Страна налоговой регистрации'],['f.taxCountryH','Де компанія зареєстрована як платник ПДВ або є податковим резидентом.','Where the company is VAT-registered or tax resident.','Где компания зарегистрирована по НДС или является налоговым резидентом.'],
+['e.gcc','OTA не укладає договорів із партнерами, заснованими в державах ССАГПЗ','OTA does not contract with partners established in GCC states','OTA не заключает договоры с партнёрами, учреждёнными в странах ССАГПЗ'],
 ['f.country','Країна реєстрації компанії','Country of incorporation','Страна регистрации компании'],['f.regno','Реєстраційний номер компанії','Company registration no.','Регистрационный номер компании'],['f.regnoPh','напр. 00012345','e.g. 00012345','напр. 00012345'],
 ['h.order','Нове замовлення','New order','Новый заказ'],
 ['ck.legalForm','Заповніть анкету партнера','Fill in the partner questionnaire','Заполните анкету партнёра'],['ck.legalForm.d','Реквізити, підписант, бренд, країни й друга мова документів — з них портал збере пакет документів.','Company details, signatory, brand, countries and second language — the portal builds the document package from them.','Реквизиты, подписант, бренд, страны и второй язык документов — из них портал соберёт пакет документов.'],['ck.legalForm.b','До анкети','To questionnaire','К анкете'],
@@ -452,7 +466,7 @@ ru:{'onb.logo.t':'Логотип компании','onb.logo.d':'Показыв�
 ['nx.pay','Оплатіть рахунок','Pay the invoice','Оплатите счёт'],['nx.draft','Виставте рахунок','Issue the invoice','Выставьте счёт'],['nx.receive','Підтвердьте отримання','Confirm receipt','Подтвердите получение'],['nx.wait','Очікуйте доставку','Awaiting delivery','Ожидайте доставку'],
 ['b.cur','Партнерство','Partnership','Партнёрство'],['b.curD2','Усі рахунки OTA — у доларах США. Документи складаються англійською та другою мовою.','All OTA invoices are in US dollars. Documents are in English and a second language.','Все счета OTA — в долларах США. Документы составляются на английском и втором языке.'],
 ['b.code','Код партнера','Partner code','Код партнёра'],['b.codeOk','затверджено OTA','approved by OTA','утверждён OTA'],['b.codeProp','на погодженні','pending approval','на согласовании'],['b.ccs','Країни','Countries','Страны'],['b.lang2','Друга мова документів','Second document language','Второй язык документов'],
-['b.entity','Хто виставляє рахунки','Who invoices you','Кто выставляет счета'],['b.vat0','0% — експорт послуг (ваша компанія поза ОАЕ)','0% — export of services (your company is outside the UAE)','0% — экспорт услуг (ваша компания вне ОАЭ)'],['b.vat5','5% — ваша компанія зареєстрована в ОАЕ','5% — your company is registered in the UAE','5% — ваша компания зарегистрирована в ОАЭ'],
+['b.entity','Хто виставляє рахунки','Who invoices you','Кто выставляет счета'],['b.vat0','0% — експорт послуг (у кожному рахунку OTA)','0% — zero-rated export of services (on every OTA invoice)','0% — экспорт услуг (в каждом счёте OTA)'],
 ['b.commit','Річна ціль','Annual target','Годовая цель'],['b.sims','активованих пристроїв за 365 днів','devices activated in 365 days','активированных устройств за 365 дней'],['b.commitD','Ціль — {n} активованих пристроїв на рік. Це орієнтир, а не зобов’язання купити.','The target is {n} activated devices a year. It is a goal, not a purchase obligation.','Цель — {n} активированных устройств в год. Это ориентир, а не обязательство купить.'],
 ['ad.code','Код партнера (PPP)','Partner code (PPP)','Код партнёра (PPP)'],['ad.codeOk','Затверджено. Змінюйте лише до випуску документів.','Approved. Change only before documents are issued.','Утверждён. Меняйте только до выпуска документов.'],['ad.codeProp','Запропоновано порталом — перевірте й затвердьте.','Proposed by the portal — check and approve.','Предложен порталом — проверьте и утвердите.'],['ad.approve','Затвердити код','Approve code','Утвердить код'],
 ['e.code.format','Рівно 3 латинські літери','Exactly 3 Latin letters','Ровно 3 латинские буквы'],['e.code.reserved','OTA, INV і TST зарезервовані','OTA, INV and TST are reserved','OTA, INV и TST зарезервированы'],['e.code.taken','Цей код уже використовується іншим партнером','This code is already used by another partner','Этот код уже использует другой партнёр'],

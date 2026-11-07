@@ -5,8 +5,8 @@
   "en": "Partner Commission Invoice",
   "ru": "Счёт Партнёра на вознаграждение"
  },
- "ver": "T-CI-v3",
- "effective": "2026-11-06",
+ "ver": "T-CI-v10",
+ "effective": "2026-11-07",
  "cls": "B",
  "blocks": [
   {
@@ -127,8 +127,8 @@
       "ru": "1"
      },
      {
-      "en": "Marketing and referral services for {{RS_MONTH}} under Master Agreement {{DOC_NO_MPA}}, per Statement OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}",
-      "ru": "Услуги по маркетингу и привлечению клиентов за {{RS_MONTH}} по Рамочному соглашению {{DOC_NO_MPA}} согласно Акту OTA-RS-{{P_CODE}}-{{RS_YYYYMM}}",
+      "en": "Marketing and referral services for {{RS_MONTH}} under Master Agreement {{DOC_NO_MPA}}, per Statement(s) {{RS_NO}}",
+      "ru": "Услуги по маркетингу и привлечению клиентов за {{RS_MONTH}} по Рамочному соглашению {{DOC_NO_MPA}} согласно Акту {{RS_NO}}",
       "bi": true
      },
      {

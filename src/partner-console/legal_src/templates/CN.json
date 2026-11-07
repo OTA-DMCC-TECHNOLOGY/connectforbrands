@@ -1,0 +1,358 @@
+{
+ "type": "CN",
+ "docNo": "13A",
+ "title": {
+  "en": "Tax Credit Note (OTA)",
+  "ru": "Налоговая кредит-нота (OTA)"
+ },
+ "ver": "T-CN-v10",
+ "effective": "2026-11-07",
+ "cls": "B",
+ "blocks": [
+  {
+   "id": "CN-title",
+   "kind": "heading",
+   "en": "TAX CREDIT NOTE",
+   "ru": "НАЛОГОВАЯ КРЕДИТ-НОТА"
+  },
+  {
+   "id": "CN-ref",
+   "kind": "para",
+   "en": "Document 13A of 14 · Ref. {{CN_NUMBER}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.",
+   "ru": "Документ 13A из 14 · № {{CN_NUMBER}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст."
+  },
+  {
+   "id": "CN-t1",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Supplier",
+      "ru": "Поставщик",
+      "bi": true
+     },
+     {
+      "en": "Customer",
+      "ru": "Покупатель",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}} · Licence no. {{OTA_LICENCE}}\nTRN (VAT) {{OTA_TRN}}",
+      "ru": "{{OTA_NAME}}\n{{OTA_ADDR_EN}}\nRegistration no. {{OTA_REGNO}} · Licence no. {{OTA_LICENCE}}\nTRN (VAT) {{OTA_TRN}}"
+     },
+     {
+      "en": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]",
+      "ru": "{{P_NAME}}\n{{P_ADDR_EN}}\nCompany no. {{P_REGNO}}[[P_TAXNO|\nTax / VAT no. {{P_TAXNO}}]]"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CN-t2",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Credit note no.",
+      "ru": "№ кредит-ноты",
+      "bi": true
+     },
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "Original invoice",
+      "ru": "Исходный счёт",
+      "bi": true
+     },
+     {
+      "en": "Currency",
+      "ru": "Валюта",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{CN_NUMBER}}",
+      "ru": "{{CN_NUMBER}}"
+     },
+     {
+      "en": "{{CN_DATE}}",
+      "ru": "{{CN_DATE}}"
+     },
+     {
+      "en": "{{CN_INV_NUMBER}} of / от {{CN_INV_DATE}}",
+      "ru": "{{CN_INV_NUMBER}} of / от {{CN_INV_DATE}}"
+     },
+     {
+      "en": "USD",
+      "ru": "USD"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CN-t3",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "Reason",
+      "ru": "Основание",
+      "bi": true
+     },
+     {
+      "en": "Master Agreement",
+      "ru": "Рамочное соглашение",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "[[CN_REASON_CANCEL_UNPAID|Cancellation of an unpaid invoice]][[CN_REASON_ERROR|Correction of an error]][[CN_REASON_REFUND|Refund under clause 4.3 of Document 03 or clause 10.3 of the Master Agreement]]",
+      "ru": "[[CN_REASON_CANCEL_UNPAID|Отмена неоплаченного счёта]][[CN_REASON_ERROR|Исправление ошибки]][[CN_REASON_REFUND|Возврат по п. 4.3 Документа 03 или п. 10.3 Рамочного соглашения]]",
+      "bi": true
+     },
+     {
+      "en": "{{DOC_NO_MPA}}",
+      "ru": "{{DOC_NO_MPA}}"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "CN-t4",
+   "kind": "table",
+   "rows": [
+    [
+     {
+      "en": "No. / №",
+      "ru": "No. / №"
+     },
+     {
+      "en": "Description",
+      "ru": "Описание",
+      "bi": true
+     },
+     {
+      "en": "Qty",
+      "ru": "Кол-во",
+      "bi": true
+     },
+     {
+      "en": "Unit price USD",
+      "ru": "Цена USD",
+      "bi": true
+     },
+     {
+      "en": "Amount USD",
+      "ru": "Сумма USD",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "{{CN_LINE_NO}}",
+      "ru": "{{CN_LINE_NO}}"
+     },
+     {
+      "en": "{{CN_LINE_DESC_EN}}",
+      "ru": "{{CN_LINE_DESC_L2}}",
+      "bi": true
+     },
+     {
+      "en": "{{CN_LINE_QTY}}",
+      "ru": "{{CN_LINE_QTY}}"
+     },
+     {
+      "en": "{{CN_LINE_PRICE}}",
+      "ru": "{{CN_LINE_PRICE}}"
+     },
+     {
+      "en": "–{{CN_LINE_AMOUNT}}",
+      "ru": "–{{CN_LINE_AMOUNT}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "Subtotal credited",
+      "ru": "Итого к уменьшению без НДС",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "–{{CN_SUBTOTAL}}",
+      "ru": "–{{CN_SUBTOTAL}}"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)",
+      "ru": "НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "0.00",
+      "ru": "0.00"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "VAT adjustment in AED at the UAE Central Bank rate {{AED_RATE}}",
+      "ru": "Корректировка НДС в AED по курсу ЦБ ОАЭ {{AED_RATE}}",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "AED –0.00",
+      "ru": "AED –0.00"
+     }
+    ],
+    [
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "Total credited",
+      "ru": "Итого к уменьшению",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "",
+      "ru": ""
+     },
+     {
+      "en": "–{{CN_TOTAL}}",
+      "ru": "–{{CN_TOTAL}}"
+     }
+    ]
+   ],
+   "repeat": {
+    "row": 1,
+    "list": "CN_LINES"
+   }
+  },
+  {
+   "id": "CN-p1",
+   "kind": "para",
+   "en": "This credit note reduces or cancels the original invoice stated above. Where the original invoice was not paid, no payment is due under it and no Activation Keys or Service Tokens are issued under it. Where it was paid, the credited amount is refunded to Partner's bank account or set off against Partner's next order, as stated in the Reason. Credit note numbers are never reused.",
+   "ru": "Настоящая кредит-нота уменьшает или аннулирует указанный выше исходный счёт. Если исходный счёт не был оплачен, платёж по нему не причитается и Ключи активации и Сервисные токены по нему не выпускаются. Если он был оплачен, сумма к уменьшению возвращается на банковский счёт Партнёра или засчитывается в следующий заказ Партнёра, как указано в Основании. Номера кредит-нот повторно не используются."
+  },
+  {
+   "id": "CN-sig5",
+   "kind": "signature",
+   "rows": [
+    [
+     {
+      "en": "Company",
+      "ru": "Компания",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_NAME}}",
+      "ru": "{{OTA_NAME}}"
+     }
+    ],
+    [
+     {
+      "en": "Name",
+      "ru": "ФИО",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_SIGNATORY}}",
+      "ru": "{{OTA_SIGNATORY}}"
+     }
+    ],
+    [
+     {
+      "en": "Title",
+      "ru": "Должность",
+      "bi": true
+     },
+     {
+      "en": "{{OTA_TITLE_EN}}",
+      "ru": "{{OTA_TITLE_L2}}",
+      "bi": true
+     }
+    ],
+    [
+     {
+      "en": "Signature",
+      "ru": "Подпись",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ],
+    [
+     {
+      "en": "Date",
+      "ru": "Дата",
+      "bi": true
+     },
+     {
+      "en": "____ / ____ / 20__",
+      "ru": "____ / ____ / 20__"
+     }
+    ],
+    [
+     {
+      "en": "Stamp (if any)",
+      "ru": "Печать (при наличии)",
+      "bi": true
+     },
+     {
+      "en": "",
+      "ru": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

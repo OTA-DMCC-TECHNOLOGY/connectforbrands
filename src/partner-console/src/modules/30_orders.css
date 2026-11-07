@@ -93,3 +93,8 @@
 @media(max-width:560px){.ord_pfr{grid-template-columns:1fr auto}.ord_pfl{grid-column:1/-1}}
 .ord_dft{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .ord_dft b{letter-spacing:.04em;color:var(--ink2)}
+/* v10: single VAT line + AED line (ТЗ 2.2) */
+.ord_totals{width:min(460px,100%)}
+.ord_totals>.ord_vatrow{font-size:12px;align-items:flex-start}
+.ord_totals>.ord_vatrow>span:first-child{color:var(--ink3);line-height:1.4}
+.ord_totals>.ord_vatrow>span:last-child{white-space:nowrap}

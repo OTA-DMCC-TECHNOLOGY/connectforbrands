@@ -4,6 +4,7 @@
   "P_FORM_EN": "a private limited company incorporated in England and Wales",
   "P_FORM_L2": "частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе",
   "P_COUNTRY": "GB",
+  "P_GCC_CONFIRM": true,
   "P_REGNO": "00012345",
   "P_TAXNO": null,
   "P_ADDR_EN": "10 Demo Lane, London, N1 0AA, United Kingdom",
@@ -65,6 +66,7 @@
   "P_FORM_EN": "filled",
   "P_FORM_L2": "filled",
   "P_COUNTRY": "filled",
+  "P_GCC_CONFIRM": "filled",
   "P_REGNO": "filled",
   "P_TAXNO": "empty",
   "P_ADDR_EN": "filled",
@@ -131,11 +133,6 @@
   "OTA_EMAIL_PRIVACY": "privacy@example.com",
   "OTA_EMAIL_SUPPORT": null,
   "OTA_SUPPORT_HOURS": "Mon–Fri 09:00–21:00 UTC+4; P1 24/7",
-  "OTA_CUSTOMS_CODE": null,
-  "OTA_VAT_UA": null,
-  "OTA_VAT_KZ": null,
-  "OTA_REP_UA": null,
-  "OTA_REP_KZ": null,
   "OTA_SUBPROC_EMAIL": null,
   "OTA_SUBPROC_EMAIL_LOC": null,
   "P_CODE": "ARV",
@@ -163,6 +160,8 @@
    "FEE_PCT": null,
    "DEVICES": [],
    "DOC_NO": "OTA-ARV-OF-UA-001-v1",
+   "OTA_VAT_LOCAL": "DEMO-UA-VAT-000001",
+   "OTA_REP_LOCAL": null,
    "PRICE_KEY": "9.85",
    "TOK_LIGHT_12": "14.98",
    "TOK_LIGHT_24": "26.63",
@@ -204,6 +203,8 @@
    "FEE_PCT": null,
    "DEVICES": [],
    "DOC_NO": "OTA-ARV-OF-KZ-001-v1",
+   "OTA_VAT_LOCAL": null,
+   "OTA_REP_LOCAL": "Demo Representative LLP, 1 Demo Avenue, Almaty, Kazakhstan",
    "PRICE_KEY": "9.40",
    "TOK_LIGHT_12": "20.86",
    "TOK_LIGHT_24": "37.09",
@@ -236,7 +237,58 @@
    "BL": "OTA-ARV-BL-001-v1",
    "BOA": "OTA-ARV-BOA-001",
    "DPA": "OTA-ARV-DPA-001-v1",
-   "SIM": "OTA-ARV-SIM-001-v1"
+   "SIM": "OTA-ARV-SIM-001-v1",
+   "CHG": "OTA-ARV-CHG-001"
+  }
+ },
+ "samples": {
+  "AED_RATE": "3.6725",
+  "shipment": {
+   "SHIP_FROM_NAME": "Demo Logistics Warehouse",
+   "SHIP_FROM_ADDR": "10 Demostraat, 1000 AA Amsterdam",
+   "SHIP_FROM_COUNTRY": "Netherlands",
+   "EXPORTER_EU": "Demo Logistics B.V. (acting for OTA)",
+   "EXPORTER_EORI": "NL000000000"
+  },
+  "CN": {
+   "CN_NUMBER": "OTA-CN-2026-000001",
+   "CN_DATE": "2026-11-20",
+   "CN_INV_NUMBER": "OTA-INV-2026-000001",
+   "CN_INV_DATE": "2026-11-10",
+   "CN_REASON": "cancel_unpaid",
+   "AED_RATE": "3.6725",
+   "CN_SUBTOTAL": "9,850.00",
+   "CN_TOTAL": "9,850.00",
+   "CN_LINES": [
+    {
+     "CN_LINE_NO": "1",
+     "CN_LINE_DESC_EN": "Activation Keys – copies of the CONNECT computer program (licence activation keys) – Ukraine",
+     "CN_LINE_DESC_L2": "Ключи активации – экземпляры компьютерной программы CONNECT (лицензионные ключи активации) – Украина",
+     "CN_LINE_QTY": "1,000",
+     "CN_LINE_PRICE": "9.85",
+     "CN_LINE_AMOUNT": "9,850.00"
+    }
+   ]
+  },
+  "CHG": {
+   "CHG_PARTY_NAME": "ARVELO LIMITED",
+   "CHG_EFFECTIVE_DATE": "2026-12-01",
+   "CHG_LIST": [
+    {
+     "CHG_LABEL": "Bank account / IBAN",
+     "CHG_OLD": "GB29NWBK60161331926819",
+     "CHG_NEW": "GB33DEMO00000000000000"
+    }
+   ],
+   "CHG_SIG_COMPANY": "ARVELO LIMITED",
+   "CHG_SIG_NAME": "Daniel Hart",
+   "CHG_SIG_TITLE_EN": "Director",
+   "CHG_SIG_TITLE_L2": "Директор"
+  },
+  "OF_v2": {
+   "OF_SUPERSEDES": "OTA-ARV-OF-UA-001-v1",
+   "OF_EFFECTIVE": "2027-03-01",
+   "DOC_NO": "OTA-ARV-OF-UA-001-v2"
   }
  },
  "roundtrip": {
@@ -345,7 +397,31 @@
   "PF": {
    "*": {
     "DOC_SEQ": "[YYYY-NNNN]",
-    "CC_NAME_EN": "[ ]"
+    "CC_NAME_EN": "[ ]",
+    "SHIP_FROM_COUNTRY": "[EU country / страна ЕС]"
+   }
+  },
+  "CN": {
+   "*": {
+    "CN_NUMBER": "OTA-CN-[YYYY-NNNNNN]",
+    "CN_INV_NUMBER": "OTA-INV-[YYYY-NNNNNN]"
+   }
+  },
+  "CHG": {
+   "*": {
+    "DOC_NO": "OTA-ARV-MPA-001-v1",
+    "CHG_SIG_COMPANY": "ARVELO LIMITED",
+    "CHG_SIG_NAME": "Daniel Hart",
+    "CHG_SIG_TITLE_EN": "Director",
+    "CHG_SIG_TITLE_L2": "Директор"
+   },
+   "en": {
+    "CHG_PARTY_NAME": "[Party name]",
+    "CHG_EFFECTIVE_DATE": "[DATE]"
+   },
+   "ru": {
+    "CHG_PARTY_NAME": "[наименование Стороны]",
+    "CHG_EFFECTIVE_DATE": "[ДАТА]"
    }
   },
   "SR": {

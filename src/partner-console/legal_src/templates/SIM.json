@@ -5,8 +5,8 @@
   "en": "SIM Custody, Delivery and Customs Schedule",
   "ru": "Порядок хранения, поставки и таможенного оформления SIM"
  },
- "ver": "T-SIM-v3",
- "effective": "2026-11-06",
+ "ver": "T-SIM-v10",
+ "effective": "2026-11-07",
  "cls": "A",
  "blocks": [
   {
@@ -54,8 +54,8 @@
   {
    "id": "SIM-2.1",
    "kind": "clause",
-   "en": "2.1 All shipments are made DAP (Incoterms® 2020) to the delivery address named by Partner. OTA arranges and pays for transport and insurance up to that address.",
-   "ru": "2.1 Все отгрузки осуществляются на условиях DAP (Incoterms® 2020) до адреса доставки, указанного Партнёром. OTA организует и оплачивает перевозку и страхование до этого адреса."
+   "en": "2.1 All shipments are dispatched from a warehouse of OTA's supplier or logistics provider in the European Union and are made DAP (Incoterms® 2020) to the delivery address named by Partner. SIMs are never shipped to or through the United Arab Emirates. OTA arranges and pays for transport and insurance up to that address; export formalities in the country of dispatch are handled by OTA's supplier, logistics provider or customs representative.",
+   "ru": "2.1 Все отгрузки осуществляются со склада поставщика или логистического провайдера OTA в Европейском союзе на условиях DAP (Incoterms® 2020) до адреса доставки, указанного Партнёром. SIM никогда не ввозятся в Объединённые Арабские Эмираты и не перевозятся через них. Экспортные формальности в стране отправки выполняет поставщик, логистический провайдер или таможенный представитель OTA. OTA организует и оплачивает перевозку и страхование до этого адреса."
   },
   {
    "id": "SIM-2.2",
@@ -116,6 +116,12 @@
    "kind": "clause",
    "en": "4.5 On termination of the Agreement, uninstalled SIMs are returned to OTA at OTA's cost or, at OTA's request, destroyed by Partner with a written destruction certificate.",
    "ru": "4.5 При прекращении Договора неустановленные SIM возвращаются OTA за счёт OTA или, по запросу OTA, уничтожаются Партнёром с составлением письменного акта об уничтожении."
+  },
+  {
+   "id": "SIM-4.6",
+   "kind": "clause",
+   "en": "4.6 Registration and identifiers. Before shipment OTA registers every SIM in its own connectivity account. SIM sleeves and carriers are B2B packaging: Partner and its installers keep them, read the ICCID at installation and do not give them, or lists of ICCIDs, to buyers or third parties, because the ICCID of an unbound SIM allows a first binding to an End User account (End User Terms, clause 3.2). Installers check installation through the cabinet and shall not bind SIMs to their own End User accounts.",
+   "ru": "4.6 Регистрация и идентификаторы. До отгрузки OTA регистрирует каждую SIM в собственном аккаунте подключения. Конверты и носители SIM являются B2B-упаковкой: Партнёр и его монтажники хранят их у себя, считывают ICCID при установке и не передают их или списки ICCID покупателям и третьим лицам, поскольку ICCID непривязанной SIM позволяет выполнить первую привязку к учётной записи Конечного пользователя (Условия для пользователей, п. 3.2). Монтажники проверяют установку через кабинет и не привязывают SIM к своим собственным учётным записям Конечного пользователя."
   },
   {
    "id": "SIM-s5",

@@ -5,8 +5,8 @@
   "en": "Service Token Reseller Terms",
   "ru": "Условия перепродажи сервисных токенов"
  },
- "ver": "T-TRT-v3",
- "effective": "2026-11-06",
+ "ver": "T-TRT-v10",
+ "effective": "2026-11-07",
  "cls": "A",
  "blocks": [
   {
@@ -90,8 +90,8 @@
   {
    "id": "TRT-3.1",
    "kind": "clause",
-   "en": "3.1 Partner shall make available to customers, on the packaging, insert or sales page, the following: (a) the plan term (12, 24, 36, 48 or 60 months) and that it starts on activation; (b) the activation deadline; (c) the address of the service terms: {{P_DOMAIN}}/terms.",
-   "ru": "3.1 Партнёр доводит до покупателей на упаковке, вкладыше или странице продажи: (a) срок тарифа (12, 24, 36, 48 или 60 месяцев) и то, что он начинается с даты активации; (b) крайний срок активации; (c) адрес условий сервиса: {{P_DOMAIN}}/terms."
+   "en": "3.1 Partner shall make available to customers, on the packaging, insert or sales page, the following: (a) the plan term (12, 24, 36, 48 or 60 months) and that it starts on activation; (b) the activation deadline; (c) that the code can be redeemed only once and that the card should be kept, because its serial number is needed to block a lost or stolen unredeemed code; (d) the address of the service terms: {{P_DOMAIN}}/terms.",
+   "ru": "3.1 Партнёр доводит до покупателей на упаковке, вкладыше или странице продажи: (a) срок тарифа (12, 24, 36, 48 или 60 месяцев) и то, что он начинается с даты активации; (b) крайний срок активации; (c) то, что код может быть погашен только один раз, и карту следует сохранить, так как её серийный номер нужен для блокировки утерянного или похищенного непогашенного кода; (d) адрес условий сервиса: {{P_DOMAIN}}/terms."
   },
   {
    "id": "TRT-3.2",
@@ -108,20 +108,26 @@
   {
    "id": "TRT-4.1",
    "kind": "clause",
-   "en": "4.1 OTA issues Tokens after full payment, as codes or QR codes in the cabinet. Each Token can be redeemed once. Unredeemed Tokens are valid for thirty-six (36) months from the date of issue and, during that period, may be exchanged in the cabinet for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded.",
-   "ru": "4.1 OTA выпускает токены после полной оплаты в виде кодов или QR-кодов в кабинете. Каждый токен может быть погашен один раз. Непогашенные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены в кабинете на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается."
+   "en": "4.1 OTA issues Tokens after full payment, as codes or QR codes in the cabinet, each with a unique serial number recorded by OTA. Each Token can be redeemed once, by the End User in the portal after login by one-time code, and is then attached to the Approved Device chosen by the End User (End User Terms, clauses 3 and 4.1). Unredeemed Tokens are valid for thirty-six (36) months from the date of issue and, during that period, may be exchanged in the cabinet for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded.",
+   "ru": "4.1 OTA выпускает токены после полной оплаты в виде кодов или QR-кодов в кабинете, каждый – с уникальным серийным номером, учитываемым OTA. Каждый токен может быть погашен один раз Конечным пользователем на портале после входа по одноразовому коду и затем закрепляется за выбранным им Одобренным устройством (Условия для пользователей, пп. 3 и 4.1). Непогашенные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены в кабинете на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается."
   },
   {
    "id": "TRT-4.2",
    "kind": "clause",
-   "en": "4.2 Partner keeps Tokens secure and is responsible for Tokens lost, stolen or disclosed within its organisation or sales channel. On Partner's notice, OTA will block a compromised unredeemed Token and issue a free replacement.",
-   "ru": "4.2 Партнёр обеспечивает сохранность токенов и отвечает за токены, утраченные, похищенные или раскрытые в его организации или канале продаж. По уведомлению Партнёра OTA блокирует скомпрометированный непогашенный токен и бесплатно выпускает замену."
+   "en": "4.2 Partner keeps Tokens secure and is responsible for Tokens lost, stolen or disclosed within its organisation or sales channel. On Partner's notice quoting the serial number, OTA will block a compromised unredeemed Token and issue a free replacement.",
+   "ru": "4.2 Партнёр обеспечивает сохранность токенов и отвечает за токены, утраченные, похищенные или раскрытые в его организации или канале продаж. По уведомлению Партнёра с указанием серийного номера OTA блокирует скомпрометированный непогашенный токен и бесплатно выпускает замену."
   },
   {
    "id": "TRT-4.3",
    "kind": "clause",
    "en": "4.3 OTA does not refund Tokens purchased by Partner, except: (a) Tokens that cannot be redeemed for reasons attributable to OTA, which are replaced or refunded; (b) if OTA terminates the Order Form for reasons not attributable to Partner, or Partner terminates it for OTA's material breach, unredeemed and unexpired Tokens and unused Activation Keys are refunded at the purchase price; (c) as provided in clause 10.3 of the Master Agreement.",
    "ru": "4.3 OTA не возвращает стоимость приобретённых Партнёром токенов, за исключением: (a) токенов, которые невозможно погасить по причинам на стороне OTA, – они заменяются или их стоимость возвращается; (b) случая расторжения Заказа OTA по причинам, не связанным с Партнёром, или Партнёром из-за существенного нарушения OTA, – стоимость непогашенных токенов с неистёкшим сроком и неиспользованных Ключей активации возвращается по цене покупки; (c) случаев, предусмотренных п. 10.3 Рамочного соглашения."
+  },
+  {
+   "id": "TRT-4.4",
+   "kind": "clause",
+   "en": "4.4 Printed cards. Partner may print Tokens on scratch cards or inserts under its own plan names and SKUs, using the layout and wording rules provided by OTA. The code and its QR code (https://{{P_DOMAIN}}/a/[code]) are printed only under an opaque scratch layer; the serial number is printed outside it. Variable data is printed only from the file provided in the cabinet, by a printer bound by confidentiality, and print files are deleted after the run.",
+   "ru": "4.4 Печатные карты. Партнёр вправе печатать токены на скретч-картах или вкладышах под собственными наименованиями тарифов и артикулами (SKU), соблюдая правила макета и формулировок OTA. Код и его QR-код (https://{{P_DOMAIN}}/a/[код]) печатаются только под непрозрачным защитным слоем; серийный номер печатается вне его. Переменные данные печатаются только из файла, выданного в кабинете, типографией, связанной обязательством о конфиденциальности; файлы печати удаляются после тиража."
   },
   {
    "id": "TRT-s5",
@@ -146,6 +152,12 @@
    "kind": "clause",
    "en": "5.3 If a customer is entitled to a refund from Partner for an unredeemed Token, Partner may return that Token to OTA for cancellation, and its price is credited against Partner's next Token order.",
    "ru": "5.3 Если покупатель имеет право на возврат средств от Партнёра за непогашенный токен, Партнёр вправе вернуть этот токен OTA для аннулирования, и его стоимость засчитывается в оплату следующего заказа токенов Партнёром."
+  },
+  {
+   "id": "TRT-5.4",
+   "kind": "clause",
+   "en": "5.4 Ownership requests. Partner and its dealers provide first-line handling of requests where a customer is told that a SIM \"already has an owner\" or cannot complete a transfer (End User Terms, clauses 3.3 and 3.6): they check the proof of purchase or installation and submit the request in the cabinet. OTA executes the reset or transfer after notifying the current Owner and the security delay. Partner is responsible for requests submitted by it, its dealers and installers, and shall not submit a request without such proof.",
+   "ru": "5.4 Запросы о владении. Партнёр и его дилеры обрабатывают на первой линии обращения, когда покупателю сообщено, что у SIM «уже есть владелец», или он не может завершить передачу (Условия для пользователей, пп. 3.3 и 3.6): проверяют документ о покупке или установке и подают запрос в кабинете. OTA выполняет снятие привязки или передачу после уведомления текущего Владельца и истечения защитной задержки. Партнёр отвечает за запросы, поданные им, его дилерами и монтажниками, и не подаёт запрос без такого документа."
   },
   {
    "id": "TRT-s6",
@@ -272,8 +284,8 @@
   {
    "id": "TRT-p2",
    "kind": "para",
-   "en": "\"{{P_PROGRAMME}} – [12/24/36/48/60] months. Activate by scanning the QR code before [date]. The plan starts on activation and works with the supported device in [country], where mobile networks are available. Notifications are informational and are not an alarm system. Service terms: {{P_DOMAIN}}/terms.\"",
-   "ru": "«{{P_PROGRAMME}} – [12/24/36/48/60] мес. Активируйте, отсканировав QR-код, до [дата]. Тариф начинается с даты активации и работает с поддерживаемым устройством в [страна] при наличии мобильной сети. Уведомления носят информационный характер и не являются сигнализацией. Условия сервиса: {{P_DOMAIN}}/terms.»"
+   "en": "\"{{P_PROGRAMME}} – [12/24/36/48/60] months. Scratch off and scan the QR code to activate before [date]. The code can be used only once; keep this card (serial no. {serial}). The plan starts on activation and works with the supported device in [country], where mobile networks are available. Notifications are informational and are not an alarm system. Service terms: {{P_DOMAIN}}/terms.\"",
+   "ru": "«{{P_PROGRAMME}} – [12/24/36/48/60] мес. Сотрите защитный слой и отсканируйте QR-код для активации до [дата]. Код используется один раз; сохраните карту (серийный № {serial}). Тариф начинается с даты активации и работает с поддерживаемым устройством в [страна] при наличии мобильной сети. Уведомления носят информационный характер и не являются сигнализацией. Условия сервиса: {{P_DOMAIN}}/terms.»"
   },
   {
    "id": "TRT-h3",
