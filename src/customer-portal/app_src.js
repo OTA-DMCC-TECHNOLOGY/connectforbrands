@@ -70,7 +70,7 @@ if(SS.cur===undefined)SS.cur=P.last||null;
 function ssave(){try{sessionStorage.setItem(SKEY,JSON.stringify(SS));}catch(e){}}
 let S;
 function props(o){Object.defineProperty(o,'lang',{get:()=>P.lang,set:v=>{P.lang=v;},configurable:true,enumerable:false});
- Object.defineProperty(o,'tick',{get:()=>P.tick,set:v=>{P.tick=v;},configurable:true,enumerable:false});
+ Object.defineProperty(o,'tick',{get:()=>Math.round(((clk().offset_ms)||0)/60000),set:v=>{clockAdd((v-Math.round(((clk().offset_ms)||0)/60000))*60000);},configurable:true,enumerable:false});
  Object.defineProperty(o,'devices',{get:()=>owned(),configurable:true,enumerable:false});return o;}
 function acct(){return (SS.cur&&P.accts[SS.cur])||null;}
 function bindS(){const a=acct();if(a){const f=fresh();for(const k in f)if(a.prof[k]==null)a.prof[k]=f[k];S=props(a.prof);}else S=props(fresh());}
@@ -99,7 +99,12 @@ function pf(n,k){const f=(T[S.lang]&&T[S.lang].day_forms)||T.en.day_forms;let c=
 const NB=' ';
 const money=n=>new Intl.NumberFormat(loc()).format(n).replace(/\s/g,NB)+NB+t('cur');
 const pad=n=>String(n).padStart(2,'0');
-const nowMs=()=>Date.now()+P.tick*60000;
+// shared demo clock in the bridge (same for /partner and /portal): demoNow = demo0 + (real now − real0) + offset_ms
+function clk(){const b=B();return b.clock;}
+const nowMs=()=>{const c=clk();return c.demo0+(Date.now()-c.real0)+(c.offset_ms||0);};
+let clkQ=0;
+function clockAdd(ms){if(!ms)return;const c=clk();c.offset_ms=(c.offset_ms||0)+ms;clkQ+=ms;const d0=clkQ;
+ Promise.resolve().then(()=>{if(!clkQ)return;const dd=clkQ;clkQ=0;bridgeTx(b=>{b.clock.offset_ms=(b.clock.offset_ms||0)+dd;return{};});});}
 const now=()=>new Date(nowMs());
 const iso=x=>`${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;
 const isoT=x=>iso(x)+`T${pad(x.getHours())}:${pad(x.getMinutes())}`;
@@ -151,7 +156,7 @@ function seedBridge(){const n=Date.now();const sims={};
  for(let i=21;i<=24;i++)sims[genIccid(i)]={partner:'ARV',status:'issued',imei:genImei(i),model:MODELS[i-21],cc:'UA',demo:'history'};
  const codes={};const c=(pkg,ser,sec,o)=>{codes[mkCode(pkg,ser,sec)]=Object.assign({serial:ser,status:'new',device_id:null},o||{});};
  c('4','00101','K7PQ');c('7','00102','M2XR');c('8','00103','T9WZ');c('1','00104','H3NV');
- c('4','00105','B8DS',{status:'redeemed',device_id:'d-'+genIccid(23),redeemed_at:isoMs(n-300*DAY),redeemed_by_account_id:'acc_demo_previous'});
+ c('4','00105','B8DS',{status:'redeemed',device_id:genImei(23),iccid:genIccid(23),redeemed_at:isoMs(n-300*DAY),redeemed_by_account_id:'acc_demo_previous'});
  c('4','00106','Q4FJ',{status:'blocked',blocked_at:isoMs(n-2*DAY)});
  c('7','00107','Y6GC',{expires_at:isoMs(n-DAY)});
  return{sims,bindings:[],transfers:[],codes,events:[],requests:[],t12_overrides:[],
@@ -161,14 +166,16 @@ function seedBridge(){const n=Date.now();const sims={};
   partnerContacts:[{partner:'ARV',user_id:'u_demo_dealer',role:'dealer',contact:'e:dealer@arvelo.demo'},{partner:'ARV',user_id:'u_demo_dealer',role:'dealer',contact:'p:670000001'},
    {partner:'ARV',user_id:'u_demo_inst',role:'installer',contact:'e:installer@arvelo.demo'},{partner:'ARV',user_id:'u_demo_inst',role:'installer',contact:'p:670000002'}],
   partner_users:[{name:'Demo Dealer',email:'dealer@arvelo.demo',phone:'+380670000001',role:'dealer'},{name:'Demo Installer',email:'installer@arvelo.demo',phone:'+380670000002',role:'installer'}],
-  settings:{countries:{UA:{delay_hours:24}}},seeded_by:'portal',rev:1};}
+  settings:{},seeded_by:'portal',rev:1};}
 function normBridge(b){['bindings','transfers','events','links','bindLinks','partner_users','partnerContacts','t12Exempt','requests','notices','t12_overrides'].forEach(k=>{if(!Array.isArray(b[k]))b[k]=[];});
- if(!b.codes||typeof b.codes!=='object')b.codes={};if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.accounts||typeof b.accounts!=='object')b.accounts={};if(!b.settings.countries)b.settings.countries={};
+ if(!b.codes||typeof b.codes!=='object')b.codes={};
+ let chc=false;if(!b.clock||typeof b.clock!=='object'||!isFinite(b.clock.demo0)||!isFinite(b.clock.real0)){const n=Date.now();b.clock={demo0:n,real0:n,offset_ms:0,created_by:'portal'};chc=true;}
+ if(!isFinite(b.clock.offset_ms))b.clock.offset_ms=0;if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.accounts||typeof b.accounts!=='object')b.accounts={};if(!b.settings.countries)b.settings.countries={};
  // the portal must work even if the partner console seeded SIMs the portal cannot bind (e.g. no Luhn digit): top up a small demo pool
  const ok=Object.keys(b.sims).filter(i=>/^\d{19,20}$/.test(i)&&luhnOk(i)&&b.sims[i].status==='issued'&&!b.sims[i].demo);
  let ch=false;if(ok.length<3){const s=seedBridge();Object.keys(s.sims).forEach(i=>{if(!b.sims[i]){b.sims[i]=Object.assign(s.sims[i],{src:'portal-demo'});ch=true;}});
   Object.keys(s.codes).forEach(k=>{if(!b.codes[k]){b.codes[k]=s.codes[k];ch=true;}});if(!b.partner_users.length){b.partner_users=s.partner_users;ch=true;}}
- return ch;}
+ return ch||chc;}
 function readBridge(){let b=null;try{b=JSON.parse(localStorage.getItem(BKEY));}catch(e){}
  let ch=false;if(!b||typeof b!=='object'||!b.sims||typeof b.sims!=='object'){b=seedBridge();ch=true;}
  if(normBridge(b))ch=true;if(ch){try{localStorage.setItem(BKEY,JSON.stringify(b));}catch(e){}}return b;}
@@ -234,7 +241,7 @@ async function otpCheck(ck,purpose,code){otpGc();const r=P.otp[ck];if(!r||r.p!==
  r.tries++;if(r.tries>=OTP_TRIES){delete P.otp[ck];logIn(ck,purpose,'too_many');save();return{dead:true};}
  logIn(ck,purpose,'wrong');save();return{left:OTP_TRIES-r.tries};}
 async function startFlow(p,c,data,back){const ck=cKey(c);const r=await otpSend(ck,p);
- SS.flow={p,ck,data:data||{},back:back||'home',err:r.limit?t('otp_limit',{t:fdt(r.limit)}):null};ssave();go('otp');}
+ SS.flow={p,ck,data:data||{},back:back||'home',notSent:!r.ok,err:r.limit?t('otp_limit',{t:fdt(r.limit)}):null};ssave();go('otp');}
 /* ---- rate limits & anti-fraud (ТЗ 4.3.5): 5 failed/account/hour or 20/IP/day → 24 h block; ≥10 different unknown ICCIDs/day → signal ---- */
 function signal(reason,extra){const e=Object.assign({id:uid('af'),reason,at:isoNow(),ip:IP_DEMO,account_id:SS.cur||null},extra||{});P.af.unshift(e);
  bridgeTx(b=>{b.events.push(Object.assign({type:'antifraud'},e,{by:'portal'}));return{};});}
@@ -247,14 +254,31 @@ function fail(aid,unknownIccid){const n=nowMs(),R=P.rl;(R.fails[aid]=R.fails[aid
   const day=iso(now());if((u.length>=10||R.unkIp.length>=10)&&R.sig['enum:'+aid]!==day){R.sig['enum:'+aid]=day;signal('iccid_enumeration',{distinct_unknown_iccids:Math.max(u.length,R.unkIp.length)});}}
  save();}
 /* ---- devices & bindings ---- */
-function ensureDev(iccid,boundMs){const id='d-'+iccid;let x=P.devs[id];if(x)return x;const s=B().sims[iccid]||{};
- const model=MODEL_TYPE[s.model]?s.model:MODELS[parseInt(iccid.slice(-4),10)%4];const bm=boundMs||nowMs();
+const devIdOf=(iccid,b)=>{const s=(b||B()).sims[iccid];return (s&&s.imei)||'d-'+iccid;};   // device_id = IMEI, as in the partner console
+function consoleModelPlan(name){try{const ps=JSON.parse(localStorage.getItem('cfb-partner-v3'));let hit=null;
+ const walk=o=>{if(hit||!o||typeof o!=='object')return;if(!Array.isArray(o)&&o.name===name&&(o.plan==='std'||o.plan==='light'))hit=o.plan;else Object.values(o).forEach(walk);};walk(ps&&ps.catalog);if(!hit)walk(ps);return hit;}catch(e){return null;}}
+function modelInfo(s,iccid){const m=s.model;if(MODEL_TYPE[m])return{type:MODEL_TYPE[m],model:m,plan:MODEL_PLAN[m]};
+ if(m){const nm=String(m),short=nm.replace(/^ARVELO\s+/i,'');const ty=/track|gps|T\d/i.test(nm)?'tracker':/alarm|A\d/i.test(nm)?'alarm':/boiler|R\d/i.test(nm)?'boiler':'inverter';
+  const pl=(s.plan==='std'||s.plan==='light')?s.plan:consoleModelPlan(nm)||(ty==='tracker'||ty==='boiler'?'light':'std');return{type:ty,model:short,plan:pl};}
+ const k=MODELS[parseInt(iccid.slice(-4),10)%4];return{type:MODEL_TYPE[k],model:k,plan:MODEL_PLAN[k]};}
+function consolePlan(x){const b=B();const n=nowMs();   // a plan already attached in the console (code redeemed there, recorded by IMEI/ICCID)
+ Object.entries(b.codes).forEach(([k,r])=>{if(r.status!=='redeemed'||!r.redeemed_at)return;if(!(r.device_id===x.id||(x.imei&&r.device_id===x.imei)||r.iccid===x.iccid))return;
+  const ser=r.serial||normCode(k).slice(6,11);if((x.codes||[]).some(c=>c.serial===ser))return;const pl=codePlan(normCode(k),r);if(!pl)return;
+  const until=addMonths(iso(new Date(Date.parse(r.redeemed_at))),pl.months);(x.codes=x.codes||[]).push({serial:ser,at:r.redeemed_at,src:'console'});
+  if(!x.paidUntil||x.paidUntil<until){x.paidUntil=until;if(x.mode!=='sub')x.mode='pkg';}});}
+function vatLocal(cc){const b=B();let v=((b.settings.countries||{})[cc]||{}).vat_local;
+ if(!v){try{const ps=JSON.parse(localStorage.getItem('cfb-partner-v3'));v=ps&&ps.ota&&ps.ota.countries&&ps.ota.countries[cc]&&ps.ota.countries[cc].vat_local;}catch(e){}}return v?String(v).trim():'';}
+const devCc=x=>((B().sims[x.iccid]||{}).cc)||'UA';
+function vatLine(x){if(!x)return '';const cc=devCc(x);const v=vatLocal(cc);return v?`<p class="muted small" data-vat="${esc(cc)}">${t('vat_local',{cc:esc(cc),v:esc(v)})}</p>`:'';}   // ТЗ 2.6: only if set, only for that country
+const codePlanActive=x=>!!(x.codes&&x.codes.length&&x.mode==='pkg'&&x.paidUntil&&d(x.paidUntil)>now());
+function ensureDev(iccid,boundMs){const b=B();const id=devIdOf(iccid,b);let x=P.devs[id];if(x)return x;const s=b.sims[iccid]||{};
+ const mi=modelInfo(s,iccid);const bm=boundMs||nowMs();
  // history from before the binding (factory test, installer check) exists on the device but is never shown to the Owner (ТЗ 4.3.6, 4.8)
- x={id,iccid,imei:s.imei||null,type:MODEL_TYPE[model],model,plan:MODEL_PLAN[model],status:'ok',mode:'none',loc:true,start:iso(new Date(bm)),
+ x={id,iccid,imei:s.imei||null,type:mi.type,model:mi.model,plan:mi.plan,status:'ok',mode:'none',loc:true,start:iso(new Date(bm)),
   ev:[['ev_factory',isoT(new Date(bm-9*DAY)),'info'],['ev_install',isoT(new Date(bm-20*HOUR)),'ok']]};P.devs[id]=x;return x;}
 const liveB=z=>z.status==='active'||z.status==='frozen';
 function myBindings(){const a=acct();if(!a)return[];return B().bindings.filter(z=>z.owner_account_id===a.id&&liveB(z)).sort((p,q)=>p.bound_at.localeCompare(q.bound_at));}
-function owned(){return myBindings().map(z=>{const x=ensureDev(z.iccid,Date.parse(z.bound_at));Object.defineProperty(x,'_b',{value:z,configurable:true,writable:true,enumerable:false});return x;});}
+function owned(){return myBindings().map(z=>{const x=ensureDev(z.iccid,Date.parse(z.bound_at));consolePlan(x);Object.defineProperty(x,'_b',{value:z,configurable:true,writable:true,enumerable:false});return x;});}
 const bnd=x=>x&&x._b;
 const frozen=x=>!!(bnd(x)&&bnd(x).status==='frozen');
 const sinceMs=x=>bnd(x)?floorMin(Date.parse(bnd(x).bound_at)):Infinity;
@@ -264,10 +288,20 @@ function delayHours(iccid,b){b=b||B();const cc=((b.sims||{})[iccid]||{}).cc||'UA
  let v=((b.settings.countries||{})[cc]||{}).delay_hours;if(ok(v))return +v;
  try{const ps=JSON.parse(localStorage.getItem('cfb-partner-v3'));const w=ps&&ps.ota&&ps.ota.countries&&ps.ota.countries[cc]&&ps.ota.countries[cc].delay_hours;if(ok(w))return +w;}catch(e){}
  return 24;}
-function autoOff(x,aid,at){if(!x)return;if(x.mode==='sub'){x.mode='pkg';x.paidUntil=x.next;delete x.next;}delete x.auto;delete x.custom;delete x.moved;delete x.movedPin;x.autoOffFor={account:aid,at};}
-function queuePurge(devId,aid,from,to){P.purge.push({device_id:devId,owner_account_id:aid,from,to,due:isoMs(Date.parse(to)+30*DAY),legal_hold:false,done:false});}
-function runPurge(){const n=nowMs();let ch=false;P.purge.forEach(q=>{if(q.done||q.legal_hold||Date.parse(q.due)>n)return;const x=P.devs[q.device_id];
- if(x){const a=floorMin(Date.parse(q.from)),b=floorMin(Date.parse(q.to));x.ev=x.ev.filter(e=>{const m=evMs(e[1]);return m<a||m>=b;});}q.done=true;q.done_at=isoMs(n);ch=true;});if(ch)save();}
+function autoOff(x,aid,at){if(!x)return;if(x.mode==='sub'){x.mode='pkg';x.paidUntil=x.next;delete x.next;}delete x.auto;delete x.custom;delete x.moved;delete x.movedPin;
+ x.status='ok';delete x.offAt;delete x.cause;   // the new owner must not see "not connected since …" from before their bound_at
+ x.autoOffFor={account:aid,at};}
+function queuePurge(devId,aid,from,to,bindingId,iccid){P.purge.push({device_id:devId,owner_account_id:aid,from,to,binding_id:bindingId||null,iccid:iccid||null,due:isoMs(Date.parse(to)+30*DAY),legal_hold:false,done:false});
+ if(bindingId)bridgeTx(b=>{b.history=b.history||[];if(b.history.some(h=>h.binding_id===bindingId))return{write:false};const bd=b.bindings.find(z=>z.id===bindingId)||{};
+  b.history.push({id:'hs_'+bindingId,partner_id:bd.partner_id||null,iccid:iccid||bd.iccid,binding_id:bindingId,owner_account_id:aid,from,to,state:'hidden',hidden_at:to,erase_due:isoMs(Date.parse(to)+30*DAY),erased_at:null,legal_hold:false,hold_reason:'',by:'portal'});return{};});}
+function onHold(q){const b=B();if(q.legal_hold)return true;   // legal hold: history flag, frozen binding or disputed request on this SIM
+ const ic=q.iccid||(P.devs[q.device_id]||{}).iccid;
+ if((b.history||[]).some(h=>h.legal_hold&&((q.binding_id&&h.binding_id===q.binding_id)||(ic&&h.iccid===ic))))return true;
+ if(ic&&b.bindings.some(z=>z.iccid===ic&&z.status==='frozen'))return true;
+ if(ic&&b.requests.some(r=>r.iccid===ic&&(r.status==='disputed'||r.objected_at)&&r.status!=='closed'&&r.status!=='rejected'))return true;return false;}
+function runPurge(){const n=nowMs();let ch=false;const er=[];P.purge.forEach(q=>{if(q.done||Date.parse(q.due)>n||onHold(q))return;const x=P.devs[q.device_id];if(q.binding_id)er.push(q.binding_id);
+ if(x){const a=floorMin(Date.parse(q.from)),b=floorMin(Date.parse(q.to));x.ev=x.ev.filter(e=>{const m=evMs(e[1]);return m<a||m>=b;});}q.done=true;q.done_at=isoMs(n);ch=true;});if(ch)save();
+ if(er.length)bridgeTx(b=>{let w=false;(b.history||[]).forEach(h=>{if(er.includes(h.binding_id)&&!h.erased_at&&!h.legal_hold){h.erased_at=isoMs(n);h.state='erased';w=true;}});return{write:w};});}
 /* bind by ICCID (ТЗ 4.3): T3 not found / not issued / deactivated; T2 owned by another account; T4 already mine; T5 bound */
 async function bindIccid(iccid,opts){opts=opts||{};const a=acct();if(!a)return{code:'T3'};
  const bu=blockedUntil(a.id);if(bu)return{code:'BLOCK',until:bu};
@@ -277,7 +311,7 @@ async function bindIccid(iccid,opts){opts=opts||{};const a=acct();if(!a)return{c
   const cur=b.bindings.find(z=>z.iccid===iccid&&liveB(z));
   if(cur)return{res:{code:cur.owner_account_id===a.id?'T4':'T2'},write:false};
   let link=null;if(opts.link){link=findLink(b,opts.link);if(!linkOpen(link)||link.iccid!==iccid)return{res:{code:'LINK'},write:false};}
-  const bd={id:uid('bnd'),iccid,device_id:'d-'+iccid,owner_account_id:a.id,owner_contact:cShow(primary(a)),partner_id:sim.partner,method:opts.method||'iccid',
+  const bd={id:uid('bnd'),iccid,device_id:devIdOf(iccid,b),owner_account_id:a.id,owner_contact:cShow(primary(a)),partner_id:sim.partner,method:opts.method||'iccid',
    bound_at:opts.boundAt||isoNow(),unbound_at:null,unbind_reason:null,status:'active',started_by_installer:link?link.token:null};
   b.bindings.push(bd);b.events.push(bEvent('device_bound',bd,{method:bd.method}));
   if(link){link.status='confirmed';link.confirmed_at=isoNow();link.account_id=a.id;link.binding_id=bd.id;}
@@ -297,6 +331,7 @@ async function redeemCode(raw,devId){const a=acct();const c=normCode(raw);const 
   if(!codeOk(rec)||!pl)return{res:{code:'T7'},write:false};
   const bd=b.bindings.find(z=>z.device_id===devId&&z.owner_account_id===a.id&&liveB(z));if(!bd)return{res:{code:'T7'},write:false};
   if(pl.plan!==x.plan)return{res:{code:'TYPE',pl},write:false};
+  if(codePlanActive(x))return{res:{code:'ACTIVE'},write:false};
   Object.assign(rec,{status:'redeemed',device_id:devId,iccid:bd.iccid,redeemed_at:isoNow(),redeemed_by_account_id:a.id});
   b.events.push(bEvent('code_redeemed',bd,{serial:rec.serial||c.slice(6,11)}));return{res:{code:'OK',pl,serial:rec.serial||c.slice(6,11)}};});
  if(r.code==='T7')fail(a.id);
@@ -352,7 +387,7 @@ async function processDue(){if(dueBusy)return false;dueBusy=true;try{
  out.forEach(o=>{if(o.kind!=='effective')return;const x=P.devs[o.tr.device_id];
   // prepaid plan stays with the device (same end date); previous owner's auto-renewal off; previous history hidden + queued for deletion (30 days)
   autoOff(x,o.tr.from_account_id,o.tr.effective_at);if(x)x.ev.push(['ev_tr_done',isoT(new Date(Date.parse(o.tr.effective_at))),'info']);
-  queuePurge(o.tr.device_id,o.tr.from_account_id,o.old.bound_at,o.tr.effective_at);
+  queuePurge(o.tr.device_id,o.tr.from_account_id,o.old.bound_at,o.tr.effective_at,o.old.id,o.old.iccid);
   notify(parseKey(o.tr.from_contact),t('tr_effective'));notify(parseKey(o.tr.to_contact),t('tr_effective'));});
  if(out.length)save();runPurge();return out.length>0;}finally{dueBusy=false;}}
 async function doUnbind(data){const a=acct();const x=dev(data.id);if(!x){go('home');return;}
@@ -360,13 +395,13 @@ async function doUnbind(data){const a=acct();const x=dev(data.id);if(!x){go('hom
   if(!bd||b.transfers.some(z=>z.device_id===x.id&&OPEN_TR.includes(z.status)))return{res:null,write:false};
   Object.assign(bd,{status:'ended',unbound_at:isoNow(),unbind_reason:'owner_unbind'});b.events.push(bEvent('device_unbound',bd,{reason:'owner_unbind'}));return{res:bd};});
  if(!r){go('device-'+x.id);toast(t('tr_open'));return;}
- autoOff(x,a.id,r.unbound_at);queuePurge(x.id,a.id,r.bound_at,r.unbound_at);save();go('home');toast(t('ub_done'));}
+ autoOff(x,a.id,r.unbound_at);queuePurge(x.id,a.id,r.bound_at,r.unbound_at,r.id,r.iccid);save();go('home');toast(t('ub_done'));}
 const findLink=(b,tk)=>(b.bindLinks||[]).find(z=>z.token===tk)||(b.links||[]).find(z=>z.token===tk)||null;
 const linkOpen=l=>!!l&&(l.status==='pending'||l.status==='open')&&Date.parse(l.expires_at)>nowMs();
 const linkContact=l=>parseKey(l.contact_norm||l.contact);
 async function doLink(data){const l=findLink(B(),data.token);if(!l){go('b/'+data.token);return;}
  const a=login(linkContact(l));const r=await bindIccid(l.iccid,{method:'iccid',link:l.token});
- if(r.code==='T5'){SS.flash={dev:'d-'+l.iccid,code:'T5'};SS.lnk=null;if(!S.onboarded){S.onboarded=true;SS.ret='device-d-'+l.iccid;ssave();save();go('start-1');}else{ssave();go('device-d-'+l.iccid);}}
+ if(r.code==='T5'){const did=devIdOf(l.iccid);SS.flash={dev:did,code:'T5'};SS.lnk=null;if(!S.onboarded){S.onboarded=true;SS.ret='device-'+did;ssave();save();go('start-1');}else{ssave();go('device-'+did);}}
  else{SS.lnk={res:r.code,until:r.until};ssave();go('b/'+data.token);}}
 async function finishFlow(f){const c=parseKey(f.ck);
  if(f.p==='login'){login(c);afterLogin();return;}
@@ -388,7 +423,7 @@ async function seedDemo(){const a=acct();if(!a||a.prof.seeded)return;a.prof.seed
  const have=S.devices.map(x=>x.type);
  const got=await bridgeTx(b=>{const g=[];Object.keys(b.sims).filter(i=>b.sims[i].demo==='history'&&b.sims[i].status==='issued').forEach(i=>{
    const ty=MODEL_TYPE[b.sims[i].model];if(!ty||have.includes(ty)||g.some(z=>z[1]===ty)||b.bindings.some(z=>z.iccid===i&&liveB(z)))return;
-   const at=isoMs(nowMs()-mk[ty].days*DAY-3*HOUR);const bd={id:uid('bnd'),iccid:i,device_id:'d-'+i,owner_account_id:a.id,owner_contact:cShow(primary(a)),partner_id:b.sims[i].partner,method:'iccid',bound_at:at,unbound_at:null,unbind_reason:null,status:'active',demo:true};
+   const at=isoMs(nowMs()-mk[ty].days*DAY-3*HOUR);const bd={id:uid('bnd'),iccid:i,device_id:devIdOf(i,b),owner_account_id:a.id,owner_contact:cShow(primary(a)),partner_id:b.sims[i].partner,method:'iccid',bound_at:at,unbound_at:null,unbind_reason:null,status:'active',demo:true};
    b.bindings.push(bd);g.push([i,ty,at]);});return{res:g,write:g.length>0};});
  const ids={};got.forEach(([i,ty,at])=>{const x=ensureDev(i,Date.parse(at));const o=mk[ty];x.mode=o.mode;if(o.paidUntil)x.paidUntil=o.paidUntil;if(o.next)x.next=o.next;if(o.auto)x.auto=o.auto;
   x.ev=x.ev.slice(0,1).concat([['ev_bound',isoT(new Date(Date.parse(at))),'info']],o.ev);x.start=at.slice(0,10);ids[ty]=x.id;});
@@ -396,8 +431,13 @@ async function seedDemo(){const a=acct();if(!a||a.prof.seeded)return;a.prof.seed
  if(ids.tracker)S.tx=[{ts:ago(19,9,0),dev:ids.tracker,desc:t('pm_kindM'),sum:PR.light.m,ok:true,via:'card',card:'4242'},{ts:ago(19,8,55),dev:ids.tracker,desc:t('pm_kindM'),sum:PR.light.m,ok:false,via:'card',card:'4242',retried:true},{ts:ago(49,9,0),dev:ids.tracker,desc:t('pm_kindM'),sum:PR.light.m,ok:true,via:'card',card:'4242'}];
  if(ids.alarm)S.tx.push({ts:ago(300,10,5),dev:ids.alarm,desc:t('pm_kindP',{term:t('p_y2')}),sum:PR.std.y2,ok:true,via:'card',card:'4242'});
  save();}
-async function resetBridge(){await bridgeTx(b=>{if(b.seeded_by==='portal'){const s=seedBridge();Object.keys(b).forEach(k=>delete b[k]);Object.assign(b,s);return{};}
- const mine=id=>String(id||'').startsWith('acc_');
+async function resetBridge(){await bridgeTx(b=>{   // merge, never replace: drop what portal accounts created, restore the portal's own demo seed items
+ const mine=id=>String(id||'').startsWith('acc_');const sd=seedBridge();
+ Object.keys(sd.sims).forEach(i=>{if(!b.sims[i])b.sims[i]=sd.sims[i];});
+ Object.keys(sd.codes).forEach(k=>{const r=b.codes[k];if(!r||!r.partner||r.src==='portal-demo')b.codes[k]=sd.codes[k];});
+ sd.bindLinks.forEach(l=>{const i=b.bindLinks.findIndex(z=>z.token===l.token);if(i<0)b.bindLinks.push(l);else b.bindLinks[i]=l;});
+ b.bindLinks=b.bindLinks.filter(l=>l.src!=='portal-demo');b.requests=b.requests.filter(r=>r.src!=='portal-demo');
+ b.history=(b.history||[]).filter(h=>!mine(h.owner_account_id));
  b.bindings=b.bindings.filter(z=>!mine(z.owner_account_id));b.transfers=b.transfers.filter(z=>!mine(z.from_account_id)&&!mine(z.to_account_id));
  Object.values(b.codes).forEach(r=>{if(mine(r.redeemed_by_account_id)){r.status='new';r.device_id=null;delete r.redeemed_at;delete r.redeemed_by_account_id;delete r.iccid;}});
  b.events=b.events.filter(e=>e.by!=='portal');b.bindLinks.forEach(l=>{if(mine(l.account_id)){l.status='pending';delete l.account_id;delete l.confirmed_at;delete l.binding_id;}});
@@ -430,7 +470,7 @@ function vSignin(){const act=SS.ret&&SS.ret.startsWith('/a/');const v=SS.si||{};
  <p class="muted small" style="text-align:center">${t('beat')}</p></main>`;}
 function vOtp(){const f=SS.flow;if(!f)return vSignin();const c=parseKey(f.ck);const w=otpWait(f.ck);
  return `${topbar({back:true,backAct:'otpback'})}<main class="stack s24 fade"><form class="stack s24" data-form="otp" novalidate>
- <div class="stack s8"><h1>${t('otp_title')}</h1><p class="muted">${t('otp_sub',{c:`<b>${esc(cShow(c))}</b>`})}</p><p class="small muted">${t('otp_why_'+f.p)}</p></div>
+ <div class="stack s8"><h1>${t('otp_title')}</h1><p class="muted" id="otpsub">${f.notSent?(w&&w.gap?t('otp_gap',{c:`<b>${esc(cShow(c))}</b>`,s:`<span id="otpgs">${Math.max(1,Math.ceil((w.gap-nowMs())/1000))}</span>`}):t('otp_notsent',{c:`<b>${esc(cShow(c))}</b>`})):t('otp_sub',{c:`<b>${esc(cShow(c))}</b>`})}</p><p class="small muted">${t('otp_why_'+f.p)}</p></div>
  <label class="f" for="otp">${t('otp_label')}<input class="inp code" id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" ${f.err?'aria-invalid="true" aria-describedby="otph"':''}></label>
  ${f.err?errL('otph',f.err):''}
  <div class="democard">${ic('flask','sm')}<span>${t('otp_demo_hint')}</span></div>
@@ -442,7 +482,7 @@ function simState(i,b){const s=b.sims[i];if(!s)return 'dst_unknown';if(!s.partne
 function blockedNote(){const bu=acct()&&blockedUntil(acct().id);return bu?`<div class="note bad" role="alert" id="blocked">${t('blocked_acct',{t:fdt(bu)})}</div>`:'';}
 function vAdd(){const v=SS.add||{};const ob=!S.onboarded;const back=ob?'start-1':SS.ret&&SS.ret.startsWith('/a/')?SS.ret:'home';const b=B();
  const res=v.res?(v.res==='BLOCK'?'':`<div class="note ${v.res==='T4'?'warn':'bad'}" role="alert" id="addres">${t(v.res)}</div>`):'';
- const demo=Object.keys(b.sims).filter(i=>!b.sims[i].demo&&/^\d{19,20}$/.test(i)).slice(0,10).concat([genIccid(999)]);
+ const demo=Object.keys(b.sims).filter(i=>!b.sims[i].demo&&/^\d{19,20}$/.test(i)).slice(0,10).concat([genIccid(987654)]);
  return `${topbar({back})}<main class="stack s24 fade">${ob?steps(2):''}<div class="stack s8"><h1>${t('add_device')}</h1><p class="muted">${t('add_hint2')}</p></div>
  ${blockedNote()}
  <form class="stack" data-form="iccid" novalidate>
@@ -454,15 +494,17 @@ function vAdd(){const v=SS.add||{};const ob=!S.onboarded;const back=ob?'start-1'
  ${res}
  <button class="btn primary" type="submit" id="bindbtn">${ic('plus')} ${t('bind_btn')}</button></form>
  <section class="card stack s8"><span class="tag">${ic('flask','sm')} ${t('demo_iccids')}</span><div class="list" style="box-shadow:none">${demo.map(i=>`<div class="li" style="min-height:56px;padding:10px 4px"><div class="grow"><div class="t" style="font-variant-numeric:tabular-nums;font-size:.92rem">${fmtIccid(i)}</div><div class="s">${t(simState(i,b))}</div></div><button class="btn plain auto small" type="button" data-act="useiccid" data-arg="${i}">${t('demo_use')}</button></div>`).join('')}</div></section></main>`;}
+let actDone=null;   // one-shot success screen: never persisted, so re-opening /a/<code> shows T7
 function vActivate(code){const b=B();const L=codeLookup(b,code);const ok=L&&codeOk(L[1])&&codePlan(code,L[1]);
- if(SS.actDone){const o=SS.actDone;const x=dev(o.dev);return `${topbar()}<main class="stack s24 fade" style="align-items:center;text-align:center;padding-top:32px"><div class="success">${ic('check','lg')}</div><h1>${t('p_ok')}</h1>
+ if(actDone&&actDone.code!==code)actDone=null;
+ if(actDone){const o=actDone;const x=dev(o.dev);return `${topbar()}<main class="stack s24 fade" style="align-items:center;text-align:center;padding-top:32px"><div class="success">${ic('check','lg')}</div><h1>${t('p_ok')}</h1>
   <p class="muted">${esc(o.txt)}. ${x?t('p_okS',{device:esc(dname(x)),date:fdate(x.paidUntil)}):''}</p><button class="btn primary" type="button" data-act="actdone">${t('p_back')}</button></main>`;}
  if(!ok){if(SS.actFail!==code){SS.actFail=code;ssave();if(acct())fail(acct().id);}
   return `${topbar({back:'home'})}<main class="stack s24 fade"><h1>${t('act_title')}</h1>${blockedNote()}<div class="note bad" role="alert" id="actres">${t('T7')}</div><a class="btn primary" href="#home">${t('p_home')}</a></main>`;}
  const pl=codePlan(code,L[1]);const v=SS.act||{};const ds=S.devices;
  return `${topbar({back:'home'})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('act_title')}</h1><p class="muted">${t('act_sub',{code:`<b class="nw">${fmtCode(code)}</b>`})}</p>
  <p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pl.plan],term:termTxt(pl.months)})}</p></div>${blockedNote()}
- ${ds.length?`<form class="stack" data-form="act" data-code="${code}" novalidate><div class="list" role="radiogroup" aria-label="${t('act_title')}">${ds.map(x=>`<label class="li" for="ad-${x.id}"><input type="radio" name="actdev" id="ad-${x.id}" value="${x.id}" style="width:22px;height:22px;accent-color:var(--brand)" ${ds.length===1||v.dev===x.id?'checked':''}><span class="ic">${ic(DEVICON[x.type])}</span><span class="grow"><span class="t" style="display:block">${esc(dname(x))}</span><span class="s" style="display:block">${PLN[x.plan]} · ${payTxt(x)}</span></span></label>`).join('')}</div>
+ ${ds.length?`<form class="stack" data-form="act" data-code="${code}" novalidate><div class="list" role="radiogroup" aria-label="${t('act_title')}">${ds.map(x=>`<label class="li" for="ad-${x.id}"><input type="radio" name="actdev" id="ad-${x.id}" value="${x.id}" style="width:22px;height:22px;accent-color:var(--brand)" ${codePlanActive(x)?'disabled':(ds.filter(y=>!codePlanActive(y)).length===1&&!codePlanActive(x))||v.dev===x.id?'checked':''}><span class="ic">${ic(DEVICON[x.type])}</span><span class="grow"><span class="t" style="display:block">${esc(dname(x))}</span><span class="s" style="display:block">${PLN[x.plan]} · ${payTxt(x)}</span></span></label>`).join('')}</div>
   ${v.err?errL('acth',v.err):''}<button class="btn primary" type="submit">${ic('key')} ${t('act_btn')}</button></form>
   <button class="btn plain" type="button" data-act="actadd">${ic('plus')} ${t('act_add')}</button>`:
  `<p class="muted">${t('act_none')}</p><button class="btn primary" type="button" data-act="actadd">${ic('plus')} ${t('act_add')}</button>`}</main>`;}
@@ -648,7 +690,7 @@ function vPay(id){
   <div class="stack s8"><button class="paybtn" type="button" data-act="wallet">Apple Pay · ${amt}</button><button class="paybtn alt" type="button" data-act="wallet">Google Pay · ${amt}</button><button class="btn ghost" type="button" data-act="tocard">${ic('card')} ${t('p_card')}</button></div>
   <p class="muted small" style="display:flex;gap:8px">${ic('sim','sm')}<span>${t('p_sim')}</span></p>
   <p class="muted small" style="text-align:center">${t('pay_terms')} <button type="button" class="lnk" data-act="doc" data-arg="terms">${t('ag_terms')}</button>.</p>`;}
- body=codeBlock+body;
+ body=(codePlanActive(x)?`<div class="note ok" id="planactive">${ic('check','sm')} ${payTxt(x)}</div>`:codeBlock)+body+vatLine(x);
  return `${topbar({back:'device-'+id})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('p_title')}</h1><p class="muted">${t('p_for',{device:esc(dname(x))})}</p></div>${body}</main>`;
 }
 const defCard=()=>S.cards.find(c=>c.def)||S.cards[0];
@@ -662,7 +704,7 @@ function vPayments(){const it=autoItems();const dc=defCard();
  <section class="stack s8"><h2>${t('cards')}</h2><div class="list">${S.cards.map(c=>`<div class="li" style="flex-wrap:wrap"><span class="ic">${ic('card')}</span><div class="grow"><div class="t">•••• ${c.last4} ${c.def?`<span class="status ok" style="padding:2px 10px;font-size:.8rem;margin-left:6px">${t('card_def')}</span>`:''}</div><div class="s">${t('card_exp',{d:esc(c.exp)})}</div></div>
   <div class="row" style="gap:4px">${c.def?'':`<button class="btn plain auto small" type="button" data-act="carddef" data-arg="${c.id}">${t('card_mkdef')}</button>`}<button class="btn plain auto small" type="button" data-act="carddel" data-arg="${c.id}" style="color:var(--bad)">${t('card_del')}</button></div></div>`).join('')||`<div class="li muted">${t('card_none')}</div>`}
   <button class="li" type="button" data-act="cardadd"><span class="ic brand">${ic('plus')}</span><span class="grow t">${t('card_add')}</span></button></div></section>
- <section class="stack s8"><h2>${t('tx_title')}</h2>${S.tx.length?`<div class="list">${S.tx.map((o,i)=>{const d=dev(o.dev);return `<div class="li" style="flex-wrap:wrap"><span class="dt ${o.ok?'ok':'bad'}">${ic(txIcon(o),'sm')}</span><div class="grow"><div class="t">${o.sum?money(o.sum):esc(o.desc)}</div><div class="s">${d?esc(dname(d)):''}${o.sum?' · '+esc(o.desc):''}</div><div class="s">${fwhen(o.ts)} · ${o.via==='code'?t('tx_code'):o.via==='wallet'?t('tx_wallet'):'•••• '+o.card}</div>${o.ok?'':`<div class="s" style="color:var(--bad);font-weight:600">${t('tx_fail')}: ${t('tx_reason')}</div>`}</div>${o.ok?`<span class="small" style="color:var(--ok);font-weight:600">${t('tx_ok')}</span>`:o.retried?`<span class="small muted" style="font-weight:600">${t('tx_retried_l')}</span>`:`<button class="btn primary auto small" type="button" data-act="txretry" data-arg="${i}" style="min-height:44px">${t('tx_retry')}</button>`}</div>`;}).join('')}</div>`:`<p class="muted">${t('tx_none')}</p>`}</section>
+ <section class="stack s8"><h2>${t('tx_title')}</h2>${S.tx.length?`<div class="list">${S.tx.map((o,i)=>{const d=dev(o.dev);return `<div class="li" style="flex-wrap:wrap"><span class="dt ${o.ok?'ok':'bad'}">${ic(txIcon(o),'sm')}</span><div class="grow"><div class="t">${o.sum?money(o.sum):esc(o.desc)}</div><div class="s">${d?esc(dname(d)):''}${o.sum?' · '+esc(o.desc):''}</div><div class="s">${fwhen(o.ts)} · ${o.via==='code'?t('tx_code'):o.via==='wallet'?t('tx_wallet'):'•••• '+o.card}</div>${o.sum&&d?vatLine(d).replace('<p class="muted small"','<div class="s"').replace('</p>','</div>'):''}${o.ok?'':`<div class="s" style="color:var(--bad);font-weight:600">${t('tx_fail')}: ${t('tx_reason')}</div>`}</div>${o.ok?`<span class="small" style="color:var(--ok);font-weight:600">${t('tx_ok')}</span>`:o.retried?`<span class="small muted" style="font-weight:600">${t('tx_retried_l')}</span>`:`<button class="btn primary auto small" type="button" data-act="txretry" data-arg="${i}" style="min-height:44px">${t('tx_retry')}</button>`}</div>`;}).join('')}</div>`:`<p class="muted">${t('tx_none')}</p>`}</section>
  </main>`;}
 function vAlerts(){
  const rows=[['lost','nosig','a_lost','a_lostS'],['off','power','a_off','a_offS'],['sim','sim','a_sim','a_simS'],['move','pin','a_move','a_moveS'],['pay','card','a_pay','a_payS']];
@@ -761,7 +803,7 @@ function render(inPlace){
 }
 const rerender=()=>render(true);
 function go(h){closeOverlay(true);if(location.hash==='#'+h)render(false);else location.hash=h;}
-window.addEventListener('hashchange',()=>{closeOverlay(true);render(false);});
+window.addEventListener('hashchange',()=>{actDone=null;closeOverlay(true);render(false);});
 
 let tt;function toast(msg,ms){const el=document.getElementById('toast');el.innerHTML=ic('check','sm')+'<span>'+msg+'</span>';el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),ms||3200);}
 let pt;const pushEl=document.getElementById('push');
@@ -825,11 +867,11 @@ const A={
  notarrived(){const f=app.querySelector('#nm');if(f)S.name=f.value.trim();S.justDone=false;go('help');},
  add(){go('add');},
  otpback(){const f=SS.flow;SS.flow=null;ssave();go(f&&f.back?f.back:(acct()?'home':'welcome'));},
- async otpresend(){const f=SS.flow;if(!f)return;const r=await otpSend(f.ck,f.p);f.err=r.limit?t('otp_limit',{t:fdt(r.limit)}):null;ssave();render(true);},
+ async otpresend(){const f=SS.flow;if(!f)return;const r=await otpSend(f.ck,f.p);f.notSent=!r.ok;f.err=r.limit?t('otp_limit',{t:fdt(r.limit)}):null;ssave();render(true);},
  useiccid(i){SS.add=Object.assign({},SS.add||{},{v:i,err:null,res:null});const el=document.getElementById('iccid');if(el){el.value=fmtIccid(i);el.focus();}ssave();},
  scan(){startScan();},
  actadd(){SS.ret=location.hash.slice(1);ssave();go('add');},
- actdone(){const o=SS.actDone;SS.actDone=null;ssave();go(o&&dev(o.dev)?'device-'+o.dev:'home');},
+ actdone(){const o=actDone;actDone=null;go(o&&dev(o.dev)?'device-'+o.dev:'home');},
  trback(){if(SS.trf)SS.trf.step='to';ssave();render(false);},
  trgo(){const v=SS.trf;if(!v)return;startFlow('transfer',primary(acct()),{id:v.id,to:v.to},'transfer-'+v.id);},
  trcancel(id){cancelTransfer(id);},
@@ -962,7 +1004,7 @@ document.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const
  else if(k==='card'){const raw=f.querySelector('#cn').value;const arEl=f.querySelector('#ar');S.pay.ar=arEl?arEl.checked:false;S.pay.viaCard=true;S.pay.cnum=raw;S.pay.cexp=f.querySelector('#ce').value;if(digits(raw).length!==16){S.pay.err=true;S.pay.cn=raw;render(true);const c=app.querySelector('#cn');if(c)c.focus();return;}pay();}
  else if(k==='actcode'){const x=dev(S.pay.id);const raw=f.querySelector('#ac').value;S.pay.code=raw;
   redeemCode(raw,x.id).then(r=>{if(r.code==='OK'){S.pay.res='code';S.pay.resTxt=t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)});S.pay.step='ok';render(false);return;}
-   S.pay.cerr=r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[x.plan]}):t('T7');rerender();const c=app.querySelector('#ac');if(c)c.focus();});}
+   S.pay.cerr=r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='ACTIVE'?payTxt(x):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[x.plan]}):t('T7');rerender();const c=app.querySelector('#ac');if(c)c.focus();});}
  else if(k==='rename'){const x=dev(f.dataset.id);const v=f.querySelector('#rn').value.trim();if(v&&v!==`${t('typ_'+x.type)} ${x.model}`)x.custom=v;else delete x.custom;closeOverlay();rerender();toast(t('d_renamed'));}
  else if(k==='newcard'){const v=f.querySelector('#cn').value;if(digits(v).length!==16){const h=document.getElementById('nch');h.className='err';h.innerHTML=ic('alert','sm')+'<span>'+t('p_cardErr')+'</span>';f.querySelector('#cn').focus();return;}addCard(v,f.querySelector('#ce').value||'12/29');closeOverlay(true);save();rerender();toast(t('card_added'));}
  else if(k==='name'){S.name=f.querySelector('#pn').value.trim();closeOverlay();rerender();toast(t('saved'));}
@@ -981,14 +1023,14 @@ async function onIccid(f){if(bindBusy)return;const raw=f.querySelector('#iccid')
  SS.add={v:sv,err,t1,t1err:!t1,res:null};ssave();
  if(err||!t1){render(true);const el=app.querySelector('[aria-invalid="true"]');if(el)el.focus();return;}
  bindBusy=true;let r;try{r=await bindIccid(sv,{method:'iccid'});}finally{bindBusy=false;}
- if(r.code==='T5'){SS.add=null;SS.flash={dev:'d-'+sv,code:'T5'};
+ const did=devIdOf(sv);if(r.code==='T5'){SS.add=null;SS.flash={dev:did,code:'T5'};
   if(!S.onboarded){S.onboarded=true;S.justDone=true;ssave();save();await seedDemo();go('start-done');setTimeout(()=>push(t('pe_test')),700);return;}
   if(SS.ret&&SS.ret.startsWith('/a/')){const rr=SS.ret;SS.ret=null;SS.flash=null;ssave();go(rr);return;}
-  ssave();go('device-d-'+sv);return;}
+  ssave();go('device-'+did);return;}
  SS.add={v:sv,t1:true,res:r.code,until:r.until};ssave();render(true);}
 async function onRedeem(code,devId){const r=await redeemCode(code,devId);
- if(r.code==='OK'){SS.act=null;SS.actDone={dev:devId,txt:t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)})};ssave();render(false);return;}
- SS.act={dev:devId,err:r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[dev(devId).plan]}):t('T7')};ssave();render(true);}
+ if(r.code==='OK'){SS.act=null;actDone={code:normCode(code),dev:devId,txt:t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)})};ssave();render(false);return;}
+ SS.act={dev:devId,err:r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='ACTIVE'?payTxt(dev(devId)):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[dev(devId).plan]}):t('T7')};ssave();render(true);}
 async function startScan(){const msg=m=>{const e=document.getElementById('scanmsg');if(e)e.textContent=m;};
  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg(t('scan_na'));const i=document.getElementById('iccid');if(i)i.focus();return;}
  let det;try{det=new window.BarcodeDetector({formats:['code_128','code_39','itf','ean_13','qr_code','data_matrix']});}catch(e){try{det=new window.BarcodeDetector();}catch(e2){msg(t('scan_na'));return;}}
@@ -1000,7 +1042,7 @@ async function startScan(){const msg=m=>{const e=document.getElementById('scanms
   try{const res=await det.detect(v);const hit=res.map(x=>(x.rawValue||'').replace(/\D/g,'')).find(z=>z.length>=19&&z.length<=20);
    if(hit){closeOverlay(true);SS.add=Object.assign({},SS.add||{},{v:hit,err:null,res:null});ssave();const i=document.getElementById('iccid');if(i)i.value=fmtIccid(hit);const c=document.getElementById('t1');if(c)c.focus();toast(t('scan_ok'));return;}}catch(e){}
   setTimeout(loop,250);};loop();}
-setInterval(()=>{if(location.hash==='#otp'&&SS.flow){const b=document.getElementById('otpres');if(b){const w=otpWait(SS.flow.ck);b.disabled=!!w;b.textContent=otpResTxt(w);}}},1000);
+setInterval(()=>{if(location.hash==='#otp'&&SS.flow){const b=document.getElementById('otpres');if(b){const w=otpWait(SS.flow.ck);b.disabled=!!w;b.textContent=otpResTxt(w);const g=document.getElementById('otpgs');if(g&&w&&w.gap)g.textContent=Math.max(1,Math.ceil((w.gap-nowMs())/1000));}}},1000);
 setInterval(()=>{if(dueList(readBridge()).length&&!dueBusy)processDue().then(ch=>{if(ch)render(true);});},20000);
 window.addEventListener('storage',e=>{const k=e.key||'';
  if(k.startsWith(AK)||k.startsWith(DK)){if(e.newValue===LS[k])return;LS[k]=e.newValue;const map=k.startsWith(AK)?P.accts:P.devs,id=k.slice(AK.length);

@@ -171,3 +171,16 @@ mark.lgd-v{background:var(--lg-hl);color:inherit;padding:0 1px;border-radius:2px
  body.lg-printing-audit .tbl{font-size:9px}
  body.lg-printing-audit .card{box-shadow:none;border:0}
 }
+/* browser print (Ctrl/Cmd+P) on a document page: only the document's A4 pages, no app chrome */
+@media print{
+ body:has(.lg-dvgrid):not(.lg-printing) .side,body:has(.lg-dvgrid):not(.lg-printing) .top,body:has(.lg-dvgrid):not(.lg-printing) .ph,
+ body:has(.lg-dvgrid):not(.lg-printing) .crumbs,body:has(.lg-dvgrid):not(.lg-printing) .copy,body:has(.lg-dvgrid):not(.lg-printing) #toasts,
+ body:has(.lg-dvgrid):not(.lg-printing) .content > .stack > .note,body:has(.lg-dvgrid):not(.lg-printing) .lg-dvgrid > :not(.lgd-wrap),
+ body:has(.lg-dvgrid):not(.lg-printing) .lg-noprint,body:has(.lg-dvgrid):not(.lg-printing) #sidescrim{display:none!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .main,body:has(.lg-dvgrid):not(.lg-printing) .content{padding:0!important;margin:0!important;max-width:none!important;display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lg-dvgrid{display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-wrap{background:none!important;padding:0!important;overflow:visible!important;border-radius:0}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-pages{zoom:1!important;gap:0!important;display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-page{box-shadow:none!important;break-after:page;margin:0}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-page:last-child{break-after:auto}
+}

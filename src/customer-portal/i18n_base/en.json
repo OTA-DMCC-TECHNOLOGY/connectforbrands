@@ -484,5 +484,8 @@
  "x_link": "Installer: start binding for this account",
  "x_req": "Seller: ownership request (T11)",
  "x_log": "Sign-in log, messages, anti-fraud",
- "x_nofree": "No free demo SIMs left"
+ "x_nofree": "No free demo SIMs left",
+ "vat_local": "OTA VAT number in {cc}: {v}",
+ "otp_gap": "A new code to {c} can be sent in {s} s. If you already have a valid code, enter it.",
+ "otp_notsent": "No new code was sent to {c}. If you already have a valid code, enter it."
 }

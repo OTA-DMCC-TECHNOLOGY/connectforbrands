@@ -818,6 +818,19 @@ mark.lgd-v{background:var(--lg-hl);color:inherit;padding:0 1px;border-radius:2px
  body.lg-printing-audit .tbl{font-size:9px}
  body.lg-printing-audit .card{box-shadow:none;border:0}
 }
+/* browser print (Ctrl/Cmd+P) on a document page: only the document's A4 pages, no app chrome */
+@media print{
+ body:has(.lg-dvgrid):not(.lg-printing) .side,body:has(.lg-dvgrid):not(.lg-printing) .top,body:has(.lg-dvgrid):not(.lg-printing) .ph,
+ body:has(.lg-dvgrid):not(.lg-printing) .crumbs,body:has(.lg-dvgrid):not(.lg-printing) .copy,body:has(.lg-dvgrid):not(.lg-printing) #toasts,
+ body:has(.lg-dvgrid):not(.lg-printing) .content > .stack > .note,body:has(.lg-dvgrid):not(.lg-printing) .lg-dvgrid > :not(.lgd-wrap),
+ body:has(.lg-dvgrid):not(.lg-printing) .lg-noprint,body:has(.lg-dvgrid):not(.lg-printing) #sidescrim{display:none!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .main,body:has(.lg-dvgrid):not(.lg-printing) .content{padding:0!important;margin:0!important;max-width:none!important;display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lg-dvgrid{display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-wrap{background:none!important;padding:0!important;overflow:visible!important;border-radius:0}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-pages{zoom:1!important;gap:0!important;display:block!important}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-page{box-shadow:none!important;break-after:page;margin:0}
+ body:has(.lg-dvgrid):not(.lg-printing) .lgd-page:last-child{break-after:auto}
+}
 /* 75_opsdocs — operational documents: statements, commission invoices, print views (always white paper, A4) */
 .ops_nw{white-space:nowrap}
 .ops_strong{font-weight:700}
@@ -1004,8 +1017,19 @@ const pad=(n,w=2)=>String(n).padStart(w,'0');
 let _uid=0;const uid=p=>(p||'id')+'_'+Date.now().toString(36)+(++_uid).toString(36);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const digits=s=>String(s||'').replace(/\D/g,'');
-function now(){return new Date(NOW0.getTime()+(S.clock||0)*60000);}   // demo clock; ACT.tick advances
-function tick(min){S.clock=(S.clock||0)+(min||1);}
+/* demo clock. SHARED contract with the customer portal: localStorage 'cfb-demo-ownership'.clock = {demo0, real0, offset_ms} (ms);
+   demoNow() = demo0 + (Date.now() - real0) + offset_ms. Without the bridge clock: old behaviour NOW0 + S.clock minutes.
+   Time skips go through clockSkip(ms) (tick(min) is kept as the console shortcut). */
+const BRIDGE_KEY='cfb-demo-ownership';let _bcT=0,_bc=null;
+function bridgeClock(){const t0=Date.now();if(t0-_bcT<400)return _bc;_bcT=t0;try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');const c=b&&b.clock;_bc=c&&isFinite(c.demo0)&&isFinite(c.real0)?c:null;}catch(e){_bc=null;}return _bc;}
+function legacyNow(){let m=0;try{m=S&&S.clock||0;}catch(e){}return new Date(NOW0.getTime()+m*60000);}
+function now(){const c=bridgeClock();return c?new Date(c.demo0+(Date.now()-c.real0)+(+c.offset_ms||0)):legacyNow();}
+// create the shared clock if the bridge object exists without one (the console continues from its current demo time)
+function bridgeClockEnsure(){try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');if(!b||typeof b!=='object'||(b.clock&&isFinite(b.clock.demo0)))return false;
+ b.clock={demo0:legacyNow().getTime(),real0:Date.now(),offset_ms:0};localStorage.setItem(BRIDGE_KEY,JSON.stringify(b));_bcT=0;return true;}catch(e){return false;}}
+function clockSkip(ms){ms=+ms||0;S.clock=(S.clock||0)+ms/60000;   // old offset kept in sync
+ try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');if(b&&b.clock&&isFinite(b.clock.demo0)){b.clock.offset_ms=(+b.clock.offset_ms||0)+ms;localStorage.setItem(BRIDGE_KEY,JSON.stringify(b));}}catch(e){}_bcT=0;}
+function tick(min){clockSkip((min||1)*60000);}
 const iso=d=>d.toISOString();
 function fmtDate(x,opt){const d=typeof x==='string'?new Date(x):x;return d.toLocaleDateString(LOCALES[S.lang],opt||{day:'numeric',month:'short',year:'numeric'}).replace(/\s?р\.$/,'').replace(/\s?г\.$/,'');}
 function fmtDateTime(x){const d=typeof x==='string'?new Date(x):x;return fmtDate(d)+', '+d.toLocaleTimeString(LOCALES[S.lang],{hour:'2-digit',minute:'2-digit'});}
@@ -1811,7 +1835,7 @@ function seedDemo(){
  let left=15;for(let i=S.codes.length-1;i>=0&&left>0;i--){const c=S.codes[i];if(c.reseller==='r2'&&c.status==='issued'){c.status='void';c.voidAt=daysAgo(5);left--;}}
  S.activity=[];log(t('c.demoLoaded'));audit('demo.seed','ARV',{});
  HOOKS.seedDemo.forEach(f=>{try{f();}catch(e){console.error(e);}});
- save();}
+ bridgeClockEnsure();save();}
 I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.ofTermBlock':'Замовлення (Order Form) для країни {c} розірвано {d}. Нові замовлення для цієї країни недоступні.'},
  en:{'c.demoLoaded':'Demo data loaded','c.ofTermBlock':'The Order Form for {c} was terminated on {d}. New orders for this country are not available.'},
  ru:{'c.demoLoaded':'Демо-данные загружены','c.ofTermBlock':'Заказ (Order Form) по стране {c} расторгнут {d}. Новые заказы по этой стране недоступны.'}});
@@ -1830,6 +1854,7 @@ HOOKS.onBoot.push(()=>{if(!S.ota)S.ota={};const sd=otaSeed();const full=!S.otaSe
  (S.creditNotes||[]).forEach(c=>{if(c.aedRate==null){const r=aedRate(c.createdAt);c.aedRate=r.rate;c.aedRateDate=r.date;c.aedSrc=r.src;c.vatAed=0;c.vat=0;c.vatRate=0;
   const i=(S.invoices||[]).find(x=>x.id===c.invoiceId);if(!CN_REASONS[c.reason]){c.reasonNote=c.reason||'';c.reason=c.wasPaid?'error':'cancel_unpaid';}if(i){c.invoiceDate=i.createdAt;if(!c.lines)c.lines=i.lines.map(l=>Object.assign({},l,{amount:-Math.abs(l.amount)}));c.total=c.net=i.net;}ch++;}});
  (S.shipments||[]).forEach(h=>{if(!h.ship_from){h.ship_from=Object.assign({},SHIP_FROM_DEMO);h.ship_from_country=SHIP_FROM_DEMO.country;h.exporter=Object.assign({},EXPORTER_DEMO);ch++;}});
+ bridgeClockEnsure();
  if(ch||full)save();});
 
 /* ---- 10_onboarding.js ---- */
@@ -4071,9 +4096,9 @@ function cx_tryActivate(raw,iccid){
 function cx_trySub(iccid){const s=S.sims.find(x=>x.iccid===iccid);if(!s)return{err:t('cod.e.noSim')};if(s.status!=='active')return{err:t('cod.e.simInactive')};
  if(s.plan)return{err:t('cod.e.simHasPkg',{p:esc(pkgLabel(s.plan,s.term))})};
  const x=findModel(s.modelId);if(!x||x.model.planStatus!=='approved'||!x.model.plan)return{err:t('cod.e.notApproved',{m:esc(x?x.model.name:'—')})};
- const needKey=!s.keyLotId&&!deviceKeyed(s.imei);if(needKey&&keysAvail()<=0)return{err:t('cx.e.noKey'),credits:true};
+ const needKey=!s.keyLotId&&!deviceKeyed(s.imei);if(needKey&&keysAvail()<=0)return{err:t('cx.e.noKeySub'),credits:true};
  const sub=subActive(s)||subCreate(s,x.model.plan);const r=deviceActivate(s,{via:'subscription',sub});
- if(r.err==='no_key')return{err:t('cx.e.noKey'),credits:true};if(r.err)return{err:t('cod.e.invalid')};
+ if(r.err==='no_key')return{err:t('cx.e.noKeySub'),credits:true};if(r.err)return{err:t('cod.e.invalid')};
  log(t('cx.sub.log',{p:PLAN_NAME[sub.plan],s:fmtIccid(s.iccid)}));return{ok:true,s,sub};}
 FORM.cx_act=f=>{const d=formData(f);const raw=String(d.cx_ap||'').trim()||d.cx_ac;const out=$('#cx_actRes');
  const via=(f.querySelector('input[name=cx_via]:checked')||{}).value||'token';
@@ -4164,9 +4189,9 @@ ru:{'cx.nav':'Коды активации','cx.title':'Коды активаци
 ['cat.priceNote','ціна сервісного токена на один пристрій, USD без ПДВ','price of one Service Token for one device, USD net','цена сервисного токена на одно устройство, USD без НДС'],['cat.cPrice','Ціна токена','Token price','Цена токена'],['cat.cTerm','Термін','Term','Срок'],['cat.indiv','ціна змінена','custom price','цена изменена'],
 ['cat.reviewNote','Ми перевіряємо цей пристрій, щоб призначити тариф (Light, Standard або Premium). Зазвичай це займає до 1 робочого дня. Список IMEI можна завантажити вже зараз.','We are checking this device to assign a plan (Light, Standard or Premium). This usually takes up to 1 business day. You can upload the IMEI list already.','Мы проверяем это устройство, чтобы назначить тариф (Light, Standard или Premium). Обычно это занимает до 1 рабочего дня. Список IMEI можно загрузить уже сейчас.'],
 ];const o={uk:{},en:{},ru:{}};R.forEach(([k,uk,en,ru])=>{o.uk[k]=uk;o.en[k]=en;o.ru[k]=ru;});I18N.add(o);})();
-I18N.add({uk:{'cx.via':'Звідки тариф','cx.via.token':'Код активації (сервісний токен)','cx.via.tokenD':'Списується 1 токен пакета коду і, якщо пристрій новий, 1 ключ активації.','cx.via.sub':'Пряма підписка','cx.via.subD':'Покупець оплачує карткою на порталі, продавець — OTA. Токен не потрібен, ключ активації списується.','cx.sub.log':'Активація за прямою підпискою {p}: SIM {s}','cx.sub.toast':'SIM {s}: активовано за прямою підпискою {p}'},
-en:{'cx.via':'Plan source','cx.via.token':'Activation code (Service Token)','cx.via.tokenD':'Uses 1 token of the code’s package and, for a new device, 1 Activation Key.','cx.via.sub':'Direct Subscription','cx.via.subD':'The customer pays by card on the portal; OTA is the seller. No token needed; an Activation Key is used.','cx.sub.log':'Activation with Direct Subscription {p}: SIM {s}','cx.sub.toast':'SIM {s}: activated with Direct Subscription {p}'},
-ru:{'cx.via':'Откуда тариф','cx.via.token':'Код активации (сервисный токен)','cx.via.tokenD':'Списывается 1 токен пакета кода и, если устройство новое, 1 ключ активации.','cx.via.sub':'Прямая подписка','cx.via.subD':'Покупатель оплачивает картой на портале, продавец — OTA. Токен не нужен, ключ активации списывается.','cx.sub.log':'Активация по прямой подписке {p}: SIM {s}','cx.sub.toast':'SIM {s}: активировано по прямой подписке {p}'}});
+I18N.add({uk:{'cx.via':'Звідки тариф','cx.via.token':'Код активації (сервісний токен)','cx.via.tokenD':'Списується 1 токен пакета коду і, якщо пристрій новий, 1 ключ активації.','cx.via.sub':'Пряма підписка','cx.via.subD':'Покупець оплачує карткою на порталі, продавець — OTA. Токен не потрібен, ключ активації списується.','cx.e.noKeySub':'Немає вільного ключа активації для нового пристрою — активувати за прямою підпискою не можна. Купіть ключі активації.','cx.sub.log':'Активація за прямою підпискою {p}: SIM {s}','cx.sub.toast':'SIM {s}: активовано за прямою підпискою {p}'},
+en:{'cx.via':'Plan source','cx.via.token':'Activation code (Service Token)','cx.via.tokenD':'Uses 1 token of the code’s package and, for a new device, 1 Activation Key.','cx.via.sub':'Direct Subscription','cx.via.subD':'The customer pays by card on the portal; OTA is the seller. No token needed; an Activation Key is used.','cx.e.noKeySub':'No free Activation Key for a new device — the Direct Subscription activation can’t go ahead. Buy Activation Keys.','cx.sub.log':'Activation with Direct Subscription {p}: SIM {s}','cx.sub.toast':'SIM {s}: activated with Direct Subscription {p}'},
+ru:{'cx.via':'Откуда тариф','cx.via.token':'Код активации (сервисный токен)','cx.via.tokenD':'Списывается 1 токен пакета кода и, если устройство новое, 1 ключ активации.','cx.via.sub':'Прямая подписка','cx.via.subD':'Покупатель оплачивает картой на портале, продавец — OTA. Токен не нужен, ключ активации списывается.','cx.e.noKeySub':'Нет свободного ключа активации для нового устройства — активировать по прямой подписке нельзя. Купите ключи активации.','cx.sub.log':'Активация по прямой подписке {p}: SIM {s}','cx.sub.toast':'SIM {s}: активировано по прямой подписке {p}'}});
 /* ---------- customer-portal bridge (ТЗ v10 3.1 / 4.4): codes redeemed in /portal (localStorage cfb-demo-ownership.codes[CODE].status='redeemed')
    are activated here with the same rules: 1 Service Token of the code's package + 1 Activation Key for a new device; no key / no token → stays pending. */
 function cx_bridgeSync(){if(!S||!S.authed||!S.codes||!S.codes.length)return 0;let b=null;try{b=JSON.parse(localStorage.getItem('cfb-demo-ownership')||'null');}catch(e){}
@@ -4796,6 +4821,8 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
  if(cc){V.CC=cc;V.CC_NAME_EN=lg_ccDemo(cc).CC_NAME_EN||ctyNameEn(cc);
   LG_COUNTRY_OTA.forEach(k=>{const v=lg_ccVal(cc,k);if(v!=null)lg_put(V,k,v,null,l2);else NA.add(k);});
   if(!V.CC_NAME_L2)V.CC_NAME_L2=lg_ccName(cc,l2);
+  if(!V.EUT_LANGS||/^\[/.test(String(V.EUT_LANGS))){const nm=(l,loc)=>{try{const x=new Intl.DisplayNames([loc],{type:'language'}).of(l);return x||l;}catch(e){return l;}};const ls=lg_pubLangs(cc);
+   V.EUT_LANGS=ls.map(l=>nm(l,'en')).join(', ');const l2s=ls.map(l=>nm(l,(LG_LANG2[l2]||{}).loc||'ru')).join(', ');if(l2s!==V.EUT_LANGS)V.EUT_LANGS_L2=l2s;else delete V.EUT_LANGS_L2;NA.delete('EUT_LANGS');}
   V.CC_NAME_UPPER_EN=String(V.CC_NAME_EN).toUpperCase();V.CC_NAME_UPPER_L2=String(V.CC_NAME_L2).toLocaleUpperCase(LG_LANG2[l2].loc);
   LG_COUNTRY_PARTNER.forEach(k=>{const v=lg_ccVal(cc,k);const m=lg_meta(k);if(v!=null)lg_put(V,k,v,m&&m.format,l2);else if(k.startsWith('OF_EXC'))NA.add(k);});
   if(!V.OF_EXCEPTIONS_EN)V.OF_EXCEPTIONS_NONE=true;
@@ -5092,7 +5119,10 @@ function lg_pubCurrent(type){return lg_st().pub.filter(p=>p.type===type&&p.statu
 function lg_pubPublish(type,cc,lang,o){o=o||{};const L=lg_st();const at=o.at||iso(now());const cur=L.pub.find(p=>p.type===type&&p.cc===cc&&p.lang===lang&&p.status==='current');
  let ver='1.0';if(cur){const [ma,mi]=cur.ver.split('.').map(Number);ver=o.major?(ma+1)+'.0':ma+'.'+(mi+1);cur.status='superseded';cur.supersededAt=at;}
  const p={id:uid('pub'),type,cc,lang,ver,number:docNo(type,{cc,lang,ver}),tplVer:o.tplVer||lg_tplCurVer(type),publishedAt:at,effective:o.effective||at,notifiedAt:o.notified?at:null,status:'current',note:o.note||'',by:o.by||actorName()};
- L.pub.unshift(p);if(!o.silent)lg_audit('pub.version',p.number,{tpl:p.tplVer});return p;}
+ // QA #5: the published text is frozen (values + SHA-256) — later OTA / country data changes need a new version
+ const rl=p.lang==='en'||lg_tplHasLang(type,p.lang)?p.lang:'en';const r=lg_render(type,{cc,public:rl,tplVer:p.tplVer,effective:p.effective,docVer:'v'+ver,lang2:rl==='en'?lg_l2():rl});
+ p.vals=lg_freezeVals(r);p.renderLang=rl;p.hash=lg_sha256sync(r.text);p.textLen=r.text.length;
+ L.pub.unshift(p);if(!o.silent)lg_audit('pub.version',p.number,{tpl:p.tplVer,hash:p.hash});return p;}
 
 // ТЗ 3.4: 07/08 are published in the country's language(s): UA — uk; KZ — kk AND ru. A language is available when the template
 // carries its text or OTA uploaded the professional translation (ТЗ 4.12). Publishing a country is all-or-nothing.
@@ -5616,7 +5646,7 @@ function lg_pubHtml(){const L=lg_st();const groups={};L.pub.forEach(p=>{const k=
  return `<div class="stack">${lg_launchCard()}${ui.card({title:t('lg.pub.title'),body:`<div class="col g16"><p class="small muted">${t('lg.pub.d2')}</p>${ccCards||`<p class="small muted">${t('lg.pub.none')}</p>`}</div>`})}
   ${hist?ui.card({title:t('lg.pub.hist'),body:`<div class="col g16">${hist}</div>`}):''}</div>`;}
 function lg_pubView(id){const p=lg_st().pub.find(x=>x.id===id);if(!p)return;const tplLang=p.lang==='en'||lg_tplHasLang(p.type,p.lang);const tr=((lg_st().tr[p.type]||{})[p.lang]);
- const lang=tplLang?p.lang:'en';const r=lg_render(p.type,{cc:p.cc,public:lang==='en'?'en':lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:lang==='en'?lg_l2():lang});
+ const lang=p.renderLang||(tplLang?p.lang:'en');const r=lg_render(p.type,{cc:p.cc,public:lang==='en'?'en':lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:lang==='en'?lg_l2():lang,vals:p.vals||undefined});
  modal(esc(lg_tplTitle(p.type,lang==='en'?'en':'ru'))+` <span class="xs muted mono">${esc(lg_langName(p.lang))} · v${esc(p.ver)}</span>`,`<div class="lg-web"><div class="lg-webbar">${icon('globe','sm')}<span class="mono xs">https://${esc(lg_fval('P_DOMAIN')||'connect.brand.com')}/${p.type==='EUT'?'terms':'privacy'}</span></div>
   ${tplLang?'':ui.note('info',t('lg.pub.trView',{f:esc(tr?tr.file:'—'),l:esc(lg_langName(p.lang))}))}<div class="lg-webbody">${r.html}</div>
   ${r.missing.length&&S.admin?ui.note('admin',t('lg.pub.miss',{k:r.missing.join(', ')})):''}</div>`,ui.btn(t('c.close'),{act:'ovclose'}),{wide:true});lg_audit('doc.view',p.number,{public:true});}
@@ -5844,7 +5874,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
  const devs=allModels().filter(x=>x.model.plan&&x.model.planStatus==='approved').map(x=>({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'rev. A',DEV_FW:'1.0',DEV_PLAN:PLAN_EN[x.model.plan],DEV_MB:x.model.plan==='light'?'5':'50',DEV_SIM:'Industrial IoT SIM (2FF/3FF/4FF)',ok:true}));
  orgCountries().forEach(cc=>{const C=(D&&D.countries&&D.countries[cc])||{};const dv=(S.org.delivery||{})[cc]||{};
   ['CC_NAME_L2','CC_NAME_FULL_EN','CC_NAME_FULL_L2','CC_NAME_LOC_L2','CC_EXCLUSION_EN','CC_EXCLUSION_L2'].forEach(k=>set(lg_ccKey(k,cc),C[k]==null?null:C[k],{by:'Platform Admin'}));
-  set(lg_ccKey('EUT_LANGS',cc),'[languages]',{by:'Platform Admin'});set(lg_ccKey('EUT_CONSUMER_AUTH',cc),'[consumer protection authority]',{by:'Platform Admin'});set(lg_ccKey('EUT_DP_AUTH',cc),'[data protection authority]',{by:'Platform Admin'});
+  set(lg_ccKey('EUT_CONSUMER_AUTH',cc),'[consumer protection authority]',{by:'Platform Admin'});set(lg_ccKey('EUT_DP_AUTH',cc),'[data protection authority]',{by:'Platform Admin'});
   set(lg_ccKey('LAUNCH_DATE',cc),ago(57).slice(0,10));set(lg_ccKey('RETAIL_CUR',cc),(CC_META[cc]||{}).cur||'USD');set(lg_ccKey('DELIVERY_ADDR',cc),[dv.address,dv.city].filter(Boolean).join(', '));set(lg_ccKey('IMPORTER',cc),dv.importer||'');
   ['INIT_SIMS','INIT_KEYS','INIT_TOKENS','ANNUAL_TARGET'].forEach(k=>set(lg_ccKey(k,cc),String(C[k]!=null?C[k]:'')));set(lg_ccKey('DEVICES',cc),devs.map(x=>Object.assign({},x)));});
  lg_syncOrg();
@@ -6524,11 +6554,11 @@ function ops_pfV10(T){const C=(en,ru)=>({en,ru,bi:true});const V=(en,ru)=>({en,r
  const p3=T.blocks.find(b=>b.id==='PF-p3');if(p3&&/exporter's records/.test(p3.en||'')){p3.en='I declare that the information in this document is true and correct and is supported by the records of OTA as owner of the goods.';p3.ru='Подтверждаю, что сведения в настоящем документе достоверны и подтверждаются документами OTA как собственника товара.';}
  const t1r=t1.rows.find(r=>/Reason for export/.test((r[0]||{}).en||''));if(t1r&&t1r[1]&&/property of the exporter/.test(t1r[1].en||''))t1r[1]={en:'Free-of-charge transfer into custody of SIM cards remaining the property of OTA or its supplier, for installation in approved IoT devices; not for retail sale',ru:'Безвозмездная передача на хранение SIM-карт, остающихся собственностью OTA или её поставщика, для установки в одобренные IoT-устройства; не для розничной продажи',bi:true};}
 // A2 box label: SHIPPER (OWNER OF GOODS) — OTA TECHNOLOGY DMCC + SHIP FROM block (warehouse, exporter, EORI). Label layout only; no legal text.
-function ops_buildA2(id){const h=(S.shipments||[]).find(x=>x.id===id);if(!h)return null;const v=ops_shipVals(h);const d=h.dap||{};const n=Math.max(1,+h.cartons||1);const name=v.OTA_NAME||'OTA TECHNOLOGY DMCC';
+function ops_buildA2(id){const h=(S.shipments||[]).find(x=>x.id===id);if(!h)return null;const v=ops_shipVals(h);const d=h.dap||{};const n=Math.max(1,+h.cartons||1);const per=i=>{const base=Math.floor(h.qty/n),rest=h.qty-base*n;return base+(i<=rest?1:0);};/* per-box quantity (QA #11) */const name=v.OTA_NAME||'OTA TECHNOLOGY DMCC';
  const box=i=>`<section class="ops_a2" aria-label="A2 label ${i}/${n}"><div class="ops_a2sh"><span class="ops_a2k">SHIPPER (OWNER OF GOODS)</span><b>— ${esc(name)}</b></div>
   <div class="ops_a2g"><div><span class="ops_a2k">SHIP FROM</span><b>${esc(v.SHIP_FROM_NAME)}</b><span>${esc(v.SHIP_FROM_ADDR)}</span><span>${esc(v.SHIP_FROM_COUNTRY)}</span><span>Exporter: ${esc(v.EXPORTER_EU)}</span><span>EORI: <b class="mono">${esc(v.EXPORTER_EORI)}</b></span></div>
   <div><span class="ops_a2k">SHIP TO (DAP)</span><b>${esc(d.company||'')}</b>${d.recipient?`<span>Attn: ${esc(d.recipient)}</span>`:''}<span>${esc([d.address,d.city].filter(Boolean).join(', '))}</span><span>${esc(ctyNameEn(d.country||h.cc))}</span>${d.phone?`<span>Tel. ${esc(d.phone)}</span>`:''}</div></div>
-  <div class="ops_a2f"><span>Pro forma <b class="mono">${esc(h.pf)}</b></span><span>Box <b>${i} / ${n}</b></span><span>${esc(ops_q(h.qty))} SIM · HS 8523.52</span></div></section>`;
+  <div class="ops_a2f"><span>Pro forma <b class="mono">${esc(h.pf)}</b></span><span>Box <b>${i} / ${n}</b></span><span>${esc(ops_q(per(i)))} SIM · HS 8523.52</span></div></section>`;
  const html=`<div class="ops_a2wrap">${Array.from({length:Math.min(n,20)},(_,i)=>box(i+1)).join('')}</div>`;
  const text=['SHIPPER (OWNER OF GOODS) — '+name,'SHIP FROM',v.SHIP_FROM_NAME,v.SHIP_FROM_ADDR,v.SHIP_FROM_COUNTRY,'Exporter: '+v.EXPORTER_EU,'EORI: '+v.EXPORTER_EORI,'Pro forma '+h.pf].join('\n');
  return{type:'a2',id,no:h.pf+' · A2',date:h.createdAt,cc:h.cc,html,text,missing:[],tplVer:'A2 label',h,src:link('shipment',h.id),status:h.status,title:'A2 box label'};}
@@ -6897,8 +6927,8 @@ function own_userName(id){const u=users().find(x=>x.id===id);return u?u.name:'';
 let own__si=null,own__siN=-1,own__siS=null;
 function own_sim(iccid){if(!own__si||own__siN!==S.sims.length||own__siS!==S.sims){own__si=new Map();S.sims.forEach(s=>own__si.set(s.iccid,s));own__siN=S.sims.length;own__siS=S.sims;}return own__si.get(iccid)||null;}
 function own_simCc(s){const h=s&&s.shipmentId&&(S.shipments||[]).find(x=>x.id===s.shipmentId);return (h&&h.cc)||primaryCc();}
-function own_ctyCfg(cc){const o=S.ota||{};return (o.countries&&o.countries[cc])||(S.otaCountries&&S.otaCountries[cc])||{};}
-function own_delay(cc){const v=+own_ctyCfg(cc).delay_hours;return v>=1&&v<=24?Math.round(v):24;}   // 1–24, default 24 (4.5 p.3)
+function own_ctyCfg(cc){if(typeof otaCountry==='function')return otaCountry(cc);const o=S.ota||{};return (o.countries&&o.countries[cc])||{};}
+function own_delay(cc){const v=parseInt(own_ctyCfg(cc).delay_hours,10);return v>=1&&v<=24?v:24;}   // 1–24, default 24 (4.5 p.3)
 function own_online(s){return !!s&&s.status==='active'&&!!s.lastSeen&&(now()-new Date(s.lastSeen))<OWN_ONLINE_MIN*60000;}
 function own_mname(x){if(!x)return null;const m=x.model.name,b=x.brand.name;return m.toLowerCase().startsWith(b.toLowerCase())?m:b+' '+m;}
 function own_modelMap(){const m={};allModels().forEach(x=>{m[x.model.id]=x;});return m;}
@@ -6911,7 +6941,10 @@ let own__b=null;
 function own_bRead(){try{const b=JSON.parse(localStorage.getItem(OWN_KEY));return b&&typeof b==='object'&&b.sims?b:null;}catch(e){return null;}}
 function own_bNorm(b){['bindings','transfers','events','requests','bindLinks','partnerContacts','t12Exempt','history','notices','seeded_partners'].forEach(k=>{if(!Array.isArray(b[k]))b[k]=[];});
  ['sims','codes','accounts'].forEach(k=>{if(!b[k]||typeof b[k]!=='object')b[k]={};});return b;}
-function own_bWrite(b){b.v=1;b.rev=(b.rev||0)+1;b.updated_at=iso(now());b.updated_by='partner-console';try{localStorage.setItem(OWN_KEY,JSON.stringify(b));}catch(e){console.warn('ownership bridge',e);}own__b=b;own_mirror(b);}
+function own_clockFix(b){let cur=null;try{cur=JSON.parse(localStorage.getItem(OWN_KEY));}catch(e){}
+ if(cur&&cur.clock&&isFinite(cur.clock.demo0))b.clock=cur.clock;   // never overwrite a clock skip made meanwhile (clockSkip)
+ else if(!b.clock||!isFinite(b.clock.demo0))b.clock={demo0:now().getTime(),real0:Date.now(),offset_ms:0};}
+function own_bWrite(b){own_clockFix(b);b.v=1;b.rev=(b.rev||0)+1;b.updated_at=iso(now());b.updated_by='partner-console';try{localStorage.setItem(OWN_KEY,JSON.stringify(b));}catch(e){console.warn('ownership bridge',e);}try{_bcT=0;}catch(e){}own__b=b;own_mirror(b);}
 // read-modify-write on a fresh copy (the customer portal may have written in between)
 function own_tx(fn){const b=own_bNorm(own_bRead()||{sims:{}});const r=fn(b);own_process(b);own_bWrite(b);return r;}
 function own_b(){if(!own__b)own_sync();return own__b||own_bNorm({sims:{}});}
@@ -6930,27 +6963,24 @@ function own_seedScopes(){if(S.sims.some(s=>s.sold_by_user_id||s.installed_by_us
   if(idx%6===1||[1,3,7].includes(idx))s.sold_by_user_id='u_p_dealer';
   if((s.reseller==='r1'&&idx%5===4)||[1,4,6].includes(idx))s.installed_by_user_id='u_p_installer';});}
 function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const ago=h=>iso(new Date(n.getTime()-h*3600e3));
- // remove this partner's previous demo records (other partners and customer accounts stay)
- Object.keys(b.sims).forEach(k=>{if(b.sims[k].partner===P)delete b.sims[k];});
- Object.keys(b.codes).forEach(k=>{if(b.codes[k].partner===P)delete b.codes[k];});
- const mine=new Set(b.bindings.filter(x=>x.partner_id===P).map(x=>x.id));
- b.bindings=b.bindings.filter(x=>x.partner_id!==P);b.transfers=b.transfers.filter(x=>!mine.has(x.binding_id));
- ['requests','history','bindLinks','events','notices'].forEach(k=>{b[k]=b[k].filter(x=>x.partner_id!==P);});
- S.sims.forEach(s=>{b.sims[s.iccid]=own_simRec(s);});
- const last=S.sims[S.sims.length-1];if(last&&last.status==='stock')Object.assign(b.sims[last.iccid],{status:'deactivated',deactivated_reason:'lost'});
+ // MERGE (never replace): existing SIMs, codes, accounts, bindings, transfers, requests and events stay as they are
+ const added=new Set();S.sims.forEach(s=>{if(!b.sims[s.iccid]){b.sims[s.iccid]=own_simRec(s);added.add(s.iccid);}});
+ const last=S.sims[S.sims.length-1];if(last&&last.status==='stock'&&added.has(last.iccid))Object.assign(b.sims[last.iccid],{status:'deactivated',deactivated_reason:'lost'});
  // activation codes: issued → new, activated → redeemed (pinned to the device), void → blocked
  const imeiOf=ic=>{const s=ic&&own_sim(ic);return s?s.imei:null;};
- (S.codes||[]).forEach(c=>{const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
+ (S.codes||[]).forEach(c=>{if(b.codes[c.code])return;const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
   device_id:c.status==='activated'?imeiOf(c.iccid):null,redeemed_at:c.activatedAt||null,blocked_at:c.status==='void'?(c.voidAt||ago(120)):null};});
- const st=own_st();const blk=(S.codes||[]).find(c=>c.reseller==='r1'&&c.status==='issued');
+ const st=own_st();const blk=(S.codes||[]).find(c=>c.reseller==='r1'&&c.status==='issued'&&b.codes[c.code]&&b.codes[c.code].status==='new');
  if(blk){blk.status='void';blk.voidAt=ago(30);blk.blockedAt=blk.voidAt;Object.assign(b.codes[blk.code],{status:'blocked',blocked_at:blk.voidAt,blocked_reason:'lost'});
   st.codes.blocked=[{code:blk.code,serial:parseCode(blk.code).serial,plan:blk.plan,term:blk.term,reseller:blk.reseller,at:blk.voidAt,by:(S.user&&S.user.name)||'Partner Admin',reason:'lost',mode:'serial'}];}
  // customer accounts + bindings for every SIM the customer already linked
  const names=['Olena Shevchenko','Petro Ivanenko','Iryna Bondarenko','Serhii Tkachenko','Nataliia Kravets','Andrii Moroz','Oksana Lysenko','Dmytro Savchenko','Yuliia Rudenko','Maksym Polishchuk','Tetiana Hnatiuk','Vasyl Kovalenko','Halyna Melnyk','Roman Shevchuk'];
- let an=0;const mkAcc=nm=>{an++;const id='acc_'+P.toLowerCase()+'_'+pad(an,4);const sl=nm.toLowerCase().replace(/[^a-z]+/g,'.');b.accounts[id]={name:nm,email:sl+an+'@mail.example',phone:'+380 50 '+pad(100+an%900,3)+' '+pad(an%100,2)+' '+pad((an*7)%100,2),created_at:ago(24*40),src:'demo'};return id;};
+ let an=0;const mkAcc=nm=>{an++;const id='acc_'+P.toLowerCase()+'_'+pad(an,4);const sl=nm.toLowerCase().replace(/[^a-z]+/g,'.');if(!b.accounts[id])b.accounts[id]={name:nm,email:sl+an+'@mail.example',phone:'+380 50 '+pad(100+an%900,3)+' '+pad(an%100,2)+' '+pad((an*7)%100,2),created_at:ago(24*40),src:'demo'};return id;};
  const mkB=(s,acc,at,method)=>{const bd={id:'bd_'+P.toLowerCase()+'_'+s.iccid.slice(-6)+'_'+(b.bindings.length+1),iccid:s.iccid,device_id:s.imei||null,owner_account_id:acc,partner_id:P,method,bound_at:at,unbound_at:null,unbind_reason:null,status:'active'};b.bindings.push(bd);return bd;};
  const days=at=>Math.max(1,(new Date(at)-0)/864e5);
- S.sims.forEach((s,idx)=>{if(!s.linked)return;const ev=(s.events||[]).find(e=>e[1]==='linked');const at=ev?ev[0]:ago(24*20);const acc=mkAcc(names[an%names.length]);
+ const hasB=new Set(b.bindings.map(x=>x.iccid));
+ S.sims.forEach((s,idx)=>{if(!s.linked||hasB.has(s.iccid))return;   // never re-bind a SIM the bridge already knows (portal bindings stay)
+  const ev=(s.events||[]).find(e=>e[1]==='linked');const at=ev?ev[0]:ago(24*20);const acc=mkAcc(names[an%names.length]);
   if(idx===4||idx===6){ // transferred to a new owner earlier: 29 days ago (history due for erasure) / 10 days ago (legal hold)
    const tAt=idx===4?ago(24*29+4):ago(24*10);const old=mkB(s,acc,at,'iccid');old.status='ended';old.unbound_at=tAt;old.unbind_reason='transfer';
    const acc2=mkAcc(names[an%names.length]);const nb=mkB(s,acc2,tAt,'transfer');nb.prev_binding_id=old.id;
@@ -6961,10 +6991,10 @@ function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const a
   }else mkB(s,acc,at,'iccid');});
  // pending transfer (awaiting the new owner's acceptance)
  const s3=S.sims[3];const b3=s3&&own_activeB(b,s3.iccid);
- if(b3)b.transfers.push({id:'tr_'+b3.id,binding_id:b3.id,from_account_id:b3.owner_account_id,to_contact:'new.owner@example.com',to_account_id:null,status:'pending_acceptance',initiated_at:ago(5),accepted_at:null,effective_at:null,cancelled_at:null,cancelled_by:null,delay_hours:own_delay(own_simCc(s3))});
+ if(b3&&b3.partner_id===P&&!own_openTr(b,b3.id))b.transfers.push({id:'tr_'+b3.id,binding_id:b3.id,from_account_id:b3.owner_account_id,to_contact:'new.owner@example.com',to_account_id:null,status:'pending_acceptance',initiated_at:ago(5),accepted_at:null,effective_at:null,cancelled_at:null,cancelled_by:null,delay_hours:own_delay(own_simCc(s3))});
  // ownership request awaiting OTA support (submitted by the dealer)
  const s7=S.sims[7];const b7=s7&&own_activeB(b,s7.iccid);
- if(b7){const q={id:'or_'+P.toLowerCase()+'_1',no:'OR-'+P+'-0001',partner_id:P,iccid:s7.iccid,binding_id:b7.id,owner_account_id:b7.owner_account_id,requester_contact:'+380 67 700 12 34',reason:'previous_owner_unreachable',action:'transfer',
+ if(b7&&!b.requests.some(x=>x.id==='or_'+P.toLowerCase()+'_1'||(x.iccid===s7.iccid&&['submitted','docs_requested','cooling_off','disputed'].includes(x.status)))){const q={id:'or_'+P.toLowerCase()+'_1',no:'OR-'+P+'-0001',partner_id:P,iccid:s7.iccid,binding_id:b7.id,owner_account_id:b7.owner_account_id,requester_contact:'+380 67 700 12 34',reason:'previous_owner_unreachable',action:'transfer',
   files:[{name:'receipt_2026-10-12.pdf',size:184320,type:'application/pdf',uploaded_at:ago(26),by:'Oleh Bondar'}],doc_checked:true,status:'submitted',submitted_by:'Oleh Bondar',submitted_by_id:'u_p_dealer',submitted_role:'p_dealer',submitted_at:ago(26),log:[[ago(26),'submitted','Oleh Bondar','']]};
   b.requests.push(q);seqNext(P+':OR');}
  if(!b.seeded_partners.includes(P))b.seeded_partners.push(P);
@@ -6983,10 +7013,11 @@ function own_t12Blocked(b,contact){const n=own_normContact(contact);if(!n)return
 function own_hide(b,old,at){let h=b.history.find(x=>x.binding_id===old.id);
  if(!h){const d0=Math.max(0,(new Date(old.unbound_at||at)-new Date(old.bound_at))/864e5);h={id:'hs_'+old.id,partner_id:old.partner_id,iccid:old.iccid,binding_id:old.id,owner_account_id:old.owner_account_id,from:old.bound_at,to:old.unbound_at||at,points:Math.round(d0*48),events:Math.round(d0*3),state:'visible',erased_at:null,legal_hold:false,hold_reason:''};b.history.push(h);}
  if(h.state==='visible'){h.state='hidden';h.hidden_at=old.unbound_at||at;h.erase_due=iso(addDays(h.hidden_at,OWN_RET_DAYS));return true;}return false;}
-function own_endBinding(b,bd,reason,at){bd.status='ended';bd.unbound_at=at;bd.unbind_reason=reason;own_hide(b,bd,at);}
+function own_endBinding(b,bd,reason,at){if(bd.bound_at&&at<bd.bound_at)at=bd.bound_at;bd.status='ended';bd.unbound_at=at;bd.unbind_reason=reason;own_hide(b,bd,at);}
 function own_newBinding(b,old,acc,method,at){if(own_activeB(b,old.iccid))return null;   // one active binding per ICCID
  const nb={id:own_id('bd'),iccid:old.iccid,device_id:old.device_id,owner_account_id:acc,partner_id:old.partner_id,method,bound_at:at,unbound_at:null,unbind_reason:null,status:'active',prev_binding_id:old.id};b.bindings.push(nb);return nb;}
 function own_execTransfer(b,tr,at){const old=b.bindings.find(x=>x.id===tr.binding_id);if(!old||old.status!=='active'){tr.status='cancelled';tr.cancelled_at=at;tr.cancelled_by='system';return;}
+ if(old.bound_at&&at<old.bound_at)at=old.bound_at;
  const to=tr.to_account_id||own_accByContact(b,tr.to_contact)||own_mkAcc(b,{contact:tr.to_contact});
  own_endBinding(b,old,'transfer',at);const nb=own_newBinding(b,old,to,'transfer',at);
  tr.status='effective';tr.effective_at=at;tr.to_account_id=to;
@@ -7025,10 +7056,16 @@ function own_sync(){if(!S||!S.authed||!S.org||!Array.isArray(S.sims))return null
   else if(c.status==='void'&&r.status==='new'){r.status='blocked';r.blocked_at=c.voidAt||iso(now());dirty=true;}}
  const pc=own_partnerContacts();const old=b.partnerContacts.filter(x=>x.partner===P);
  if(JSON.stringify(pc)!==JSON.stringify(old)){b.partnerContacts=b.partnerContacts.filter(x=>x.partner!==P).concat(pc);dirty=true;}
+ if(own_settings(b))dirty=true;
  if(own_process(b))dirty=true;
  const st=own_st();if(st.ret.lastDay!==own_day(now())&&st.seededAt){own_runRetention(b,{auto:true});dirty=true;}
  if(!st.seededAt){st.seededAt=iso(now());st.ret.lastDay=own_day(now());}
  if(dirty)own_bWrite(b);else{own__b=b;own_mirror(b);}return b;}
+// the console is the authority for per-country settings in the bridge (OTA edits them on the OTA data page)
+function own_settings(b){if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.settings.countries||typeof b.settings.countries!=='object')b.settings.countries={};let ch=false;
+ const ccs=Array.from(new Set(orgCountries().concat(Object.keys((S.ota&&S.ota.countries)||{}))));
+ ccs.forEach(cc=>{const cur=b.settings.countries[cc]||{};const want={delay_hours:own_delay(cc),ownership_v10_enabled:!!own_ctyCfg(cc).ownership_v10_enabled};
+  if(cur.delay_hours!==want.delay_hours||cur.ownership_v10_enabled!==want.ownership_v10_enabled){b.settings.countries[cc]=Object.assign({},cur,want,{set_at:iso(now()),set_by:'partner-console (OTA data)'});ch=true;}});return ch;}
 function own_mirror(b){const P=own_pc();const st=own_st();
  st.bindings=b.bindings.filter(x=>x.partner_id===P);const ids=new Set(st.bindings.map(x=>x.id));
  st.transfers=b.transfers.filter(x=>ids.has(x.binding_id));st.requests=b.requests.filter(x=>x.partner_id===P);
@@ -7069,7 +7106,11 @@ function own_opt(v,l,sel){return `<option value="${esc(v)}" ${String(v)===String
 function own_submit(label,form,kind){return `<button class="btn ${kind||'primary'}" type="submit" form="${form}"><span>${label}</span></button>`;}
 function own_cancel(){return ui.btn(t('c.cancel'),{act:'ovclose'});}
 function own_yes(v){return v==null?`<span class="faint">—</span>`:v?`<span class="own_ok">${icon('check','sm')}${t('c.yes')}</span>`:`<span class="own_no">${icon('x','sm')}${t('c.no')}</span>`;}
-function own_noAccess(title){return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),t('own.noAccessP',{r:esc(roleName(own_role()))}),S.admin?'':(typeof ord_asBtn==='function'?ord_asBtn('p_admin'):''))})});}
+// need: role that can open the page ('ota' = OTA support in OTA mode). Offer a switch only to a DIFFERENT role that is reachable now.
+function own_noAccess(title,need){need=need||'p_admin';const ota=need==='ota';const r=own_role();
+ if(ota&&!S.admin)return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),t('own.noAccessOta'))})});
+ const target=ota?'ota_admin':need;const btn=target!==r&&typeof ord_asBtn==='function'&&(S.admin||own_side(target)==='partner')?ord_asBtn(target):'';
+ return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),ota?t('own.noAccessOta2',{r:esc(roleName(r))}):t('own.noAccessP',{r:esc(roleName(r))}),btn)})});}
 function own_bBadge(bd,role){if(!bd)return ui.badge(t('own.st.free'),'');if(bd.status==='frozen'&&own_canSee('contacts',role))return ui.badge(t('own.st.frozen'),'bad',true);return ui.badge(t('own.st.bound'),'ok',true);}
 function own_reqBadge(st){const tone={submitted:'info',docs_requested:'warn',cooling_off:'violet',disputed:'bad',rejected:'',done:'ok',cancelled:''}[st]||'';return ui.badge(t('own.rq.st.'+st),tone,true);}
 function own_demoTag(){return S.admin?' '+ui.badge(t('own.demo'),'violet'):'';}
@@ -7353,7 +7394,7 @@ function own_runRetention(b,o){o=o||{};const st=own_st();const at=now();const ts
   if(iso(addMonths(base,24))<=ts){bd.owner_account_id=null;bd.anonymised_at=ts;r.anon++;}});
  st.ret.runs.unshift(r);st.ret.runs=st.ret.runs.slice(0,30);st.ret.lastDay=own_day(at);
  audit('retention.run','4.10',{auto:r.auto,hidden:r.hidden,erased:r.erased,held:r.held,files:r.files,anon:r.anon});return r;}
-route('own-ret',{nav:'own-ret',render(){if(!own_isSupport())return own_noAccess(t('own.rt.title'));const b=own_b();const st=own_st();const P=own_pc();
+route('own-ret',{nav:'own-ret',render(){if(!own_isSupport())return own_noAccess(t('own.rt.title'),'ota');const b=own_b();const st=own_st();const P=own_pc();
  const hs=b.history.filter(h=>h.partner_id===P).slice().sort((a,c)=>String(a.hidden_at)<String(c.hidden_at)?1:-1);const ts=iso(now());
  const rows=hs.map(h=>{const held=own_held(b,h);const over=h.state==='hidden'&&h.erase_due<ts&&!held;return{cells:[`<span class="mono nowrap">···${esc(h.iccid.slice(-6))}</span>`,`${fmtDate(h.from)} – ${fmtDate(h.to)}`,h.state==='erased'?'—':`${fmtNum(h.points)} / ${fmtNum(h.events)}`,
   ui.badge(t('own.rt.st.'+h.state),{visible:'info',hidden:'warn',erased:'ok'}[h.state])+(held&&h.state==='hidden'?' '+ui.badge(t('own.rt.held'),'bad'):'')+(over?' '+ui.badge(t('own.rt.overdue'),'bad'):''),
@@ -7399,7 +7440,7 @@ Object.assign(ACT,{
  own_freeze(iccid){own_freezeModal(iccid);},
  own_blockAsk(arg){own_blockAsk(arg);},
  own_retRun(){if(!own_isSupport())return;const r=own_tx(b=>own_runRetention(b,{}));toast(t('own.rt.done',{e:r.erased,h:r.held}));rerender();},
- own_tick(min){if(!own_isSupport())return;tick(+min||60);toast(t('own.rt.clock',{d:esc(fmtDateTime(now()))}));rerender();},
+ own_tick(min){if(!own_isSupport())return;const ms=(+min||60)*60000;if(typeof clockSkip==='function')clockSkip(ms);else tick(+min||60);own__b=null;toast(t('own.rt.clock',{d:esc(fmtDateTime(now()))}));rerender();},
  own_hold(id){own_holdModal(id);},
  own_exemptAdd(){modal(t('own.ex12.add'),`<form id="own_xF" data-form="own_exempt" class="stack" novalidate>${ui.field({id:'own_xc',label:t('own.bs.contact'),placeholder:t('own.bs.contactPh')})}${ui.field({id:'own_xr',label:t('own.dc.reason'),type:'textarea',rows:2})}</form>`,own_cancel()+own_submit(t('c.confirm'),'own_xF'));},
  own_userAdd(){own_userModal();},
@@ -7424,19 +7465,19 @@ I18N.add({
 uk:{
 'c.role.p_dealer':'Дилер','c.role.p_installer':'Монтажник',
 'own.T1':'Підтверджую, що пристрій належить мені або його власник дозволив мені ним користуватися, і приймаю Умови використання.',
-'own.T2':'Ця SIM-картка вже має власника. Зверніться до продавця пристрою.',
+'own.T2':'У цієї SIM-картки вже є власник. Зверніться до продавця пристрою.',
 'own.T3':'Ми не знайшли цю SIM-картку. Перевірте номер або зверніться до продавця пристрою.',
 'own.T4':'Цей пристрій уже є у вашому обліковому записі.',
 'own.T5':'Пристрій додано до вашого облікового запису. Місцезнаходження та події показуються з цього моменту.',
 'own.T6':'{date} до вашого облікового запису CONNECT додано пристрій. Якщо це були не ви, зверніться до служби підтримки.',
 'own.T7':'Цей код не можна використати. Перевірте код або зверніться до продавця.',
-'own.T8':'Після передачі: передплачений тариф залишається за пристроєм; автоподовження вашої підписки припиняється; історія за цим пристроєм стане вам недоступною і не показується новому власникові. Скасувати передачу можна протягом {N} год після того, як новий власник її прийме.',
+'own.T8':'Після передачі: передплачений тариф залишається за пристроєм; автоматичне продовження вашої підписки припиняється; історія цього пристрою стане вам недоступна й не показується новому власникові. Скасувати передачу можна протягом {N} год після того, як новий власник її прийме.',
 'own.T9':'{ім’я або контакт} хоче передати вам пристрій у CONNECT. Прийміть передачу протягом 72 годин.',
 'own.T10':'Передачу пристрою скасовано.',
-'own.T11':'Продавець запросив відв’язку пристрою від вашого облікового запису. Якщо ви проти, натисніть «Заперечити» протягом {N} год.',
+'own.T11':'Продавець надіслав запит на відв’язування пристрою від вашого облікового запису. Якщо ви проти, натисніть «Заперечити» протягом {N} год.',
 'own.T12':'Цей пристрій не можна додати до облікового запису, пов’язаного з дилером або монтажником. Зверніться до служби підтримки.',
 'own.sec':'Власники пристроїв','own.otasec':'Підтримка OTA','own.nav.devices':'Пристрої та власники','own.nav.check':'Перевірка встановлення','own.nav.req':'Запити про власника','own.nav.feed':'Стрічка подій','own.nav.codes':'Блокування кодів','own.nav.users':'Дилери й монтажники','own.nav.ret':'Строки зберігання',
-'own.demo':'демо','own.noAccessT':'Немає доступу','own.noAccessP':'Роль «{r}» не має доступу до цього розділу.','own.notInScope':'Цей пристрій не належить до ваших продажів чи встановлень.','own.anonOwner':'Власник (дані приховано)',
+'own.demo':'демо','own.noAccessT':'Немає доступу','own.noAccessOta':'Ця сторінка — для підтримки OTA. Увімкніть режим OTA (демо), щоб її відкрити.','own.noAccessOta2':'Ця сторінка — для підтримки OTA, а ви зараз дієте як «{r}».','own.noAccessP':'Роль «{r}» не має доступу до цього розділу.','own.notInScope':'Цей пристрій не належить до ваших продажів чи встановлень.','own.anonOwner':'Власник (дані приховано)',
 'own.revT':'Доступ закрито','own.revP':'Адмін партнера відкликав ваш доступ до кабінету. Зверніться до нього, якщо це помилка.',
 'own.scope.dealer':'Ви бачите лише пристрої, які продали, і лише технічний статус: прив’язано чи ні, у мережі, тариф і строк. Контакти власників і місцезнаходження недоступні.','own.scope.installer':'Ви бачите лише пристрої, які встановили, і лише технічний статус: прив’язано чи ні, у мережі, перевірка встановлення. Контакти власників, тариф і місцезнаходження недоступні.',
 'own.title':'Пристрої та власники','own.sub':'Чи прив’язав покупець SIM, чи пристрій у мережі і хто власник. Прив’язку робить лише сам покупець у клієнтському кабінеті.',
@@ -7515,7 +7556,7 @@ en:{
 'own.T11':'The seller has asked to release your device from your account. If you object, tap "Object" within {N} hours.',
 'own.T12':'This device cannot be added to an account linked to a dealer or installer. Contact support.',
 'own.sec':'Device owners','own.otasec':'OTA support','own.nav.devices':'Devices & owners','own.nav.check':'Installation check','own.nav.req':'Ownership requests','own.nav.feed':'Event feed','own.nav.codes':'Block codes','own.nav.users':'Dealers & installers','own.nav.ret':'Data retention',
-'own.demo':'demo','own.noAccessT':'No access','own.noAccessP':'The “{r}” role has no access to this section.','own.notInScope':'This device is not one of your sales or installations.','own.anonOwner':'Owner (details hidden)',
+'own.demo':'demo','own.noAccessT':'No access','own.noAccessOta':'This page is for OTA support. Turn on OTA mode (demo) to open it.','own.noAccessOta2':'This page is for OTA support; you are acting as “{r}”.','own.noAccessP':'The “{r}” role has no access to this section.','own.notInScope':'This device is not one of your sales or installations.','own.anonOwner':'Owner (details hidden)',
 'own.revT':'Access closed','own.revP':'Your Partner Admin revoked your access to the console. Contact them if this is a mistake.',
 'own.scope.dealer':'You see only devices you sold, and only their technical status: bound or not, online, plan and term. Owner contacts and location are not available.','own.scope.installer':'You see only devices you installed, and only their technical status: bound or not, online, installation check. Owner contacts, plan and location are not available.',
 'own.title':'Devices & owners','own.sub':'Whether the buyer has bound the SIM, whether the device is online and who owns it. Only the buyer can bind, in the customer portal.',
@@ -7594,7 +7635,7 @@ ru:{
 'own.T11':'Продавец запросил отвязку устройства от вашей учётной записи. Если вы против, нажмите «Возразить» в течение {N} ч.',
 'own.T12':'Это устройство нельзя добавить в учётную запись, связанную с дилером или монтажником. Обратитесь в поддержку.',
 'own.sec':'Владельцы устройств','own.otasec':'Поддержка OTA','own.nav.devices':'Устройства и владельцы','own.nav.check':'Проверка установки','own.nav.req':'Запросы о владении','own.nav.feed':'Лента событий','own.nav.codes':'Блокировка кодов','own.nav.users':'Дилеры и монтажники','own.nav.ret':'Сроки хранения',
-'own.demo':'демо','own.noAccessT':'Нет доступа','own.noAccessP':'У роли «{r}» нет доступа к этому разделу.','own.notInScope':'Это устройство не относится к вашим продажам или установкам.','own.anonOwner':'Владелец (данные скрыты)',
+'own.demo':'демо','own.noAccessT':'Нет доступа','own.noAccessOta':'Эта страница — для поддержки OTA. Включите режим OTA (демо), чтобы её открыть.','own.noAccessOta2':'Эта страница — для поддержки OTA, а вы сейчас действуете как «{r}».','own.noAccessP':'У роли «{r}» нет доступа к этому разделу.','own.notInScope':'Это устройство не относится к вашим продажам или установкам.','own.anonOwner':'Владелец (данные скрыты)',
 'own.revT':'Доступ закрыт','own.revP':'Админ партнёра отозвал ваш доступ к кабинету. Обратитесь к нему, если это ошибка.',
 'own.scope.dealer':'Вы видите только проданные вами устройства и только технический статус: привязано или нет, в сети, тариф и срок. Контакты владельцев и местоположение недоступны.','own.scope.installer':'Вы видите только установленные вами устройства и только технический статус: привязано или нет, в сети, проверка установки. Контакты владельцев, тариф и местоположение недоступны.',
 'own.title':'Устройства и владельцы','own.sub':'Привязал ли покупатель SIM, в сети ли устройство и кто владелец. Привязку делает только сам покупатель в клиентском кабинете.',

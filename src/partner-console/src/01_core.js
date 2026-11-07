@@ -66,8 +66,19 @@ const pad=(n,w=2)=>String(n).padStart(w,'0');
 let _uid=0;const uid=p=>(p||'id')+'_'+Date.now().toString(36)+(++_uid).toString(36);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const digits=s=>String(s||'').replace(/\D/g,'');
-function now(){return new Date(NOW0.getTime()+(S.clock||0)*60000);}   // demo clock; ACT.tick advances
-function tick(min){S.clock=(S.clock||0)+(min||1);}
+/* demo clock. SHARED contract with the customer portal: localStorage 'cfb-demo-ownership'.clock = {demo0, real0, offset_ms} (ms);
+   demoNow() = demo0 + (Date.now() - real0) + offset_ms. Without the bridge clock: old behaviour NOW0 + S.clock minutes.
+   Time skips go through clockSkip(ms) (tick(min) is kept as the console shortcut). */
+const BRIDGE_KEY='cfb-demo-ownership';let _bcT=0,_bc=null;
+function bridgeClock(){const t0=Date.now();if(t0-_bcT<400)return _bc;_bcT=t0;try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');const c=b&&b.clock;_bc=c&&isFinite(c.demo0)&&isFinite(c.real0)?c:null;}catch(e){_bc=null;}return _bc;}
+function legacyNow(){let m=0;try{m=S&&S.clock||0;}catch(e){}return new Date(NOW0.getTime()+m*60000);}
+function now(){const c=bridgeClock();return c?new Date(c.demo0+(Date.now()-c.real0)+(+c.offset_ms||0)):legacyNow();}
+// create the shared clock if the bridge object exists without one (the console continues from its current demo time)
+function bridgeClockEnsure(){try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');if(!b||typeof b!=='object'||(b.clock&&isFinite(b.clock.demo0)))return false;
+ b.clock={demo0:legacyNow().getTime(),real0:Date.now(),offset_ms:0};localStorage.setItem(BRIDGE_KEY,JSON.stringify(b));_bcT=0;return true;}catch(e){return false;}}
+function clockSkip(ms){ms=+ms||0;S.clock=(S.clock||0)+ms/60000;   // old offset kept in sync
+ try{const b=JSON.parse(localStorage.getItem(BRIDGE_KEY)||'null');if(b&&b.clock&&isFinite(b.clock.demo0)){b.clock.offset_ms=(+b.clock.offset_ms||0)+ms;localStorage.setItem(BRIDGE_KEY,JSON.stringify(b));}}catch(e){}_bcT=0;}
+function tick(min){clockSkip((min||1)*60000);}
 const iso=d=>d.toISOString();
 function fmtDate(x,opt){const d=typeof x==='string'?new Date(x):x;return d.toLocaleDateString(LOCALES[S.lang],opt||{day:'numeric',month:'short',year:'numeric'}).replace(/\s?р\.$/,'').replace(/\s?г\.$/,'');}
 function fmtDateTime(x){const d=typeof x==='string'?new Date(x):x;return fmtDate(d)+', '+d.toLocaleTimeString(LOCALES[S.lang],{hour:'2-digit',minute:'2-digit'});}

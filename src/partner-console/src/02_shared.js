@@ -304,7 +304,7 @@ function seedDemo(){
  let left=15;for(let i=S.codes.length-1;i>=0&&left>0;i--){const c=S.codes[i];if(c.reseller==='r2'&&c.status==='issued'){c.status='void';c.voidAt=daysAgo(5);left--;}}
  S.activity=[];log(t('c.demoLoaded'));audit('demo.seed','ARV',{});
  HOOKS.seedDemo.forEach(f=>{try{f();}catch(e){console.error(e);}});
- save();}
+ bridgeClockEnsure();save();}
 I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.ofTermBlock':'Замовлення (Order Form) для країни {c} розірвано {d}. Нові замовлення для цієї країни недоступні.'},
  en:{'c.demoLoaded':'Demo data loaded','c.ofTermBlock':'The Order Form for {c} was terminated on {d}. New orders for this country are not available.'},
  ru:{'c.demoLoaded':'Демо-данные загружены','c.ofTermBlock':'Заказ (Order Form) по стране {c} расторгнут {d}. Новые заказы по этой стране недоступны.'}});
@@ -323,4 +323,5 @@ HOOKS.onBoot.push(()=>{if(!S.ota)S.ota={};const sd=otaSeed();const full=!S.otaSe
  (S.creditNotes||[]).forEach(c=>{if(c.aedRate==null){const r=aedRate(c.createdAt);c.aedRate=r.rate;c.aedRateDate=r.date;c.aedSrc=r.src;c.vatAed=0;c.vat=0;c.vatRate=0;
   const i=(S.invoices||[]).find(x=>x.id===c.invoiceId);if(!CN_REASONS[c.reason]){c.reasonNote=c.reason||'';c.reason=c.wasPaid?'error':'cancel_unpaid';}if(i){c.invoiceDate=i.createdAt;if(!c.lines)c.lines=i.lines.map(l=>Object.assign({},l,{amount:-Math.abs(l.amount)}));c.total=c.net=i.net;}ch++;}});
  (S.shipments||[]).forEach(h=>{if(!h.ship_from){h.ship_from=Object.assign({},SHIP_FROM_DEMO);h.ship_from_country=SHIP_FROM_DEMO.country;h.exporter=Object.assign({},EXPORTER_DEMO);ch++;}});
+ bridgeClockEnsure();
  if(ch||full)save();});

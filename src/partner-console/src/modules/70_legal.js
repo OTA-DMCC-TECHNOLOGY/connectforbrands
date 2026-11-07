@@ -157,6 +157,8 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
  if(cc){V.CC=cc;V.CC_NAME_EN=lg_ccDemo(cc).CC_NAME_EN||ctyNameEn(cc);
   LG_COUNTRY_OTA.forEach(k=>{const v=lg_ccVal(cc,k);if(v!=null)lg_put(V,k,v,null,l2);else NA.add(k);});
   if(!V.CC_NAME_L2)V.CC_NAME_L2=lg_ccName(cc,l2);
+  if(!V.EUT_LANGS||/^\[/.test(String(V.EUT_LANGS))){const nm=(l,loc)=>{try{const x=new Intl.DisplayNames([loc],{type:'language'}).of(l);return x||l;}catch(e){return l;}};const ls=lg_pubLangs(cc);
+   V.EUT_LANGS=ls.map(l=>nm(l,'en')).join(', ');const l2s=ls.map(l=>nm(l,(LG_LANG2[l2]||{}).loc||'ru')).join(', ');if(l2s!==V.EUT_LANGS)V.EUT_LANGS_L2=l2s;else delete V.EUT_LANGS_L2;NA.delete('EUT_LANGS');}
   V.CC_NAME_UPPER_EN=String(V.CC_NAME_EN).toUpperCase();V.CC_NAME_UPPER_L2=String(V.CC_NAME_L2).toLocaleUpperCase(LG_LANG2[l2].loc);
   LG_COUNTRY_PARTNER.forEach(k=>{const v=lg_ccVal(cc,k);const m=lg_meta(k);if(v!=null)lg_put(V,k,v,m&&m.format,l2);else if(k.startsWith('OF_EXC'))NA.add(k);});
   if(!V.OF_EXCEPTIONS_EN)V.OF_EXCEPTIONS_NONE=true;
@@ -453,7 +455,10 @@ function lg_pubCurrent(type){return lg_st().pub.filter(p=>p.type===type&&p.statu
 function lg_pubPublish(type,cc,lang,o){o=o||{};const L=lg_st();const at=o.at||iso(now());const cur=L.pub.find(p=>p.type===type&&p.cc===cc&&p.lang===lang&&p.status==='current');
  let ver='1.0';if(cur){const [ma,mi]=cur.ver.split('.').map(Number);ver=o.major?(ma+1)+'.0':ma+'.'+(mi+1);cur.status='superseded';cur.supersededAt=at;}
  const p={id:uid('pub'),type,cc,lang,ver,number:docNo(type,{cc,lang,ver}),tplVer:o.tplVer||lg_tplCurVer(type),publishedAt:at,effective:o.effective||at,notifiedAt:o.notified?at:null,status:'current',note:o.note||'',by:o.by||actorName()};
- L.pub.unshift(p);if(!o.silent)lg_audit('pub.version',p.number,{tpl:p.tplVer});return p;}
+ // QA #5: the published text is frozen (values + SHA-256) — later OTA / country data changes need a new version
+ const rl=p.lang==='en'||lg_tplHasLang(type,p.lang)?p.lang:'en';const r=lg_render(type,{cc,public:rl,tplVer:p.tplVer,effective:p.effective,docVer:'v'+ver,lang2:rl==='en'?lg_l2():rl});
+ p.vals=lg_freezeVals(r);p.renderLang=rl;p.hash=lg_sha256sync(r.text);p.textLen=r.text.length;
+ L.pub.unshift(p);if(!o.silent)lg_audit('pub.version',p.number,{tpl:p.tplVer,hash:p.hash});return p;}
 
 // ТЗ 3.4: 07/08 are published in the country's language(s): UA — uk; KZ — kk AND ru. A language is available when the template
 // carries its text or OTA uploaded the professional translation (ТЗ 4.12). Publishing a country is all-or-nothing.
@@ -977,7 +982,7 @@ function lg_pubHtml(){const L=lg_st();const groups={};L.pub.forEach(p=>{const k=
  return `<div class="stack">${lg_launchCard()}${ui.card({title:t('lg.pub.title'),body:`<div class="col g16"><p class="small muted">${t('lg.pub.d2')}</p>${ccCards||`<p class="small muted">${t('lg.pub.none')}</p>`}</div>`})}
   ${hist?ui.card({title:t('lg.pub.hist'),body:`<div class="col g16">${hist}</div>`}):''}</div>`;}
 function lg_pubView(id){const p=lg_st().pub.find(x=>x.id===id);if(!p)return;const tplLang=p.lang==='en'||lg_tplHasLang(p.type,p.lang);const tr=((lg_st().tr[p.type]||{})[p.lang]);
- const lang=tplLang?p.lang:'en';const r=lg_render(p.type,{cc:p.cc,public:lang==='en'?'en':lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:lang==='en'?lg_l2():lang});
+ const lang=p.renderLang||(tplLang?p.lang:'en');const r=lg_render(p.type,{cc:p.cc,public:lang==='en'?'en':lang,tplVer:p.tplVer,effective:p.effective,docVer:'v'+p.ver,lang2:lang==='en'?lg_l2():lang,vals:p.vals||undefined});
  modal(esc(lg_tplTitle(p.type,lang==='en'?'en':'ru'))+` <span class="xs muted mono">${esc(lg_langName(p.lang))} · v${esc(p.ver)}</span>`,`<div class="lg-web"><div class="lg-webbar">${icon('globe','sm')}<span class="mono xs">https://${esc(lg_fval('P_DOMAIN')||'connect.brand.com')}/${p.type==='EUT'?'terms':'privacy'}</span></div>
   ${tplLang?'':ui.note('info',t('lg.pub.trView',{f:esc(tr?tr.file:'—'),l:esc(lg_langName(p.lang))}))}<div class="lg-webbody">${r.html}</div>
   ${r.missing.length&&S.admin?ui.note('admin',t('lg.pub.miss',{k:r.missing.join(', ')})):''}</div>`,ui.btn(t('c.close'),{act:'ovclose'}),{wide:true});lg_audit('doc.view',p.number,{public:true});}
@@ -1205,7 +1210,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
  const devs=allModels().filter(x=>x.model.plan&&x.model.planStatus==='approved').map(x=>({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'rev. A',DEV_FW:'1.0',DEV_PLAN:PLAN_EN[x.model.plan],DEV_MB:x.model.plan==='light'?'5':'50',DEV_SIM:'Industrial IoT SIM (2FF/3FF/4FF)',ok:true}));
  orgCountries().forEach(cc=>{const C=(D&&D.countries&&D.countries[cc])||{};const dv=(S.org.delivery||{})[cc]||{};
   ['CC_NAME_L2','CC_NAME_FULL_EN','CC_NAME_FULL_L2','CC_NAME_LOC_L2','CC_EXCLUSION_EN','CC_EXCLUSION_L2'].forEach(k=>set(lg_ccKey(k,cc),C[k]==null?null:C[k],{by:'Platform Admin'}));
-  set(lg_ccKey('EUT_LANGS',cc),'[languages]',{by:'Platform Admin'});set(lg_ccKey('EUT_CONSUMER_AUTH',cc),'[consumer protection authority]',{by:'Platform Admin'});set(lg_ccKey('EUT_DP_AUTH',cc),'[data protection authority]',{by:'Platform Admin'});
+  set(lg_ccKey('EUT_CONSUMER_AUTH',cc),'[consumer protection authority]',{by:'Platform Admin'});set(lg_ccKey('EUT_DP_AUTH',cc),'[data protection authority]',{by:'Platform Admin'});
   set(lg_ccKey('LAUNCH_DATE',cc),ago(57).slice(0,10));set(lg_ccKey('RETAIL_CUR',cc),(CC_META[cc]||{}).cur||'USD');set(lg_ccKey('DELIVERY_ADDR',cc),[dv.address,dv.city].filter(Boolean).join(', '));set(lg_ccKey('IMPORTER',cc),dv.importer||'');
   ['INIT_SIMS','INIT_KEYS','INIT_TOKENS','ANNUAL_TARGET'].forEach(k=>set(lg_ccKey(k,cc),String(C[k]!=null?C[k]:'')));set(lg_ccKey('DEVICES',cc),devs.map(x=>Object.assign({},x)));});
  lg_syncOrg();

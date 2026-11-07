@@ -66,8 +66,8 @@ function own_userName(id){const u=users().find(x=>x.id===id);return u?u.name:'';
 let own__si=null,own__siN=-1,own__siS=null;
 function own_sim(iccid){if(!own__si||own__siN!==S.sims.length||own__siS!==S.sims){own__si=new Map();S.sims.forEach(s=>own__si.set(s.iccid,s));own__siN=S.sims.length;own__siS=S.sims;}return own__si.get(iccid)||null;}
 function own_simCc(s){const h=s&&s.shipmentId&&(S.shipments||[]).find(x=>x.id===s.shipmentId);return (h&&h.cc)||primaryCc();}
-function own_ctyCfg(cc){const o=S.ota||{};return (o.countries&&o.countries[cc])||(S.otaCountries&&S.otaCountries[cc])||{};}
-function own_delay(cc){const v=+own_ctyCfg(cc).delay_hours;return v>=1&&v<=24?Math.round(v):24;}   // 1–24, default 24 (4.5 p.3)
+function own_ctyCfg(cc){if(typeof otaCountry==='function')return otaCountry(cc);const o=S.ota||{};return (o.countries&&o.countries[cc])||{};}
+function own_delay(cc){const v=parseInt(own_ctyCfg(cc).delay_hours,10);return v>=1&&v<=24?v:24;}   // 1–24, default 24 (4.5 p.3)
 function own_online(s){return !!s&&s.status==='active'&&!!s.lastSeen&&(now()-new Date(s.lastSeen))<OWN_ONLINE_MIN*60000;}
 function own_mname(x){if(!x)return null;const m=x.model.name,b=x.brand.name;return m.toLowerCase().startsWith(b.toLowerCase())?m:b+' '+m;}
 function own_modelMap(){const m={};allModels().forEach(x=>{m[x.model.id]=x;});return m;}
@@ -80,7 +80,10 @@ let own__b=null;
 function own_bRead(){try{const b=JSON.parse(localStorage.getItem(OWN_KEY));return b&&typeof b==='object'&&b.sims?b:null;}catch(e){return null;}}
 function own_bNorm(b){['bindings','transfers','events','requests','bindLinks','partnerContacts','t12Exempt','history','notices','seeded_partners'].forEach(k=>{if(!Array.isArray(b[k]))b[k]=[];});
  ['sims','codes','accounts'].forEach(k=>{if(!b[k]||typeof b[k]!=='object')b[k]={};});return b;}
-function own_bWrite(b){b.v=1;b.rev=(b.rev||0)+1;b.updated_at=iso(now());b.updated_by='partner-console';try{localStorage.setItem(OWN_KEY,JSON.stringify(b));}catch(e){console.warn('ownership bridge',e);}own__b=b;own_mirror(b);}
+function own_clockFix(b){let cur=null;try{cur=JSON.parse(localStorage.getItem(OWN_KEY));}catch(e){}
+ if(cur&&cur.clock&&isFinite(cur.clock.demo0))b.clock=cur.clock;   // never overwrite a clock skip made meanwhile (clockSkip)
+ else if(!b.clock||!isFinite(b.clock.demo0))b.clock={demo0:now().getTime(),real0:Date.now(),offset_ms:0};}
+function own_bWrite(b){own_clockFix(b);b.v=1;b.rev=(b.rev||0)+1;b.updated_at=iso(now());b.updated_by='partner-console';try{localStorage.setItem(OWN_KEY,JSON.stringify(b));}catch(e){console.warn('ownership bridge',e);}try{_bcT=0;}catch(e){}own__b=b;own_mirror(b);}
 // read-modify-write on a fresh copy (the customer portal may have written in between)
 function own_tx(fn){const b=own_bNorm(own_bRead()||{sims:{}});const r=fn(b);own_process(b);own_bWrite(b);return r;}
 function own_b(){if(!own__b)own_sync();return own__b||own_bNorm({sims:{}});}
@@ -99,27 +102,24 @@ function own_seedScopes(){if(S.sims.some(s=>s.sold_by_user_id||s.installed_by_us
   if(idx%6===1||[1,3,7].includes(idx))s.sold_by_user_id='u_p_dealer';
   if((s.reseller==='r1'&&idx%5===4)||[1,4,6].includes(idx))s.installed_by_user_id='u_p_installer';});}
 function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const ago=h=>iso(new Date(n.getTime()-h*3600e3));
- // remove this partner's previous demo records (other partners and customer accounts stay)
- Object.keys(b.sims).forEach(k=>{if(b.sims[k].partner===P)delete b.sims[k];});
- Object.keys(b.codes).forEach(k=>{if(b.codes[k].partner===P)delete b.codes[k];});
- const mine=new Set(b.bindings.filter(x=>x.partner_id===P).map(x=>x.id));
- b.bindings=b.bindings.filter(x=>x.partner_id!==P);b.transfers=b.transfers.filter(x=>!mine.has(x.binding_id));
- ['requests','history','bindLinks','events','notices'].forEach(k=>{b[k]=b[k].filter(x=>x.partner_id!==P);});
- S.sims.forEach(s=>{b.sims[s.iccid]=own_simRec(s);});
- const last=S.sims[S.sims.length-1];if(last&&last.status==='stock')Object.assign(b.sims[last.iccid],{status:'deactivated',deactivated_reason:'lost'});
+ // MERGE (never replace): existing SIMs, codes, accounts, bindings, transfers, requests and events stay as they are
+ const added=new Set();S.sims.forEach(s=>{if(!b.sims[s.iccid]){b.sims[s.iccid]=own_simRec(s);added.add(s.iccid);}});
+ const last=S.sims[S.sims.length-1];if(last&&last.status==='stock'&&added.has(last.iccid))Object.assign(b.sims[last.iccid],{status:'deactivated',deactivated_reason:'lost'});
  // activation codes: issued → new, activated → redeemed (pinned to the device), void → blocked
  const imeiOf=ic=>{const s=ic&&own_sim(ic);return s?s.imei:null;};
- (S.codes||[]).forEach(c=>{const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
+ (S.codes||[]).forEach(c=>{if(b.codes[c.code])return;const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
   device_id:c.status==='activated'?imeiOf(c.iccid):null,redeemed_at:c.activatedAt||null,blocked_at:c.status==='void'?(c.voidAt||ago(120)):null};});
- const st=own_st();const blk=(S.codes||[]).find(c=>c.reseller==='r1'&&c.status==='issued');
+ const st=own_st();const blk=(S.codes||[]).find(c=>c.reseller==='r1'&&c.status==='issued'&&b.codes[c.code]&&b.codes[c.code].status==='new');
  if(blk){blk.status='void';blk.voidAt=ago(30);blk.blockedAt=blk.voidAt;Object.assign(b.codes[blk.code],{status:'blocked',blocked_at:blk.voidAt,blocked_reason:'lost'});
   st.codes.blocked=[{code:blk.code,serial:parseCode(blk.code).serial,plan:blk.plan,term:blk.term,reseller:blk.reseller,at:blk.voidAt,by:(S.user&&S.user.name)||'Partner Admin',reason:'lost',mode:'serial'}];}
  // customer accounts + bindings for every SIM the customer already linked
  const names=['Olena Shevchenko','Petro Ivanenko','Iryna Bondarenko','Serhii Tkachenko','Nataliia Kravets','Andrii Moroz','Oksana Lysenko','Dmytro Savchenko','Yuliia Rudenko','Maksym Polishchuk','Tetiana Hnatiuk','Vasyl Kovalenko','Halyna Melnyk','Roman Shevchuk'];
- let an=0;const mkAcc=nm=>{an++;const id='acc_'+P.toLowerCase()+'_'+pad(an,4);const sl=nm.toLowerCase().replace(/[^a-z]+/g,'.');b.accounts[id]={name:nm,email:sl+an+'@mail.example',phone:'+380 50 '+pad(100+an%900,3)+' '+pad(an%100,2)+' '+pad((an*7)%100,2),created_at:ago(24*40),src:'demo'};return id;};
+ let an=0;const mkAcc=nm=>{an++;const id='acc_'+P.toLowerCase()+'_'+pad(an,4);const sl=nm.toLowerCase().replace(/[^a-z]+/g,'.');if(!b.accounts[id])b.accounts[id]={name:nm,email:sl+an+'@mail.example',phone:'+380 50 '+pad(100+an%900,3)+' '+pad(an%100,2)+' '+pad((an*7)%100,2),created_at:ago(24*40),src:'demo'};return id;};
  const mkB=(s,acc,at,method)=>{const bd={id:'bd_'+P.toLowerCase()+'_'+s.iccid.slice(-6)+'_'+(b.bindings.length+1),iccid:s.iccid,device_id:s.imei||null,owner_account_id:acc,partner_id:P,method,bound_at:at,unbound_at:null,unbind_reason:null,status:'active'};b.bindings.push(bd);return bd;};
  const days=at=>Math.max(1,(new Date(at)-0)/864e5);
- S.sims.forEach((s,idx)=>{if(!s.linked)return;const ev=(s.events||[]).find(e=>e[1]==='linked');const at=ev?ev[0]:ago(24*20);const acc=mkAcc(names[an%names.length]);
+ const hasB=new Set(b.bindings.map(x=>x.iccid));
+ S.sims.forEach((s,idx)=>{if(!s.linked||hasB.has(s.iccid))return;   // never re-bind a SIM the bridge already knows (portal bindings stay)
+  const ev=(s.events||[]).find(e=>e[1]==='linked');const at=ev?ev[0]:ago(24*20);const acc=mkAcc(names[an%names.length]);
   if(idx===4||idx===6){ // transferred to a new owner earlier: 29 days ago (history due for erasure) / 10 days ago (legal hold)
    const tAt=idx===4?ago(24*29+4):ago(24*10);const old=mkB(s,acc,at,'iccid');old.status='ended';old.unbound_at=tAt;old.unbind_reason='transfer';
    const acc2=mkAcc(names[an%names.length]);const nb=mkB(s,acc2,tAt,'transfer');nb.prev_binding_id=old.id;
@@ -130,10 +130,10 @@ function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const a
   }else mkB(s,acc,at,'iccid');});
  // pending transfer (awaiting the new owner's acceptance)
  const s3=S.sims[3];const b3=s3&&own_activeB(b,s3.iccid);
- if(b3)b.transfers.push({id:'tr_'+b3.id,binding_id:b3.id,from_account_id:b3.owner_account_id,to_contact:'new.owner@example.com',to_account_id:null,status:'pending_acceptance',initiated_at:ago(5),accepted_at:null,effective_at:null,cancelled_at:null,cancelled_by:null,delay_hours:own_delay(own_simCc(s3))});
+ if(b3&&b3.partner_id===P&&!own_openTr(b,b3.id))b.transfers.push({id:'tr_'+b3.id,binding_id:b3.id,from_account_id:b3.owner_account_id,to_contact:'new.owner@example.com',to_account_id:null,status:'pending_acceptance',initiated_at:ago(5),accepted_at:null,effective_at:null,cancelled_at:null,cancelled_by:null,delay_hours:own_delay(own_simCc(s3))});
  // ownership request awaiting OTA support (submitted by the dealer)
  const s7=S.sims[7];const b7=s7&&own_activeB(b,s7.iccid);
- if(b7){const q={id:'or_'+P.toLowerCase()+'_1',no:'OR-'+P+'-0001',partner_id:P,iccid:s7.iccid,binding_id:b7.id,owner_account_id:b7.owner_account_id,requester_contact:'+380 67 700 12 34',reason:'previous_owner_unreachable',action:'transfer',
+ if(b7&&!b.requests.some(x=>x.id==='or_'+P.toLowerCase()+'_1'||(x.iccid===s7.iccid&&['submitted','docs_requested','cooling_off','disputed'].includes(x.status)))){const q={id:'or_'+P.toLowerCase()+'_1',no:'OR-'+P+'-0001',partner_id:P,iccid:s7.iccid,binding_id:b7.id,owner_account_id:b7.owner_account_id,requester_contact:'+380 67 700 12 34',reason:'previous_owner_unreachable',action:'transfer',
   files:[{name:'receipt_2026-10-12.pdf',size:184320,type:'application/pdf',uploaded_at:ago(26),by:'Oleh Bondar'}],doc_checked:true,status:'submitted',submitted_by:'Oleh Bondar',submitted_by_id:'u_p_dealer',submitted_role:'p_dealer',submitted_at:ago(26),log:[[ago(26),'submitted','Oleh Bondar','']]};
   b.requests.push(q);seqNext(P+':OR');}
  if(!b.seeded_partners.includes(P))b.seeded_partners.push(P);
@@ -152,10 +152,11 @@ function own_t12Blocked(b,contact){const n=own_normContact(contact);if(!n)return
 function own_hide(b,old,at){let h=b.history.find(x=>x.binding_id===old.id);
  if(!h){const d0=Math.max(0,(new Date(old.unbound_at||at)-new Date(old.bound_at))/864e5);h={id:'hs_'+old.id,partner_id:old.partner_id,iccid:old.iccid,binding_id:old.id,owner_account_id:old.owner_account_id,from:old.bound_at,to:old.unbound_at||at,points:Math.round(d0*48),events:Math.round(d0*3),state:'visible',erased_at:null,legal_hold:false,hold_reason:''};b.history.push(h);}
  if(h.state==='visible'){h.state='hidden';h.hidden_at=old.unbound_at||at;h.erase_due=iso(addDays(h.hidden_at,OWN_RET_DAYS));return true;}return false;}
-function own_endBinding(b,bd,reason,at){bd.status='ended';bd.unbound_at=at;bd.unbind_reason=reason;own_hide(b,bd,at);}
+function own_endBinding(b,bd,reason,at){if(bd.bound_at&&at<bd.bound_at)at=bd.bound_at;bd.status='ended';bd.unbound_at=at;bd.unbind_reason=reason;own_hide(b,bd,at);}
 function own_newBinding(b,old,acc,method,at){if(own_activeB(b,old.iccid))return null;   // one active binding per ICCID
  const nb={id:own_id('bd'),iccid:old.iccid,device_id:old.device_id,owner_account_id:acc,partner_id:old.partner_id,method,bound_at:at,unbound_at:null,unbind_reason:null,status:'active',prev_binding_id:old.id};b.bindings.push(nb);return nb;}
 function own_execTransfer(b,tr,at){const old=b.bindings.find(x=>x.id===tr.binding_id);if(!old||old.status!=='active'){tr.status='cancelled';tr.cancelled_at=at;tr.cancelled_by='system';return;}
+ if(old.bound_at&&at<old.bound_at)at=old.bound_at;
  const to=tr.to_account_id||own_accByContact(b,tr.to_contact)||own_mkAcc(b,{contact:tr.to_contact});
  own_endBinding(b,old,'transfer',at);const nb=own_newBinding(b,old,to,'transfer',at);
  tr.status='effective';tr.effective_at=at;tr.to_account_id=to;
@@ -194,10 +195,16 @@ function own_sync(){if(!S||!S.authed||!S.org||!Array.isArray(S.sims))return null
   else if(c.status==='void'&&r.status==='new'){r.status='blocked';r.blocked_at=c.voidAt||iso(now());dirty=true;}}
  const pc=own_partnerContacts();const old=b.partnerContacts.filter(x=>x.partner===P);
  if(JSON.stringify(pc)!==JSON.stringify(old)){b.partnerContacts=b.partnerContacts.filter(x=>x.partner!==P).concat(pc);dirty=true;}
+ if(own_settings(b))dirty=true;
  if(own_process(b))dirty=true;
  const st=own_st();if(st.ret.lastDay!==own_day(now())&&st.seededAt){own_runRetention(b,{auto:true});dirty=true;}
  if(!st.seededAt){st.seededAt=iso(now());st.ret.lastDay=own_day(now());}
  if(dirty)own_bWrite(b);else{own__b=b;own_mirror(b);}return b;}
+// the console is the authority for per-country settings in the bridge (OTA edits them on the OTA data page)
+function own_settings(b){if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.settings.countries||typeof b.settings.countries!=='object')b.settings.countries={};let ch=false;
+ const ccs=Array.from(new Set(orgCountries().concat(Object.keys((S.ota&&S.ota.countries)||{}))));
+ ccs.forEach(cc=>{const cur=b.settings.countries[cc]||{};const want={delay_hours:own_delay(cc),ownership_v10_enabled:!!own_ctyCfg(cc).ownership_v10_enabled};
+  if(cur.delay_hours!==want.delay_hours||cur.ownership_v10_enabled!==want.ownership_v10_enabled){b.settings.countries[cc]=Object.assign({},cur,want,{set_at:iso(now()),set_by:'partner-console (OTA data)'});ch=true;}});return ch;}
 function own_mirror(b){const P=own_pc();const st=own_st();
  st.bindings=b.bindings.filter(x=>x.partner_id===P);const ids=new Set(st.bindings.map(x=>x.id));
  st.transfers=b.transfers.filter(x=>ids.has(x.binding_id));st.requests=b.requests.filter(x=>x.partner_id===P);
@@ -238,7 +245,11 @@ function own_opt(v,l,sel){return `<option value="${esc(v)}" ${String(v)===String
 function own_submit(label,form,kind){return `<button class="btn ${kind||'primary'}" type="submit" form="${form}"><span>${label}</span></button>`;}
 function own_cancel(){return ui.btn(t('c.cancel'),{act:'ovclose'});}
 function own_yes(v){return v==null?`<span class="faint">—</span>`:v?`<span class="own_ok">${icon('check','sm')}${t('c.yes')}</span>`:`<span class="own_no">${icon('x','sm')}${t('c.no')}</span>`;}
-function own_noAccess(title){return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),t('own.noAccessP',{r:esc(roleName(own_role()))}),S.admin?'':(typeof ord_asBtn==='function'?ord_asBtn('p_admin'):''))})});}
+// need: role that can open the page ('ota' = OTA support in OTA mode). Offer a switch only to a DIFFERENT role that is reachable now.
+function own_noAccess(title,need){need=need||'p_admin';const ota=need==='ota';const r=own_role();
+ if(ota&&!S.admin)return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),t('own.noAccessOta'))})});
+ const target=ota?'ota_admin':need;const btn=target!==r&&typeof ord_asBtn==='function'&&(S.admin||own_side(target)==='partner')?ord_asBtn(target):'';
+ return ui.page({title,body:ui.card({body:ui.empty('shield',t('own.noAccessT'),ota?t('own.noAccessOta2',{r:esc(roleName(r))}):t('own.noAccessP',{r:esc(roleName(r))}),btn)})});}
 function own_bBadge(bd,role){if(!bd)return ui.badge(t('own.st.free'),'');if(bd.status==='frozen'&&own_canSee('contacts',role))return ui.badge(t('own.st.frozen'),'bad',true);return ui.badge(t('own.st.bound'),'ok',true);}
 function own_reqBadge(st){const tone={submitted:'info',docs_requested:'warn',cooling_off:'violet',disputed:'bad',rejected:'',done:'ok',cancelled:''}[st]||'';return ui.badge(t('own.rq.st.'+st),tone,true);}
 function own_demoTag(){return S.admin?' '+ui.badge(t('own.demo'),'violet'):'';}
@@ -522,7 +533,7 @@ function own_runRetention(b,o){o=o||{};const st=own_st();const at=now();const ts
   if(iso(addMonths(base,24))<=ts){bd.owner_account_id=null;bd.anonymised_at=ts;r.anon++;}});
  st.ret.runs.unshift(r);st.ret.runs=st.ret.runs.slice(0,30);st.ret.lastDay=own_day(at);
  audit('retention.run','4.10',{auto:r.auto,hidden:r.hidden,erased:r.erased,held:r.held,files:r.files,anon:r.anon});return r;}
-route('own-ret',{nav:'own-ret',render(){if(!own_isSupport())return own_noAccess(t('own.rt.title'));const b=own_b();const st=own_st();const P=own_pc();
+route('own-ret',{nav:'own-ret',render(){if(!own_isSupport())return own_noAccess(t('own.rt.title'),'ota');const b=own_b();const st=own_st();const P=own_pc();
  const hs=b.history.filter(h=>h.partner_id===P).slice().sort((a,c)=>String(a.hidden_at)<String(c.hidden_at)?1:-1);const ts=iso(now());
  const rows=hs.map(h=>{const held=own_held(b,h);const over=h.state==='hidden'&&h.erase_due<ts&&!held;return{cells:[`<span class="mono nowrap">···${esc(h.iccid.slice(-6))}</span>`,`${fmtDate(h.from)} – ${fmtDate(h.to)}`,h.state==='erased'?'—':`${fmtNum(h.points)} / ${fmtNum(h.events)}`,
   ui.badge(t('own.rt.st.'+h.state),{visible:'info',hidden:'warn',erased:'ok'}[h.state])+(held&&h.state==='hidden'?' '+ui.badge(t('own.rt.held'),'bad'):'')+(over?' '+ui.badge(t('own.rt.overdue'),'bad'):''),
@@ -568,7 +579,7 @@ Object.assign(ACT,{
  own_freeze(iccid){own_freezeModal(iccid);},
  own_blockAsk(arg){own_blockAsk(arg);},
  own_retRun(){if(!own_isSupport())return;const r=own_tx(b=>own_runRetention(b,{}));toast(t('own.rt.done',{e:r.erased,h:r.held}));rerender();},
- own_tick(min){if(!own_isSupport())return;tick(+min||60);toast(t('own.rt.clock',{d:esc(fmtDateTime(now()))}));rerender();},
+ own_tick(min){if(!own_isSupport())return;const ms=(+min||60)*60000;if(typeof clockSkip==='function')clockSkip(ms);else tick(+min||60);own__b=null;toast(t('own.rt.clock',{d:esc(fmtDateTime(now()))}));rerender();},
  own_hold(id){own_holdModal(id);},
  own_exemptAdd(){modal(t('own.ex12.add'),`<form id="own_xF" data-form="own_exempt" class="stack" novalidate>${ui.field({id:'own_xc',label:t('own.bs.contact'),placeholder:t('own.bs.contactPh')})}${ui.field({id:'own_xr',label:t('own.dc.reason'),type:'textarea',rows:2})}</form>`,own_cancel()+own_submit(t('c.confirm'),'own_xF'));},
  own_userAdd(){own_userModal();},
@@ -593,19 +604,19 @@ I18N.add({
 uk:{
 'c.role.p_dealer':'Дилер','c.role.p_installer':'Монтажник',
 'own.T1':'Підтверджую, що пристрій належить мені або його власник дозволив мені ним користуватися, і приймаю Умови використання.',
-'own.T2':'Ця SIM-картка вже має власника. Зверніться до продавця пристрою.',
+'own.T2':'У цієї SIM-картки вже є власник. Зверніться до продавця пристрою.',
 'own.T3':'Ми не знайшли цю SIM-картку. Перевірте номер або зверніться до продавця пристрою.',
 'own.T4':'Цей пристрій уже є у вашому обліковому записі.',
 'own.T5':'Пристрій додано до вашого облікового запису. Місцезнаходження та події показуються з цього моменту.',
 'own.T6':'{date} до вашого облікового запису CONNECT додано пристрій. Якщо це були не ви, зверніться до служби підтримки.',
 'own.T7':'Цей код не можна використати. Перевірте код або зверніться до продавця.',
-'own.T8':'Після передачі: передплачений тариф залишається за пристроєм; автоподовження вашої підписки припиняється; історія за цим пристроєм стане вам недоступною і не показується новому власникові. Скасувати передачу можна протягом {N} год після того, як новий власник її прийме.',
+'own.T8':'Після передачі: передплачений тариф залишається за пристроєм; автоматичне продовження вашої підписки припиняється; історія цього пристрою стане вам недоступна й не показується новому власникові. Скасувати передачу можна протягом {N} год після того, як новий власник її прийме.',
 'own.T9':'{ім’я або контакт} хоче передати вам пристрій у CONNECT. Прийміть передачу протягом 72 годин.',
 'own.T10':'Передачу пристрою скасовано.',
-'own.T11':'Продавець запросив відв’язку пристрою від вашого облікового запису. Якщо ви проти, натисніть «Заперечити» протягом {N} год.',
+'own.T11':'Продавець надіслав запит на відв’язування пристрою від вашого облікового запису. Якщо ви проти, натисніть «Заперечити» протягом {N} год.',
 'own.T12':'Цей пристрій не можна додати до облікового запису, пов’язаного з дилером або монтажником. Зверніться до служби підтримки.',
 'own.sec':'Власники пристроїв','own.otasec':'Підтримка OTA','own.nav.devices':'Пристрої та власники','own.nav.check':'Перевірка встановлення','own.nav.req':'Запити про власника','own.nav.feed':'Стрічка подій','own.nav.codes':'Блокування кодів','own.nav.users':'Дилери й монтажники','own.nav.ret':'Строки зберігання',
-'own.demo':'демо','own.noAccessT':'Немає доступу','own.noAccessP':'Роль «{r}» не має доступу до цього розділу.','own.notInScope':'Цей пристрій не належить до ваших продажів чи встановлень.','own.anonOwner':'Власник (дані приховано)',
+'own.demo':'демо','own.noAccessT':'Немає доступу','own.noAccessOta':'Ця сторінка — для підтримки OTA. Увімкніть режим OTA (демо), щоб її відкрити.','own.noAccessOta2':'Ця сторінка — для підтримки OTA, а ви зараз дієте як «{r}».','own.noAccessP':'Роль «{r}» не має доступу до цього розділу.','own.notInScope':'Цей пристрій не належить до ваших продажів чи встановлень.','own.anonOwner':'Власник (дані приховано)',
 'own.revT':'Доступ закрито','own.revP':'Адмін партнера відкликав ваш доступ до кабінету. Зверніться до нього, якщо це помилка.',
 'own.scope.dealer':'Ви бачите лише пристрої, які продали, і лише технічний статус: прив’язано чи ні, у мережі, тариф і строк. Контакти власників і місцезнаходження недоступні.','own.scope.installer':'Ви бачите лише пристрої, які встановили, і лише технічний статус: прив’язано чи ні, у мережі, перевірка встановлення. Контакти власників, тариф і місцезнаходження недоступні.',
 'own.title':'Пристрої та власники','own.sub':'Чи прив’язав покупець SIM, чи пристрій у мережі і хто власник. Прив’язку робить лише сам покупець у клієнтському кабінеті.',
@@ -684,7 +695,7 @@ en:{
 'own.T11':'The seller has asked to release your device from your account. If you object, tap "Object" within {N} hours.',
 'own.T12':'This device cannot be added to an account linked to a dealer or installer. Contact support.',
 'own.sec':'Device owners','own.otasec':'OTA support','own.nav.devices':'Devices & owners','own.nav.check':'Installation check','own.nav.req':'Ownership requests','own.nav.feed':'Event feed','own.nav.codes':'Block codes','own.nav.users':'Dealers & installers','own.nav.ret':'Data retention',
-'own.demo':'demo','own.noAccessT':'No access','own.noAccessP':'The “{r}” role has no access to this section.','own.notInScope':'This device is not one of your sales or installations.','own.anonOwner':'Owner (details hidden)',
+'own.demo':'demo','own.noAccessT':'No access','own.noAccessOta':'This page is for OTA support. Turn on OTA mode (demo) to open it.','own.noAccessOta2':'This page is for OTA support; you are acting as “{r}”.','own.noAccessP':'The “{r}” role has no access to this section.','own.notInScope':'This device is not one of your sales or installations.','own.anonOwner':'Owner (details hidden)',
 'own.revT':'Access closed','own.revP':'Your Partner Admin revoked your access to the console. Contact them if this is a mistake.',
 'own.scope.dealer':'You see only devices you sold, and only their technical status: bound or not, online, plan and term. Owner contacts and location are not available.','own.scope.installer':'You see only devices you installed, and only their technical status: bound or not, online, installation check. Owner contacts, plan and location are not available.',
 'own.title':'Devices & owners','own.sub':'Whether the buyer has bound the SIM, whether the device is online and who owns it. Only the buyer can bind, in the customer portal.',
@@ -763,7 +774,7 @@ ru:{
 'own.T11':'Продавец запросил отвязку устройства от вашей учётной записи. Если вы против, нажмите «Возразить» в течение {N} ч.',
 'own.T12':'Это устройство нельзя добавить в учётную запись, связанную с дилером или монтажником. Обратитесь в поддержку.',
 'own.sec':'Владельцы устройств','own.otasec':'Поддержка OTA','own.nav.devices':'Устройства и владельцы','own.nav.check':'Проверка установки','own.nav.req':'Запросы о владении','own.nav.feed':'Лента событий','own.nav.codes':'Блокировка кодов','own.nav.users':'Дилеры и монтажники','own.nav.ret':'Сроки хранения',
-'own.demo':'демо','own.noAccessT':'Нет доступа','own.noAccessP':'У роли «{r}» нет доступа к этому разделу.','own.notInScope':'Это устройство не относится к вашим продажам или установкам.','own.anonOwner':'Владелец (данные скрыты)',
+'own.demo':'демо','own.noAccessT':'Нет доступа','own.noAccessOta':'Эта страница — для поддержки OTA. Включите режим OTA (демо), чтобы её открыть.','own.noAccessOta2':'Эта страница — для поддержки OTA, а вы сейчас действуете как «{r}».','own.noAccessP':'У роли «{r}» нет доступа к этому разделу.','own.notInScope':'Это устройство не относится к вашим продажам или установкам.','own.anonOwner':'Владелец (данные скрыты)',
 'own.revT':'Доступ закрыт','own.revP':'Админ партнёра отозвал ваш доступ к кабинету. Обратитесь к нему, если это ошибка.',
 'own.scope.dealer':'Вы видите только проданные вами устройства и только технический статус: привязано или нет, в сети, тариф и срок. Контакты владельцев и местоположение недоступны.','own.scope.installer':'Вы видите только установленные вами устройства и только технический статус: привязано или нет, в сети, проверка установки. Контакты владельцев, тариф и местоположение недоступны.',
 'own.title':'Устройства и владельцы','own.sub':'Привязал ли покупатель SIM, в сети ли устройство и кто владелец. Привязку делает только сам покупатель в клиентском кабинете.',
