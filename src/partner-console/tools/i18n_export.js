@@ -13,8 +13,9 @@ for(const f of files){const s=fs.readFileSync(dir+'/'+f,'utf8');
    if(c==='"'||c==="'"||c==='`'){q=c;continue;}if('({['.includes(c))d++;if(')}]'.includes(c)){if(d===0)break;d--;}}
   try{I18N.add(vm.runInNewContext('('+s.slice(i+9,j)+')',{}));}catch(e){}i=j;}
  // 2) row tables: (function(){const R=[[key,uk,en,ru],...];...I18N.add(o);})();
- i=0;const END='I18N.add(o);})();';while((i=s.indexOf('(function(){const R=[',i))>=0){const j=s.indexOf(END,i);if(j<0)break;
-  vm.runInNewContext(s.slice(i,j+END.length),{I18N});i=j+END.length;}}
+ //    also the arrow form (()=>{const R=[...];...I18N.add(o);})();
+ for(const START of ['(function(){const R=[','(()=>{const R=[']){i=0;const END='I18N.add(o);})();';while((i=s.indexOf(START,i))>=0){const j=s.indexOf(END,i);if(j<0)break;
+  vm.runInNewContext(s.slice(i,j+END.length),{I18N});i=j+END.length;}}}
 // English titles of legal documents (uk/ru have lg.tt.*; English comes from the templates)
 const ctx={HOOKS:{onBoot:[]},S:{}};
 vm.runInNewContext(fs.readFileSync(dir+'/src/modules/60_legal_templates.js','utf8')+';this.__T=LEGAL_TPL;',ctx);
