@@ -5,8 +5,8 @@
   "en": "End User Terms (public)",
   "ru": "Условия для Конечных пользователей (публичный документ)"
  },
- "ver": "T-EUT-v10",
- "effective": "2026-11-07",
+ "ver": "T-EUT-v12",
+ "effective": "2026-11-12",
  "cls": "C",
  "blocks": [
   {
@@ -132,8 +132,8 @@
   {
    "id": "EUT-4.1",
    "kind": "clause",
-   "en": "4.1 Activation code (12, 24, 36, 48 or 60 months). If you bought an activation code from the Brand Partner or its dealer, you redeem it in the portal by scanning the QR code under the scratch layer or entering the code, signing in with an OTP and choosing the device to which the plan applies. The code can be redeemed only once. Your plan starts on redemption and lasts for the stated term; it is attached to the chosen device and cannot be moved to another device or account, except together with the device under clause 3.5 or under clause 8.2. If an unredeemed code is lost or stolen, contact the seller with the serial number printed on the card: the code can then be blocked. The price, receipt, replacement and refunds for the purchase of the code are matters between you and the seller of the code.",
-   "ru": "4.1 Код активации (12, 24, 36, 48 или 60 месяцев). Если вы купили код активации у Бренд-партнёра или его дилера, вы погашаете его на портале: сканируете QR-код под защитным слоем или вводите код, входите по OTP и выбираете устройство, к которому применяется тариф. Код может быть погашен только один раз. Тариф начинается с момента погашения и действует указанный срок; он закрепляется за выбранным устройством и не может быть перенесён на другое устройство или учётную запись, кроме передачи вместе с устройством по п. 3.5 или по п. 8.2. Если непогашенный код утерян или похищен, обратитесь к продавцу, указав серийный номер, напечатанный на карте: код может быть заблокирован. Цена, чек, замена и возврат денег за покупку кода – вопросы между вами и продавцом кода."
+   "en": "4.1 Activation code (package code) (12, 24, 36, 48 or 60 months). If you bought an activation code from the Brand Partner or its dealer, you redeem it in the portal: you sign in with an OTP, enter the code printed under the scratch layer and choose the device to which the plan applies. The code can be redeemed only once. Your plan starts on redemption and lasts for the stated term; it is attached to the chosen device and cannot be moved to another device or account, except together with the device under clause 3.5 or under clause 8.2. If an unredeemed code is lost or stolen, contact the seller with the serial number printed on the card: the code can then be blocked. The price, receipt, replacement and refunds for the purchase of the code are matters between you and the seller of the code.",
+   "ru": "4.1 Код активации (код пакета) (12, 24, 36, 48 или 60 месяцев). Если вы купили код активации у Бренд-партнёра или его дилера, вы погашаете его на портале: входите по OTP, вводите код, напечатанный под защитным слоем, и выбираете устройство, к которому применяется тариф. Код может быть погашен только один раз. Тариф начинается с момента погашения и действует указанный срок; он закрепляется за выбранным устройством и не может быть перенесён на другое устройство или учётную запись, кроме передачи вместе с устройством по п. 3.5 или по п. 8.2. Если непогашенный код утерян или похищен, обратитесь к продавцу, указав серийный номер, напечатанный на карте: код может быть заблокирован. Цена, чек, замена и возврат денег за покупку кода – вопросы между вами и продавцом кода."
   },
   {
    "id": "EUT-4.2",
@@ -168,8 +168,8 @@
   {
    "id": "EUT-5.1",
    "kind": "clause",
-   "en": "5.1 Monthly subscription: you may cancel at any time; the service continues until the end of the paid month; the current month is not refunded.",
-   "ru": "5.1 Ежемесячная подписка: вы можете отказаться в любой момент; сервис действует до конца оплаченного месяца; оплата за текущий месяц не возвращается."
+   "en": "5.1 Monthly subscription: you may cancel at any time, including with the cancellation button in the portal (available without logging in where the law of your country requires it); the service continues until the end of the paid month; the current month is not refunded.",
+   "ru": "5.1 Ежемесячная подписка: вы можете отказаться в любой момент, в том числе кнопкой расторжения на портале (доступна без входа в аккаунт, если этого требует законодательство вашей страны); сервис действует до конца оплаченного месяца; оплата за текущий месяц не возвращается."
   },
   {
    "id": "EUT-5.2",
@@ -216,8 +216,8 @@
   {
    "id": "EUT-s7.p1",
    "kind": "para",
-   "en": "We may suspend or limit the service only for fraud, misuse, security threats, abnormal network load caused by the device, legal or regulatory requirements, an unpaid subscription, use of the device in the countries and beyond the limits described in clause 2.4, or a dispute about ownership under clause 3.6, and we will notify you where lawful and practicable. A paid plan is not suspended because of disputes between OTA and the Brand Partner.",
-   "ru": "Мы вправе приостановить или ограничить сервис только при мошенничестве, злоупотреблении, угрозах безопасности, аномальной нагрузке на сеть со стороны устройства, требованиях закона или регулятора, неоплате подписки, использовании устройства в странах и сверх пределов, указанных в п. 2.4, либо споре о владении по п. 3.6, и уведомим вас, где это законно и практически возможно. Оплаченный тариф не приостанавливается из-за споров между OTA и Бренд-партнёром."
+   "en": "We may suspend or limit the service only for fraud, misuse, security threats, abnormal network load caused by the device, legal or regulatory requirements, use of the device in the countries and beyond the limits described in clause 2.4, or a dispute about ownership under clause 3.6, and we will notify you where lawful and practicable. A paid plan is not suspended because of disputes between OTA and the Brand Partner. The SIM is not blocked or deactivated for non-payment: if a subscription is not paid, the SIM stays bound to your device and you can renew at any time without replacing it; until payment we may limit the service to renewal in the portal and notifications about the payment.",
+   "ru": "Мы вправе приостановить или ограничить сервис только при мошенничестве, злоупотреблении, угрозах безопасности, аномальной нагрузке на сеть со стороны устройства, требованиях закона или регулятора, использовании устройства в странах и сверх пределов, указанных в п. 2.4, либо споре о владении по п. 3.6, и уведомим вас, где это законно и практически возможно. Оплаченный тариф не приостанавливается из-за споров между OTA и Бренд-партнёром. SIM не блокируется и не отключается за неуплату: если подписка не оплачена, SIM остаётся закреплённой за вашим устройством, и вы можете продлить её в любой момент без замены SIM; до оплаты мы вправе ограничить сервис продлением на портале и уведомлениями об оплате."
   },
   {
    "id": "EUT-s8",

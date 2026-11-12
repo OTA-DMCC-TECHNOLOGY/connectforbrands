@@ -3,8 +3,11 @@
   "P_NAME": "ARVELO LIMITED",
   "P_FORM_EN": "a private limited company incorporated in England and Wales",
   "P_FORM_L2": "частная компания с ограниченной ответственностью, учреждённая в Англии и Уэльсе",
+  "P_INC_COUNTRY": "GB",
   "P_COUNTRY": "GB",
-  "P_GCC_CONFIRM": true,
+  "P_TAX_COUNTRY": "GB",
+  "P_VAT_REGS": null,
+  "P_UAE_FE": false,
   "P_REGNO": "00012345",
   "P_TAXNO": null,
   "P_ADDR_EN": "10 Demo Lane, London, N1 0AA, United Kingdom",
@@ -48,7 +51,6 @@
   "P_LOGO": null,
   "P_BRANDBOOK": null,
   "P_BRAND_RULES": null,
-  "P_BRAND_CONTACT": null,
   "P_EMAIL_OPS": null,
   "P_EMAIL_LEGAL": null,
   "P_EMAIL_FIN": null,
@@ -59,14 +61,18 @@
   "P_BANK_NAME": "Demo Bank Ltd",
   "P_BANK_ADDR": "2 Demo Square, London, E1 0AA, United Kingdom",
   "P_BANK_SWIFT": "DEMOGB21",
-  "P_BANK_INTERMEDIARY": "DEMOGB2L"
+  "P_BANK_INTERMEDIARY": "DEMOGB2L",
+  "P_BANK_IBAN_EUR": "GB71DEMO60161300000077"
  },
  "status": {
   "P_NAME": "filled",
   "P_FORM_EN": "filled",
   "P_FORM_L2": "filled",
+  "P_INC_COUNTRY": "filled",
   "P_COUNTRY": "filled",
-  "P_GCC_CONFIRM": "filled",
+  "P_TAX_COUNTRY": "filled",
+  "P_VAT_REGS": "empty",
+  "P_UAE_FE": "filled",
   "P_REGNO": "filled",
   "P_TAXNO": "empty",
   "P_ADDR_EN": "filled",
@@ -97,7 +103,6 @@
   "P_LOGO": "empty",
   "P_BRANDBOOK": "empty",
   "P_BRAND_RULES": "empty",
-  "P_BRAND_CONTACT": "empty",
   "P_EMAIL_OPS": "empty",
   "P_EMAIL_LEGAL": "empty",
   "P_EMAIL_FIN": "empty",
@@ -108,7 +113,8 @@
   "P_BANK_NAME": "filled",
   "P_BANK_ADDR": "filled",
   "P_BANK_SWIFT": "filled",
-  "P_BANK_INTERMEDIARY": "filled"
+  "P_BANK_INTERMEDIARY": "filled",
+  "P_BANK_IBAN_EUR": "filled"
  },
  "ota": {
   "OTA_NAME": "OTA TECHNOLOGY DMCC",
@@ -127,6 +133,8 @@
   "OTA_BANK_ACCOUNT": "1234567890123",
   "OTA_BANK_IBAN": "AE070331234567890123456",
   "OTA_BANK_SWIFT": "DEMOAEADXXX",
+  "OTA_BANK_ACCOUNT_EUR": "9876543210987",
+  "OTA_BANK_IBAN_EUR": "AE070339876543210987654",
   "OTA_EMAIL_OPS": "ops@example.com",
   "OTA_EMAIL_LEGAL": "legal@example.com",
   "OTA_EMAIL_FIN": "finance@example.com",
@@ -160,6 +168,8 @@
    "FEE_PCT": null,
    "DEVICES": [],
    "DOC_NO": "OTA-ARV-OF-UA-001-v1",
+   "CCY": "USD",
+   "OTA_OSS_NO": null,
    "OTA_VAT_LOCAL": "DEMO-UA-VAT-000001",
    "OTA_REP_LOCAL": null,
    "PRICE_KEY": "9.85",
@@ -203,6 +213,8 @@
    "FEE_PCT": null,
    "DEVICES": [],
    "DOC_NO": "OTA-ARV-OF-KZ-001-v1",
+   "CCY": "USD",
+   "OTA_OSS_NO": null,
    "OTA_VAT_LOCAL": null,
    "OTA_REP_LOCAL": "Demo Representative LLP, 1 Demo Avenue, Almaty, Kazakhstan",
    "PRICE_KEY": "9.40",
@@ -224,6 +236,51 @@
    "TOK_PREMIUM_48": "117.81",
    "TOK_PREMIUM_60": "135.93",
    "RET_PREMIUM": "3.78"
+  },
+  "DE": {
+   "CC": "DE",
+   "CC_NAME_EN": "Germany",
+   "CC_NAME_L2": "Германия",
+   "CC_NAME_UPPER_EN": "GERMANY",
+   "CC_NAME_UPPER_L2": "ГЕРМАНИЯ",
+   "CC_NAME_FULL_EN": "Federal Republic of Germany",
+   "CC_NAME_FULL_L2": "Федеративная Республика Германия",
+   "CC_NAME_LOC_L2": "Германии",
+   "CC_EXCLUSION_EN": null,
+   "CC_EXCLUSION_L2": null,
+   "OF_EXCEPTIONS_EN": null,
+   "OF_EXCEPTIONS_L2": null,
+   "LAUNCH_DATE": null,
+   "INIT_SIMS": 1000,
+   "INIT_KEYS": 1000,
+   "INIT_TOKENS": 300,
+   "ANNUAL_TARGET": 10000,
+   "FEE_PCT": null,
+   "DEVICES": [],
+   "DOC_NO": "OTA-ARV-OF-DE-001-v1",
+   "CCY": "EUR",
+   "OTA_OSS_NO": "EU276DEMO01",
+   "OTA_VAT_LOCAL": null,
+   "OTA_REP_LOCAL": "Demo EU Representative GmbH, 1 Demostraße, 10115 Berlin, Germany",
+   "PRICE_KEY": "8.90",
+   "TOK_LIGHT_12": "36.21",
+   "TOK_LIGHT_24": "64.38",
+   "TOK_LIGHT_36": "84.49",
+   "TOK_LIGHT_48": "104.61",
+   "TOK_LIGHT_60": "120.71",
+   "RET_LIGHT": "3.35",
+   "TOK_STANDARD_12": "45.29",
+   "TOK_STANDARD_24": "80.51",
+   "TOK_STANDARD_36": "105.67",
+   "TOK_STANDARD_48": "130.83",
+   "TOK_STANDARD_60": "150.96",
+   "RET_STANDARD": "4.19",
+   "TOK_PREMIUM_12": "67.93",
+   "TOK_PREMIUM_24": "120.77",
+   "TOK_PREMIUM_36": "158.51",
+   "TOK_PREMIUM_48": "196.25",
+   "TOK_PREMIUM_60": "226.44",
+   "RET_PREMIUM": "6.29"
   }
  },
  "system": {
@@ -289,19 +346,71 @@
    "OF_SUPERSEDES": "OTA-ARV-OF-UA-001-v1",
    "OF_EFFECTIVE": "2027-03-01",
    "DOC_NO": "OTA-ARV-OF-UA-001-v2"
+  },
+  "INV_AE": {
+   "VAT_AE": true,
+   "INV_SUBTOTAL": "9,850.00",
+   "INV_VAT_AMOUNT": "492.50",
+   "INV_VAT_AED": "1,808.71",
+   "INV_TOTAL": "10,342.50",
+   "AED_RATE": "3.6725"
+  },
+  "CN_AE": {
+   "VAT_AE": true,
+   "CN_VAT_AMOUNT": "492.50",
+   "CN_VAT_AED": "1,808.71",
+   "CN_TOTAL": "10,342.50"
+  },
+  "INV_DE": {
+   "CC": "DE",
+   "CCY": "EUR",
+   "AED_RATE": "4.2600",
+   "DOC_NO_OF": "OTA-ARV-OF-DE-001-v1"
+  },
+  "partner_AE": {
+   "P_INC_COUNTRY": "AE",
+   "P_TAX_COUNTRY": "AE",
+   "P_VAT_REGS": "AE 100000000000099 (demo TRN)",
+   "P_UAE_FE": true
   }
  },
  "roundtrip": {
   "*": {
    "*": {
-    "P_TAXNO": "[ ]",
-    "P_EMAIL_OPS": "[ ]",
-    "P_EMAIL_LEGAL": "[ ]",
-    "P_EMAIL_FIN": "[ ]",
-    "P_EMAIL_SUPPORT": "[ ]",
+    "P_NAME": "[Partner full legal name / Полное наименование Партнёра]",
+    "P_BANK_BENEFICIARY": "[Partner full legal name / Полное наименование Партнёра]",
+    "P_FORM_EN": "[legal form and country of incorporation]",
+    "P_FORM_L2": "[организационно-правовая форма и страна регистрации]",
+    "P_REGNO": "[Registration number / Рег. номер]",
+    "P_TAXNO": "[Tax / VAT number / Налоговый номер]",
+    "P_ADDR_EN": "[Registered address]",
+    "P_ADDR_L2": "[Юридический адрес]",
+    "P_TITLE_EN": "[Title]",
+    "P_TITLE_L2": "[Должность]",
+    "P_TITLE_L2_GEN": "[должности в родительном падеже]",
+    "P_SIGNATORY": "[Full name of signatory / ФИО подписанта]",
+    "P_PROGRAMME": "[BRAND] CONNECT",
+    "P_DOMAIN": "connect.[brand-domain]",
+    "P_BRAND": "[BRAND]",
+    "P_CODE": "[PPP]",
+    "P_BANK_NAME": "[Bank]",
+    "P_BANK_ADDR": "[Bank address / Адрес банка]",
+    "P_BANK_SWIFT": "[SWIFT]",
+    "P_BANK_INTERMEDIARY": "[Intermediary bank SWIFT, if any / SWIFT банка-посредника, если есть]",
+    "P_BANK_IBAN": "[Account / IBAN]",
+    "P_BANK_IBAN_EUR": "[Partner EUR account / IBAN]",
+    "P_EMAIL_OPS": "[ops e-mail]",
+    "P_EMAIL_LEGAL": "[legal e-mail]",
+    "P_EMAIL_FIN": "[finance e-mail]",
+    "P_EMAIL_SUPPORT": "[support e-mail]",
+    "CCY": "[USD / EUR]",
+    "CCY_USD": true,
+    "CCY_EUR": null,
+    "CC_DE": null,
+    "VAT_ZERO": true,
+    "VAT_AE": null,
     "P_LOGO": "[ ]",
     "P_BRAND_RULES": "[ ]",
-    "P_BRAND_CONTACT": "[ ]",
     "P_BRANDBOOK": "[attach file / приложить файл]",
     "P_TM_OWNER_NAME": "[Brand Owner legal name]",
     "P_TM_OWNER_REGNO": "[ ]",
@@ -321,8 +430,7 @@
     "OTA_SUBPROC_EMAIL": "[Email service provider / Почтовый сервис]",
     "OTA_SUBPROC_EMAIL_LOC": "[ ]",
     "CARD_DESCRIPTOR": "[OTA*ARVELOCONNECT]",
-    "DOC_NO_MPA": "OTA-ARV-MPA-001-v1",
-    "P_BANK_BENEFICIARY": "ARVELO LIMITED",
+    "DOC_NO_MPA": "OTA-[PPP]-MPA-001-v1",
     "DOC_VER": "[1.0]",
     "DATE": "[ ]",
     "DUE_DATE": "[ ]",
@@ -371,7 +479,8 @@
   },
   "MPA": {
    "*": {
-    "DATE": "[DATE / ДАТА]"
+    "DATE": "[DATE / ДАТА]",
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "BOA": {
@@ -384,7 +493,7 @@
     "P_TM_OWNER_NAME": "[наименование правообладателя]"
    },
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "RS": {
@@ -409,11 +518,11 @@
   },
   "CHG": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1",
-    "CHG_SIG_COMPANY": "ARVELO LIMITED",
-    "CHG_SIG_NAME": "Daniel Hart",
-    "CHG_SIG_TITLE_EN": "Director",
-    "CHG_SIG_TITLE_L2": "Директор"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1",
+    "CHG_SIG_COMPANY": "[Partner full legal name / Полное наименование Партнёра]",
+    "CHG_SIG_NAME": "[Full name of signatory / ФИО подписанта]",
+    "CHG_SIG_TITLE_EN": "[Title]",
+    "CHG_SIG_TITLE_L2": "[Должность]"
    },
    "en": {
     "CHG_PARTY_NAME": "[Party name]",
@@ -468,7 +577,9 @@
     "TOK_PREMIUM_60": "[ ]",
     "RET_PREMIUM": "[ ]",
     "OF_EXCEPTIONS_EN": null,
-    "OF_EXCEPTIONS_L2": null
+    "OF_EXCEPTIONS_L2": null,
+    "CCY": "USD",
+    "DOC_NO": "OTA-[PPP]-OF-UA-001-v1"
    }
   },
   "OF-KZ": {
@@ -492,34 +603,73 @@
     "TOK_PREMIUM_60": "[ ]",
     "RET_PREMIUM": "[ ]",
     "OF_EXCEPTIONS_EN": null,
-    "OF_EXCEPTIONS_L2": null
+    "OF_EXCEPTIONS_L2": null,
+    "CCY": "USD",
+    "DOC_NO": "OTA-[PPP]-OF-KZ-001-v1"
+   }
+  },
+  "OF-DE": {
+   "*": {
+    "TOK_LIGHT_12": "[ ]",
+    "TOK_LIGHT_24": "[ ]",
+    "TOK_LIGHT_36": "[ ]",
+    "TOK_LIGHT_48": "[ ]",
+    "TOK_LIGHT_60": "[ ]",
+    "RET_LIGHT": "[ ]",
+    "TOK_STANDARD_12": "[ ]",
+    "TOK_STANDARD_24": "[ ]",
+    "TOK_STANDARD_36": "[ ]",
+    "TOK_STANDARD_48": "[ ]",
+    "TOK_STANDARD_60": "[ ]",
+    "RET_STANDARD": "[ ]",
+    "TOK_PREMIUM_12": "[ ]",
+    "TOK_PREMIUM_24": "[ ]",
+    "TOK_PREMIUM_36": "[ ]",
+    "TOK_PREMIUM_48": "[ ]",
+    "TOK_PREMIUM_60": "[ ]",
+    "RET_PREMIUM": "[ ]",
+    "OF_EXCEPTIONS_EN": null,
+    "OF_EXCEPTIONS_L2": null,
+    "CCY": "EUR",
+    "DOC_NO": "OTA-[PPP]-OF-DE-001-v1",
+    "CCY_USD": null,
+    "CCY_EUR": true,
+    "CC_DE": true
+   },
+   "en": {
+    "OTA_OSS_NO": "[OSS No.]",
+    "ANNUAL_TARGET": "[10,000]"
+   },
+   "ru": {
+    "OTA_OSS_NO": "[№ OSS]",
+    "ANNUAL_TARGET": "[10 000]"
    }
   },
   "TRT": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "SLA": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "BL": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "DPA": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   },
   "SIM": {
    "*": {
-    "DOC_NO": "OTA-ARV-MPA-001-v1"
+    "DOC_NO": "OTA-[PPP]-MPA-001-v1"
    }
   }
  },
- "_note": "partner = ARVELO values from A_Partner_Data_Form (null = \"[ ]\" in the form); roundtrip = placeholders exactly as shown in the v09 DOCX, used only by the round-trip test."
+ "_note": "partner = fictional ARVELO demo values (v12 Data Form is generic; null = empty / N/A); roundtrip = placeholders exactly as shown in the v12 DOCX (generic [ ] / [PPP] / [BRAND] …), used only by the round-trip test."
 }

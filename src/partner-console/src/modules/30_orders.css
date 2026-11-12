@@ -98,3 +98,10 @@
 .ord_totals>.ord_vatrow{font-size:12px;align-items:flex-start}
 .ord_totals>.ord_vatrow>span:first-child{color:var(--ink3);line-height:1.4}
 .ord_totals>.ord_vatrow>span:last-child{white-space:nowrap}
+/* pack v12: Activation Keys + SIMs 1:1 quota per country */
+.ord_qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ord_q{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ord_qn{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--ink2)}
+.ord_qn b{color:var(--ink)}
+.ord_qbar{position:relative;margin-top:2px}
+.ord_q70{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;border-radius:1px}

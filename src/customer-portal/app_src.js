@@ -12,7 +12,12 @@ const CAT=[{type:'inverter',model:'H5',plan:'std'},{type:'tracker',model:'T2',pl
 const MSG=['Viber','Telegram','WhatsApp'];
 // Activation code: [country 1][partner 4][package 1][serial 5][secret 4][check 1] = 16 chars, Crockford Base32
 const B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const CTRY={K:'UA',P:'PL',Z:'ZA'};const HOME='K';
+const CTRY={K:'UA',P:'PL',Z:'ZA',D:'DE'};const HOME='K';
+/* v12: per-country retail (Direct Subscription) prices. UA keeps the legacy demo prices in UAH; Germany (Order Form 02-DE, clause 1.6 / 3.1)
+   is priced in EUR, including taxes. Source order: bridge settings.countries[CC].retail → partner console S.ota.countries[CC].retail / S.retail[CC]
+   → these demo defaults (fictional). Wholesale price lists (S.priceLists) are partner prices and are never shown to End Users. */
+const PR_DE={std:{m:4.99,y:49.9,y2:89.9,y3:124.9,y5:189.9},light:{m:2.99,y:29.9,y2:54.9,y3:74.9,y5:109.9}};
+const CC_DEF={DE:{currency:'EUR',retail:PR_DE,vat_rate:19,oss:true,cancel_public:true,docs_de_published:true}};
 const PKG={'1':['light',24],'2':['light',36],'3':['light',60],'4':['std',24],'5':['std',36],'6':['std',60],'7':['light',12],'8':['std',12]};
 const PLN={light:'Light',std:'Standard'};
 function normCode(v){return (v||'').toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1').replace(/U/g,'V').replace(/[^0-9A-Z]/g,'').split('').filter(c=>B32.includes(c)).join('');}
@@ -97,7 +102,10 @@ function t(k,v){let s=(T[S.lang]&&T[S.lang][k]);if(s==null)s=T.uk[k];if(s==null)
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function pf(n,k){const f=(T[S.lang]&&T[S.lang].day_forms)||T.en.day_forms;let c='other';try{c=new Intl.PluralRules(loc()).select(n);}catch(e){}return f[c]||f.other;}
 const NB=' ';
-const money=n=>new Intl.NumberFormat(loc()).format(n).replace(/\s/g,NB)+NB+t('cur');
+const r2=n=>Math.round(n*100)/100;
+// money(n, currency): UAH keeps the legacy "1 234 грн" look; other currencies (EUR for Germany) use the locale's currency format with cents
+function money(n,cur){cur=cur||'UAH';if(cur==='UAH')return new Intl.NumberFormat(loc()).format(n).replace(/\s/g,NB)+NB+t('cur');
+ try{return new Intl.NumberFormat(loc(),{style:'currency',currency:cur,minimumFractionDigits:2,maximumFractionDigits:2}).format(n).replace(/\s/g,NB);}catch(e){return (+n).toFixed(2)+NB+cur;}}
 const pad=n=>String(n).padStart(2,'0');
 // shared demo clock in the bridge (same for /partner and /portal): demoNow = demo0 + (real now − real0) + offset_ms
 function clk(){const b=B();return b.clock;}
@@ -148,9 +156,14 @@ function luhnDigit(body){for(let c=0;c<10;c++)if(luhnOk(body+c))return String(c)
 const genIccid=n=>{const b='89380012'+String(n).padStart(10,'0');return b+luhnDigit(b);};
 const genImei=n=>{const b='35'+String(840000000000+n).padStart(12,'0');return b+luhnDigit(b);};
 const fmtIccid=s=>String(s).replace(/(\d{4})(?=\d)/g,'$1 ');
-function mkCode(pkg,serial,secret){const body=HOME+'ARV1'+pkg+serial+secret;return body+luhn32(body);}
+function mkCode(pkg,serial,secret,ctry){const body=(ctry||HOME)+'ARV1'+pkg+serial+secret;return body+luhn32(body);}
+const genIccidDE=n=>{const b='89490012'+String(n).padStart(10,'0');return b+luhnDigit(b);};   // v12 Germany demo SIMs (ICCID country code 49)
+function deSeed(n){const sims={},codes={};for(let i=1;i<=3;i++)sims[genIccidDE(i)]={partner:'ARV',status:'issued',imei:genImei(100+i),model:MODELS[(i-1)%4],cc:'DE',country:'DE'};
+ codes[mkCode('4','00201','D4EV','D')]={serial:'00201',status:'new',device_id:null,cc:'DE'};codes[mkCode('7','00202','D7EV','D')]={serial:'00202',status:'new',device_id:null,cc:'DE'};
+ codes[mkCode('8','00203','D8EV','D')]={serial:'00203',status:'new',device_id:null,cc:'DE'};return{sims,codes};}
 function seedBridge(){const n=Date.now();const sims={};
  for(let i=1;i<=8;i++)sims[genIccid(i)]={partner:'ARV',status:'issued',imei:genImei(i),model:MODELS[(i-1)%4],cc:'UA'};
+ {const de=deSeed();Object.assign(sims,de.sims);}
  sims[genIccid(9)]={partner:'ARV',status:'deactivated',imei:genImei(9),model:'T2',cc:'UA'};
  sims[genIccid(10)]={partner:null,status:'stock',imei:null,model:'H5',cc:'UA'};
  for(let i=21;i<=24;i++)sims[genIccid(i)]={partner:'ARV',status:'issued',imei:genImei(i),model:MODELS[i-21],cc:'UA',demo:'history'};
@@ -159,7 +172,8 @@ function seedBridge(){const n=Date.now();const sims={};
  c('4','00105','B8DS',{status:'redeemed',device_id:genImei(23),iccid:genIccid(23),redeemed_at:isoMs(n-300*DAY),redeemed_by_account_id:'acc_demo_previous'});
  c('4','00106','Q4FJ',{status:'blocked',blocked_at:isoMs(n-2*DAY)});
  c('7','00107','Y6GC',{expires_at:isoMs(n-DAY)});
- return{sims,bindings:[],transfers:[],codes,events:[],requests:[],t12_overrides:[],
+ Object.assign(codes,deSeed().codes);
+ return{sims,bindings:[],transfers:[],codes,events:[],requests:[],t12_overrides:[],cancellations:[],
   links:[],accounts:{},notices:[],t12Exempt:[],
   bindLinks:[{token:'DEMOLINK0001',iccid:genIccid(5),contact:'buyer@example.com',contact_norm:'e:buyer@example.com',created_at:isoMs(n),expires_at:isoMs(n+72*HOUR),status:'pending',created_by:'Demo Installer'},
    {token:'DEMOLINK0002',iccid:genIccid(6),contact:'late@example.com',contact_norm:'e:late@example.com',created_at:isoMs(n-80*HOUR),expires_at:isoMs(n-8*HOUR),status:'pending',created_by:'Demo Installer'}],
@@ -167,7 +181,7 @@ function seedBridge(){const n=Date.now();const sims={};
    {partner:'ARV',user_id:'u_demo_inst',role:'installer',contact:'e:installer@arvelo.demo'},{partner:'ARV',user_id:'u_demo_inst',role:'installer',contact:'p:670000002'}],
   partner_users:[{name:'Demo Dealer',email:'dealer@arvelo.demo',phone:'+380670000001',role:'dealer'},{name:'Demo Installer',email:'installer@arvelo.demo',phone:'+380670000002',role:'installer'}],
   settings:{},seeded_by:'portal',rev:1};}
-function normBridge(b){['bindings','transfers','events','links','bindLinks','partner_users','partnerContacts','t12Exempt','requests','notices','t12_overrides'].forEach(k=>{if(!Array.isArray(b[k]))b[k]=[];});
+function normBridge(b){['bindings','transfers','events','links','bindLinks','partner_users','partnerContacts','t12Exempt','requests','notices','t12_overrides','cancellations'].forEach(k=>{if(!Array.isArray(b[k]))b[k]=[];});
  if(!b.codes||typeof b.codes!=='object')b.codes={};
  let chc=false;if(!b.clock||typeof b.clock!=='object'||!isFinite(b.clock.demo0)||!isFinite(b.clock.real0)){const n=Date.now();b.clock={demo0:n,real0:n,offset_ms:0,created_by:'portal'};chc=true;}
  if(!isFinite(b.clock.offset_ms))b.clock.offset_ms=0;if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.accounts||typeof b.accounts!=='object')b.accounts={};if(!b.settings.countries)b.settings.countries={};
@@ -175,6 +189,9 @@ function normBridge(b){['bindings','transfers','events','links','bindLinks','par
  const ok=Object.keys(b.sims).filter(i=>/^\d{19,20}$/.test(i)&&luhnOk(i)&&b.sims[i].status==='issued'&&!b.sims[i].demo);
  let ch=false;if(ok.length<3){const s=seedBridge();Object.keys(s.sims).forEach(i=>{if(!b.sims[i]){b.sims[i]=Object.assign(s.sims[i],{src:'portal-demo'});ch=true;}});
   Object.keys(s.codes).forEach(k=>{if(!b.codes[k]){b.codes[k]=s.codes[k];ch=true;}});if(!b.partner_users.length){b.partner_users=s.partner_users;ch=true;}}
+ // v12: Germany is a demo country — if neither app has seeded bindable DE SIMs yet, add the portal's own small DE pool (+ DE package codes)
+ if(!Object.keys(b.sims).some(i=>simCc(b.sims[i])==='DE'&&/^\d{19,20}$/.test(i)&&luhnOk(i)&&b.sims[i].status==='issued'&&b.sims[i].partner)){const de=deSeed();
+  Object.keys(de.sims).forEach(i=>{if(!b.sims[i]){b.sims[i]=Object.assign(de.sims[i],{src:'portal-demo'});ch=true;}});Object.keys(de.codes).forEach(k=>{if(!b.codes[k]){b.codes[k]=Object.assign(de.codes[k],{src:'portal-demo'});ch=true;}});}
  return ch||chc;}
 function readBridge(){let b=null;try{b=JSON.parse(localStorage.getItem(BKEY));}catch(e){}
  let ch=false;if(!b||typeof b!=='object'||!b.sims||typeof b.sims!=='object'){b=seedBridge();ch=true;}
@@ -268,8 +285,30 @@ function consolePlan(x){const b=B();const n=nowMs();   // a plan already attache
   if(!x.paidUntil||x.paidUntil<until){x.paidUntil=until;if(x.mode!=='sub')x.mode='pkg';}});}
 function vatLocal(cc){const b=B();let v=((b.settings.countries||{})[cc]||{}).vat_local;
  if(!v){try{const ps=JSON.parse(localStorage.getItem('cfb-partner-v3'));v=ps&&ps.ota&&ps.ota.countries&&ps.ota.countries[cc]&&ps.ota.countries[cc].vat_local;}catch(e){}}return v?String(v).trim():'';}
-const devCc=x=>((B().sims[x.iccid]||{}).cc)||'UA';
-function vatLine(x){if(!x)return '';const cc=devCc(x);const v=vatLocal(cc);return v?`<p class="muted small" data-vat="${esc(cc)}">${t('vat_local',{cc:esc(cc),v:esc(v)})}</p>`:'';}   // ТЗ 2.6: only if set, only for that country
+const simCc=s=>(s&&(s.cc||s.country))||'UA';
+const devCc=x=>simCc(B().sims[x.iccid]);
+/* ---- v12 country settings: bridge settings.countries[CC] (OTA demo / console mirror) → partner console S.ota.countries[CC] (contract: currency, oss_no)
+   → demo defaults (CC_DEF). DE: EUR, German VAT under the EU OSS with OTA as seller (02-DE cl. 1.6), § 312k BGB cancellation button without login. */
+function psState(){try{return JSON.parse(localStorage.getItem('cfb-partner-v3'))||null;}catch(e){return null;}}
+function ccCfg(cc){const b=((B().settings||{}).countries||{})[cc]||{};const ps=psState();const p=(ps&&ps.ota&&ps.ota.countries&&ps.ota.countries[cc])||{};const d=CC_DEF[cc]||{};
+ const has=v=>v!=null&&v!=='';const pick=k=>has(b[k])?b[k]:has(p[k])?p[k]:d[k];
+ const psRet=ps&&ps.retail&&ps.retail[cc];
+ return{currency:pick('currency')||null,retail_currency:pick('retail_currency')||null,retail:(has(b.retail)&&b.retail)||(has(p.retail)&&p.retail)||psRet||d.retail||null,
+  vat_rate:+pick('vat_rate')||0,oss:!!pick('oss')||String(pick('currency')||'')==='EUR',oss_no:String(pick('oss_no')||'').trim(),
+  cancel_public:pick('cancel_public')!=null?!!pick('cancel_public'):false,docs_de_published:pick('docs_de_published')==null?true:!!pick('docs_de_published')};}
+// End User (retail) currency: the Order Form currency if it is EUR (Approved Countries in Europe, MPA 8.1); otherwise the legacy local demo currency (UAH)
+function retailCur(cc){const c=ccCfg(cc);return c.retail_currency||(c.currency==='EUR'?'EUR':'UAH');}
+function retail(cc){const c=ccCfg(cc);const base=retailCur(cc)==='EUR'?PR_DE:PR;const r=c.retail;const out={};
+ ['std','light'].forEach(pl=>{out[pl]={};PLANS.forEach(q=>{const v=r&&r[pl]&&+r[pl][q.k];out[pl][q.k]=v>0?v:base[pl][q.k];});});return out;}
+const prOf=x=>retail(devCc(x));const curOf=x=>retailCur(devCc(x));const mny=(x,n)=>money(n,curOf(x));
+const OTA_NAME=()=>{const ps=psState();const v=ps&&ps.ota&&ps.ota.OTA_NAME;return v&&typeof v==='string'?v:'OTA TECHNOLOGY DMCC';};
+// tax info for a gross (tax-inclusive) amount: OSS countries → VAT rate + amount, seller and OSS registration no.
+function taxOf(cc,gross){const c=ccCfg(cc);if(!c.oss)return null;const rate=c.vat_rate||19;return{rate,vat:r2(gross-gross/(1+rate/100)),oss_no:c.oss_no,seller:OTA_NAME(),cc};}
+function ossHtml(tx,cur,tag){tag=tag||'p';const amt=tx.vat!=null?`<span data-oss-vat>${t('oss_incl',{r:tx.rate,v:money(tx.vat,cur)})}</span> `:'';
+ return `<${tag} class="${tag==='p'?'muted small':'s'}" data-oss="${esc(tx.cc)}">${amt}${t('oss_seller',{s:esc(tx.seller)})}${tx.oss_no?` <span data-oss-no>${t('oss_no',{n:esc(tx.oss_no)})}</span>`:''}</${tag}>`;}
+function vatLine(x,gross){if(!x)return '';const cc=devCc(x);const tx=taxOf(cc,gross||0);
+ if(tx){if(!gross)tx.vat=null;return ossHtml(tx,curOf(x));}   // v12: Germany — German VAT under OSS, OTA as seller (02-DE cl. 1.6)
+ const v=vatLocal(cc);return v?`<p class="muted small" data-vat="${esc(cc)}">${t('vat_local',{cc:esc(cc),v:esc(v)})}</p>`:'';}   // ТЗ 2.6: only if set, only for that country
 const codePlanActive=x=>!!(x.codes&&x.codes.length&&x.mode==='pkg'&&x.paidUntil&&d(x.paidUntil)>now());
 function ensureDev(iccid,boundMs){const b=B();const id=devIdOf(iccid,b);let x=P.devs[id];if(x)return x;const s=b.sims[iccid]||{};
  const mi=modelInfo(s,iccid);const bm=boundMs||nowMs();
@@ -308,6 +347,8 @@ async function bindIccid(iccid,opts){opts=opts||{};const a=acct();if(!a)return{c
  if(isT12(a))return{code:'T12'};
  const r=await bridgeTx(b=>{const sim=b.sims[iccid];
   if(!sim||!sim.partner||sim.status!=='issued')return{res:{code:'T3',unknown:!sim},write:false};
+  // 02-DE cl. 1.6: the portal for Germany opens only after Documents 07 and 08 with the Germany Country Schedule are published in German
+  if(simCc(sim)==='DE'&&!ccCfg('DE').docs_de_published)return{res:{code:'DEGATE'},write:false};
   const cur=b.bindings.find(z=>z.iccid===iccid&&liveB(z));
   if(cur)return{res:{code:cur.owner_account_id===a.id?'T4':'T2'},write:false};
   let link=null;if(opts.link){link=findLink(b,opts.link);if(!linkOpen(link)||link.iccid!==iccid)return{res:{code:'LINK'},write:false};}
@@ -330,6 +371,8 @@ async function redeemCode(raw,devId){const a=acct();const c=normCode(raw);const 
  const r=await bridgeTx(b=>{const L=codeLookup(b,c);const rec=L&&L[1];const pl=rec&&codePlan(c,rec);
   if(!codeOk(rec)||!pl)return{res:{code:'T7'},write:false};
   const bd=b.bindings.find(z=>z.device_id===devId&&z.owner_account_id===a.id&&liveB(z));if(!bd)return{res:{code:'T7'},write:false};
+  // v12: a Germany package code (EUR, OSS) applies only to a German device and vice versa; other countries keep the v10 behaviour
+  const kc=rec.cc||rec.country||CTRY[c[0]];const dc=devCc(x);if(kc&&(kc==='DE'||dc==='DE')&&kc!==dc)return{res:{code:'CTRY'},write:false};
   if(pl.plan!==x.plan)return{res:{code:'TYPE',pl},write:false};
   if(codePlanActive(x))return{res:{code:'ACTIVE'},write:false};
   Object.assign(rec,{status:'redeemed',device_id:devId,iccid:bd.iccid,redeemed_at:isoNow(),redeemed_by_account_id:a.id});
@@ -403,6 +446,31 @@ async function doLink(data){const l=findLink(B(),data.token);if(!l){go('b/'+data
  const a=login(linkContact(l));const r=await bindIccid(l.iccid,{method:'iccid',link:l.token});
  if(r.code==='T5'){const did=devIdOf(l.iccid);SS.flash={dev:did,code:'T5'};SS.lnk=null;if(!S.onboarded){S.onboarded=true;SS.ret='device-'+did;ssave();save();go('start-1');}else{ssave();go('device-'+did);}}
  else{SS.lnk={res:r.code,until:r.until};ssave();go('b/'+data.token);}}
+/* ---- v12: cancellation of subscriptions (EUT 5.1 v12; Germany: § 312k BGB, Order Form 02-DE cl. 1.6).
+   Public button (no login) where the country requires it (ccCfg(cc).cancel_public, DE by default): the declaration is identified by the sign-in
+   contact + SIM number (ICCID) or IMEI; it is confirmed at once (demo: message to the confirmation e-mail + notice to the account's own contact)
+   with reference, time of receipt and end of service. In-account cancellation uses the same flow without the identification fields.
+   Effect (EUT 5.1): renewal stops, the service continues until the end of the paid period, nothing is refunded for the current period. */
+const subOf=x=>!!x&&(x.mode==='sub'||(x.mode==='pkg'&&!!x.auto));
+const subEnd=x=>x.mode==='sub'?x.next:x.paidUntil;
+function stopSub(x,at,ref,channel){const end=subEnd(x);if(x.mode==='sub'){x.mode='pkg';x.paidUntil=x.next;delete x.next;}delete x.auto;
+ x.cancelled={at,ref,channel,end};x.ev.push(['ev_cancel',isoT(new Date(Date.parse(at))),'info']);return end;}
+async function doCancel(v){const at=isoNow();const ref='CX-'+tok().slice(0,8);const b=B();let x=null,bd=null,owner=null,res='ok';
+ if(v.mode==='account'){x=dev(v.dev);bd=x&&bnd(x);owner=acct();}
+ else{const r=v.devref;bd=b.bindings.find(z=>liveB(z)&&(z.iccid===r||z.device_id===r||((b.sims[z.iccid]||{}).imei===r)))||null;
+  owner=bd&&P.accts[bd.owner_account_id];if(!owner||!acctKeys(owner).includes(v.ck)){bd=null;owner=null;}   // the contact must be the sign-in contact of that account
+  x=bd&&P.devs[bd.device_id];if(bd&&!ccCfg(simCc(b.sims[bd.iccid])).cancel_public)return{res:'login'};}
+ if(!(x&&subOf(x)))res=bd?'nosub':'nomatch';
+ const cc=bd?simCc(b.sims[bd.iccid]):null;let end=null;
+ if(res==='ok')end=stopSub(x,at,ref,v.mode==='account'?'account':'public_button');
+ const rec={ref,received_at:at,channel:v.mode==='account'?'account':'public_button',name:v.name||(owner&&owner.prof.name)||'',contact:v.ck?cShow(parseKey(v.ck)):(owner?cShow(primary(owner)):''),
+  device_ref:v.devref||(bd&&bd.iccid)||null,iccid:bd&&bd.iccid||null,device_id:bd&&bd.device_id||null,cc,type:v.type||'ordinary',reason:v.reason||'',confirm_to:v.mail,
+  status:res==='ok'?'done':res==='nosub'?'no_subscription':'needs_review',service_until:end,account_id:owner?owner.id:null,partner_id:bd&&bd.partner_id||null};
+ await bridgeTx(bb=>{bb.cancellations.push(rec);bb.events.push(Object.assign(bd?bEvent('subscription_cancel_request',bd):{id:uid('ev'),type:'subscription_cancel_request',at,by:'portal'},{ref,status:rec.status,channel:rec.channel}));return{};});
+ save();const dn=x?dname(x):'';
+ notify({k:'e',v:v.mail},res==='ok'?t('cx_conf',{ref,t:fdt(Date.parse(at)),d:dn,date:fdate(end)}):t('cx_conf_pending',{ref,t:fdt(Date.parse(at))}));
+ if(owner&&cKey(primary(owner))!=='e:'+v.mail&&res==='ok')notify(primary(owner),t('cx_conf',{ref,t:fdt(Date.parse(at)),d:dn,date:fdate(end)}));
+ return{res,ref,at,end,dev:dn,mail:v.mail};}
 async function finishFlow(f){const c=parseKey(f.ck);
  if(f.p==='login'){login(c);afterLogin();return;}
  if(f.p==='chg_old')return startFlow('chg_new',parseKey(f.data.nv),f.data,f.back);
@@ -460,14 +528,48 @@ const payTxt=x=>x.mode==='sub'?t('autopay',{date:fdate(x.next)}):x.mode==='pkg'?
 const noteFor=x=>x.cause==='jam'?t('note_jam'):x.cause==='sim'?t('note_sim'):t('note_power');
 
 function errL(id,txt){return `<span id="${id}" class="err" role="alert">${ic('alert','sm')}<span>${txt}</span></span>`;}
-function vSignin(){const act=SS.ret&&SS.ret.startsWith('/a/');const v=SS.si||{};
+function vSignin(){const act=SS.ret&&SS.ret.startsWith('/a/');const pk=SS.ret==='code';const v=SS.si||{};
  return `${topbar()}<main class="stack s24 fade"><div class="row" style="gap:12px">${LOGO}<div class="stack s8" style="gap:2px"><span style="font-weight:800;letter-spacing:.14em">${esc(t('brand'))}</span><span class="small" style="font-weight:700;letter-spacing:.3em;color:var(--brand)">CONNECT</span></div></div>
- <form class="stack s24" data-form="signin" novalidate><div class="stack s8"><h1>${t('si_title')}</h1><p class="muted">${act?t('si_act')+' ':''}${t('si_sub')}</p></div>
+ <form class="stack s24" data-form="signin" novalidate><div class="stack s8"><h1>${t('si_title')}</h1><p class="muted" id="sisub">${act?t('si_act')+' ':pk?t('si_pkg')+' ':''}${t('si_sub')}</p></div>
  <label class="f" for="si">${t('si_label')}<input class="inp" id="si" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" value="${esc(v.v||'')}" ${v.err?'aria-invalid="true" aria-describedby="sih"':''}></label>
  ${v.err?errL('sih',t('si_err')):''}
  <div class="democard">${ic('flask','sm')}<span>${t('otp_demo_hint')}</span></div>
- <button class="btn primary" type="submit">${t('si_btn')} ${ic('right')}</button></form>
+ <button class="btn primary" type="submit">${t('si_btn')} ${ic('right')}</button>
+ ${act||pk?'':`<button class="btn ghost" type="button" data-act="pkgsignin" id="pksignin">${ic('key')} ${t('pk_have')}</button>`}</form>
  <p class="muted small" style="text-align:center">${t('beat')}</p></main>`;}
+/* v12 EUT 4.1: activation code (package code) — sign in with OTP, enter the code printed under the scratch layer, choose the device.
+   The card no longer carries a QR code under the scratch layer (Document B v12: QR to the portal outside it); /a/<code> stays as a convenience
+   that opens the "choose device" step with the code already filled in. */
+function vCode(){const v=SS.pk||{};
+ return `${topbar({back:'home'})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('pk_title')}</h1><p class="muted">${t('pk_sub')}</p></div>${blockedNote()}
+ <form class="stack" data-form="pkg" novalidate><label class="f" for="pk">${t('c_label')}<input class="inp" id="pk" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" value="${esc(v.v||'')}" style="letter-spacing:.04em;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem;padding:0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" ${v.err?'aria-invalid="true" aria-describedby="pkres"':'aria-describedby="pkh"'}></label>
+ ${v.err?`<div class="note bad" role="alert" id="pkres">${v.err}</div>`:`<span class="hint" id="pkh">${t('pk_hint')}</span>`}
+ <button class="btn primary" type="submit" id="pkbtn">${t('pk_next')} ${ic('right')}</button><button class="btn plain small" type="button" data-act="pkdemo">${ic('flask','sm')} ${t('c_demo')}</button></form>
+ <section class="card stack s8"><p class="small">${t('L_c41')}</p><p class="muted small">${t('L_c41_ref')}</p></section></main>`;}
+function vCancel(){const a=acct();const v=SS.cx||{};const r=v.done;const val=v.vals||{};const err=v.err||{};
+ const top=`${topbar(a?{back:'home'}:{back:'welcome'})}<main class="stack s24 fade">`;
+ if(r&&r.res==='login')return top+`<h1>${t('cx_title')}</h1><div class="note warn" role="status" id="cxres">${t('cx_login')}</div><button class="btn primary" type="button" data-act="cxsignin">${t('si_title')} ${ic('right')}</button></main>`;
+ if(r)return top+`<div class="stack" style="align-items:center;text-align:center"><div class="success">${ic('check','lg')}</div><h1>${t('cx_done_t')}</h1></div>
+  <section class="card stack s8" id="cxdone" data-res="${r.res}"><p><span class="muted">${t('cx_ref')}</span> <b id="cxref">${esc(r.ref)}</b></p><p id="cxrec">${t('cx_rec',{t:fdt(Date.parse(r.at))})}</p>
+  ${r.res==='ok'?`<p id="cxend">${t('cx_end',{d:esc(r.dev),date:fdate(r.end)})}</p>`:`<p id="cxpend">${t(r.res==='nosub'?'cx_nosub':'cx_pending')}</p>`}
+  <p class="muted small" id="cxsent">${t('cx_sent',{c:`<b>${esc(r.mail)}</b>`})}</p></section>
+  <button class="btn ghost" type="button" data-act="cxprint">${t('cx_print')}</button><a class="btn primary" href="#${a?'home':'welcome'}">${t(a?'p_home':'cx_back')}</a></main>`;
+ const subs=a?S.devices.filter(subOf):[];const mode=a?'account':'public';
+ const fld=(id,lab,typ,im,ac,ek,val0)=>`<label class="f" for="${id}">${lab}<input class="inp" id="${id}" type="${typ}" inputmode="${im}" autocomplete="${ac}" autocapitalize="off" spellcheck="false" value="${esc(val0||'')}" ${err[ek]?`aria-invalid="true" aria-describedby="${id}h"`:''}></label>${err[ek]?errL(id+'h',t('cx_err_'+ek)):''}`;
+ const who=a?(subs.length?`<div class="list" role="radiogroup" aria-label="${t('cx_pick')}">${subs.map(x=>`<label class="li" for="cx-${x.id}"><input type="radio" name="cxdev" id="cx-${x.id}" value="${x.id}" style="width:22px;height:22px;accent-color:var(--brand)" ${val.dev===x.id||subs.length===1?'checked':''}><span class="ic">${ic(DEVICON[x.type])}</span><span class="grow"><span class="t" style="display:block">${esc(dname(x))}</span><span class="s" style="display:block">${x.mode==='sub'?t('pm_kindM'):t('pm_kindP',{term:t('p_'+x.auto.plan)})} · ${t('cx_until',{date:fdate(subEnd(x))})}</span></span></label>`).join('')}</div>${err.pick?errL('cxpickh',t('cx_err_pick')):''}`:`<div class="note warn" id="cxnone">${t('cx_none')}</div>`)
+  :fld('cxname',t('cx_name'),'text','text','name','name',val.name)+fld('cxcontact',t('cx_contact'),'text','email','username','contact',val.contact)+fld('cxdev',t('cx_dev'),'text','numeric','off','dev',val.devref)+`<span class="hint">${t('cx_dev_hint')}</span>`;
+ const ty=val.type||'ordinary';
+ return top+`<div class="stack s8"><h1>${t('cx_title')}</h1><p class="muted">${t(a?'cx_sub_acc':'cx_sub')}</p></div>
+ <form class="stack" data-form="cancel" data-mode="${mode}" novalidate>${who}
+ ${a&&!subs.length?'':`<fieldset class="stack s8" style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:4px">${t('cx_type')}</legend>
+  <label class="agr" for="cxt1"><input type="radio" name="cxtype" id="cxt1" value="ordinary" ${ty==='ordinary'?'checked':''}><span>${t('cx_type_ord')}</span></label>
+  <label class="agr" for="cxt2"><input type="radio" name="cxtype" id="cxt2" value="extra" ${ty==='extra'?'checked':''}><span>${t('cx_type_extra')}</span></label>
+  <label class="f" for="cxreason">${t('cx_reason')}<textarea class="inp" id="cxreason" rows="2" style="height:auto;padding:12px 14px" ${err.reason?'aria-invalid="true" aria-describedby="cxreasonh"':''}>${esc(val.reason||'')}</textarea></label>${err.reason?errL('cxreasonh',t('cx_err_reason')):''}</fieldset>
+ <p class="small"><b>${t('cx_when_l')}</b> ${t('cx_when')}</p>
+ ${fld('cxmail',t('cx_mail'),'email','email','email','mail',val.mail!=null?val.mail:(a?(S.email||acct().email||''):''))}
+ <button class="btn danger" type="submit" id="cxbtn">${t('cx_btn')}</button>`}</form>
+ <section class="card stack s8"><p class="small">${t('L_c51')}</p><p class="muted small">${t('L_c51_ref')}</p></section></main>`;}
+function footer(){return `<footer class="foot" id="foot"><a href="#cancel" data-act="cxopen" id="cxlink">${t('cx_link')}</a><button type="button" class="lnk" data-act="doc" data-arg="terms">${t('doc_terms')}</button><button type="button" class="lnk" data-act="doc" data-arg="priv">${t('doc_priv')}</button></footer>`;}
 function vOtp(){const f=SS.flow;if(!f)return vSignin();const c=parseKey(f.ck);const w=otpWait(f.ck);
  return `${topbar({back:true,backAct:'otpback'})}<main class="stack s24 fade"><form class="stack s24" data-form="otp" novalidate>
  <div class="stack s8"><h1>${t('otp_title')}</h1><p class="muted" id="otpsub">${f.notSent?(w&&w.gap?t('otp_gap',{c:`<b>${esc(cShow(c))}</b>`,s:`<span id="otpgs">${Math.max(1,Math.ceil((w.gap-nowMs())/1000))}</span>`}):t('otp_notsent',{c:`<b>${esc(cShow(c))}</b>`})):t('otp_sub',{c:`<b>${esc(cShow(c))}</b>`})}</p><p class="small muted">${t('otp_why_'+f.p)}</p></div>
@@ -482,7 +584,8 @@ function simState(i,b){const s=b.sims[i];if(!s)return 'dst_unknown';if(!s.partne
 function blockedNote(){const bu=acct()&&blockedUntil(acct().id);return bu?`<div class="note bad" role="alert" id="blocked">${t('blocked_acct',{t:fdt(bu)})}</div>`:'';}
 function vAdd(){const v=SS.add||{};const ob=!S.onboarded;const back=ob?'start-1':SS.ret&&SS.ret.startsWith('/a/')?SS.ret:'home';const b=B();
  const res=v.res?(v.res==='BLOCK'?'':`<div class="note ${v.res==='T4'?'warn':'bad'}" role="alert" id="addres">${t(v.res)}</div>`):'';
- const demo=Object.keys(b.sims).filter(i=>!b.sims[i].demo&&/^\d{19,20}$/.test(i)).slice(0,10).concat([genIccid(987654)]);
+ const pool=Object.keys(b.sims).filter(i=>!b.sims[i].demo&&/^\d{19,20}$/.test(i));
+ const demo=pool.filter(i=>simCc(b.sims[i])!=='DE').slice(0,10).concat(pool.filter(i=>simCc(b.sims[i])==='DE').slice(0,3),[genIccid(987654)]);
  return `${topbar({back})}<main class="stack s24 fade">${ob?steps(2):''}<div class="stack s8"><h1>${t('add_device')}</h1><p class="muted">${t('add_hint2')}</p></div>
  ${blockedNote()}
  <form class="stack" data-form="iccid" novalidate>
@@ -493,7 +596,7 @@ function vAdd(){const v=SS.add||{};const ob=!S.onboarded;const back=ob?'start-1'
  ${v.t1err?errL('t1h',t('t1_err')):''}
  ${res}
  <button class="btn primary" type="submit" id="bindbtn">${ic('plus')} ${t('bind_btn')}</button></form>
- <section class="card stack s8"><span class="tag">${ic('flask','sm')} ${t('demo_iccids')}</span><div class="list" style="box-shadow:none">${demo.map(i=>`<div class="li" style="min-height:56px;padding:10px 4px"><div class="grow"><div class="t" style="font-variant-numeric:tabular-nums;font-size:.92rem">${fmtIccid(i)}</div><div class="s">${t(simState(i,b))}</div></div><button class="btn plain auto small" type="button" data-act="useiccid" data-arg="${i}">${t('demo_use')}</button></div>`).join('')}</div></section></main>`;}
+ <section class="card stack s8"><span class="tag">${ic('flask','sm')} ${t('demo_iccids')}</span><div class="list" style="box-shadow:none">${demo.map(i=>`<div class="li" style="min-height:56px;padding:10px 4px"><div class="grow"><div class="t" style="font-variant-numeric:tabular-nums;font-size:.92rem">${fmtIccid(i)}</div><div class="s">${t(simState(i,b))}${b.sims[i]?' · '+esc(simCc(b.sims[i])):''}</div></div><button class="btn plain auto small" type="button" data-act="useiccid" data-arg="${i}">${t('demo_use')}</button></div>`).join('')}</div></section></main>`;}
 let actDone=null;   // one-shot success screen: never persisted, so re-opening /a/<code> shows T7
 function vActivate(code){const b=B();const L=codeLookup(b,code);const ok=L&&codeOk(L[1])&&codePlan(code,L[1]);
  if(actDone&&actDone.code!==code)actDone=null;
@@ -616,7 +719,8 @@ function vHome(){
  if(!list.length)hero=`<div class="hero warn"><span class="ring">${ic('qr','lg')}</span><div><div class="big">${t('add_device')}</div><div class="sub">${t('add_hint2')}</div></div></div>`;
  return `${topbar()}<main class="stack s24 fade">${inc}<div class="stack s8"><h1 style="font-size:1.45rem">${greet()}${S.name?', '+esc(S.name):''}</h1>${hero}<p class="beat">${ic('heart','sm')}<span>${t('beat')}</span></p></div>
  <section class="stack" aria-labelledby="hdev"><h2 id="hdev">${t('my_devices')}</h2>${list.map(devCard).join('')}
- <button class="add" type="button" data-go="add"><span class="ic">${ic('qr')}</span><div><div style="font-weight:700">${t('add_device')}</div><div class="muted small">${t('add_hint2')}</div></div></button></section>
+ <button class="add" type="button" data-go="add"><span class="ic">${ic('qr')}</span><div><div style="font-weight:700">${t('add_device')}</div><div class="muted small">${t('add_hint2')}</div></div></button>
+ <button class="add" type="button" data-go="code" id="pkhome"><span class="ic">${ic('key')}</span><div><div style="font-weight:700">${t('pk_title')}</div><div class="muted small">${t('pk_hint')}</div></div></button></section>
  ${S.family.length?'':`<section class="tip"><div class="row"><span class="ic brand" style="background:var(--surface)">${ic('users')}</span><h2 class="grow" style="font-size:1.1rem">${t('fam_t')}</h2></div><p>${t('fam_s')}</p><button class="btn primary" type="button" data-go="fam-new">${ic('plus')} ${t('fam_add')}</button></section>`}
  </main>${tabs('home')}`;
 }
@@ -638,7 +742,7 @@ function vDevice(id){
  const sec=x.type==='alarm'||x.type==='tracker';const steps=x.cause==='jam'?(sec?['d_jam_1','d_jam_2']:['d_lost_1','d_jam_2']):x.cause==='sim'?['d_sim_1','d_jam_2']:['d_power_1','d_power_2'];
  return `${topbar({back:'home'})}<main class="stack s24 fade">
  ${flash}<section class="card bigstatus"><div class="orb ${off?'bad':'ok'}">${ic(DEVICON[x.type],'lg')}</div><h1><button type="button" class="ttl" data-act="rename" data-arg="${x.id}" aria-label="${t('d_rename')}: ${esc(dname(x))}">${esc(dname(x))}${ic('pencil','sm')}</button></h1>${pill(x)}<p class="muted small">${seenTxt(x)} · ${t('beat')}</p></section>
- ${fzBox}${reqBox(x)}${trBox(x)}${offer}
+ ${fzBox}${reqBox(x)}${trBox(x)}${offer}${x.cancelled&&!subOf(x)&&x.paidUntil&&d(x.paidUntil)>now()?`<div class="note warn" id="cxnote">${t('cx_dev_note',{date:fdate(x.cancelled.end||x.paidUntil)})}</div>`:''}
  ${x.moved?`<section class="card stack" style="background:var(--bad-bg)"><h2 style="color:var(--bad)">${t('hero_move',{device:esc(dname(x))})}</h2><p>${t('note_move',{t:ftime(x.moved)})}</p><a class="btn primary" href="#map">${ic('pin')} ${t('move_map')}</a><button class="btn ghost" type="button" data-act="moveok" data-arg="${x.id}">${ic('check')} ${t('move_ok')}</button></section>`:''}
  ${off?`<section class="card stack" style="background:var(--bad-bg)"><h2 style="color:var(--bad)">${t('d_what')}</h2><ol class="stack s8" style="margin:0;padding-left:22px">${steps.map(k=>`<li>${t(k)}</li>`).join('')}</ol></section>`:''}
  <div class="stack s8">${main}</div>
@@ -654,7 +758,7 @@ function vDevice(id){
 function vPay(id){
  const x=dev(id);if(!x)return vHome();
  if(!S.pay||S.pay.id!==id)S.pay={id,plan:'y',step:'choose'};
- const p=S.pay,pr=PR[x.plan];
+ const p=S.pay,pr=prOf(x)[x.plan];const M=n=>mny(x,n);const perMo=v=>curOf(x)==='UAH'?Math.round(v):r2(v);
  if(p.step==='proc')return `<main class="stack s24" style="align-items:center;text-align:center;padding-top:120px"><div class="spinner" role="progressbar" aria-label="${t('p_proc')}"></div><h1 style="font-size:1.3rem">${t('p_proc')}</h1></main>`;
  if(p.step==='ok')return `${topbar()}<main class="stack s24 fade" style="align-items:center;text-align:center;padding-top:32px"><div class="success">${ic('check','lg')}</div><h1>${t('p_ok')}</h1>
   <p class="muted">${p.res==='code'?p.resTxt+'. '+t('p_okS',{device:esc(dname(x)),date:fdate(x.paidUntil)}):p.res==='m'?t('p_okM',{date:fdate(x.next)}):t('p_okS',{device:esc(dname(x)),date:fdate(x.paidUntil)})}</p>${x.auto&&p.res!=='code'&&p.res!=='m'?`<p class="status ok" style="margin:0 auto">${ic('refresh','sm')} ${t('ar_on')}</p><p class="muted small">${t('ar_next',{date:fdate(x.paidUntil)})}</p>`:''}
@@ -662,15 +766,15 @@ function vPay(id){
  const plans=PLANS.filter(q=>!(q.k==='m'&&x.mode==='sub'));if(!plans.find(q=>q.k===p.plan))p.plan='y';
  const plan=PLANS.find(q=>q.k===p.plan);const thru=paidThrough(x);const prepaid=!!thru&&d(thru)>now();const base=prepaid?thru:today();
  const deferred=p.plan==='m'&&prepaid;const price=deferred?0:pr[p.plan];const until=addMonths(base,plan.mo);
- const label=deferred?t('p_enable'):t('p_pay',{sum:money(price)});
+ const label=deferred?t('p_enable'):t('p_pay',{sum:M(price)});
  if(p.step==='card')return `${topbar({back:true,backAct:'cardback'})}<main class="stack s24 fade"><h1>${t('p_card')}</h1>
   <form class="stack" data-form="card" novalidate>
    <label class="f" for="cn">${t('p_cardno')}<input class="inp" id="cn" inputmode="numeric" autocomplete="cc-number" value="${esc(p.cn!=null?p.cn:'4242 4242 4242 4242')}" maxlength="19" ${p.err?'aria-invalid="true" aria-describedby="cnh"':''}></label>
    ${p.err?`<span id="cnh" class="err">${ic('alert','sm')}<span>${t('p_cardErr')}</span></span>`:''}
    <div class="row" style="align-items:flex-start;flex-wrap:wrap"><label class="f grow" for="ce" style="min-width:130px">${t('p_exp')}<input class="inp" id="ce" inputmode="numeric" value="12/29" maxlength="5"></label><label class="f grow" for="cv" style="min-width:130px">${t('p_cvv')}<input class="inp" id="cv" type="password" inputmode="numeric" value="123" maxlength="4"></label></div>
-   ${p.plan==='m'?`<p class="note" style="background:var(--brand-soft);color:var(--ink)">${t('ar_hintM',{sum:money(pr.m)})}</p>`:`<label class="agr" for="ar"><input type="checkbox" id="ar" ${p.ar?'checked':''}><span><b>${t('ar_label')}</b><br><span class="muted small">${t('ar_hint',{sum:money(pr[p.plan])})}</span></span></label>`}
+   ${p.plan==='m'?`<p class="note" style="background:var(--brand-soft);color:var(--ink)">${t('ar_hintM',{sum:M(pr.m)})}</p>`:`<label class="agr" for="ar"><input type="checkbox" id="ar" ${p.ar?'checked':''}><span><b>${t('ar_label')}</b><br><span class="muted small">${t('ar_hint',{sum:M(pr[p.plan])})}</span></span></label>`}
    <div class="democard">${ic('flask','sm')}<span>${t('p_demo')}</span></div>
-   <div class="sum"><span class="muted">${deferred?t('p_today'):t('p_total')}</span><b>${money(price)}</b></div>
+   <div class="sum"><span class="muted">${deferred?t('p_today'):t('p_total')}</span><b>${M(price)}</b></div>${vatLine(x,price)}
    <button class="btn primary" type="submit">${ic('lock','sm')} ${label}</button></form></main>`;
  const cv=p.code||'';const pc=cv?parseCode(cv):null;const cerr=p.cerr;
  const dec=pc&&!pc.err?`<p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pc.plan],term:termTxt(pc.months)})}</p>`:'';
@@ -682,29 +786,32 @@ function vPay(id){
  let body;
  {
   const rows=plans.map(q=>{const v=pr[q.k];const sv=pr.m*q.mo-v;const sel=p.plan===q.k;
-   return `<button type="button" class="plan" role="radio" aria-checked="${sel}" data-act="plan" data-arg="${q.k}"><span class="radio">${sel?ic('check','sm'):''}</span><span class="grow"><span style="display:block;font-weight:700">${t('p_'+q.k)}</span><span class="muted small" style="display:block">${q.k==='m'?t('p_mS'):t('p_permonth',{sum:money(Math.round(v/q.mo))})}</span></span><span class="pr"><span class="price" style="display:block">${money(v)}</span>${sv>0?`<span class="save" style="display:block">${t('p_save',{p:Math.round(sv/(pr.m*q.mo)*100)})}</span>`:''}</span></button>`;}).join('');
+   return `<button type="button" class="plan" role="radio" aria-checked="${sel}" data-act="plan" data-arg="${q.k}"><span class="radio">${sel?ic('check','sm'):''}</span><span class="grow"><span style="display:block;font-weight:700">${t('p_'+q.k)}</span><span class="muted small" style="display:block">${q.k==='m'?t('p_mS'):t('p_permonth',{sum:M(perMo(v/q.mo))})}</span></span><span class="pr"><span class="price" style="display:block" data-price="${q.k}">${M(v)}</span>${sv>0?`<span class="save" style="display:block">${t('p_save',{p:Math.round(sv/(pr.m*q.mo)*100)})}</span>`:''}</span></button>`;}).join('');
   const info=p.plan==='m'?(deferred?t('p_mStart',{date:fdate(thru)}):t('p_mNext',{date:fdate(addMonths(today(),1))})):(prepaid?t('p_add',{to:fdate(until)}):t('p_until',{date:fdate(until)}));
-  const amt=deferred?t('p_enable'):money(price);
+  const amt=deferred?t('p_enable'):M(price);
   body=`<div class="stack" role="radiogroup" aria-label="${t('p_title')}" style="gap:12px">${rows}</div>
-  <div class="card stack s8"><div class="sum"><span class="muted">${deferred?t('p_today'):t('p_total')}</span><b>${money(price)}</b></div><p class="muted small">${info}</p></div>
+  <div class="card stack s8"><div class="sum"><span class="muted">${deferred?t('p_today'):t('p_total')}</span><b id="ptotal">${M(price)}</b></div><p class="muted small">${info}</p>${vatLine(x,price)}</div>
   <div class="stack s8"><button class="paybtn" type="button" data-act="wallet">Apple Pay · ${amt}</button><button class="paybtn alt" type="button" data-act="wallet">Google Pay · ${amt}</button><button class="btn ghost" type="button" data-act="tocard">${ic('card')} ${t('p_card')}</button></div>
   <p class="muted small" style="display:flex;gap:8px">${ic('sim','sm')}<span>${t('p_sim')}</span></p>
   <p class="muted small" style="text-align:center">${t('pay_terms')} <button type="button" class="lnk" data-act="doc" data-arg="terms">${t('ag_terms')}</button>.</p>`;}
- body=(codePlanActive(x)?`<div class="note ok" id="planactive">${ic('check','sm')} ${payTxt(x)}</div>`:codeBlock)+body+vatLine(x);
+ // EUT 7 v12: no suspension / SIM deactivation for an unpaid subscription — shown while the device has no paid period
+ const s7=!prepaid&&!codePlanActive(x)?`<section class="card stack s8" id="eut7"><p class="small">${t('L_s7')}</p><p class="muted small">${t('L_s7_ref')}</p></section>`:'';
+ body=(codePlanActive(x)?`<div class="note ok" id="planactive">${ic('check','sm')} ${payTxt(x)}</div>`:codeBlock)+body+s7;
  return `${topbar({back:'device-'+id})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('p_title')}</h1><p class="muted">${t('p_for',{device:esc(dname(x))})}</p></div>${body}</main>`;
 }
 const defCard=()=>S.cards.find(c=>c.def)||S.cards[0];
 function addCard(num,exp){const l4=digits(num).slice(-4);let c=S.cards.find(x=>x.last4===l4);if(!c){c={id:'c'+Date.now().toString(36),last4:l4,exp:exp||'12/29',def:!S.cards.length};S.cards.push(c);}return c;}
 function addTx(o){S.tx.unshift(Object.assign({ts:isoT(now())},o));}
-function autoItems(){const a=[];S.devices.forEach(x=>{if(x.mode==='sub')a.push({x,kind:'m',date:x.next,sum:PR[x.plan].m});else if(x.mode==='pkg'&&x.auto)a.push({x,kind:'p',date:x.paidUntil,sum:PR[x.plan][x.auto.plan],term:t('p_'+x.auto.plan)});});return a;}
+function autoItems(){const a=[];S.devices.forEach(x=>{const pr=prOf(x)[x.plan];if(x.mode==='sub')a.push({x,kind:'m',date:x.next,sum:pr.m});else if(x.mode==='pkg'&&x.auto)a.push({x,kind:'p',date:x.paidUntil,sum:pr[x.auto.plan],term:t('p_'+x.auto.plan)});});return a;}
 function vPayments(){const it=autoItems();const dc=defCard();
  const txIcon=o=>o.ok?'check':'alert';
  return `${topbar({back:'profile'})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('pm_title')}</h1><p class="muted">${t('pm_sub')}</p></div>
- ${it.length?`<div class="list">${it.map(o=>`<div class="li" style="flex-wrap:wrap"><span class="ic brand">${ic(DEVICON[o.x.type])}</span><div class="grow"><div class="t">${esc(dname(o.x))}</div><div class="s">${o.kind==='m'?t('pm_kindM'):t('pm_kindP',{term:o.term})}${dc?' · '+t('pm_from',{c:dc.last4}):''}</div><div class="s">${t('pm_next',{date:fdate(o.date),sum:money(o.sum)})}</div></div><button class="btn danger auto small" type="button" data-act="aroffq" data-arg="${o.x.id}" style="min-height:44px">${t('pm_off')}</button></div>`).join('')}</div>`:`<p class="muted">${t('pm_none')}</p>`}
+ ${it.length?`<div class="list">${it.map(o=>`<div class="li" style="flex-wrap:wrap"><span class="ic brand">${ic(DEVICON[o.x.type])}</span><div class="grow"><div class="t">${esc(dname(o.x))}</div><div class="s">${o.kind==='m'?t('pm_kindM'):t('pm_kindP',{term:o.term})}${dc?' · '+t('pm_from',{c:dc.last4}):''}</div><div class="s">${t('pm_next',{date:fdate(o.date),sum:mny(o.x,o.sum)})}</div></div><button class="btn danger auto small" type="button" data-act="aroffq" data-arg="${o.x.id}" style="min-height:44px">${t('pm_off')}</button></div>`).join('')}</div>`:`<p class="muted">${t('pm_none')}</p>`}
+ <a class="btn plain" href="#cancel" data-act="cxopen" id="cxacc">${ic('x','sm')} ${t('cx_link')}</a>
  <section class="stack s8"><h2>${t('cards')}</h2><div class="list">${S.cards.map(c=>`<div class="li" style="flex-wrap:wrap"><span class="ic">${ic('card')}</span><div class="grow"><div class="t">•••• ${c.last4} ${c.def?`<span class="status ok" style="padding:2px 10px;font-size:.8rem;margin-left:6px">${t('card_def')}</span>`:''}</div><div class="s">${t('card_exp',{d:esc(c.exp)})}</div></div>
   <div class="row" style="gap:4px">${c.def?'':`<button class="btn plain auto small" type="button" data-act="carddef" data-arg="${c.id}">${t('card_mkdef')}</button>`}<button class="btn plain auto small" type="button" data-act="carddel" data-arg="${c.id}" style="color:var(--bad)">${t('card_del')}</button></div></div>`).join('')||`<div class="li muted">${t('card_none')}</div>`}
   <button class="li" type="button" data-act="cardadd"><span class="ic brand">${ic('plus')}</span><span class="grow t">${t('card_add')}</span></button></div></section>
- <section class="stack s8"><h2>${t('tx_title')}</h2>${S.tx.length?`<div class="list">${S.tx.map((o,i)=>{const d=dev(o.dev);return `<div class="li" style="flex-wrap:wrap"><span class="dt ${o.ok?'ok':'bad'}">${ic(txIcon(o),'sm')}</span><div class="grow"><div class="t">${o.sum?money(o.sum):esc(o.desc)}</div><div class="s">${d?esc(dname(d)):''}${o.sum?' · '+esc(o.desc):''}</div><div class="s">${fwhen(o.ts)} · ${o.via==='code'?t('tx_code'):o.via==='wallet'?t('tx_wallet'):'•••• '+o.card}</div>${o.sum&&d?vatLine(d).replace('<p class="muted small"','<div class="s"').replace('</p>','</div>'):''}${o.ok?'':`<div class="s" style="color:var(--bad);font-weight:600">${t('tx_fail')}: ${t('tx_reason')}</div>`}</div>${o.ok?`<span class="small" style="color:var(--ok);font-weight:600">${t('tx_ok')}</span>`:o.retried?`<span class="small muted" style="font-weight:600">${t('tx_retried_l')}</span>`:`<button class="btn primary auto small" type="button" data-act="txretry" data-arg="${i}" style="min-height:44px">${t('tx_retry')}</button>`}</div>`;}).join('')}</div>`:`<p class="muted">${t('tx_none')}</p>`}</section>
+ <section class="stack s8"><h2>${t('tx_title')}</h2>${S.tx.length?`<div class="list">${S.tx.map((o,i)=>{const d=dev(o.dev);const cur=o.cur||(d?curOf(d):'UAH');return `<div class="li" style="flex-wrap:wrap" data-tx="${i}"><span class="dt ${o.ok?'ok':'bad'}">${ic(txIcon(o),'sm')}</span><div class="grow"><div class="t">${o.sum?money(o.sum,cur):esc(o.desc)}</div><div class="s">${d?esc(dname(d)):''}${o.sum?' · '+esc(o.desc):''}</div><div class="s">${fwhen(o.ts)} · ${o.via==='code'?t('tx_code'):o.via==='wallet'?t('tx_wallet'):'•••• '+o.card}</div>${o.sum&&o.oss?ossHtml(o.oss,cur,'div'):o.sum&&d?vatLine(d).replace('<p class="muted small"','<div class="s"').replace('</p>','</div>'):''}${o.sum&&o.ok?`<button class="lnk small" type="button" data-act="receipt" data-arg="${i}">${t('rc_btn')}</button>`:''}${o.ok?'':`<div class="s" style="color:var(--bad);font-weight:600">${t('tx_fail')}: ${t('tx_reason')}</div>`}</div>${o.ok?`<span class="small" style="color:var(--ok);font-weight:600">${t('tx_ok')}</span>`:o.retried?`<span class="small muted" style="font-weight:600">${t('tx_retried_l')}</span>`:`<button class="btn primary auto small" type="button" data-act="txretry" data-arg="${i}" style="min-height:44px">${t('tx_retry')}</button>`}</div>`;}).join('')}</div>`:`<p class="muted">${t('tx_none')}</p>`}</section>
  </main>`;}
 function vAlerts(){
  const rows=[['lost','nosig','a_lost','a_lostS'],['off','power','a_off','a_offS'],['sim','sim','a_sim','a_simS'],['move','pin','a_move','a_moveS'],['pay','card','a_pay','a_payS']];
@@ -765,11 +872,12 @@ function vProfile(){
 function build(){
  BC=null;let h=(location.hash||'').slice(1);const rp=x=>{h=x;history.replaceState(null,'','#'+x);};
  if(h.startsWith('/l/'))rp('b/'+h.slice(3));
- const pub=h==='welcome'||h==='otp'||h.startsWith('/t/')||h.startsWith('b/')||h.startsWith('/a/');
+ const pub=h==='welcome'||h==='otp'||h==='cancel'||h.startsWith('/t/')||h.startsWith('b/')||h.startsWith('/a/');   // v12: #cancel works without login (§ 312k BGB)
+ if(h==='code'&&!acct()){SS.ret='code';ssave();}
  if(h.startsWith('/a/')){const c=normCode(decodeURIComponent(h.slice(3)));if(c&&('/a/'+c)!==h)rp('/a/'+c);if(!acct()){SS.ret='/a/'+c;ssave();}}
  if(!acct()){if(!pub)rp('welcome');}
  else{if(h==='welcome'||!h)rp(S.onboarded?'home':'start-1');
-  if(!S.onboarded&&!['start-1','add','otp','contacts'].includes(h)&&!h.startsWith('/')&&!h.startsWith('b/'))rp('start-1');
+  if(!S.onboarded&&!['start-1','add','otp','contacts','cancel'].includes(h)&&!h.startsWith('/')&&!h.startsWith('b/'))rp('start-1');
   if(S.onboarded&&h==='start-1')rp('home');
   if(h==='start-done'&&!S.justDone)rp('home');}
  if(dueList(B()).length&&!dueBusy)processDue().then(ch=>{if(ch)rerender();});
@@ -780,6 +888,8 @@ function build(){
  else if(h.startsWith('/t/')){v=vAccept(h.slice(3));A1();}
  else if(h.startsWith('b/')){v=vLink(h.slice(2));A1();}
  else if(h.startsWith('/a/')){v=vActivate(h.slice(3));A1();}
+ else if(h==='cancel'){v=vCancel();A1();}
+ else if(h==='code'){v=vCode();A1();}
  else if(h==='add'){v=vAdd();A1();}
  else if(h==='start-1'){v=vContacts('ob');A1();}else if(h==='start-done'){v=vDone();A1();}
  else if(h==='contacts'){v=vContacts('edit');A1();}
@@ -791,6 +901,7 @@ function build(){
  else if(h==='payments'){v=vPayments();A1();}
  else if(h.startsWith('device-'))v=vDevice(h.slice(7));else if(h.startsWith('pay-')){v=vPay(h.slice(4));A1();}
  else if(h==='alerts')v=vAlerts();else if(h==='map')v=vMap();else if(h==='help'){v=vProfile();setTimeout(()=>{const e=document.getElementById('help');if(e)e.scrollIntoView();},0);}else if(h==='profile')v=vProfile();else v=vHome();
+ const ix=v.lastIndexOf('</main>');if(ix>=0&&!v.includes('class="spinner"'))v=v.slice(0,ix)+footer()+v.slice(ix);   // v12: footer with the cancellation button on every page
  app.className='shell'+(tb?'':' notabs');app.innerHTML=v;document.documentElement.lang=S.lang;
  const h1=app.querySelector('h1');document.title=(h1?h1.textContent.trim()+' · ':'')+'CONNECT';save();
 }
@@ -803,7 +914,7 @@ function render(inPlace){
 }
 const rerender=()=>render(true);
 function go(h){closeOverlay(true);if(location.hash==='#'+h)render(false);else location.hash=h;}
-window.addEventListener('hashchange',()=>{actDone=null;closeOverlay(true);render(false);});
+window.addEventListener('hashchange',()=>{actDone=null;if(location.hash!=='#cancel'&&SS.cx){SS.cx=null;ssave();}if(location.hash!=='#code'&&SS.pk){SS.pk=null;ssave();}closeOverlay(true);render(false);});
 
 let tt;function toast(msg,ms){const el=document.getElementById('toast');el.innerHTML=ic('check','sm')+'<span>'+msg+'</span>';el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),ms||3200);}
 let pt;const pushEl=document.getElementById('push');
@@ -839,6 +950,8 @@ function lab(){const ds=S.devices;if(!labDev||!dev(labDev))labDev=ds[0]?ds[0].id
  <div class="list">${[['ff','60','refresh','x_ff1'],['ff','1440','refresh','x_ff24']].concat(labDev?[['labfreeze',labDev,'lock',frozen(dev(labDev))?'x_unfreeze':'x_freeze'],['labreq',labDev,'alert','x_req']]:[]).concat([['lablink','','users','x_link'],['labgolog','','key','x_log']]).map(([a,g,i,l])=>`<button class="evbtn" type="button" data-act="${a}" data-arg="${g}"><span class="ic">${ic(i)}</span><span class="grow">${t(l)}</span></button>`).join('')}</div>
  <form class="stack s8" data-form="delay" novalidate><label class="f" for="dl">${t('x_delay',{cc:'UA'})}<input class="inp" id="dl" inputmode="numeric" value="${delayHours(genIccid(1))}" style="height:52px"></label><span id="dlh"></span><button class="btn ghost" type="submit">${t('save')}</button></form>
  <span class="tag">${t('x_more')}</span>
+ <span class="tag">${t('x_de')}</span>
+ <div class="list"><button class="evbtn" type="button" data-act="labde" id="labde"><span class="ic">${ic('globe')}</span><span class="grow">${t(ccCfg('DE').docs_de_published?'x_de_close':'x_de_open')}</span></button></div>
  <div class="list"><button class="evbtn" type="button" data-act="labadd"><span class="ic">${ic('plus')}</span><span class="grow">${t('x_add')}</span></button><button class="evbtn" type="button" data-act="labreset"><span class="ic">${ic('refresh')}</span><span class="grow">${t('x_reset')}</span></button></div>
  <button class="btn plain" type="button" data-act="closeov">${t('close')}</button>`);}
 function simulate(kind){const x=dev(labDev);if(!x){closeOverlay(true);return;}
@@ -848,7 +961,7 @@ function simulate(kind){const x=dev(labDev);if(!x){closeOverlay(true);return;}
  S.tick+=1;const ts=isoT(now());const tm=ftime(ts);const v={d:dname(x),t:tm};
  closeOverlay(true);
  if(kind==='test'){push(t('pe_test'));save();return;}
- if(kind==='fail'){const c=defCard()||addCard('4242424242424242');const sum=x.mode==='sub'?PR[x.plan].m:PR[x.plan][(x.auto&&x.auto.plan)||'y'];addTx({dev:x.id,desc:x.mode==='sub'?t('pm_kindM'):t('pm_kindP',{term:t('p_'+((x.auto&&x.auto.plan)||'y'))}),sum,ok:false,via:'card',card:c.last4});x.ev.push(['ev_payfail',ts,'bad']);save();render(true);push(t('pe_fail',{d:dname(x),sum:money(sum),c:c.last4}));return;}
+ if(kind==='fail'){const c=defCard()||addCard('4242424242424242');const pr=prOf(x)[x.plan];const sum=x.mode==='sub'?pr.m:pr[(x.auto&&x.auto.plan)||'y'];addTx({dev:x.id,desc:x.mode==='sub'?t('pm_kindM'):t('pm_kindP',{term:t('p_'+((x.auto&&x.auto.plan)||'y'))}),sum,cur:curOf(x),ok:false,via:'card',card:c.last4});x.ev.push(['ev_payfail',ts,'bad']);save();render(true);push(t('pe_fail',{d:dname(x),sum:mny(x,sum),c:c.last4}));return;}
  if(kind==='lost'||kind==='off'||kind==='sim'){x.status='off';x.cause={lost:'jam',off:'power',sim:'sim'}[kind];x.offAt=ts;x.ev.push([{lost:'ev_lost',off:'ev_off',sim:'ev_sim'}[kind],ts,kind==='off'?'warn':'bad']);}
  if(kind==='back'){x.status='ok';delete x.cause;delete x.offAt;x.ev.push(['ev_restored',ts,'ok']);}
  if(kind==='pay'){x.ev.push(['ev_remind',ts,'warn']);}
@@ -905,7 +1018,7 @@ const A={
  carddef(id){S.cards.forEach(c=>c.def=c.id===id);save();rerender();},
  carddel(id){const c=S.cards.find(x=>x.id===id);if(c.def&&S.cards.length===1&&autoItems().length){toast(t('card_last'));return;}S.cards=S.cards.filter(x=>x.id!==id);if(!S.cards.some(x=>x.def)&&S.cards[0])S.cards[0].def=true;save();rerender();toast(t('card_deleted'));},
  cardadd(){sheet(t('card_add'),`<form class="stack" data-form="newcard" novalidate><label class="f" for="nc">${t('p_cardno')}<input class="inp" id="cn" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000"></label><span id="nch"></span><label class="f" for="ce">${t('p_exp')}<input class="inp" id="ce" inputmode="numeric" maxlength="5" placeholder="MM/YY"></label><div class="democard">${ic('flask','sm')}<span>${t('p_demo')}</span></div><button class="btn primary" type="submit">${t('save')}</button><button class="btn plain" type="button" data-act="closeov">${t('cancel')}</button></form>`);},
- txretry(i){const o=S.tx[+i];S.tick+=1;o.retried=true;addTx({dev:o.dev,desc:o.desc,sum:o.sum,ok:true,via:'card',card:(defCard()||{last4:o.card}).last4});save();rerender();toast(t('tx_retried'));},
+ txretry(i){const o=S.tx[+i];S.tick+=1;o.retried=true;addTx({dev:o.dev,desc:o.desc,sum:o.sum,cur:o.cur,oss:o.oss,seller:o.seller,ok:true,via:'card',card:(defCard()||{last4:o.card}).last4});save();rerender();toast(t('tx_retried'));},
  aroffq(id){const x=dev(id);const dt=x.mode==='sub'?x.next:x.paidUntil;sheet(t('pm_off'),`<p>${t('pm_offQ',{d:esc(dname(x)),date:fdate(dt)})}</p><button class="btn danger" type="button" data-act="aroff" data-arg="${id}">${t('pm_off')}</button><button class="btn primary" type="button" data-act="closeov">${t('cancel')}</button>`);},
  aroff(id){const x=dev(id);if(x.mode==='sub'){x.mode='pkg';x.paidUntil=x.next;delete x.next;}delete x.auto;closeOverlay(true);rerender();toast(t('pm_offDone'));},
  rem(n){n=+n;if(S.remind.includes(n)){if(S.remind.length===1){toast(t('r_none'));return;}S.remind=S.remind.filter(x=>x!==n);}else S.remind.push(n);save();rerender();},
@@ -915,7 +1028,7 @@ const A={
  geooff(){S.geo=false;rerender();toast(t('m_offDone'));},
  alert(k,el){if(!el.checked&&(k==='lost'||k==='sim'||k==='move')){el.checked=true;sheet(t('a_'+k),`<p>${t('a_offQ')}</p><button class="btn danger" type="button" data-act="alertoff" data-arg="${k}">${t('a_offY')}</button><button class="btn primary" type="button" data-act="closeov">${t('a_keep')}</button>`);return;}S.alerts[k]=el.checked;save();},
  alertoff(k){S.alerts[k]=false;closeOverlay(true);rerender();},
- autopay(id){const x=dev(id);sheet(t('ap_t'),`<p>${t('ap_next',{date:fdate(x.next),sum:money(PR[x.plan].m)})}</p><button class="btn ghost" type="button" data-go="pay-${id}">${ic('card')} ${t('prepay')}</button><button class="btn danger" type="button" data-act="apoffq" data-arg="${id}">${t('ap_off')}</button><button class="btn plain" type="button" data-act="closeov">${t('close')}</button>`);},
+ autopay(id){const x=dev(id);sheet(t('ap_t'),`<p>${t('ap_next',{date:fdate(x.next),sum:mny(x,prOf(x)[x.plan].m)})}</p><button class="btn ghost" type="button" data-go="pay-${id}">${ic('card')} ${t('prepay')}</button><button class="btn danger" type="button" data-act="apoffq" data-arg="${id}">${t('ap_off')}</button><button class="btn plain" type="button" data-act="closeov">${t('close')}</button>`);},
  apoffq(id){const x=dev(id);sheet(t('ap_off'),`<p>${t('ap_offQ',{date:fdate(x.next)})}</p><button class="btn danger" type="button" data-act="apoff" data-arg="${id}">${t('ap_offY')}</button><button class="btn primary" type="button" data-act="closeov">${t('ap_keep')}</button>`);},
  apoff(id){const x=dev(id);x.mode='pkg';x.paidUntil=x.next;delete x.next;closeOverlay(true);rerender();toast(t('ap_done'));},
  async democode(){const x=dev(S.pay.id);const b=B();let k=Object.keys(b.codes).find(k=>{const c=normCode(k);const r=b.codes[k];const pl=codeOk(r)&&codePlan(c,r);return pl&&pl.plan===x.plan;});
@@ -937,7 +1050,21 @@ const A={
  logoutY(){SS={cur:null};P.last=null;ssave();save();bindS();go('welcome');},
  logoutN(){rerender();},
  lab(){lab();},
- doc(k){sheet(k==='priv'?t('doc_priv'):t('doc_terms'),`<p class="muted">${t('doc_demo')}</p><button class="btn primary" type="button" data-act="closeov">${t('close')}</button>`);},
+ doc(k){const q=k==='priv'?[['L_pn5','L_pn5_ref']]:[['L_c51','L_c51_ref'],['L_s7','L_s7_ref']];   // v12 changes quoted from Documents 07 / 08
+  sheet(k==='priv'?t('doc_priv'):t('doc_terms'),`<p class="muted">${t('doc_demo')}</p>${q.map(([a,b])=>`<div class="stack s8" data-q="${a}"><p class="small">${t(a)}</p><p class="muted small">${t(b)}</p></div>`).join('')}<button class="btn primary" type="button" data-act="closeov">${t('close')}</button>`);},
+ pkgsignin(){SS.ret='code';ssave();render(true);const el=app.querySelector('#si');if(el)el.focus();},
+ async pkdemo(){const b=B();const ds=S.devices;const k=Object.keys(b.codes).find(k=>{const c=normCode(k);const r=b.codes[k];const pl=codeOk(r)&&codePlan(c,r);if(!pl)return false;const kc=r.cc||r.country||CTRY[c[0]];return ds.some(x=>x.plan===pl.plan&&(kc==='DE')===(devCc(x)==='DE'));})||Object.keys(b.codes).find(k=>codeOk(b.codes[k])&&codePlan(normCode(k),b.codes[k]));
+  SS.pk={v:k?fmtCode(normCode(k)):''};ssave();rerender();},
+ cxopen(){SS.cx=null;ssave();go('cancel');},
+ cxprint(){try{window.print();}catch(e){}},
+ cxsignin(){SS.cx=null;SS.ret='cancel';ssave();go('welcome');},
+ async labde(){await bridgeTx(b=>{const c=b.settings.countries.DE=Object.assign({},b.settings.countries.DE);c.docs_de_published=!ccCfg('DE').docs_de_published;c.set_by='OTA (demo, portal lab)';return{};});closeOverlay(true);toast(t(ccCfg('DE').docs_de_published?'x_de_on':'x_de_off'));rerender();},
+ receipt(i){const o=S.tx[+i];if(!o)return;const x=dev(o.dev)||P.devs[o.dev];const cur=o.cur||(x?curOf(x):'UAH');
+  sheet(t('rc_title'),`<div class="stack s8" id="receipt"><p class="muted small">${fwhen(o.ts)}</p><p><span class="muted">${t('rc_seller')}</span> <b>${esc(o.seller||OTA_NAME())}</b></p>
+   <p><span class="muted">${t('rc_item')}</span> ${t('rc_desc',{brand:esc(t('brand'))})}${o.desc?' · '+esc(o.desc):''}</p>${x?`<p class="muted small">${esc(dname(x))} · ICCID ${fmtIccid(x.iccid)}</p>`:''}
+   <div class="sum"><span class="muted">${t('p_total')}</span><b>${money(o.sum,cur)}</b></div>${o.oss?ossHtml(o.oss,cur):x?vatLine(x):''}
+   <p class="muted small">${o.via==='wallet'?t('tx_wallet'):'•••• '+esc(o.card||'')}</p><button type="button" class="lnk" data-act="doc" data-arg="terms">${t('doc_terms')}</button></div>
+   <button class="btn primary" type="button" data-act="closeov">${t('close')}</button>`);},
  labdev(id){labDev=id;lab();},
  sim(k){simulate(k);},
  labadd(){closeOverlay(true);go('add');},
@@ -950,8 +1077,9 @@ function pay(){const p=S.pay;const x=dev(p.id);const plan=PLANS.find(q=>q.k===p.
   if(p.plan==='m'){x.next=prepaid?thru:addMonths(today(),1);x.mode='sub';delete x.paidUntil;}
   else{x.paidUntil=addMonths(prepaid?thru:today(),plan.mo);x.mode='pkg';delete x.next;if(p.viaCard&&p.ar)x.auto={plan:p.plan};else if(p.viaCard)delete x.auto;}
   let card=null;if(p.viaCard){card=addCard(p.cnum||'4242424242424242',p.cexp);}
-  addTx({dev:x.id,desc:p.plan==='m'?t('pm_kindM'):t('pm_kindP',{term:t('p_'+p.plan)}),sum:p.plan==='m'&&prepaid?0:PR[x.plan][p.plan],ok:true,via:card?'card':'wallet',card:card?card.last4:null});
-  x.ev.push(['ev_paid',isoT(now()),'info']);p.res=p.plan;p.step='ok';render(false);},1300);}
+  const sum=p.plan==='m'&&prepaid?0:prOf(x)[x.plan][p.plan];const tax=sum?taxOf(devCc(x),sum):null;   // receipt keeps currency + German VAT (OSS) at the time of payment
+  addTx({dev:x.id,desc:p.plan==='m'?t('pm_kindM'):t('pm_kindP',{term:t('p_'+p.plan)}),sum,cur:curOf(x),oss:tax,seller:OTA_NAME(),ok:true,via:card?'card':'wallet',card:card?card.last4:null});
+  delete x.cancelled;x.ev.push(['ev_paid',isoT(now()),'info']);p.res=p.plan;p.step='ok';render(false);},1300);}
 
 document.addEventListener('click',e=>{
  const g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.dataset.go);return;}
@@ -975,6 +1103,7 @@ document.addEventListener('input',e=>{const id=e.target.id;
  if(id==='iccid'){const el=e.target;const v=digits(el.value).slice(0,20);el.value=fmtIccid(v);if(SS.add){SS.add.v=v;SS.add.res=null;}}
  if(id==='cn'){const v=digits(e.target.value).slice(0,16);e.target.value=v.replace(/(.{4})/g,'$1 ').trim();}
  if(id==='ce'){let v=digits(e.target.value).slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);e.target.value=v;}
+ if(id==='pk'){const v=normCode(e.target.value).slice(0,16);e.target.value=v?fmtCode(v):'';SS.pk={v:e.target.value};}
  if(id==='ac'){const v=normCode(e.target.value).slice(0,16);e.target.value=v?fmtCode(v):'';if(S.pay){S.pay.code=e.target.value;S.pay.cerr='';}
   const box=document.getElementById('acd');e.target.removeAttribute('aria-invalid');if(box){const pc=v.length===16?parseCode(v):null;box.innerHTML=pc&&!pc.err?`<p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pc.plan],term:termTxt(pc.months)})}</p>`:(pc&&pc.err?`<span class="err">${ic('alert','sm')}<span>${t(pc.err)}</span></span>`:'');}}
 });
@@ -991,6 +1120,8 @@ document.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const
   SS.si=null;ssave();startFlow('login',c,{},'welcome');}
  else if(k==='otp'){onOtp(f.querySelector('#otp').value.trim());}
  else if(k==='iccid'){onIccid(f);}
+ else if(k==='pkg'){onPkg(f);}
+ else if(k==='cancel'){onCancel(f);}
  else if(k==='act'){const r=f.querySelector('input[name="actdev"]:checked');if(!r){SS.act={err:t('act_pick')};ssave();render(true);return;}onRedeem(f.dataset.code,r.value);}
  else if(k==='trto'){const id=f.dataset.id;const raw=f.querySelector('#trto').value;const c=normContact(raw);let err=null;if(!c)err='si_err';else if(acctKeys(acct()).includes(cKey(c)))err='tr_self';
   SS.trf={id,raw,step:err?'to':'conseq',err,to:c?cKey(c):null};ssave();render(false);if(err){const el=app.querySelector('#trto');if(el)el.focus();}}
@@ -1007,7 +1138,7 @@ document.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const
  else if(k==='card'){const raw=f.querySelector('#cn').value;const arEl=f.querySelector('#ar');S.pay.ar=arEl?arEl.checked:false;S.pay.viaCard=true;S.pay.cnum=raw;S.pay.cexp=f.querySelector('#ce').value;if(digits(raw).length!==16){S.pay.err=true;S.pay.cn=raw;render(true);const c=app.querySelector('#cn');if(c)c.focus();return;}pay();}
  else if(k==='actcode'){const x=dev(S.pay.id);const raw=f.querySelector('#ac').value;S.pay.code=raw;
   redeemCode(raw,x.id).then(r=>{if(r.code==='OK'){S.pay.res='code';S.pay.resTxt=t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)});S.pay.step='ok';render(false);return;}
-   S.pay.cerr=r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='ACTIVE'?payTxt(x):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[x.plan]}):t('T7');rerender();const c=app.querySelector('#ac');if(c)c.focus();});}
+   S.pay.cerr=r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='CTRY'?t('c_ctry'):r.code==='ACTIVE'?payTxt(x):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[x.plan]}):t('T7');rerender();const c=app.querySelector('#ac');if(c)c.focus();});}
  else if(k==='rename'){const x=dev(f.dataset.id);const v=f.querySelector('#rn').value.trim();if(v&&v!==`${t('typ_'+x.type)} ${x.model}`)x.custom=v;else delete x.custom;closeOverlay();rerender();toast(t('d_renamed'));}
  else if(k==='newcard'){const v=f.querySelector('#cn').value;if(digits(v).length!==16){const h=document.getElementById('nch');h.className='err';h.innerHTML=ic('alert','sm')+'<span>'+t('p_cardErr')+'</span>';f.querySelector('#cn').focus();return;}addCard(v,f.querySelector('#ce').value||'12/29');closeOverlay(true);save();rerender();toast(t('card_added'));}
  else if(k==='name'){S.name=f.querySelector('#pn').value.trim();closeOverlay();rerender();toast(t('saved'));}
@@ -1020,6 +1151,22 @@ async function onOtp(code){const f=SS.flow;if(!f)return;if(!/^\d{6}$/.test(code)
  const r=await otpCheck(f.ck,f.p,code);
  if(r.ok){SS.flow=null;ssave();await finishFlow(f);return;}
  f.err=r.dead?t('otp_dead'):t('otp_wrong',{n:r.left});ssave();render(true);const el=app.querySelector('#otp');if(el)el.focus();}
+function onPkg(f){const raw=f.querySelector('#pk').value;const c=normCode(raw);const a=acct();const show=c?fmtCode(c):'';let err=null;
+ const bu=a&&blockedUntil(a.id);
+ if(bu)err=t('blocked_acct',{t:fdt(bu)});else if(c.length!==16)err=t('c_len');
+ else if(codeValid(c)){SS.pk=null;SS.act=null;actDone=null;ssave();go('/a/'+c);return;}
+ else if(!codeLookup(B(),c)&&parseCode(c).err)err=t('c_bad');   // checksum typo: not counted as a failed attempt
+ else{err=t('T7');if(a)fail(a.id);}   // used / blocked / expired / unknown → one message T7 (ТЗ 4.4)
+ SS.pk={v:show,err};ssave();render(true);const el=app.querySelector('#pk');if(el)el.focus();}
+async function onCancel(f){const mode=f.dataset.mode;const g=sel=>{const e=f.querySelector(sel);return e?e.value.trim():'';};
+ const type=(f.querySelector('input[name="cxtype"]:checked')||{}).value||'ordinary';const vals={type,reason:g('#cxreason'),mail:g('#cxmail')};const err={};let c=null;
+ if(mode==='public'){vals.name=g('#cxname');vals.contact=g('#cxcontact');vals.devref=g('#cxdev').replace(/[\s-]+/g,'');c=normContact(vals.contact);
+  if(!vals.name)err.name=1;if(!c)err.contact=1;if(!/^(\d{15}|\d{19,20})$/.test(vals.devref))err.dev=1;if(!vals.mail&&c&&c.k==='e')vals.mail=c.v;vals.ck=c?cKey(c):null;}
+ else{const r=f.querySelector('input[name="cxdev"]:checked');vals.dev=r?r.value:null;if(!vals.dev)err.pick=1;}
+ if(type==='extra'&&!vals.reason)err.reason=1;if(!validEmail(vals.mail))err.mail=1;
+ if(Object.keys(err).length){SS.cx={vals,err};ssave();render(true);const el=app.querySelector('[aria-invalid="true"]');if(el)el.focus();return;}
+ const btn=f.querySelector('#cxbtn');if(btn)btn.disabled=true;
+ const r=await doCancel(Object.assign({mode},vals));SS.cx={done:r};ssave();render(false);}
 let bindBusy=false;
 async function onIccid(f){if(bindBusy)return;const raw=f.querySelector('#iccid').value;const sv=raw.replace(/\s+/g,'');const t1=f.querySelector('#t1').checked;
  let err=null;if(!/^\d+$/.test(sv)||sv.length<19||sv.length>20)err='iccid_len';else if(!luhnOk(sv))err='iccid_bad';
@@ -1033,7 +1180,7 @@ async function onIccid(f){if(bindBusy)return;const raw=f.querySelector('#iccid')
  SS.add={v:sv,t1:true,res:r.code,until:r.until};ssave();render(true);}
 async function onRedeem(code,devId){const r=await redeemCode(code,devId);
  if(r.code==='OK'){SS.act=null;actDone={code:normCode(code),dev:devId,txt:t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)})};ssave();render(false);return;}
- SS.act={dev:devId,err:r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='ACTIVE'?payTxt(dev(devId)):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[dev(devId).plan]}):t('T7')};ssave();render(true);}
+ SS.act={dev:devId,err:r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='CTRY'?t('c_ctry'):r.code==='ACTIVE'?payTxt(dev(devId)):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[dev(devId).plan]}):t('T7')};ssave();render(true);}
 async function startScan(){const msg=m=>{const e=document.getElementById('scanmsg');if(e)e.textContent=m;};
  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg(t('scan_na'));const i=document.getElementById('iccid');if(i)i.focus();return;}
  let det;try{det=new window.BarcodeDetector({formats:['code_128','code_39','itf','ean_13','qr_code','data_matrix']});}catch(e){try{det=new window.BarcodeDetector();}catch(e2){msg(t('scan_na'));return;}}

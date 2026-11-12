@@ -5,8 +5,8 @@
   "en": "Pro Forma Invoice for Customs",
   "ru": "Проформа-инвойс для таможни"
  },
- "ver": "T-PF-v10",
- "effective": "2026-11-07",
+ "ver": "T-PF-v12",
+ "effective": "2026-11-12",
  "cls": "B",
  "blocks": [
   {

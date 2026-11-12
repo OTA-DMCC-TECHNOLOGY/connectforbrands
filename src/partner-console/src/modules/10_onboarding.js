@@ -2,9 +2,15 @@
 
 /* ---------- constants ---------- */
 const ONB_COUNTRIES=['GB','UA','KZ','PL','MD','GE','RO','DE','AE','SA','QA','KW','BH','OM','XX'];
-// v10 (ТЗ 1.1): registration is blocked when the country of incorporation or of tax registration is a GCC state
-const ONB_GCC=['AE','SA','QA','KW','BH','OM'];
-function onb_isGcc(c){return ONB_GCC.includes(c);}
+// pack v12 (MPA 2.6): partners from GCC states can register. Signup asks the tax status of the Partner Data Form —
+// country of incorporation, tax residence, VAT registrations, fixed establishment in the UAE — and shows the VAT line that applies.
+function onb_taxTs(){const u=S.ui;const inc=u.onb_country||'UA',tax=u.onb_taxCountry||inc;const vr=u.onb_vatRegs;const regs=Array.isArray(vr)?vr:[];
+ return{inc,tax,vatRegs:regs,vatRegsSet:vr==='NONE'||regs.length>0,uaeFe:u.onb_uaeFe==='yes'?true:u.onb_uaeFe==='no'?false:null,
+  get complete(){return !!(this.inc&&this.inc!=='XX'&&this.tax&&this.tax!=='XX'&&this.vatRegsSet&&this.uaeFe!=null);}};}
+function onb_vatBox(){return typeof lg_vatBox==='function'?lg_vatBox(onb_taxTs()):'';}
+// order-form currency per country (MPA 8.1): USD, EUR for Approved Countries in Europe
+function onb_ccy(cc){return typeof lg_ccy==='function'?lg_ccy(cc):'USD';}
+function onb_curs(){return [...new Set(orgCountries().map(onb_ccy))];}
 const ONB_ROLES=['admin','finance','warehouse','viewer'];
 const ONB_EVENTS=['sim.activated','sim.blocked','order.shipped','invoice.paid'];
 const ONB_EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -71,26 +77,34 @@ function onb_verifyHtml(){
 function onb_setupHtml(){
  if(!S.ui.onb_email)return onb_signupHtml();
  if(!S.ui.onb_verified)return onb_verifyHtml();
- const c=S.ui.onb_country||'UA';const tc=S.ui.onb_taxCountry||c;const gccErr=onb_isGcc(c)||onb_isGcc(tc);
+ const c=S.ui.onb_country||'UA';const tc=S.ui.onb_taxCountry||c;const vr=S.ui.onb_vatRegs;const regs=Array.isArray(vr)?vr:[];const fe=S.ui.onb_uaeFe||'';
+ const vatChips=ONB_COUNTRIES.filter(k=>k!=='XX').map(k=>`<label class="lg-vatchip ${regs.includes(k)?'on':''}" title="${esc(onb_cty(k))}"><input type="checkbox" class="lg-sr onb-sr" data-act="onb_vatReg" data-arg="${k}" ${regs.includes(k)?'checked':''} aria-label="${esc(onb_cty(k))}"><span>${k}</span></label>`).join('');
  return onb_authShell(`<div class="col g8"><span class="xs faint onb-stepn">${t('onb.st.step')}</span><h1 class="onb-h1" tabindex="-1">${t('onb.st.title')}</h1><p class="muted">${t('onb.st.sub')}</p></div>
   <form data-form="onb_setup" class="col g16" novalidate>
    ${ui.field({id:'name',label:t('onb.f.company'),placeholder:t('onb.f.companyPh'),value:S.ui.onb_name||'',attrs:'autocomplete="organization" required'})}
    <div class="onb-2">
-    ${ui.field({id:'country',label:t('onb.f.countryInc'),type:'select',value:c,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_country"'+(onb_isGcc(c)?' aria-invalid="true"':''),err:onb_isGcc(c)?t('onb.e.gcc'):''})}
-    ${ui.field({id:'taxCountry',label:t('onb.f.taxCountry'),type:'select',value:tc,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_taxCountry"'+(onb_isGcc(tc)?' aria-invalid="true"':''),err:onb_isGcc(tc)?t('onb.e.gcc'):'',hint:onb_isGcc(tc)?'':t('onb.f.taxCountryH')})}
+    ${ui.field({id:'country',label:t('onb.f.countryInc'),type:'select',value:c,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_country"'})}
+    ${ui.field({id:'taxCountry',label:t('onb.f.taxCountry'),type:'select',value:tc,options:ONB_COUNTRIES.map(k=>[k,onb_cty(k)]),attrs:'data-act="onb_taxCountry"',hint:t('onb.f.taxCountryH')})}
    </div>
-   ${gccErr?ui.note('bad',`<b>${t('onb.e.gcc')}</b>`):''}
+   <fieldset class="field onb-fs0" id="vatRegs-fs" aria-describedby="vatRegs-h"><legend class="lbl">${t('onb.f.vatRegs')}</legend>
+    <label class="chk small"><input type="checkbox" name="vatNone" id="vatRegs" data-act="onb_vatNone" ${vr==='NONE'?'checked':''}><span>${t('onb.f.vatNone')}</span></label>
+    <div class="lg-vatchips">${vatChips}</div><span class="hint" id="vatRegs-h">${t('onb.f.vatRegsH')}</span></fieldset>
+   <fieldset class="field onb-fs0" aria-describedby="uaeFe-h"><legend class="lbl">${t('onb.f.uaeFe')}</legend>
+    <div class="row wrap g16">${['yes','no'].map(x=>`<label class="chk small"><input type="radio" name="uaeFe" value="${x}" ${x==='yes'?'id="uaeFe"':''} data-act="onb_uaeFe" ${fe===x?'checked':''}><span>${t('onb.yn.'+x)}</span></label>`).join('')}</div><span class="hint" id="uaeFe-h">${t('onb.f.uaeFeH')}</span></fieldset>
+   <div id="onb-vat">${onb_vatBox()}</div>
    ${ui.field({id:'taxId',label:t('onb.f.regno'),placeholder:t('onb.f.regnoPh'),value:S.ui.onb_taxId||'',hint:t('onb.f.optHint')})}
-   <fieldset class="field" style="border:0;padding:0;margin:0"><legend class="lbl">${t('onb.f.ccs')}</legend><div class="row wrap g12">${Object.keys(CC_META).map(cc=>`<label class="chk small"><input type="checkbox" name="cc_${cc}" ${cc==='UA'?'checked':''}><span>${esc(ctyName(cc))}</span></label>`).join('')}</div><span class="hint" id="cc_UA-h">${t('onb.f.ccsH')}</span></fieldset>
-   <div class="onb-2">${ui.field({id:'lang2',label:t('onb.f.lang2'),type:'select',value:'ru',options:LANG2_AVAILABLE.map(l=>[l,LANG_NAMES[l]||l]),hint:t('onb.f.lang2H')})}
+   <fieldset class="field" style="border:0;padding:0;margin:0"><legend class="lbl">${t('onb.f.ccs')}</legend><div class="row wrap g12">${Object.keys(CC_META).map(cc=>`<label class="chk small"><input type="checkbox" name="cc_${cc}" ${(S.ui.onb_ccs?S.ui.onb_ccs.includes(cc):cc==='UA')?'checked':''}><span>${esc(ctyName(cc))}</span></label>`).join('')}</div><span class="hint" id="cc_UA-h">${t('onb.f.ccsH')}</span></fieldset>
+   <div class="onb-2">${ui.field({id:'lang2',label:t('onb.f.lang2'),type:'select',value:S.ui.onb_lang2||'ru',options:LANG2_AVAILABLE.map(l=>[l,LANG_NAMES[l]||l]),hint:t('onb.f.lang2H')})}
    <div class="field"><span class="lbl">${t('onb.f.code')}</span><b class="mono onb-prefix" id="onb_codeP" style="font-size:20px">${esc(proposeCode(S.ui.onb_name||''))}</b><span class="hint">${t('onb.f.codeH')}</span></div></div>
    ${ui.note('info',t('onb.f.billingNote'))}
-   <div class="field"><label class="chk small"><input type="checkbox" name="agree" id="agree" aria-describedby="agree-h"><span>${t('onb.f.agree',{terms:`<a href="#" data-act="onb_terms">${t('onb.termsLink')}</a>`})}</span></label><span class="hint" id="agree-h"></span></div>
+   <div class="field"><label class="chk small"><input type="checkbox" name="agree" id="agree" aria-describedby="agree-h" ${S.ui.onb_agree?'checked':''}><span>${t('onb.f.agree',{terms:`<a href="#" data-act="onb_terms">${t('onb.termsLink')}</a>`})}</span></label><span class="hint" id="agree-h"></span></div>
    ${ui.btn(t('onb.st.submit'),{kind:'primary',size:'lg',type:'submit',block:true})}
   </form>`,false);}
 
-// re-render the setup step (GCC message) without losing what was typed
-function onb_keepSetup(){const f=$('form[data-form=onb_setup]');if(f){const d=formData(f);S.ui.onb_name=d.name||S.ui.onb_name||'';S.ui.onb_taxId=d.taxId||'';}rerender();}
+// re-render the setup step (VAT treatment box) without losing what was typed; focus returns to the control that changed
+function onb_keepSetup(focusSel){const f=$('form[data-form=onb_setup]');if(f){const d=formData(f);S.ui.onb_name=d.name||S.ui.onb_name||'';S.ui.onb_taxId=d.taxId||'';
+  S.ui.onb_ccs=Object.keys(d).filter(k=>k.startsWith('cc_')&&d[k]).map(k=>k.slice(3));S.ui.onb_agree=!!d.agree;S.ui.onb_lang2=d.lang2||S.ui.onb_lang2;}
+ rerender();if(focusSel){const el=document.querySelector(focusSel);if(el)el.focus({preventScroll:true});}}
 route('signup',{auth:false,render:onb_signupHtml});
 route('verify',{auth:false,render:onb_verifyHtml});
 route('setup',{auth:false,render:onb_setupHtml});
@@ -127,16 +141,22 @@ FORM.onb_setup=f=>{clearErrs(f);const d=formData(f);let bad=false;
  const name=d.name.trim(),tax=d.taxId.trim();
  if(name.length<2){setErr(f,'name',t('onb.e.company'));bad=true;}
  if(tax&&!/^[A-Za-z0-9 -]{6,16}$/.test(tax)){setErr(f,'taxId',t('onb.e.tax'));bad=true;}
- if(onb_isGcc(d.country)){setErr(f,'country',t('onb.e.gcc'));bad=true;}
- if(onb_isGcc(d.taxCountry)){setErr(f,'taxCountry',t('onb.e.gcc'));bad=true;}
+ // v12 tax status (Data Form A / MPA 2.6) — required, no country is refused
+ const vr=S.ui.onb_vatRegs;if(!(vr==='NONE'||(Array.isArray(vr)&&vr.length))){setErr(f,'vatNone',t('onb.e.vatRegs'));bad=true;}
+ const fe=S.ui.onb_uaeFe;if(fe!=='yes'&&fe!=='no'){setErr(f,'uaeFe',t('onb.e.uaeFe'));bad=true;}
  if(!d.agree){setErr(f,'agree',t('onb.e.agree'));bad=true;}
  if(bad){const x=f.querySelector('[aria-invalid="true"]');if(x)x.focus();return;}
  const ccs=Object.keys(CC_META).filter(cc=>d['cc_'+cc]);if(!ccs.length){setErr(f,'cc_UA',t('onb.e.ccs'));return;}
  const email=S.ui.onb_email,lang=S.lang;const code=proposeCode(name);
  S=freshState();S.lang=lang;
  S.user={email,name:''};
- S.org={name,code,codeStatus:'proposed',lang2:d.lang2||'ru',country:d.country,taxCountry:d.taxCountry||d.country,countries:ccs,regNo:tax,taxId:'',address:'',currency:'USD',prefix:makePrefix(ccs[0]),createdAt:iso(now()),commit:3000,serials:{},delivery:{}};
+ S.org={name,code,codeStatus:'proposed',lang2:d.lang2||'ru',country:d.country,taxCountry:d.taxCountry||d.country,countries:ccs,regNo:tax,taxId:'',address:'',currency:'USD',prefix:makePrefix(ccs[0]),createdAt:iso(now()),commit:3000,serials:{},delivery:{},
+  vatRegs:vr==='NONE'?[]:vr.slice(),uaeFe:fe==='yes'};
  codeRegister(code);
+ // the questionnaire starts from the signup tax status (P_INC_COUNTRY, P_TAX_COUNTRY, P_VAT_REGS, P_UAE_FE)
+ S.form=S.form||{};const pf=(k,v)=>{S.form[k]={value:v,status:'filled',comment:'',by:email,at:iso(now())};};
+ if(d.country&&d.country!=='XX'){pf('P_INC_COUNTRY',d.country);pf('P_COUNTRY',d.country);}if(S.org.taxCountry&&S.org.taxCountry!=='XX')pf('P_TAX_COUNTRY',S.org.taxCountry);
+ pf('P_VAT_REGS',vr==='NONE'?'NONE':vr.join(','));pf('P_UAE_FE',fe);
  // demo: OTA's standard price list for the chosen countries (OTA reviews and adjusts it in OTA mode)
  ccs.forEach(cc=>{S.priceLists[cc]=[Object.assign({ver:1,from:iso(now()),to:null,createdAt:iso(now()),by:'OTA',note:'',increase:false},plSeed(cc))];});
  S.actor='u_p_admin';audit('partner.signup',code,{name,country:d.country,countries:ccs});
@@ -146,8 +166,11 @@ Object.assign(ACT,{
  demo(){seedDemo();go('home');},
  onb_resume(){S.authed=true;go('home');},
  onb_resend(){toast(t('onb.t.resent',{email:esc(S.ui.onb_email||'')}));const f=$('.onb-code input');if(f){$$('.onb-code input').forEach(x=>x.value='');f.focus();}},
- onb_country(v){const tc=S.ui.onb_taxCountry;if(!tc||tc===S.ui.onb_country)S.ui.onb_taxCountry=v;S.ui.onb_country=v;onb_keepSetup();},
- onb_taxCountry(v){S.ui.onb_taxCountry=v;onb_keepSetup();},
+ onb_country(v){const tc=S.ui.onb_taxCountry;if(!tc||tc===S.ui.onb_country)S.ui.onb_taxCountry=v;S.ui.onb_country=v;onb_keepSetup('#country');},
+ onb_taxCountry(v){S.ui.onb_taxCountry=v;onb_keepSetup('#taxCountry');},
+ onb_vatNone(on){S.ui.onb_vatRegs=on?'NONE':null;onb_keepSetup('#vatRegs');},
+ onb_vatReg(on,el){const k=el.dataset.arg;let a=Array.isArray(S.ui.onb_vatRegs)?S.ui.onb_vatRegs.slice():[];a=a.filter(x=>x!==k);if(on)a.push(k);S.ui.onb_vatRegs=a.length?a:null;onb_keepSetup(`[data-act=onb_vatReg][data-arg="${k}"]`);},
+ onb_uaeFe(v){S.ui.onb_uaeFe=v;onb_keepSetup(`input[name=uaeFe][value="${v}"]`);},
  onb_curTouch(v,el){const f=el.closest('form');if(f)f.dataset.curTouched='1';},
  onb_terms(){modal(t('onb.terms'),`<div class="onb-terms small">${t('onb.termsBody')}</div>`,ui.btn(t('c.close'),{kind:'primary',act:'ovclose'}),{wide:true});},
 });
@@ -225,15 +248,18 @@ function onb_tabCompany(){const o=S.org;
   <div class="row">${ui.btn(t('c.save'),{kind:'primary',type:'submit'})}</div></form>`});}
 
 function onb_entityDl(){const v=k=>otaVal(k);
- return `<dl class="dl small"><dt>${t('onb.b.seller')}</dt><dd><b>${esc(v('OTA_NAME')||'')}</b></dd>${v('OTA_REGNO')?`<dt>${t('onb.b.reg')}</dt><dd>${esc(v('OTA_REGNO'))}${v('OTA_LICENCE')?' · '+esc(v('OTA_LICENCE')):''}</dd>`:''}${v('OTA_TRN')?`<dt>TRN</dt><dd class="mono">${esc(v('OTA_TRN'))}</dd>`:''}<dt>${t('onb.b.addr')}</dt><dd>${esc(v('OTA_ADDR_EN')||'')}</dd>${v('OTA_BANK_IBAN')?`<dt>IBAN</dt><dd class="mono">${esc(v('OTA_BANK_IBAN'))}</dd>`:''}${v('OTA_BANK_NAME')?`<dt>${t('onb.b.bankName')}</dt><dd>${esc(v('OTA_BANK_NAME'))}${v('OTA_BANK_SWIFT')?' · <span class="mono">'+esc(v('OTA_BANK_SWIFT'))+'</span>':''}</dd>`:''}<dt>${t('onb.b.vat')}</dt><dd>${t('onb.b.vat0')}</dd></dl>`;}
+ return `<dl class="dl small"><dt>${t('onb.b.seller')}</dt><dd><b>${esc(v('OTA_NAME')||'')}</b></dd>${v('OTA_REGNO')?`<dt>${t('onb.b.reg')}</dt><dd>${esc(v('OTA_REGNO'))}${v('OTA_LICENCE')?' · '+esc(v('OTA_LICENCE')):''}</dd>`:''}${v('OTA_TRN')?`<dt>TRN</dt><dd class="mono">${esc(v('OTA_TRN'))}</dd>`:''}<dt>${t('onb.b.addr')}</dt><dd>${esc(v('OTA_ADDR_EN')||'')}</dd>${v('OTA_BANK_IBAN')?`<dt>IBAN</dt><dd class="mono">${esc(v('OTA_BANK_IBAN'))}</dd>`:''}${v('OTA_BANK_NAME')?`<dt>${t('onb.b.bankName')}</dt><dd>${esc(v('OTA_BANK_NAME'))}${v('OTA_BANK_SWIFT')?' · <span class="mono">'+esc(v('OTA_BANK_SWIFT'))+'</span>':''}</dd>`:''}<dt>${t('onb.b.vat')}</dt><dd>${onb_vatLine()}</dd></dl>`;}
+// v12: the VAT line that applies to this partner (Document 13 wording; rate from vatRateFor / MPA 2.6 rule)
+function onb_vatLine(){if(typeof lg_vatRate!=='function'||typeof LG_VAT_TXT==='undefined')return t('onb.b.vat0');const ts=lg_taxStatus();if(!ts.complete)return esc(t('lg.vat.incomplete'));
+ const five=lg_vatRate()>=0.05;const L=S.lang==='en'?'en':'ru';return `${ui.badge(five?'5%':'0%',five?'warn':'ok')} ${esc(five?LG_VAT_TXT.uae[L]:LG_VAT_TXT.zero[L])}`;}
 function onb_tabBilling(){const o=S.org;
  const ordered=onb_ordersLastYear();const frac=o.commit?ordered/o.commit:0;const cs=codeAvailable(o.code,o.code);
  const admin=S.admin?ui.card({title:`${t('onb.ad.title')} ${ui.badge('OTA','violet')}`,body:`<div class="col g12">${ui.note('admin',t('onb.ad.note'))}
    <form data-form="onb_code" class="row wrap g8" novalidate style="align-items:flex-end">${ui.field({id:'code',label:t('onb.ad.code'),value:o.code||'',mono:true,attrs:'maxlength="3" autocomplete="off" style="width:110px;text-transform:uppercase" '+(can('ota.codes')?'':'disabled'),hint:o.codeStatus==='approved'?t('onb.ad.codeOk'):t('onb.ad.codeProp')})}${ui.btn(o.codeStatus==='approved'?t('c.save'):t('onb.ad.approve'),{kind:'primary',type:'submit',size:'sm',disabled:!can('ota.codes')})}</form>
    <dl class="dl small"><dt>${t('onb.ad.pid')}</dt><dd class="mono">${esc(o.prefix.slice(1))}</dd><dt>${t('onb.pf.prefix')}</dt><dd class="mono">${esc(o.prefix)}</dd><dt>${t('onb.ad.created')}</dt><dd>${fmtDate(o.createdAt)}</dd></dl>
    <div>${ui.btn(t('onb.ad.reset'),{kind:'danger',act:'onb_resetAsk',icon:'trash'})}</div></div>`}):'';
- return `<div class="stack">${ui.card({title:t('onb.b.cur'),body:`<div class="col g12"><p class="small muted">${t('onb.b.curD2')}</p><dl class="dl small"><dt>${t('onb.b.code')}</dt><dd><b class="mono">${esc(o.code||'—')}</b> ${o.codeStatus==='approved'?ui.badge(t('onb.b.codeOk'),'ok'):ui.badge(t('onb.b.codeProp'),'warn')}</dd><dt>${t('onb.b.ccs')}</dt><dd>${orgCountries().map(c=>esc(ctyName(c))).join(', ')}</dd><dt>${t('onb.b.lang2')}</dt><dd>${esc(LANG_NAMES[o.lang2]||o.lang2||'—')}</dd></dl></div>`})}
-  ${ui.card({title:t('onb.b.entity'),actions:ui.badge('USD','accent'),body:onb_entityDl()})}
+ return `<div class="stack">${ui.card({title:t('onb.b.cur'),body:`<div class="col g12"><p class="small muted">${t('onb.b.curD2')}</p><dl class="dl small"><dt>${t('onb.b.code')}</dt><dd><b class="mono">${esc(o.code||'—')}</b> ${o.codeStatus==='approved'?ui.badge(t('onb.b.codeOk'),'ok'):ui.badge(t('onb.b.codeProp'),'warn')}</dd><dt>${t('onb.b.ccs')}</dt><dd>${orgCountries().map(c=>esc(ctyName(c))+' <span class="xs muted mono">'+esc(onb_ccy(c))+'</span>').join(', ')}</dd><dt>${t('onb.b.lang2')}</dt><dd>${esc(LANG_NAMES[o.lang2]||o.lang2||'—')}</dd></dl></div>`})}
+  ${ui.card({title:t('onb.b.entity'),actions:ui.badge(onb_curs().join(' / '),'accent'),body:onb_entityDl()})}
   ${ui.card({title:t('onb.b.commit'),body:`<div class="col g12"><div class="row between wrap g8"><div><span class="onb-big num">${fmtNum(ordered)}</span> <span class="muted">/ ${fmtNum(o.commit)} ${t('onb.b.sims')}</span></div><span class="small muted num">${pct(Math.min(frac,9.99))}</span></div>${ui.bar(frac,frac>=1?'ok':'')}<p class="small muted">${t('onb.b.commitD',{n:fmtNum(o.commit)})}</p></div>`})}
   ${admin}</div>`;}
 FORM.onb_code=f=>{if(!can('ota.codes'))return;clearErrs(f);const v=String(formData(f).code||'').trim().toUpperCase();const o=S.org;const e=codeAvailable(v,o.code);
@@ -294,7 +320,7 @@ Object.assign(ACT,{
  onb_resetAsk(){modal(t('onb.ad.resetT'),ui.note('bad',t('onb.ad.resetD')),ui.btn(t('c.cancel'),{act:'ovclose'})+ui.btn(t('onb.ad.reset'),{kind:'danger',act:'onb_reset'}));},
  onb_reset(){const lang=S.lang;S=freshState();S.lang=lang;closeOverlay();save();go('signup');toast(t('onb.t.reset'));},
  orgmenu(){if(!S.org)return;onb_closeSide();const o=S.org;
-  modal(t('onb.om.title'),`<div class="row g12">${orgMark(44)}<div class="grow"><b>${esc(o.name)}</b><div class="small muted">${onb_cty(o.country)} · ${esc(o.code||'')} · USD</div></div></div>
+  modal(t('onb.om.title'),`<div class="row g12">${orgMark(44)}<div class="grow"><b>${esc(o.name)}</b><div class="small muted">${onb_cty(o.country)} · ${esc(o.code||'')} · ${esc(onb_curs().join(' / '))}</div></div></div>
    <dl class="dl small"><dt>${t('onb.pf.prefix')}</dt><dd><span class="mono"><b>${esc(o.prefix)}</b></span> <button type="button" class="onb-link" data-act="copy" data-arg="${esc(o.prefix)}">${t('onb.pf.copy')}</button></dd><dt>${t('onb.om.since')}</dt><dd>${fmtDate(o.createdAt)}</dd></dl>
    <div class="col g4 onb-menu"><a href="#settings">${icon('gear','sm')}${t('onb.om.settings')}</a><a href="#settings--billing">${icon('card','sm')}${t('onb.s.billing')}</a><a href="#settings--team">${icon('users','sm')}${t('onb.s.team')}</a></div>`,
    ui.btn(t('onb.om.signout'),{kind:'ghost',icon:'logout',act:'onb_signout'}));},
@@ -448,9 +474,11 @@ ru:{'onb.logo.t':'Логотип компании','onb.logo.d':'Показыв�
 ['f.ccs','Країни, де ви продаватимете','Countries where you’ll sell','Страны, где вы будете продавать'],['f.ccsH','Для кожної країни буде окремий Заказ і прайс-лист.','Each country gets its own Order Form and price list.','Для каждой страны будет отдельный Заказ и прайс-лист.'],['e.ccs','Виберіть хоча б одну країну','Choose at least one country','Выберите хотя бы одну страну'],
 ['f.lang2','Друга мова документів','Second document language','Второй язык документов'],['f.lang2H','Перша мова — завжди англійська.','The first language is always English.','Первый язык — всегда английский.'],
 ['f.code','Код партнера (пропозиція)','Partner code (proposed)','Код партнёра (предложение)'],['f.codeH','3 латинські літери в номерах документів. Остаточно затверджує OTA.','3 Latin letters used in document numbers. OTA gives final approval.','3 латинские буквы в номерах документов. Окончательно утверждает OTA.'],
-['f.billingNote','Рахунки виставляє OTA TECHNOLOGY DMCC (Дубай) у доларах США, ПДВ 0% (експорт послуг). OTA не укладає договорів із компаніями, заснованими в державах ССАГПЗ.','Invoices are issued by OTA TECHNOLOGY DMCC (Dubai) in US dollars, VAT 0% (export of services). OTA does not contract with companies established in GCC states.','Счета выставляет OTA TECHNOLOGY DMCC (Дубай) в долларах США, НДС 0% (экспорт услуг). OTA не заключает договоры с компаниями, учреждёнными в странах ССАГПЗ.'],
-['f.countryInc','Країна реєстрації компанії','Country of incorporation','Страна регистрации компании'],['f.taxCountry','Країна податкової реєстрації','Country of tax registration','Страна налоговой регистрации'],['f.taxCountryH','Де компанія зареєстрована як платник ПДВ або є податковим резидентом.','Where the company is VAT-registered or tax resident.','Где компания зарегистрирована по НДС или является налоговым резидентом.'],
-['e.gcc','OTA не укладає договорів із партнерами, заснованими в державах ССАГПЗ','OTA does not contract with partners established in GCC states','OTA не заключает договоры с партнёрами, учреждёнными в странах ССАГПЗ'],
+['f.billingNote','Рахунки виставляє OTA TECHNOLOGY DMCC (Дубай) у доларах США, а за схваленими країнами в Європі — у євро. Ставка ПДВ залежить від податкового статусу нижче.','Invoices are issued by OTA TECHNOLOGY DMCC (Dubai) in US dollars, and in euro for Approved Countries in Europe. The VAT rate depends on the tax status below.','Счета выставляет OTA TECHNOLOGY DMCC (Дубай) в долларах США, а по Одобренным странам в Европе — в евро. Ставка НДС зависит от налогового статуса ниже.'],
+['f.countryInc','Країна реєстрації компанії','Country of incorporation','Страна регистрации компании'],['f.taxCountry','Країна податкового резидентства','Tax residence','Страна налогового резидентства'],['f.taxCountryH','Країна, де компанія є податковим резидентом.','The country where the company is tax resident.','Страна, где компания является налоговым резидентом.'],
+['f.vatRegs','Реєстрації платником ПДВ','VAT registrations','Регистрации плательщиком НДС'],['f.vatNone','Немає реєстрацій платником ПДВ','No VAT registration','Нет регистраций плательщиком НДС'],['f.vatRegsH','Позначте всі країни, де компанія зареєстрована платником ПДВ.','Tick every country where the company is VAT-registered.','Отметьте все страны, где компания зарегистрирована плательщиком НДС.'],
+['f.uaeFe','Постійне представництво в ОАЕ','Fixed establishment in the UAE','Постоянное представительство в ОАЭ'],['f.uaeFeH','Офіс, філія або інше постійне місце діяльності в ОАЕ.','An office, branch or other fixed place of business in the UAE.','Офис, филиал или иное постоянное место деятельности в ОАЭ.'],
+['yn.yes','Так','Yes','Да'],['yn.no','Ні','No','Нет'],['e.vatRegs','Позначте країни реєстрації платником ПДВ або «Немає реєстрацій»','Tick the VAT registration countries or “No VAT registration”','Отметьте страны регистрации по НДС или «Нет регистраций»'],['e.uaeFe','Вкажіть, чи є постійне представництво в ОАЕ','Say whether there is a fixed establishment in the UAE','Укажите, есть ли постоянное представительство в ОАЭ'],
 ['f.country','Країна реєстрації компанії','Country of incorporation','Страна регистрации компании'],['f.regno','Реєстраційний номер компанії','Company registration no.','Регистрационный номер компании'],['f.regnoPh','напр. 00012345','e.g. 00012345','напр. 00012345'],
 ['h.order','Нове замовлення','New order','Новый заказ'],
 ['ck.legalForm','Заповніть анкету партнера','Fill in the partner questionnaire','Заполните анкету партнёра'],['ck.legalForm.d','Реквізити, підписант, бренд, країни й друга мова документів — з них портал збере пакет документів.','Company details, signatory, brand, countries and second language — the portal builds the document package from them.','Реквизиты, подписант, бренд, страны и второй язык документов — из них портал соберёт пакет документов.'],['ck.legalForm.b','До анкети','To questionnaire','К анкете'],
@@ -464,7 +492,7 @@ ru:{'onb.logo.t':'Логотип компании','onb.logo.d':'Показыв�
 ['cr.empty','Токенів і ключів ще немає','No tokens or keys yet','Токенов и ключей пока нет'],['cr.emptyD','Замовте ключі активації й сервісні токени — вони з’являться тут після оплати.','Order Activation Keys and Service Tokens — they show up here after payment.','Закажите ключи активации и сервисные токены — они появятся здесь после оплаты.'],
 ['or.title','У роботі','In progress','В работе'],['or.order','Документ','Document','Документ'],['or.sims','{n} SIM','{n} SIMs','{n} SIM'],['or.none','Нічого не очікує на вас.','Nothing is waiting for you.','Ничего не ждёт вас.'],
 ['nx.pay','Оплатіть рахунок','Pay the invoice','Оплатите счёт'],['nx.draft','Виставте рахунок','Issue the invoice','Выставьте счёт'],['nx.receive','Підтвердьте отримання','Confirm receipt','Подтвердите получение'],['nx.wait','Очікуйте доставку','Awaiting delivery','Ожидайте доставку'],
-['b.cur','Партнерство','Partnership','Партнёрство'],['b.curD2','Усі рахунки OTA — у доларах США. Документи складаються англійською та другою мовою.','All OTA invoices are in US dollars. Documents are in English and a second language.','Все счета OTA — в долларах США. Документы составляются на английском и втором языке.'],
+['b.cur','Партнерство','Partnership','Партнёрство'],['b.curD2','Рахунки OTA — у доларах США, за схваленими країнами в Європі — у євро (валюта Замовлення). Документи складаються англійською та другою мовою.','OTA invoices are in US dollars, and in euro for Approved Countries in Europe (the Order Form currency). Documents are in English and a second language.','Счета OTA — в долларах США, по Одобренным странам в Европе — в евро (валюта Заказа). Документы составляются на английском и втором языке.'],
 ['b.code','Код партнера','Partner code','Код партнёра'],['b.codeOk','затверджено OTA','approved by OTA','утверждён OTA'],['b.codeProp','на погодженні','pending approval','на согласовании'],['b.ccs','Країни','Countries','Страны'],['b.lang2','Друга мова документів','Second document language','Второй язык документов'],
 ['b.entity','Хто виставляє рахунки','Who invoices you','Кто выставляет счета'],['b.vat0','0% — експорт послуг (у кожному рахунку OTA)','0% — zero-rated export of services (on every OTA invoice)','0% — экспорт услуг (в каждом счёте OTA)'],
 ['b.commit','Річна ціль','Annual target','Годовая цель'],['b.sims','активованих пристроїв за 365 днів','devices activated in 365 days','активированных устройств за 365 дней'],['b.commitD','Ціль — {n} активованих пристроїв на рік. Це орієнтир, а не зобов’язання купити.','The target is {n} activated devices a year. It is a goal, not a purchase obligation.','Цель — {n} активированных устройств в год. Это ориентир, а не обязательство купить.'],

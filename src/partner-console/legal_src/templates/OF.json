@@ -5,8 +5,8 @@
   "en": "Order Form",
   "ru": "Заказ"
  },
- "ver": "T-OF-v10",
- "effective": "2026-11-07",
+ "ver": "T-OF-v12",
+ "effective": "2026-11-12",
  "cls": "A",
  "blocks": [
   {
@@ -71,16 +71,23 @@
    "ru": "1.5 Исключения из п. 5.6 Рамочного соглашения (единая платформа связи): [[OF_EXCEPTIONS_NONE|нет]][[OF_EXCEPTIONS_L2|следующие: {{OF_EXCEPTIONS_L2}}]]."
   },
   {
+   "id": "OF-1.6",
+   "kind": "clause",
+   "en": "1.6 Germany and the EU. All prices, invoices, Statements, commission and payments under this Order Form are in euro (EUR) (Master Agreement, clause 8.1). For Direct Subscriptions OTA, as seller and merchant of record, charges German VAT and accounts for it under the EU One-Stop-Shop (registration {{OTA_OSS_NO}}). The End User portal for Germany opens only after Documents 07 and 08 with the Country Schedule for Germany are published in German. The portal offers End Users an online cancellation button for subscriptions (§ 312k of the German Civil Code). SIMs are shipped from OTA's warehouse in the EU.",
+   "ru": "1.6 Германия и ЕС. Все цены, счета, Акты сверки, вознаграждение и платежи по настоящему Заказу указываются в евро (EUR) (п. 8.1 Рамочного соглашения). По Прямым подпискам OTA как продавец и merchant of record начисляет НДС Германии и уплачивает его по системе One-Stop-Shop ЕС (регистрация {{OTA_OSS_NO}}). Портал Конечных пользователей для Германии открывается только после публикации Документов 07 и 08 со Страновым приложением для Германии на немецком языке. Портал предоставляет Конечным пользователям онлайн-кнопку расторжения подписки (§ 312k Гражданского кодекса Германии). SIM отгружаются со склада OTA в ЕС.",
+   "cond": "CC_DE"
+  },
+  {
    "id": "OF-s2",
    "kind": "heading",
-   "en": "2. Prices for Partner (USD, excluding taxes)",
-   "ru": "2. Цены для Партнёра (USD, без налогов)"
+   "en": "2. Prices for Partner ({{CCY}}, excluding taxes)",
+   "ru": "2. Цены для Партнёра ({{CCY}}, без налогов)"
   },
   {
    "id": "OF-2.1",
    "kind": "clause",
-   "en": "2.1 Activation Key (copy of the CONNECT computer program for one Approved Device; includes device record, SIM binding, factory test mode and cabinet access; not a price for the SIM): USD {{PRICE_KEY}} per key. Purchased in advance; not linked to SIM shipments.",
-   "ru": "2.1 Ключ активации (экземпляр компьютерной программы CONNECT для одного Одобренного устройства; включает запись устройства, привязку SIM, заводской тестовый режим и доступ к кабинету; не является ценой SIM): USD {{PRICE_KEY}} за ключ. Приобретается заранее; не связан с отгрузками SIM."
+   "en": "2.1 Activation Key (copy of the CONNECT computer program for one Approved Device; includes device record, SIM binding, factory test mode and cabinet access; not a price for the SIM): {{CCY}} {{PRICE_KEY}} per key. Purchased in advance; for each key OTA provides one SIM in custody, free of charge (Master Agreement, clause 7.1).",
+   "ru": "2.1 Ключ активации (экземпляр компьютерной программы CONNECT для одного Одобренного устройства; включает запись устройства, привязку SIM, заводской тестовый режим и доступ к кабинету; не является ценой SIM): {{CCY}} {{PRICE_KEY}} за ключ. Приобретается заранее; на каждый ключ OTA бесплатно передаёт на хранение одну SIM (п. 7.1 Рамочного соглашения)."
   },
   {
    "id": "OF-2.2",
@@ -125,24 +132,24 @@
       "ru": "Light"
      },
      {
-      "en": "USD {{TOK_LIGHT_12}}",
-      "ru": "USD {{TOK_LIGHT_12}}"
+      "en": "{{CCY}} {{TOK_LIGHT_12}}",
+      "ru": "{{CCY}} {{TOK_LIGHT_12}}"
      },
      {
-      "en": "USD {{TOK_LIGHT_24}}",
-      "ru": "USD {{TOK_LIGHT_24}}"
+      "en": "{{CCY}} {{TOK_LIGHT_24}}",
+      "ru": "{{CCY}} {{TOK_LIGHT_24}}"
      },
      {
-      "en": "USD {{TOK_LIGHT_36}}",
-      "ru": "USD {{TOK_LIGHT_36}}"
+      "en": "{{CCY}} {{TOK_LIGHT_36}}",
+      "ru": "{{CCY}} {{TOK_LIGHT_36}}"
      },
      {
-      "en": "USD {{TOK_LIGHT_48}}",
-      "ru": "USD {{TOK_LIGHT_48}}"
+      "en": "{{CCY}} {{TOK_LIGHT_48}}",
+      "ru": "{{CCY}} {{TOK_LIGHT_48}}"
      },
      {
-      "en": "USD {{TOK_LIGHT_60}}",
-      "ru": "USD {{TOK_LIGHT_60}}"
+      "en": "{{CCY}} {{TOK_LIGHT_60}}",
+      "ru": "{{CCY}} {{TOK_LIGHT_60}}"
      }
     ],
     [
@@ -151,24 +158,24 @@
       "ru": "Standard"
      },
      {
-      "en": "USD {{TOK_STANDARD_12}}",
-      "ru": "USD {{TOK_STANDARD_12}}"
+      "en": "{{CCY}} {{TOK_STANDARD_12}}",
+      "ru": "{{CCY}} {{TOK_STANDARD_12}}"
      },
      {
-      "en": "USD {{TOK_STANDARD_24}}",
-      "ru": "USD {{TOK_STANDARD_24}}"
+      "en": "{{CCY}} {{TOK_STANDARD_24}}",
+      "ru": "{{CCY}} {{TOK_STANDARD_24}}"
      },
      {
-      "en": "USD {{TOK_STANDARD_36}}",
-      "ru": "USD {{TOK_STANDARD_36}}"
+      "en": "{{CCY}} {{TOK_STANDARD_36}}",
+      "ru": "{{CCY}} {{TOK_STANDARD_36}}"
      },
      {
-      "en": "USD {{TOK_STANDARD_48}}",
-      "ru": "USD {{TOK_STANDARD_48}}"
+      "en": "{{CCY}} {{TOK_STANDARD_48}}",
+      "ru": "{{CCY}} {{TOK_STANDARD_48}}"
      },
      {
-      "en": "USD {{TOK_STANDARD_60}}",
-      "ru": "USD {{TOK_STANDARD_60}}"
+      "en": "{{CCY}} {{TOK_STANDARD_60}}",
+      "ru": "{{CCY}} {{TOK_STANDARD_60}}"
      }
     ],
     [
@@ -177,24 +184,24 @@
       "ru": "Premium"
      },
      {
-      "en": "USD {{TOK_PREMIUM_12}}",
-      "ru": "USD {{TOK_PREMIUM_12}}"
+      "en": "{{CCY}} {{TOK_PREMIUM_12}}",
+      "ru": "{{CCY}} {{TOK_PREMIUM_12}}"
      },
      {
-      "en": "USD {{TOK_PREMIUM_24}}",
-      "ru": "USD {{TOK_PREMIUM_24}}"
+      "en": "{{CCY}} {{TOK_PREMIUM_24}}",
+      "ru": "{{CCY}} {{TOK_PREMIUM_24}}"
      },
      {
-      "en": "USD {{TOK_PREMIUM_36}}",
-      "ru": "USD {{TOK_PREMIUM_36}}"
+      "en": "{{CCY}} {{TOK_PREMIUM_36}}",
+      "ru": "{{CCY}} {{TOK_PREMIUM_36}}"
      },
      {
-      "en": "USD {{TOK_PREMIUM_48}}",
-      "ru": "USD {{TOK_PREMIUM_48}}"
+      "en": "{{CCY}} {{TOK_PREMIUM_48}}",
+      "ru": "{{CCY}} {{TOK_PREMIUM_48}}"
      },
      {
-      "en": "USD {{TOK_PREMIUM_60}}",
-      "ru": "USD {{TOK_PREMIUM_60}}"
+      "en": "{{CCY}} {{TOK_PREMIUM_60}}",
+      "ru": "{{CCY}} {{TOK_PREMIUM_60}}"
      }
     ]
    ]
@@ -214,8 +221,8 @@
   {
    "id": "OF-3.1",
    "kind": "clause",
-   "en": "3.1 Partner sets the retail prices of Direct Subscriptions (monthly, annual and prepaid terms; in local currency, including taxes) in the cabinet, not below the minimum price shown there. The OTA Retained Amount is:",
-   "ru": "3.1 Розничные цены Прямых подписок (ежемесячных, годовых и на предоплаченный срок; в местной валюте, с налогами) Партнёр устанавливает в кабинете, не ниже показанной там минимальной цены. Сумма, удерживаемая OTA, составляет:"
+   "en": "3.1 Partner sets the retail prices of Direct Subscriptions (monthly, annual and prepaid terms; [[CCY_USD|in local currency]][[CCY_EUR|in euro]], including taxes) in the cabinet, not below the minimum price shown there. The OTA Retained Amount is:",
+   "ru": "3.1 Розничные цены Прямых подписок (ежемесячных, годовых и на предоплаченный срок; [[CCY_USD|в местной валюте]][[CCY_EUR|в евро]], с налогами) Партнёр устанавливает в кабинете, не ниже показанной там минимальной цены. Сумма, удерживаемая OTA, составляет:"
   },
   {
    "id": "OF-t2",
@@ -244,8 +251,8 @@
       "ru": "Light"
      },
      {
-      "en": "USD {{RET_LIGHT}}",
-      "ru": "USD {{RET_LIGHT}}"
+      "en": "{{CCY}} {{RET_LIGHT}}",
+      "ru": "{{CCY}} {{RET_LIGHT}}"
      },
      {
       "en": "Monthly amount × number of months",
@@ -259,8 +266,8 @@
       "ru": "Standard"
      },
      {
-      "en": "USD {{RET_STANDARD}}",
-      "ru": "USD {{RET_STANDARD}}"
+      "en": "{{CCY}} {{RET_STANDARD}}",
+      "ru": "{{CCY}} {{RET_STANDARD}}"
      },
      {
       "en": "Monthly amount × number of months",
@@ -274,8 +281,8 @@
       "ru": "Premium"
      },
      {
-      "en": "USD {{RET_PREMIUM}}",
-      "ru": "USD {{RET_PREMIUM}}"
+      "en": "{{CCY}} {{RET_PREMIUM}}",
+      "ru": "{{CCY}} {{RET_PREMIUM}}"
      },
      {
       "en": "Monthly amount × number of months",
@@ -288,8 +295,8 @@
   {
    "id": "OF-3.2",
    "kind": "clause",
-   "en": "3.2 Partner commission = Net Collected Revenue (Master Agreement, clause 7.4) − OTA Retained Amount. Country compliance fee under clause 7.4(d): [[FEE_NONE|not applicable]][[FEE_PCT|{{FEE_PCT}}% of payments received, not more than 3%]]. Currency conversion is made at the actual settlement rate of OTA's acquirer, shown in the Statement.",
-   "ru": "3.2 Вознаграждение Партнёра = Чистая собранная выручка (п. 7.4 Рамочного соглашения) − Сумма, удерживаемая OTA. Сбор на соблюдение страновых требований по п. 7.4(d): [[FEE_NONE|не применяется]][[FEE_PCT|{{FEE_PCT}}% от полученных платежей, но не более 3%]]. Пересчёт валют производится по фактическому курсу расчётов эквайера OTA, отражаемому в Акте сверки."
+   "en": "3.2 Partner commission = Net Collected Revenue (Master Agreement, clause 7.4) − OTA Retained Amount. Country compliance fee under clause 7.4(d): [[FEE_NONE|not applicable]][[FEE_PCT|{{FEE_PCT}}% of payments received, not more than 3%]]. [[CCY_USD|Currency conversion is made at the actual settlement rate of OTA's acquirer, shown in the Statement.]][[CCY_EUR|Where an End User pays in another currency, conversion into euro is made at the actual settlement rate of OTA's acquirer, shown in the Statement.]]",
+   "ru": "3.2 Вознаграждение Партнёра = Чистая собранная выручка (п. 7.4 Рамочного соглашения) − Сумма, удерживаемая OTA. Сбор на соблюдение страновых требований по п. 7.4(d): [[FEE_NONE|не применяется]][[FEE_PCT|{{FEE_PCT}}% от полученных платежей, но не более 3%]]. [[CCY_USD|Пересчёт валют производится по фактическому курсу расчётов эквайера OTA, отражаемому в Акте сверки.]][[CCY_EUR|Если Конечный пользователь платит в другой валюте, пересчёт в евро производится по фактическому курсу расчётов эквайера OTA, указанному в Акте сверки.]]"
   },
   {
    "id": "OF-s4",
@@ -300,8 +307,8 @@
   {
    "id": "OF-4.1",
    "kind": "clause",
-   "en": "4.1 Initial SIM shipment (custody, free of charge): {{INIT_SIMS}} units; further shipments under clause 8.1 of the Master Agreement. Initial order: {{INIT_KEYS}} Activation Keys and {{INIT_TOKENS}} Service Tokens, in the mix set out in OTA's first invoice.",
-   "ru": "4.1 Начальная отгрузка SIM (на хранение, бесплатно): {{INIT_SIMS}} шт.; последующие отгрузки – согласно п. 8.1 Рамочного соглашения. Первый заказ: {{INIT_KEYS}} Ключей активации и {{INIT_TOKENS}} Сервисных токенов в структуре, указанной в первом счёте OTA."
+   "en": "4.1 Initial SIM shipment (custody, free of charge): {{INIT_SIMS}} units; further shipments under clause 8.1 of the Master Agreement. Initial order: {{INIT_KEYS}} Activation Keys (with the same number of SIMs) and {{INIT_TOKENS}} Service Tokens, in the mix set out in OTA's first invoice.",
+   "ru": "4.1 Начальная отгрузка SIM (на хранение, бесплатно): {{INIT_SIMS}} шт.; последующие отгрузки – согласно п. 8.1 Рамочного соглашения. Первый заказ: {{INIT_KEYS}} Ключей активации (с таким же количеством SIM) и {{INIT_TOKENS}} Сервисных токенов в структуре, указанной в первом счёте OTA."
   },
   {
    "id": "OF-4.2",
@@ -363,16 +370,16 @@
     ],
     [
      {
-      "en": "Account / IBAN",
-      "ru": "Account / IBAN"
+      "en": "Account / IBAN[[CCY_EUR| (EUR)]]",
+      "ru": "Account / IBAN[[CCY_EUR| (EUR)]]"
      },
      {
-      "en": "{{OTA_BANK_ACCOUNT}}\nIBAN {{OTA_BANK_IBAN}}",
-      "ru": "{{OTA_BANK_ACCOUNT}}\nIBAN {{OTA_BANK_IBAN}}"
+      "en": "[[CCY_USD|{{OTA_BANK_ACCOUNT}}]][[CCY_EUR|{{OTA_BANK_ACCOUNT_EUR}}]]\nIBAN [[CCY_USD|{{OTA_BANK_IBAN}}]][[CCY_EUR|{{OTA_BANK_IBAN_EUR}}]]",
+      "ru": "[[CCY_USD|{{OTA_BANK_ACCOUNT}}]][[CCY_EUR|{{OTA_BANK_ACCOUNT_EUR}}]]\nIBAN [[CCY_USD|{{OTA_BANK_IBAN}}]][[CCY_EUR|{{OTA_BANK_IBAN_EUR}}]]"
      },
      {
-      "en": "{{P_BANK_IBAN}}",
-      "ru": "{{P_BANK_IBAN}}"
+      "en": "[[CCY_USD|{{P_BANK_IBAN}}]][[CCY_EUR|{{P_BANK_IBAN_EUR}}]]",
+      "ru": "[[CCY_USD|{{P_BANK_IBAN}}]][[CCY_EUR|{{P_BANK_IBAN_EUR}}]]"
      }
     ],
     [
@@ -411,12 +418,12 @@
       "bi": true
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ],
     [

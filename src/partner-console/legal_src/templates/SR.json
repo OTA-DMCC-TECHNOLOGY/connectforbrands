@@ -5,8 +5,8 @@
   "en": "SIM Receipt and Custody Acknowledgment",
   "ru": "Акт приёмки SIM на хранение"
  },
- "ver": "T-SR-v10",
- "effective": "2026-11-07",
+ "ver": "T-SR-v12",
+ "effective": "2026-11-12",
  "cls": "B",
  "blocks": [
   {

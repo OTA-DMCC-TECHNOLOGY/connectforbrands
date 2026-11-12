@@ -5,8 +5,8 @@
   "en": "Tax Invoice (OTA)",
   "ru": "Налоговый счёт (счёт OTA)"
  },
- "ver": "T-INV-v10",
- "effective": "2026-11-07",
+ "ver": "T-INV-v12",
+ "effective": "2026-11-12",
  "cls": "B",
  "blocks": [
   {
@@ -89,8 +89,8 @@
       "ru": "{{DUE_DATE}}"
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ]
    ]
@@ -143,13 +143,13 @@
       "bi": true
      },
      {
-      "en": "Unit price USD",
-      "ru": "Цена USD",
+      "en": "Unit price",
+      "ru": "Цена",
       "bi": true
      },
      {
-      "en": "Amount USD",
-      "ru": "Сумма USD",
+      "en": "Amount",
+      "ru": "Сумма",
       "bi": true
      }
     ],
@@ -250,8 +250,8 @@
       "ru": ""
      },
      {
-      "en": "VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)",
-      "ru": "НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)",
+      "en": "[[VAT_ZERO|VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)]][[VAT_AE|VAT 5%]]",
+      "ru": "[[VAT_ZERO|НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)]][[VAT_AE|НДС 5%]]",
       "bi": true
      },
      {
@@ -263,8 +263,8 @@
       "ru": ""
      },
      {
-      "en": "0.00",
-      "ru": "0.00"
+      "en": "[[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AMOUNT}}]]",
+      "ru": "[[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AMOUNT}}]]"
      }
     ],
     [
@@ -286,8 +286,8 @@
       "ru": ""
      },
      {
-      "en": "AED 0.00",
-      "ru": "AED 0.00"
+      "en": "AED [[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AED}}]]",
+      "ru": "AED [[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AED}}]]"
      }
     ],
     [
@@ -327,8 +327,8 @@
   {
    "id": "INV-p2",
    "kind": "para",
-   "en": "Payment terms: 100% prepayment by bank transfer in USD; Activation Keys and Service Tokens are issued after payment. Bank charges of the payer's bank are borne by the payer. Please quote the invoice number in the payment reference.",
-   "ru": "Условия оплаты: 100% предоплата банковским переводом в USD; Ключи активации и Сервисные токены выпускаются после оплаты. Комиссии банка плательщика оплачивает плательщик. В назначении платежа укажите номер счёта."
+   "en": "Payment terms: 100% prepayment by bank transfer in the invoice currency (USD, or EUR for Approved Countries in Europe); Activation Keys and Service Tokens are issued after payment. Bank charges of the payer's bank are borne by the payer. Please quote the invoice number in the payment reference.",
+   "ru": "Условия оплаты: 100% предоплата банковским переводом в валюте счёта (USD, для Одобренных стран в Европе – EUR); Ключи активации и Сервисные токены выпускаются после оплаты. Комиссии банка плательщика оплачивает плательщик. В назначении платежа укажите номер счёта."
   },
   {
    "id": "INV-t5",
@@ -364,8 +364,8 @@
       "bi": true
      },
      {
-      "en": "{{OTA_BANK_ACCOUNT}}",
-      "ru": "{{OTA_BANK_ACCOUNT}}"
+      "en": "[[CCY_USD|{{OTA_BANK_ACCOUNT}}]][[CCY_EUR|{{OTA_BANK_ACCOUNT_EUR}}]]",
+      "ru": "[[CCY_USD|{{OTA_BANK_ACCOUNT}}]][[CCY_EUR|{{OTA_BANK_ACCOUNT_EUR}}]]"
      }
     ],
     [
@@ -374,8 +374,8 @@
       "ru": "IBAN"
      },
      {
-      "en": "{{OTA_BANK_IBAN}}",
-      "ru": "{{OTA_BANK_IBAN}}"
+      "en": "[[CCY_USD|{{OTA_BANK_IBAN}}]][[CCY_EUR|{{OTA_BANK_IBAN_EUR}}]]",
+      "ru": "[[CCY_USD|{{OTA_BANK_IBAN}}]][[CCY_EUR|{{OTA_BANK_IBAN_EUR}}]]"
      }
     ],
     [
@@ -406,8 +406,8 @@
       "bi": true
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ]
    ]

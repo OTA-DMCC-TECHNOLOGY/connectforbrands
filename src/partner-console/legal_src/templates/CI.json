@@ -5,8 +5,8 @@
   "en": "Partner Commission Invoice",
   "ru": "Счёт Партнёра на вознаграждение"
  },
- "ver": "T-CI-v10",
- "effective": "2026-11-07",
+ "ver": "T-CI-v12",
+ "effective": "2026-11-12",
  "cls": "B",
  "blocks": [
   {
@@ -95,8 +95,8 @@
       "ru": "{{DUE_DATE}}"
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ]
    ]
@@ -116,8 +116,8 @@
       "bi": true
      },
      {
-      "en": "Amount USD",
-      "ru": "Сумма USD",
+      "en": "Amount",
+      "ru": "Сумма",
       "bi": true
      }
     ],
@@ -201,8 +201,8 @@
       "bi": true
      },
      {
-      "en": "{{P_BANK_IBAN}}",
-      "ru": "{{P_BANK_IBAN}}"
+      "en": "[[CCY_USD|{{P_BANK_IBAN}}]][[CCY_EUR|{{P_BANK_IBAN_EUR}}]]",
+      "ru": "[[CCY_USD|{{P_BANK_IBAN}}]][[CCY_EUR|{{P_BANK_IBAN_EUR}}]]"
      }
     ],
     [
@@ -244,8 +244,8 @@
       "bi": true
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ]
    ],

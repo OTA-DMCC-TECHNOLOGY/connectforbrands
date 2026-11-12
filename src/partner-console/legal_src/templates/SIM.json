@@ -5,8 +5,8 @@
   "en": "SIM Custody, Delivery and Customs Schedule",
   "ru": "Порядок хранения, поставки и таможенного оформления SIM"
  },
- "ver": "T-SIM-v10",
- "effective": "2026-11-07",
+ "ver": "T-SIM-v12",
+ "effective": "2026-11-12",
  "cls": "A",
  "blocks": [
   {
@@ -42,8 +42,8 @@
   {
    "id": "SIM-1.2",
    "kind": "clause",
-   "en": "1.2 Each shipment is requested by Partner in the cabinet or by email, stating the destination address, quantity and SIM type. OTA confirms the shipment and sends the ICCID list securely. No payment is linked to the shipment of SIMs: Activation Keys are a separate electronic product, and SIM shipments are not conditional on their purchase (Master Agreement, clause 7.1).",
-   "ru": "1.2 Каждая отгрузка запрашивается Партнёром в кабинете или по e-mail с указанием адреса доставки, количества и типа SIM. OTA подтверждает отгрузку и защищённым способом направляет перечень ICCID. С отгрузкой SIM не связан никакой платёж: Ключи активации являются отдельным электронным продуктом, и отгрузки SIM не обусловлены их приобретением (п. 7.1 Рамочного соглашения)."
+   "en": "1.2 Each shipment is requested by Partner in the cabinet or by email, stating the destination address, quantity and SIM type. OTA confirms the shipment and sends the ICCID list securely. SIMs are shipped in the quantity of Activation Keys purchased for the country (Master Agreement, clauses 7.1 and 8.1). No payment is made for SIMs: the price of an Activation Key does not include any SIM, and the pro forma (Document 11) states a value for customs purposes only.",
+   "ru": "1.2 Каждая отгрузка запрашивается Партнёром в кабинете или по e-mail с указанием адреса доставки, количества и типа SIM. OTA подтверждает отгрузку и защищённым способом направляет перечень ICCID. SIM отгружаются в количестве Ключей активации, приобретённых для страны (пп. 7.1 и 8.1 Рамочного соглашения). За SIM ничего не оплачивается: цена Ключа активации не включает SIM, а в проформе (Документ 11) стоимость указывается только для таможенных целей."
   },
   {
    "id": "SIM-s2",

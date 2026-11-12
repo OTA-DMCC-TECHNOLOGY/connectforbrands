@@ -5,8 +5,8 @@
   "en": "Brand Licence (Partner is brand owner)",
   "ru": "Лицензия на бренд (Партнёр – правообладатель)"
  },
- "ver": "T-BL-v10",
- "effective": "2026-11-07",
+ "ver": "T-BL-v12",
+ "effective": "2026-11-12",
  "cls": "A",
  "blocks": [
   {
@@ -372,8 +372,8 @@
       "bi": true
      },
      {
-      "en": "{{P_BRAND_CONTACT}}",
-      "ru": "{{P_BRAND_CONTACT}}"
+      "en": "{{P_EMAIL_OPS}}",
+      "ru": "{{P_EMAIL_OPS}}"
      }
     ],
     [

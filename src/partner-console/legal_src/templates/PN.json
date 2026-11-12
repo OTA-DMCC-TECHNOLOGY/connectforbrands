@@ -5,8 +5,8 @@
   "en": "Privacy Notice (public)",
   "ru": "Политика конфиденциальности (публичный документ)"
  },
- "ver": "T-PN-v10",
- "effective": "2026-11-07",
+ "ver": "T-PN-v12",
+ "effective": "2026-11-12",
  "cls": "C",
  "blocks": [
   {
@@ -103,8 +103,8 @@
   {
    "id": "PN-s5.p1",
    "kind": "para",
-   "en": "Your data is stored in the United Arab Emirates. If the law of your country requires that your data be stored in your country, we store it there. Any transfer of data abroad is made on a basis permitted by the law of your country and with appropriate safeguards.",
-   "ru": "Ваши данные хранятся в Объединённых Арабских Эмиратах. Если законодательство вашей страны требует хранить ваши данные на её территории, мы храним их там. Любая передача данных за рубеж осуществляется на основании, допускаемом законодательством вашей страны, и с соответствующими гарантиями."
+   "en": "Your data is stored in the United Arab Emirates. If the law of your country requires that your data be stored in your country, we store it there. Any transfer of data abroad is made on a basis permitted by the law of your country and with appropriate safeguards. For End Users in the European Economic Area, transfers outside it are made under the European Commission's standard contractual clauses or another safeguard permitted by the GDPR, and OTA's representative in the EU under Article 27 GDPR is named in section 1.3.",
+   "ru": "Ваши данные хранятся в Объединённых Арабских Эмиратах. Если законодательство вашей страны требует хранить ваши данные на её территории, мы храним их там. Любая передача данных за рубеж осуществляется на основании, допускаемом законодательством вашей страны, и с соответствующими гарантиями. Для Конечных пользователей в Европейской экономической зоне передача за её пределы осуществляется на основании стандартных договорных условий Европейской комиссии или иной гарантии, допускаемой GDPR; представитель OTA в ЕС согласно ст. 27 GDPR указан в разделе 1.3."
   },
   {
    "id": "PN-s6",

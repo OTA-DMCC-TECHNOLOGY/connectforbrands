@@ -184,3 +184,15 @@ mark.lgd-v{background:var(--lg-hl);color:inherit;padding:0 1px;border-radius:2px
  body:has(.lg-dvgrid):not(.lg-printing) .lgd-page{box-shadow:none!important;break-after:page;margin:0}
  body:has(.lg-dvgrid):not(.lg-printing) .lgd-page:last-child{break-after:auto}
 }
+/* pack v12: tax status (MPA 2.6) — yes/no, VAT registrations, VAT treatment box */
+@media (max-width:560px){.lg-yn2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lg-vatregs{display:flex;flex-direction:column;gap:8px}
+.lg-vatchips{display:flex;flex-wrap:wrap;gap:6px}
+.lg-vatchip{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:32px;padding:0 10px;border:1.5px solid var(--line2);border-radius:999px;font:600 12px/1 'JetBrains Mono',monospace;cursor:pointer;background:var(--surface);color:var(--ink2,inherit)}
+.lg-vatchip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.lg-vatchip:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.lg-vat{border:1px solid var(--line2);border-left:4px solid var(--ok,#12b76a);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.lg-vat.lg-vat5{border-left-color:var(--warn,#f79009)}
+.lg-vat-line{font-weight:600;overflow-wrap:anywhere}
+.lg-vat-src{overflow-wrap:anywhere}
+.lg-warn-t{color:var(--warn,#b54708)}

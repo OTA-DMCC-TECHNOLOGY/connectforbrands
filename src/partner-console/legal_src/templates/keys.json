@@ -46,22 +46,49 @@
   ]
  },
  {
-  "key": "P_COUNTRY",
-  "label": "Страна регистрации (ISO)",
+  "key": "P_INC_COUNTRY",
+  "label": "Страна регистрации (учреждения), ISO",
   "src": "partner",
   "req": "required",
   "tz": true,
-  "note": "не выводится в текстах; AE/SA/QA/KW/BH/OM (ССАГПЗ) – регистрация блокируется (ТЗ v10 1.1); НДС в счёте всегда 0%",
+  "note": "v12 МПА п. 2.6 / Анкета: налоговый статус; не выводится в текстах",
   "used": []
  },
  {
-  "key": "P_GCC_CONFIRM",
-  "label": "Подтверждение: компания не учреждена, не резидент, не зарегистрирована по НДС и не имеет постоянного представительства в странах ССАГПЗ (обязательная отметка)",
+  "key": "P_COUNTRY",
+  "label": "Страна регистрации (ISO) – устаревший синоним P_INC_COUNTRY (v10)",
+  "src": "partner",
+  "req": "optional",
+  "tz": false,
+  "note": "deprecated: = P_INC_COUNTRY; не выводится в текстах",
+  "used": []
+ },
+ {
+  "key": "P_TAX_COUNTRY",
+  "label": "Страна налогового резидентства, ISO",
+  "src": "partner",
+  "req": "required",
+  "tz": true,
+  "note": "v12 МПА п. 2.6 / Анкета; не выводится в текстах",
+  "used": []
+ },
+ {
+  "key": "P_VAT_REGS",
+  "label": "Регистрации плательщиком НДС (страны и номера; «нет» если нет)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "note": "v12 МПА п. 2.6 / Анкета; не выводится в текстах",
+  "used": []
+ },
+ {
+  "key": "P_UAE_FE",
+  "label": "Постоянное представительство в ОАЭ (да/нет)",
   "src": "partner",
   "req": "required",
   "tz": true,
   "format": "bool",
-  "note": "ТЗ v10 1.1; не выводится в текстах (МПА п. 2.6 – текст заверения)",
+  "note": "v12 МПА п. 2.6: НДС 5% если резидент ОАЭ / зарегистрирован по НДС в ОАЭ / есть постоянное представительство в ОАЭ (→ VAT_AE), иначе 0%",
   "used": []
  },
  {
@@ -209,7 +236,8 @@
   "req": "required",
   "tz": true,
   "used": [
-   "BOA"
+   "BOA",
+   "TRT"
   ]
  },
  {
@@ -468,22 +496,13 @@
   ]
  },
  {
-  "key": "P_BRAND_CONTACT",
-  "label": "Контакт для согласования материалов бренда (05A, прил. 2)",
-  "src": "partner",
-  "req": "required",
-  "tz": false,
-  "used": [
-   "BL"
-  ]
- },
- {
   "key": "P_EMAIL_OPS",
   "label": "E-mail для операций",
   "src": "partner",
   "req": "required",
   "tz": true,
   "used": [
+   "BL",
    "OF"
   ]
  },
@@ -587,6 +606,18 @@
   "src": "partner",
   "req": "na",
   "tz": true,
+  "used": [
+   "CI",
+   "OF"
+  ]
+ },
+ {
+  "key": "P_BANK_IBAN_EUR",
+  "label": "Банк: счёт / IBAN в EUR (если есть Одобренные страны в Европе)",
+  "src": "partner",
+  "req": "na",
+  "tz": true,
+  "note": "v12 Анкета «EUR account»; Заказ и счёт партнёра 14 при CCY = EUR",
   "used": [
    "CI",
    "OF"
@@ -844,6 +875,30 @@
   ]
  },
  {
+  "key": "OTA_BANK_ACCOUNT_EUR",
+  "label": "OTA: номер счёта в EUR (Одобренные страны в Европе)",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "note": "v12: Заказ (DE) и счёт 13 при CCY = EUR",
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "OTA_BANK_IBAN_EUR",
+  "label": "OTA: IBAN в EUR",
+  "src": "ota",
+  "req": "required",
+  "tz": true,
+  "note": "v12: Заказ (DE) и счёт 13 при CCY = EUR",
+  "used": [
+   "INV",
+   "OF"
+  ]
+ },
+ {
   "key": "OTA_EMAIL_OPS",
   "label": "OTA: e-mail операций",
   "src": "ota",
@@ -927,6 +982,17 @@
   ]
  },
  {
+  "key": "OTA_OSS_NO",
+  "label": "OTA: регистрационный номер EU One-Stop-Shop (НДС Германии/ЕС; по стране, S.ota.countries[CC].oss_no)",
+  "src": "country",
+  "req": "na",
+  "tz": true,
+  "note": "v12 Заказ 02-DE п. 1.6",
+  "used": [
+   "OF"
+  ]
+ },
+ {
   "key": "OTA_SUBPROC_EMAIL",
   "label": "OTA: почтовый сервис-субобработчик (06, прил. 1)",
   "src": "ota",
@@ -952,9 +1018,7 @@
   "src": "ota",
   "req": "required",
   "tz": false,
-  "used": [
-   "TRT"
-  ]
+  "used": []
  },
  {
   "key": "CC",
@@ -965,6 +1029,58 @@
   "used": [
    "OF",
    "RS"
+  ]
+ },
+ {
+  "key": "CCY",
+  "label": "Валюта Заказа / документа: USD | EUR (S.ota.countries[CC].currency; Европа = EUR)",
+  "src": "country",
+  "req": "required",
+  "tz": true,
+  "note": "v12 МПА п. 8.1; выводится в Заказе (цены, раздел 2, реквизиты), счетах 13/13A/14 и акте 10",
+  "used": [
+   "CI",
+   "CN",
+   "INV",
+   "OF",
+   "RS"
+  ]
+ },
+ {
+  "key": "CCY_USD",
+  "label": "Флаг: валюта USD",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= (CCY != \"EUR\"); legalDerive",
+  "used": [
+   "CI",
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "CCY_EUR",
+  "label": "Флаг: валюта EUR",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= (CCY == \"EUR\"); legalDerive",
+  "used": [
+   "CI",
+   "INV",
+   "OF"
+  ]
+ },
+ {
+  "key": "CC_DE",
+  "label": "Флаг: страна документа – Германия (п. 1.6 Заказа)",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "legalDerive ставит CC_<CC> = true для страны документа",
+  "used": [
+   "OF"
   ]
  },
  {
@@ -1271,209 +1387,209 @@
  },
  {
   "key": "PRICE_KEY",
-  "label": "Цена ключа активации, USD",
+  "label": "Цена ключа активации, в валюте Заказа (CCY)",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_LIGHT_12",
-  "label": "Цена токена Light, 12 мес., USD",
+  "label": "Цена токена Light, 12 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_LIGHT_24",
-  "label": "Цена токена Light, 24 мес., USD",
+  "label": "Цена токена Light, 24 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_LIGHT_36",
-  "label": "Цена токена Light, 36 мес., USD",
+  "label": "Цена токена Light, 36 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_LIGHT_48",
-  "label": "Цена токена Light, 48 мес., USD",
+  "label": "Цена токена Light, 48 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_LIGHT_60",
-  "label": "Цена токена Light, 60 мес., USD",
+  "label": "Цена токена Light, 60 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "RET_LIGHT",
-  "label": "Удерживаемая OTA сумма Light за оплаченный месяц, USD",
+  "label": "Удерживаемая OTA сумма Light за оплаченный месяц, в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_STANDARD_12",
-  "label": "Цена токена Standard, 12 мес., USD",
+  "label": "Цена токена Standard, 12 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_STANDARD_24",
-  "label": "Цена токена Standard, 24 мес., USD",
+  "label": "Цена токена Standard, 24 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_STANDARD_36",
-  "label": "Цена токена Standard, 36 мес., USD",
+  "label": "Цена токена Standard, 36 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_STANDARD_48",
-  "label": "Цена токена Standard, 48 мес., USD",
+  "label": "Цена токена Standard, 48 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_STANDARD_60",
-  "label": "Цена токена Standard, 60 мес., USD",
+  "label": "Цена токена Standard, 60 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "RET_STANDARD",
-  "label": "Удерживаемая OTA сумма Standard за оплаченный месяц, USD",
+  "label": "Удерживаемая OTA сумма Standard за оплаченный месяц, в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_PREMIUM_12",
-  "label": "Цена токена Premium, 12 мес., USD",
+  "label": "Цена токена Premium, 12 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_PREMIUM_24",
-  "label": "Цена токена Premium, 24 мес., USD",
+  "label": "Цена токена Premium, 24 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_PREMIUM_36",
-  "label": "Цена токена Premium, 36 мес., USD",
+  "label": "Цена токена Premium, 36 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_PREMIUM_48",
-  "label": "Цена токена Premium, 48 мес., USD",
+  "label": "Цена токена Premium, 48 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "TOK_PREMIUM_60",
-  "label": "Цена токена Premium, 60 мес., USD",
+  "label": "Цена токена Premium, 60 мес., в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
  },
  {
   "key": "RET_PREMIUM",
-  "label": "Удерживаемая OTA сумма Premium за оплаченный месяц, USD",
+  "label": "Удерживаемая OTA сумма Premium за оплаченный месяц, в валюте Заказа",
   "src": "commercial",
   "req": "required",
   "tz": true,
-  "format": "usd",
+  "format": "money",
   "used": [
    "OF"
   ]
@@ -1652,7 +1768,7 @@
  },
  {
   "key": "AED_RATE",
-  "label": "Курс ЦБ ОАЭ USD→AED на дату счёта / кредит-ноты (хранится с документом)",
+  "label": "Курс ЦБ ОАЭ валюта документа (USD/EUR)→AED на дату счёта / кредит-ноты (хранится с документом)",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -1661,6 +1777,75 @@
   "used": [
    "CN",
    "INV"
+  ]
+ },
+ {
+  "key": "VAT_AE",
+  "label": "Флаг: НДС ОАЭ 5% (партнёр – резидент / плательщик НДС / постоянное представительство в ОАЭ)",
+  "src": "invoice",
+  "req": "auto",
+  "tz": false,
+  "format": "bool",
+  "note": "v12 МПА п. 2.6; = vatRateFor(org) === 5; иначе 0% (экспорт услуг)",
+  "used": [
+   "CN",
+   "INV"
+  ]
+ },
+ {
+  "key": "VAT_ZERO",
+  "label": "Флаг: НДС 0% (экспорт услуг)",
+  "src": "system",
+  "req": "auto",
+  "tz": false,
+  "note": "= не VAT_AE; legalDerive",
+  "used": [
+   "CN",
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_VAT_AMOUNT",
+  "label": "Счёт OTA: сумма НДС 5% в валюте счёта (только VAT_AE)",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "format": "money",
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "INV_VAT_AED",
+  "label": "Счёт OTA: сумма НДС в AED по курсу AED_RATE (только VAT_AE; иначе 0.00 в шаблоне)",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "format": "money",
+  "used": [
+   "INV"
+  ]
+ },
+ {
+  "key": "CN_VAT_AMOUNT",
+  "label": "Кредит-нота: корректировка НДС 5% в валюте (без знака; только VAT_AE)",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "format": "money",
+  "used": [
+   "CN"
+  ]
+ },
+ {
+  "key": "CN_VAT_AED",
+  "label": "Кредит-нота: корректировка НДС в AED (без знака; только VAT_AE)",
+  "src": "invoice",
+  "req": "na",
+  "tz": false,
+  "format": "money",
+  "used": [
+   "CN"
   ]
  },
  {
@@ -2071,7 +2256,7 @@
  },
  {
   "key": "INV_KEY_PRICE",
-  "label": "Счёт OTA: ключи: цена USD",
+  "label": "Счёт OTA: ключи: цена",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2081,7 +2266,7 @@
  },
  {
   "key": "INV_KEY_AMOUNT",
-  "label": "Счёт OTA: ключи: сумма USD",
+  "label": "Счёт OTA: ключи: сумма",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2121,7 +2306,7 @@
  },
  {
   "key": "INV_TOK_PRICE",
-  "label": "Счёт OTA: токены: цена USD",
+  "label": "Счёт OTA: токены: цена",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2131,7 +2316,7 @@
  },
  {
   "key": "INV_TOK_AMOUNT",
-  "label": "Счёт OTA: токены: сумма USD",
+  "label": "Счёт OTA: токены: сумма",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2161,7 +2346,7 @@
  },
  {
   "key": "INV_OTHER_PRICE",
-  "label": "Счёт OTA: прочая услуга: цена USD",
+  "label": "Счёт OTA: прочая услуга: цена",
   "src": "invoice",
   "req": "na",
   "tz": false,
@@ -2171,7 +2356,7 @@
  },
  {
   "key": "INV_OTHER_AMOUNT",
-  "label": "Счёт OTA: прочая услуга: сумма USD",
+  "label": "Счёт OTA: прочая услуга: сумма",
   "src": "invoice",
   "req": "na",
   "tz": false,
@@ -2181,7 +2366,7 @@
  },
  {
   "key": "INV_SUBTOTAL",
-  "label": "Счёт OTA: итого без НДС, USD",
+  "label": "Счёт OTA: итого без НДС",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2191,7 +2376,7 @@
  },
  {
   "key": "INV_TOTAL",
-  "label": "Счёт OTA: итого к оплате, USD",
+  "label": "Счёт OTA: итого к оплате",
   "src": "invoice",
   "req": "auto",
   "tz": false,
@@ -2201,7 +2386,7 @@
  },
  {
   "key": "CI_AMOUNT",
-  "label": "Счёт партнёра: сумма вознаграждения, USD",
+  "label": "Счёт партнёра: сумма вознаграждения",
   "src": "invoice",
   "req": "required",
   "tz": false,
@@ -2380,7 +2565,7 @@
  },
  {
   "key": "CN_LINE_PRICE",
-  "label": "Строка кредит-ноты: цена USD (элемент CN_LINES)",
+  "label": "Строка кредит-ноты: цена (элемент CN_LINES)",
   "src": "invoice",
   "req": "required",
   "tz": false,
@@ -2391,7 +2576,7 @@
  },
  {
   "key": "CN_LINE_AMOUNT",
-  "label": "Строка кредит-ноты: сумма USD без знака (элемент CN_LINES)",
+  "label": "Строка кредит-ноты: сумма без знака (элемент CN_LINES)",
   "src": "invoice",
   "req": "required",
   "tz": false,

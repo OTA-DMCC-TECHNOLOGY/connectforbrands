@@ -83,13 +83,19 @@ const iso=d=>d.toISOString();
 function fmtDate(x,opt){const d=typeof x==='string'?new Date(x):x;return d.toLocaleDateString(LOCALES[S.lang],opt||{day:'numeric',month:'short',year:'numeric'}).replace(/\s?р\.$/,'').replace(/\s?г\.$/,'');}
 function fmtDateTime(x){const d=typeof x==='string'?new Date(x):x;return fmtDate(d)+', '+d.toLocaleTimeString(LOCALES[S.lang],{hour:'2-digit',minute:'2-digit'});}
 function fmtNum(n,dec=0){return new Intl.NumberFormat(LOCALES[S.lang],{minimumFractionDigits:dec,maximumFractionDigits:dec}).format(n).replace(/ /g,' ');}
-function money(n,cur,dec){cur=cur||'USD';if(dec==null)dec=cur==='USD'?2:0;const s=fmtNum(Math.abs(n),dec);const m=n<0?'−':'';if(cur==='USD')return m+'$'+s;if(cur==='UAH')return m+s+' '+(S.lang==='uk'||S.lang==='ru'?'грн':'UAH');if(cur==='KZT')return m+s+' ₸';return m+s+' '+cur;}
+// money(n, 'USD'|'EUR'|'UAH'|'KZT'|other): USD/EUR (the two invoice currencies, MPA 8.1 v12) → symbol prefix, 2 decimals. Use moneyCc(n, cc) for a country amount.
+const CUR_SYM={USD:'$',EUR:'€'};
+function money(n,cur,dec){cur=cur||'USD';if(dec==null)dec=CUR_SYM[cur]?2:0;const s=fmtNum(Math.abs(n),dec);const m=n<0?'−':'';if(CUR_SYM[cur])return m+CUR_SYM[cur]+s;if(cur==='UAH')return m+s+' '+(S.lang==='uk'||S.lang==='ru'?'грн':'UAH');if(cur==='KZT')return m+s+' ₸';return m+s+' '+cur;}
+// several amounts in different currencies: [[amount, 'USD'|'EUR'], …] → "$1,200.00 + €300.00" (never added across currencies)
+function moneyByCcy(items){const m={};(items||[]).forEach(([a,c])=>{c=c||'USD';m[c]=(m[c]||0)+(+a||0);});const ks=Object.keys(m);if(!ks.length)return money(0,'USD');
+ return ['USD','EUR'].filter(c=>c in m).concat(ks.filter(c=>c!=='USD'&&c!=='EUR')).map(c=>money(Math.round(m[c]*100)/100,c)).join(' + ');}
 function pct(x,dec=0){return fmtNum(x*100,dec)+'%';}
 function luhnOk(num){let s=0,alt=false;for(let i=num.length-1;i>=0;i--){let n=+num[i];if(alt){n*=2;if(n>9)n-=9;}s+=n;alt=!alt;}return s%10===0;}
 
-/* ---------- commercial model v09 (see API.md "Business rules") ----------
-   OTA TECHNOLOGY DMCC invoices the partner ONLY in USD for Activation Keys and Service Tokens.
-   SIM cards are never sold or invoiced: they are shipped in custody (S.shipments). */
+/* ---------- commercial model v09 / legal pack v12 (see API.md "Business rules") ----------
+   OTA TECHNOLOGY DMCC invoices the partner for Activation Keys and Service Tokens in the currency of the country's Order Form:
+   USD, or EUR for Approved Countries in Europe (MPA 8.1 v12; demo: UA, KZ = USD, DE = EUR) — see ccy(cc).
+   SIM cards are never sold or invoiced: OTA provides one SIM in custody per Activation Key bought for the country (MPA 7.1 v12). */
 const PLANS=['light','std','prem'];
 const PLAN_NAME={light:'Light',std:'Standard',prem:'Premium'};
 const PLAN_EN={light:'Light',std:'Standard',prem:'Premium'};      // names used in legal documents
@@ -104,7 +110,19 @@ const LANG2_AVAILABLE=['ru','kk'];         // approved second document languages
 // Seed sources for per-country price lists (OTA can edit the lists afterwards; these are only the starting point)
 const CC_META={
  UA:{cur:'UAH',fx:45.0564,vat:0.20,key:9.85,month:{light:75,std:99}},
- KZ:{cur:'KZT',fx:441.77,vat:0.16,key:9.40,month:{light:990,std:1290}}};
+ KZ:{cur:'KZT',fx:441.77,vat:0.16,key:9.40,month:{light:990,std:1290}},
+ // v12 demo: Germany, price list in EUR (retail €2.99 / €3.99 incl. 19% VAT; fx 1 = retail and wholesale both in EUR); key €9.90
+ DE:{cur:'EUR',fx:1,vat:0.19,key:9.90,month:{light:2.99,std:3.99}}};
+/* ---------- invoice currency per country (MPA 8.1 v12): S.ota.countries[CC].currency = 'USD' | 'EUR' ----------
+   The currency of the Order Form applies to all prices, invoices, credit notes, Statements, commission and payments for that country.
+   ccy(cc) / cur(cc) → 'USD' | 'EUR'; default: EUR for EU member states (Approved Countries in Europe; demo DE), USD otherwise (UA, KZ by OTA decision). */
+const CCY_LIST=['USD','EUR'];
+function ccyDefault(cc){try{if(EU_CC.includes(cc))return 'EUR';}catch(e){}return cc==='DE'?'EUR':'USD';}
+function ccy(cc){if(!cc)return 'USD';let v=null;try{const c=S&&S.ota&&S.ota.countries&&S.ota.countries[cc];v=c&&c.currency;}catch(e){}return CCY_LIST.includes(v)?v:ccyDefault(cc);}
+function cur(cc){return ccy(cc);}
+function moneyCc(n,cc,dec){return money(n,ccy(cc),dec);}
+// currency of a stored document (invoice / credit note / statement / commission invoice): its own frozen value, else its country's
+function docCcy(d){return d&&CCY_LIST.includes(d.currency)?d.currency:ccy(d&&d.cc);}
 const BASE_MONTH_UAH_VAT=CC_META.UA.month; // legacy name (calculator)
 const SIM_USD_NET=CC_META.UA.key;          // legacy name: now the Ukrainian Activation Key price
 // Package version digit inside an activation code (position 6) — Crockford Base32
@@ -179,7 +197,7 @@ function plAdd(cc,data,o){o=o||{};S.priceLists=S.priceLists||{};const all=S.pric
  const ts=iso(now());all.forEach(v=>{if(v.status!=='withdrawn'&&v.from>ts){v.status='withdrawn';v.withdrawnAt=ts;}}); // a new version replaces pending ones
  const prev=plVersions(cc).filter(v=>v.from<=from).pop();if(prev)prev.to=from;
  const ver=all.reduce((m,v)=>Math.max(m,v.ver),0)+1;
- const v={ver,from,to:null,key:r2(data.key),tokens:JSON.parse(JSON.stringify(data.tokens)),retained:Object.assign({},data.retained),fee:+data.fee||0,createdAt:ts,by:actorName(),note:o.note||'',increase:plIsIncrease(prev||null,data)};
+ const v={ver,from,to:null,currency:ccy(cc),key:r2(data.key),tokens:JSON.parse(JSON.stringify(data.tokens)),retained:Object.assign({},data.retained),fee:+data.fee||0,createdAt:ts,by:actorName(),note:o.note||'',increase:plIsIncrease(prev||null,data)};
  if(v.increase){v.justification=just;v.docLink=docLink;if(!just||!docLink)v.justMissing=true;}
  all.push(v);audit('pricelist.version',cc+' v'+ver,{from,increase:v.increase,note:v.note,justification:v.justification||'',docLink:v.docLink||''});return v;}
 
@@ -205,22 +223,31 @@ function orgMin(){const o=S.org||{};return{first:o.minFirst||1000,next:o.minNext
 
 /* ---------- OTA data (ТЗ §3 "Данные OTA"): S.ota = {KEY: value}. Empty = N/A (never printed) ---------- */
 const OTA_KEYS=['OTA_NAME','OTA_REGNO','OTA_LICENCE','OTA_TRN','OTA_ADDR_EN','OTA_ADDR_L2','OTA_SIGNATORY','OTA_SIGNATORY_L2_GEN','OTA_TITLE_EN','OTA_TITLE_L2','OTA_TITLE_L2_GEN',
- 'OTA_BANK_BENEF','OTA_BANK_NAME','OTA_BANK_ADDR','OTA_BANK_ACCOUNT','OTA_BANK_IBAN','OTA_BANK_SWIFT','OTA_BANK_CUR','OTA_BANK_INTER','OTA_BANK_INTER_SWIFT',
+ 'OTA_BANK_BENEF','OTA_BANK_NAME','OTA_BANK_ADDR','OTA_BANK_ACCOUNT','OTA_BANK_IBAN','OTA_BANK_SWIFT','OTA_BANK_CUR','OTA_BANK_INTER','OTA_BANK_INTER_SWIFT','OTA_BANK_ACCOUNT_EUR','OTA_BANK_IBAN_EUR',
  'OTA_EMAIL_OPS','OTA_EMAIL_LEGAL','OTA_EMAIL_FIN','OTA_EMAIL_SUPPORT','OTA_EMAIL_PRIVACY','OTA_SUBPROC_EMAIL','OTA_SUBPROC_EMAIL_LOC','OTA_SUPPORT_HOURS','CARD_DESCRIPTOR'];
 const OTA_REMOVED_KEYS=['OTA_CUSTOMS_CODE'];   // + legacy flat OTA_VAT_{CC} / OTA_REP_{CC} (v10: per-country S.ota.countries, see otaLocal)
 const otaRemovedKey=k=>OTA_REMOVED_KEYS.includes(k)||/^OTA_(VAT|REP)_[A-Z]{2}$/.test(k);  // v10 (ТЗ 1.2): SIMs ship only from the EU — no Dubai Customs code anywhere
-/* per-country OTA settings (ТЗ v10 2.6, 4.5, part 6): S.ota.countries[CC] = {vat_local, rep_local, delay_hours, ownership_v10_enabled}
+/* per-country OTA settings (ТЗ v10 2.6, 4.5, part 6; pack v12): S.ota.countries[CC] = {vat_local, rep_local, delay_hours, ownership_v10_enabled, currency, oss_no}
+   currency ('USD'|'EUR', v12 MPA 8.1 — see ccy(cc)); oss_no: OTA's EU One-Stop-Shop VAT registration for Direct Subscriptions (02-DE 1.6), demo value fictional.
    vat_local → OTA_VAT_LOCAL, rep_local → OTA_REP_LOCAL: printed ONLY when set and ONLY in documents of that country (EUT annex row, PN 1.3, OF requisites,
    payment page / receipts of Direct Subscriptions). delay_hours: transfer cooling-off, integer 1–24, default 24. ownership_v10_enabled: technical launch switch. */
 const OTA_DELAY_DEFAULT=24,OTA_DELAY_MIN=1,OTA_DELAY_MAX=24;
 function otaCountries(){S.ota=S.ota||{};if(!S.ota.countries||typeof S.ota.countries!=='object')S.ota.countries={};return S.ota.countries;}
 function otaCountry(cc){const c=(S.ota&&S.ota.countries&&S.ota.countries[cc])||{};const s=x=>x==null?'':String(x).trim();
- const d=parseInt(c.delay_hours,10);return{vat_local:s(c.vat_local),rep_local:s(c.rep_local),delay_hours:d>=OTA_DELAY_MIN&&d<=OTA_DELAY_MAX?d:OTA_DELAY_DEFAULT,ownership_v10_enabled:!!c.ownership_v10_enabled};}
-// validate + save; returns '' or an error code: 'delay' (not an integer 1–24)
+ const d=parseInt(c.delay_hours,10);return{vat_local:s(c.vat_local),rep_local:s(c.rep_local),delay_hours:d>=OTA_DELAY_MIN&&d<=OTA_DELAY_MAX?d:OTA_DELAY_DEFAULT,ownership_v10_enabled:!!c.ownership_v10_enabled,
+  currency:CCY_LIST.includes(c.currency)?c.currency:ccyDefault(cc),oss_no:s(c.oss_no)};}
+// OSS registration: non-Union scheme "EU" + 9 digits, or an EU VAT number (Union scheme); empty = not registered (N/A)
+const validOss=x=>!x||/^(EU\d{9}|[A-Z]{2}[0-9A-Z]{8,12})$/.test(String(x).replace(/\s/g,'').toUpperCase());
+// the currency may change only while the country has no price list versions in use, invoices or statements (MPA 8.1: fixed by the Order Form)
+function ccyLocked(cc){return (S.invoices||[]).some(i=>i.cc===cc)||(S.statements||[]).some(x=>x.cc===cc);}
+// validate + save; returns '' or an error code: 'delay' (not an integer 1–24) | 'currency' (not USD/EUR, or changed while locked) | 'oss' (format)
 function otaCountrySet(cc,patch){const cur=otaCountry(cc);const n=Object.assign({},cur,patch||{});
  if(patch&&'delay_hours' in patch){const raw=String(patch.delay_hours).trim();if(!/^\d+$/.test(raw)||+raw<OTA_DELAY_MIN||+raw>OTA_DELAY_MAX)return 'delay';n.delay_hours=+raw;}
+ if(patch&&'currency' in patch){const c=String(patch.currency||'').trim().toUpperCase();if(!CCY_LIST.includes(c))return 'currency';if(c!==cur.currency&&ccyLocked(cc))return 'currency';n.currency=c;}
+ if(patch&&'oss_no' in patch){const o=String(patch.oss_no||'').replace(/\s/g,'').toUpperCase();if(!validOss(o))return 'oss';n.oss_no=o;}
  n.vat_local=String(n.vat_local||'').trim();n.rep_local=String(n.rep_local||'').trim();n.ownership_v10_enabled=!!n.ownership_v10_enabled;
  otaCountries()[cc]=n;return '';}
+function otaOss(cc){const o=otaCountry(cc).oss_no;return o&&o.toUpperCase()!=='N/A'?o:null;}
 // template values for ONE country: only keys that are set (N/A → absent, never printed)
 function otaLocal(cc){const c=otaCountry(cc);const o={};const na=x=>!x||x.toUpperCase()==='N/A';if(!na(c.vat_local))o.OTA_VAT_LOCAL=c.vat_local;if(!na(c.rep_local))o.OTA_REP_LOCAL=c.rep_local;return o;}
 // demo per-country values shipped by the template agent (LEGAL_DEMO_VALUES.countries[CC].OTA_VAT_LOCAL / OTA_REP_LOCAL), fictional
@@ -228,22 +255,50 @@ function otaCountryDemo(cc){const D=legalDemo();const c=D&&D.countries&&D.countr
 function otaDelayHours(cc){return otaCountry(cc).delay_hours;}
 function ownershipEnabled(cc){return otaCountry(cc).ownership_v10_enabled;}
 
+/* ---------- UAE VAT on OTA invoices (MPA 2.6 v12) ----------
+   OTA charges UAE VAT at the standard rate (5%) if the Partner is resident, registered for VAT or has a fixed establishment in the UAE;
+   otherwise the zero rate (export of services). A Partner in another GCC state accounts for its own indirect tax (OTA: 0%).
+   Source: Partner Data Form fields owned by the legal UI agent — P_INC_COUNTRY, P_TAX_COUNTRY, P_VAT_REGS, P_UAE_FE (yes/no);
+   fallback when the form has no country: S.form.P_COUNTRY, then S.org.country. */
+const VAT_AE_RATE=0.05;
+function taxFormVal(k){const f=S&&S.form&&S.form[k];if(!f||f.status==='na')return '';const v=f&&typeof f==='object'&&'value' in f?f.value:f;return v==null||typeof v==='object'?'':String(v).trim();}
+function isAeText(x){const u=String(x||'').trim().toUpperCase();return u==='AE'||u==='ARE'||u==='UAE'||/UNITED ARAB EMIRATES|ОАЭ|ОАЕ|ОБ'ЄДНАНІ АРАБСЬКІ|ОБЪЕДИН[её]ННЫЕ АРАБСКИЕ/.test(u);}
+const isYes=x=>x===true||/^(yes|y|true|1|да|так|on)$/i.test(String(x==null?'':x).trim());
+// VAT registrations: free text / list, e.g. "AE 100000000000003; GB 123456789". UAE = "AE"/"UAE" token or a 15-digit TRN starting with 1.
+function vatRegsAe(x){const s=String(x||'');if(!s.trim())return false;return s.split(/[,;\n/|]+/).some(p=>{const t=p.trim();if(/\b(none|no|not|n\/a)\b|нет|немає|відсутн|отсутств/i.test(t))return false;return isAeText(t)||/^(AE|UAE)\b/i.test(t)||/\b1\d{14}\b/.test(t.replace(/[\s-]/g,''))||/\bTRN\b/i.test(t);});}
+// vatInfoFor(org) → {rate: 0.05 | 0 (fraction), pct: 5 | 0, ae, reasons:['incorporated'|'resident'|'vat_registered'|'fixed_establishment'], src:'form'|'org'}
+// The form wins; S.org mirrors written by the legal module (country, taxCountry, vatRegs:[ISO], uaeFe:bool) are the fallback.
+function vatInfoFor(org){org=org||(S&&S.org)||{};let inc=taxFormVal('P_INC_COUNTRY'),res=taxFormVal('P_TAX_COUNTRY');const regs=taxFormVal('P_VAT_REGS'),fe=taxFormVal('P_UAE_FE');
+ const reasons=[];let src='form';
+ if(!inc&&!res){src='org';inc=taxFormVal('P_COUNTRY')||org.country||'';res=org.taxCountry||'';}
+ if(inc&&isAeText(inc))reasons.push('incorporated');
+ if(res&&isAeText(res))reasons.push('resident');
+ if(vatRegsAe(regs)||(!regs&&Array.isArray(org.vatRegs)&&org.vatRegs.some(isAeText)))reasons.push('vat_registered');
+ if(isYes(fe)||(!fe&&org.uaeFe===true))reasons.push('fixed_establishment');
+ const ae=reasons.length>0;return{rate:ae?VAT_AE_RATE:0,pct:ae?5:0,ae,reasons,src};}
+// vatRateFor(org) → 5 | 0 (PERCENT, the shared contract read by the legal UI / template agents; VAT_AE = vatRateFor(org)===5)
+function vatRateFor(org){return vatInfoFor(org).pct;}
+
 /* ---------- UAE Central Bank USD→AED reference rates (ТЗ v10 2.2): S.fx.aed = [{date:'YYYY-MM-DD', usd_aed, src}] ----------
    Every OTA Tax Invoice / Tax Credit Note stores the rate of its own date (inv.aedRate, inv.aedRateDate). Edited by OTA Finance (perm ota.vat). */
 const AED_DEMO_RATE=3.6725;
 function fxAed(){S.fx=S.fx||{};if(!Array.isArray(S.fx.aed))S.fx.aed=[];return S.fx.aed;}
-function aedRate(date){const d=String(date?(typeof date==='string'?date:iso(date)):iso(now())).slice(0,10);
- const list=fxAed().slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);let r=null;list.forEach(x=>{if(x.date<=d)r=x;});
- if(!r)r=list[0]||{date:d,usd_aed:AED_DEMO_RATE,src:'CBUAE (demo)'};return{rate:+r.usd_aed,date:r.date,src:r.src||''};}
-// add/replace the rate of a date; returns '' or 'date' | 'rate'
-function aedRateSet(date,rate,src){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||''))||isNaN(new Date(date)))return 'date';const r=parseFloat(String(rate).replace(',','.'));if(!(r>0)||r>100)return 'rate';
- const list=fxAed();const ex=list.find(x=>x.date===date);const row={date,usd_aed:Math.round(r*1e6)/1e6,src:src||'CBUAE'};if(ex)Object.assign(ex,row);else list.push(row);list.sort((a,b)=>a.date<b.date?-1:1);return '';}
+// v12: EUR invoices (Approved Countries in Europe) need the EUR→AED rate as well: rows {date, usd_aed, eur_aed?, src}
+const AED_DEMO_RATE_EUR=4.2725;   // demo EUR→AED reference (fictional, CBUAE-style); OTA Finance enters the real published rate
+// aedRate(date, cur='USD') → {rate, date, src, cur}: the rate of the latest row on/before the date that has a rate for that currency
+function aedRate(date,cur){cur=cur==='EUR'?'EUR':'USD';const k=cur==='EUR'?'eur_aed':'usd_aed';const d=String(date?(typeof date==='string'?date:iso(date)):iso(now())).slice(0,10);
+ const list=fxAed().filter(x=>+x[k]>0).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);let r=null;list.forEach(x=>{if(x.date<=d)r=x;});
+ if(!r)r=list[0]||{date:d,[k]:cur==='EUR'?AED_DEMO_RATE_EUR:AED_DEMO_RATE,src:'CBUAE (demo)'};return{rate:+r[k],date:r.date,src:r.src||'',cur};}
+// add/replace the rate of a date; returns '' or 'date' | 'rate'. cur: 'USD' (default) | 'EUR'
+function aedRateSet(date,rate,src,cur){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||''))||isNaN(new Date(date)))return 'date';const r=parseFloat(String(rate).replace(',','.'));if(!(r>0)||r>100)return 'rate';
+ const k=cur==='EUR'?'eur_aed':'usd_aed';const list=fxAed();const ex=list.find(x=>x.date===date);const row={date,[k]:Math.round(r*1e6)/1e6,src:src||'CBUAE'};if(ex)Object.assign(ex,row);else list.push(row);list.sort((a,b)=>a.date<b.date?-1:1);return '';}
 const fmtAed=r=>{const x=+r;return isFinite(x)?String(Math.round(x*1e6)/1e6).replace(/^(\d+)$/,'$1.0'):'';};
 // hard fallback (ТЗ §3); the real seed merges LEGAL_DEMO_VALUES.ota from 60_legal_templates.js (see otaSeed)
 function otaDefaults(){return{OTA_NAME:'OTA TECHNOLOGY DMCC',OTA_REGNO:'DMCC100200',OTA_LICENCE:'DMCC-100200',OTA_TRN:'100000000000003',
  OTA_ADDR_EN:'Unit No. 0101, Demo Business Centre, Level 1, Demo Tower, Dubai, UAE',OTA_ADDR_L2:'',OTA_SIGNATORY:'Anna Petrova',OTA_SIGNATORY_L2_GEN:'',OTA_TITLE_EN:'Manager',OTA_TITLE_L2:'',OTA_TITLE_L2_GEN:'',
  OTA_BANK_BENEF:'OTA TECHNOLOGY DMCC',OTA_BANK_NAME:'Demo Bank PJSC',OTA_BANK_ADDR:'1 Demo Street, Business Bay, Dubai, UAE',OTA_BANK_ACCOUNT:'1234567890123',
  OTA_BANK_IBAN:'AE070331234567890123456',OTA_BANK_SWIFT:'DEMOAEADXXX',OTA_BANK_CUR:'USD',OTA_BANK_INTER:'',OTA_BANK_INTER_SWIFT:'',
+ OTA_BANK_ACCOUNT_EUR:'1234567890124',OTA_BANK_IBAN_EUR:'AE340331234567890124567',   // v12: separate EUR account (Partner Data Form / 02-DE 5), fictional
   OTA_EMAIL_OPS:'',OTA_EMAIL_LEGAL:'',OTA_EMAIL_FIN:'',OTA_EMAIL_SUPPORT:'',OTA_EMAIL_PRIVACY:'',OTA_SUBPROC_EMAIL:'',OTA_SUBPROC_EMAIL_LOC:'',OTA_SUPPORT_HOURS:'Mon–Fri 09:00–21:00 UTC+4; P1 24/7',CARD_DESCRIPTOR:''};}
 // LEGAL_DEMO_VALUES is a const in 60_legal_templates.js (loaded later): read it lazily, guarded against the temporal dead zone
 function legalDemo(){try{return LEGAL_DEMO_VALUES;}catch(e){return null;}}
@@ -386,7 +441,10 @@ function consumeToken(k){const lot=(S.tokenLots||[]).filter(l=>l.key===k&&!l.rev
 function keyStats(cc){const r={bought:0,used:0,avail:0,revoked:0};for(const l of S.keyLots||[]){if(cc&&l.cc!==cc)continue;r.bought+=l.qty;r.used+=l.used;if(l.revoked)r.revoked+=l.qty-l.used;else r.avail+=lotFree(l);}return r;}
 function keysAvail(cc){return keyStats(cc).avail;}
 function addKeyLot(qty,o){o=o||{};S.keyLots=S.keyLots||[];const lot={id:uid('kl'),cc:o.cc||primaryCc(),qty,used:0,unit:o.unit||0,invoiceId:o.invoiceId||null,invoiceNo:o.invoiceNo||'',issuedAt:o.issuedAt||iso(now())};S.keyLots.push(lot);return lot;}
-function consumeKey(){const lot=(S.keyLots||[]).filter(l=>!l.revoked&&lotFree(l)>0).sort((a,b)=>a.issuedAt<b.issuedAt?-1:1)[0];if(!lot)return null;lot.used++;return lot;}
+// v12: Activation Keys are bought per Approved Country (one SIM per key for that country) → a device consumes a key of its SIM's country (cc); no cc = any lot (legacy)
+function consumeKey(cc){const lot=(S.keyLots||[]).filter(l=>!l.revoked&&lotFree(l)>0&&(!cc||l.cc===cc)).sort((a,b)=>a.issuedAt<b.issuedAt?-1:1)[0];if(!lot)return null;lot.used++;return lot;}
+// country of a SIM = country of its shipment (custody SIMs are shipped per country)
+function simCc(s){const h=s&&s.shipmentId&&(S.shipments||[]).find(x=>x.id===s.shipmentId);return (h&&h.cc)||primaryCc();}
 // a device (IMEI) needs one key for life: true when a SIM in that device already holds a key
 function deviceKeyed(imei){if(!imei)return false;return S.sims.some(s=>s.imei===imei&&s.keyLotId);}
 // legacy names (older modules)

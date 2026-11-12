@@ -5,8 +5,8 @@
   "en": "Monthly Reconciliation Statement",
   "ru": "Ежемесячный акт сверки"
  },
- "ver": "T-RS-v10",
- "effective": "2026-11-07",
+ "ver": "T-RS-v12",
+ "effective": "2026-11-12",
  "cls": "B",
  "blocks": [
   {
@@ -99,8 +99,8 @@
       "bi": true
      },
      {
-      "en": "USD",
-      "ru": "USD"
+      "en": "{{CCY}}",
+      "ru": "{{CCY}}"
      }
     ]
    ]
@@ -161,8 +161,8 @@
     ],
     [
      {
-      "en": "Gross payments received (USD at acquirer rate)",
-      "ru": "Валовые поступления (USD по курсу эквайера)",
+      "en": "Gross payments received (in the Statement currency at the acquirer rate)",
+      "ru": "Валовые поступления (в валюте Акта по курсу эквайера)",
       "bi": true
      },
      {

@@ -5,8 +5,8 @@
   "en": "Service Token Reseller Terms",
   "ru": "Условия перепродажи сервисных токенов"
  },
- "ver": "T-TRT-v10",
- "effective": "2026-11-07",
+ "ver": "T-TRT-v12",
+ "effective": "2026-11-12",
  "cls": "A",
  "blocks": [
   {
@@ -54,8 +54,8 @@
   {
    "id": "TRT-1.4",
    "kind": "clause",
-   "en": "1.4 OTA's name appears only where the law or payment card rules require it: in the End User Terms and Privacy Notice, on the checkout and receipts for Direct Subscriptions, and in the card statement descriptor (which will read \"{{CARD_DESCRIPTOR}}\" or similar). OTA does not appear on Partner's packaging, devices or advertising.",
-   "ru": "1.4 Наименование OTA указывается только там, где этого требуют закон или правила платёжных систем: в Условиях для Конечных пользователей и Политике конфиденциальности, на платёжной странице и в квитанциях по Прямым подпискам, а также в назначении платежа в банковской выписке (в виде «{{CARD_DESCRIPTOR}}» или аналогичном). OTA не указывается на упаковке, устройствах и в рекламе Партнёра."
+   "en": "1.4 OTA's name appears only where the law or payment card rules require it: in the End User Terms and Privacy Notice, on the checkout and receipts for Direct Subscriptions, and in the card statement descriptor (which will read \"OTA*{{P_BRAND}}CONNECT\" or similar). OTA does not appear on Partner's packaging, devices or advertising.",
+   "ru": "1.4 Наименование OTA указывается только там, где этого требуют закон или правила платёжных систем: в Условиях для Конечных пользователей и Политике конфиденциальности, на платёжной странице и в квитанциях по Прямым подпискам, а также в назначении платежа в банковской выписке (в виде «OTA*{{P_BRAND}}CONNECT» или аналогичном). OTA не указывается на упаковке, устройствах и в рекламе Партнёра."
   },
   {
    "id": "TRT-1.5",
@@ -108,8 +108,8 @@
   {
    "id": "TRT-4.1",
    "kind": "clause",
-   "en": "4.1 OTA issues Tokens after full payment, as codes or QR codes in the cabinet, each with a unique serial number recorded by OTA. Each Token can be redeemed once, by the End User in the portal after login by one-time code, and is then attached to the Approved Device chosen by the End User (End User Terms, clauses 3 and 4.1). Unredeemed Tokens are valid for thirty-six (36) months from the date of issue and, during that period, may be exchanged in the cabinet for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded.",
-   "ru": "4.1 OTA выпускает токены после полной оплаты в виде кодов или QR-кодов в кабинете, каждый – с уникальным серийным номером, учитываемым OTA. Каждый токен может быть погашен один раз Конечным пользователем на портале после входа по одноразовому коду и затем закрепляется за выбранным им Одобренным устройством (Условия для пользователей, пп. 3 и 4.1). Непогашенные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены в кабинете на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается."
+   "en": "4.1 OTA issues Tokens after full payment, as alphanumeric codes in the cabinet, each with a unique serial number recorded by OTA. On cards, in the cabinet and in the portal a Token may be called an \"activation code\" or a \"package code\". Each Token can be redeemed once, by the End User in the portal after login by one-time code, and is then attached to the Approved Device chosen by the End User (End User Terms, clauses 3 and 4.1). Unredeemed Tokens are valid for thirty-six (36) months from the date of issue and, during that period, may be exchanged in the cabinet for Tokens of another plan or term: if the new Token is more expensive, Partner pays the difference; if it is cheaper, the difference is not refunded.",
+   "ru": "4.1 OTA выпускает токены после полной оплаты в виде буквенно-цифровых кодов в кабинете, каждый – с уникальным серийным номером, учитываемым OTA. На картах, в кабинете и на портале токен может называться «код активации» или «код пакета». Каждый токен может быть погашен один раз Конечным пользователем на портале после входа по одноразовому коду и затем закрепляется за выбранным им Одобренным устройством (Условия для пользователей, пп. 3 и 4.1). Непогашенные токены действительны тридцать шесть (36) месяцев с даты выпуска и в течение этого срока могут быть обменены в кабинете на токены другого тарифа или срока: если новый токен дороже, Партнёр доплачивает разницу; если дешевле, разница не возвращается."
   },
   {
    "id": "TRT-4.2",
@@ -126,8 +126,8 @@
   {
    "id": "TRT-4.4",
    "kind": "clause",
-   "en": "4.4 Printed cards. Partner may print Tokens on scratch cards or inserts under its own plan names and SKUs, using the layout and wording rules provided by OTA. The code and its QR code (https://{{P_DOMAIN}}/a/[code]) are printed only under an opaque scratch layer; the serial number is printed outside it. Variable data is printed only from the file provided in the cabinet, by a printer bound by confidentiality, and print files are deleted after the run.",
-   "ru": "4.4 Печатные карты. Партнёр вправе печатать токены на скретч-картах или вкладышах под собственными наименованиями тарифов и артикулами (SKU), соблюдая правила макета и формулировок OTA. Код и его QR-код (https://{{P_DOMAIN}}/a/[код]) печатаются только под непрозрачным защитным слоем; серийный номер печатается вне его. Переменные данные печатаются только из файла, выданного в кабинете, типографией, связанной обязательством о конфиденциальности; файлы печати удаляются после тиража."
+   "en": "4.4 Printed cards. Partner may print Tokens on scratch cards or inserts under its own plan names and SKUs, using the layout and wording rules provided by OTA. The code is printed as text only, under an opaque scratch layer (no QR code is printed under the layer); a QR code leading to the portal (https://{{P_DOMAIN}}) and the serial number are printed outside it. Variable data is printed only from the file provided in the cabinet, by a printer bound by confidentiality, and print files are deleted after the run.",
+   "ru": "4.4 Печатные карты. Партнёр вправе печатать токены на скретч-картах или вкладышах под собственными наименованиями тарифов и артикулами (SKU), соблюдая правила макета и формулировок OTA. Код печатается только текстом под непрозрачным защитным слоем (QR-код под слоем не печатается); QR-код со ссылкой на портал (https://{{P_DOMAIN}}) и серийный номер печатаются вне его. Переменные данные печатаются только из файла, выданного в кабинете, типографией, связанной обязательством о конфиденциальности; файлы печати удаляются после тиража."
   },
   {
    "id": "TRT-s5",
@@ -284,8 +284,8 @@
   {
    "id": "TRT-p2",
    "kind": "para",
-   "en": "\"{{P_PROGRAMME}} – [12/24/36/48/60] months. Scratch off and scan the QR code to activate before [date]. The code can be used only once; keep this card (serial no. {serial}). The plan starts on activation and works with the supported device in [country], where mobile networks are available. Notifications are informational and are not an alarm system. Service terms: {{P_DOMAIN}}/terms.\"",
-   "ru": "«{{P_PROGRAMME}} – [12/24/36/48/60] мес. Сотрите защитный слой и отсканируйте QR-код для активации до [дата]. Код используется один раз; сохраните карту (серийный № {serial}). Тариф начинается с даты активации и работает с поддерживаемым устройством в [страна] при наличии мобильной сети. Уведомления носят информационный характер и не являются сигнализацией. Условия сервиса: {{P_DOMAIN}}/terms.»"
+   "en": "\"{{P_PROGRAMME}} – [12/24/36/48/60] months. Scan the QR code or open {{P_DOMAIN}}, sign in, scratch off and enter the code to activate before [date]. The code can be used only once; keep this card (serial no. {serial}). The plan starts on activation and works with the supported device in [country], where mobile networks are available. Notifications are informational and are not an alarm system. Service terms: {{P_DOMAIN}}/terms.\"",
+   "ru": "«{{P_PROGRAMME}} – [12/24/36/48/60] мес. Отсканируйте QR-код или откройте {{P_DOMAIN}}, войдите, сотрите защитный слой и введите код для активации до [дата]. Код используется один раз; сохраните карту (серийный № {serial}). Тариф начинается с даты активации и работает с поддерживаемым устройством в [страна] при наличии мобильной сети. Уведомления носят информационный характер и не являются сигнализацией. Условия сервиса: {{P_DOMAIN}}/terms.»"
   },
   {
    "id": "TRT-h3",
@@ -335,8 +335,8 @@
     ],
     [
      {
-      "en": "plan for 12–60 months; activation code",
-      "ru": "тариф на 12–60 месяцев; код активации",
+      "en": "plan for 12–60 months; activation code (package code)",
+      "ru": "тариф на 12–60 месяцев; код активации (код пакета)",
       "bi": true
      },
      {
@@ -371,13 +371,13 @@
     ],
     [
      {
-      "en": "supported for the term of the plan",
-      "ru": "поддерживается в течение срока тарифа",
+      "en": "supported for the term of the plan; the SIM is not blocked for non-payment – renew at any time without replacing the SIM",
+      "ru": "поддерживается в течение срока тарифа; SIM не блокируется за неуплату – продлить можно в любой момент без замены SIM",
       "bi": true
      },
      {
-      "en": "lifetime, never blocked",
-      "ru": "пожизненно, никогда не блокируется",
+      "en": "lifetime, free forever, works without payment",
+      "ru": "пожизненно, бесплатно навсегда, работает без оплаты",
       "bi": true
      }
     ]
