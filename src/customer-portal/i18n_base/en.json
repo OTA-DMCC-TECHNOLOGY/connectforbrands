@@ -251,7 +251,7 @@
  "c_label": "Code under the scratch layer",
  "c_btn": "Activate",
  "c_demo": "Paste a demo code",
- "c_len": "The code has 16 characters.",
+ "c_len": "The code has 12 characters (older cards: 16).",
  "c_bad": "This code isn’t valid — check the characters.",
  "c_ctry": "This code is for another country.",
  "c_type": "This code is for the {a} plan, but this device needs {b}.",
@@ -507,7 +507,7 @@
  "rc_item": "Purchase:",
  "pk_title": "Activate a package code",
  "pk_sub": "Scratch off the protective layer on the card and enter the code printed under it. Then choose the device the plan applies to.",
- "pk_hint": "16 characters, printed under the scratch layer.",
+ "pk_hint": "12 characters, printed under the scratch layer (older cards: 16).",
  "pk_next": "Next: choose the device",
  "pk_have": "I have a package code",
  "si_pkg": "Sign in, then enter your package code.",
@@ -558,5 +558,6 @@
  "cx_neutral": "If a matching subscription exists in a country where online cancellation without login applies, it has been cancelled; otherwise please sign in to manage your subscription. [wording to be approved]",
  "cx_neutral_t": "Request received",
  "cx_conf_neutral": "Request {ref} received on {t}. If a matching subscription exists in a country where online cancellation without login applies, it has been cancelled; otherwise please sign in to manage your subscription. [wording to be approved]",
- "CCGATE": "CONNECT is not open in this country yet. Please try again later or contact the seller."
+ "CCGATE": "CONNECT is not open in this country yet. Please try again later or contact the seller.",
+ "c_typo": "There is a typo in this code. Check each character and enter it again."
 }

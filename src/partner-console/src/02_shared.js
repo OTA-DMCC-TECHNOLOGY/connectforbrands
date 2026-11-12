@@ -194,7 +194,10 @@ function shipReceive(h,r,at){const ts=at||iso(now());const n=clamp(r.received|0,
    deviceActivate(sim, {via:'token', code} | {via:'subscription', sub}) → {ok, key:bool} | {err:'no_key'|'no_token'|'no_sub'|'plan'|…} */
 function subActive(s,at){const x=(S.subs||[]).find(q=>q.iccid===(s&&s.iccid)&&q.status==='active'&&(!q.paidUntil||q.paidUntil>iso(at||now())));return x||null;}
 function deviceActivate(s,o){o=o||{};if(!s)return{err:'no_sim'};const needKey=!s.keyLotId&&!deviceKeyed(s.imei);const kcc=simCc(s);
- if(needKey&&keysAvail(kcc)<=0)return{err:'no_key'};
+ // print ТЗ v1.4: a 12-character code carries the key reserved for it (c.keyResLotId) — that key is used instead of a free one
+ const rc=o.code&&o.code.keyResLotId?(S.keyLots||[]).find(l=>l.id===o.code.keyResLotId&&!l.revoked&&(l.reserved||0)>0&&l.used<l.qty&&(!kcc||l.cc===kcc)):null;
+ const takeKey=()=>{if(rc){keyRelease(rc.id,1);rc.used++;delete o.code.keyResLotId;return rc;}return consumeKey(kcc);};
+ if(needKey&&!rc&&keysAvail(kcc)<=0)return{err:'no_key'};
  const ts=now();let lot=null;
  if(o.via==='subscription'){const sub=o.sub||subActive(s);if(!sub)return{err:'no_sub'};
   if(needKey){const kl=consumeKey(kcc);s.keyLotId=kl?kl.id:null;}
@@ -202,7 +205,7 @@ function deviceActivate(s,o){o=o||{};if(!s)return{err:'no_sim'};const needKey=!s
   audit('activation',s.iccid,{iccid:s.iccid,imei:s.imei,via:'subscription',sub:sub.id,key:needKey});return{ok:true,key:needKey,sub};}
  const c=o.code;if(!c)return{err:'no_code'};const k=pkgKey(c.plan,c.term);
  if(tokensAvail(k,kcc)<=0)return{err:'no_token'};
- lot=consumeToken(k,kcc);c.lotId=lot?lot.id:null;if(needKey){const kl=consumeKey(kcc);s.keyLotId=kl?kl.id:null;}c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
+ lot=consumeToken(k,kcc);c.lotId=lot?lot.id:null;if(needKey){const kl=takeKey();s.keyLotId=kl?kl.id:null;}else if(rc){keyRelease(rc.id,1);delete c.keyResLotId;}/* a keyed device frees the reservation */c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
  audit('activation',fmtCode(c.code),{iccid:s.iccid,imei:s.imei,via:'token',token:k,key:needKey});
  s.plan=c.plan;s.term=c.term;s.code=c.code;const until=new Date(ts.getTime());until.setMonth(until.getMonth()+c.term);s.paidUntil=iso(until);s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'package']);
  return{ok:true,key:needKey,lot};}

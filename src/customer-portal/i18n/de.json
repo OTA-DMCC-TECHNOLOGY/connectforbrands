@@ -251,7 +251,7 @@
  "c_label": "Code unter der Rubbelschicht",
  "c_btn": "Aktivieren",
  "c_demo": "Demo-Code einfügen",
- "c_len": "Der Code hat 16 Zeichen.",
+ "c_len": "Der Code hat 12 Zeichen (ältere Karten: 16).",
  "c_bad": "Der Code ist ungültig — prüfen Sie die Zeichen.",
  "c_ctry": "Dieser Code ist für ein anderes Land.",
  "c_type": "Dieser Code ist für das Paket {a}, das Gerät braucht aber {b}.",
@@ -356,7 +356,7 @@
  "rc_item": "Kauf:",
  "pk_title": "Paketcode aktivieren",
  "pk_sub": "Rubbeln Sie die Schutzschicht auf der Karte frei und geben Sie den darunter aufgedruckten Code ein. Wählen Sie dann das Gerät, für das der Tarif gelten soll.",
- "pk_hint": "16 Zeichen, unter der Rubbelschicht aufgedruckt.",
+ "pk_hint": "12 Zeichen, unter der Rubbelschicht aufgedruckt (ältere Karten: 16).",
  "pk_next": "Weiter: Gerät wählen",
  "pk_have": "Ich habe einen Paketcode",
  "si_pkg": "Melden Sie sich an und geben Sie dann Ihren Paketcode ein.",
@@ -402,5 +402,6 @@
  "cx_neutral": "Falls ein passendes Abonnement in einem Land besteht, in dem die Online-Kündigung ohne Anmeldung gilt, wurde es gekündigt; andernfalls melden Sie sich bitte an, um Ihr Abonnement zu verwalten. [wording to be approved]",
  "cx_neutral_t": "Anfrage eingegangen",
  "cx_conf_neutral": "Anfrage {ref} eingegangen am {t}. Falls ein passendes Abonnement in einem Land besteht, in dem die Online-Kündigung ohne Anmeldung gilt, wurde es gekündigt; andernfalls melden Sie sich bitte an, um Ihr Abonnement zu verwalten. [wording to be approved]",
- "CCGATE": "CONNECT ist in diesem Land noch nicht verfügbar. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Verkäufer."
+ "CCGATE": "CONNECT ist in diesem Land noch nicht verfügbar. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Verkäufer.",
+ "c_typo": "Dieser Code enthält einen Tippfehler. Prüfen Sie jedes Zeichen und geben Sie den Code erneut ein."
 }

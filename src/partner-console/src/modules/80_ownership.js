@@ -97,6 +97,22 @@ function own_mkAcc(b,o){const id=own_id('acc');const c=String(o.contact||'');b.a
 function own_ownerLabel(b,id){const a=own_acc(b,id);return a&&a.name?a.name:(id?t('own.anonOwner'):'—');}
 
 /* ---------- demo seed (bridge + Dealer/Installer scopes) ---------- */
+/* ---------- v14 card codes from 85_print (12-char Crockford, own 12-digit serial, batchId). Old 16-char codes keep their mapping.
+   The bridge record is built EXACTLY like 85_print's prn_bridgePush (same fields, same status rule) so the two writers never fight. ---------- */
+function own_isV14(c){return !!c&&!!c.batchId;}
+function own_serial(c){return own_isV14(c)?String(c.serial||'').replace(/ /g,''):(parseCode(c.code).serial||'');}
+function own_serialShow(c){return own_isV14(c)?String(c.serial||''):(parseCode(c.code).serial||'');}
+function own_v14Status(c){return c.status==='activated'?'redeemed':c.status==='printed'?'new':'blocked';}   // printed → new; activated → redeemed; generated / exported_for_print / blocked / expired → blocked
+function own_v14Batch(c){try{const x=typeof prn_batch==='function'?prn_batch(c.batchId):null;return (x&&x.no)||'';}catch(e){return '';}}
+// returns true when the record changed
+function own_v14Sync(b,c,P){let r=b.codes[c.code];if(r&&r.partner&&r.partner!==P)return false;let ch=false;
+ if(r&&r.status==='redeemed'&&c.status==='printed')return false;   // redeemed in the portal: 85_print activates it (prn_fromPortal)
+ const st=own_v14Status(c);const want={partner:P,serial:own_serial(c),plan:c.plan,term:c.term,cc:c.cc,batch:own_v14Batch(c),deadline:c.deadline,format:'v14'};
+ if(!r){r=b.codes[c.code]=Object.assign({status:st,device_id:null,redeemed_at:null,blocked_at:null},want);ch=true;}
+ Object.keys(want).forEach(k=>{if(r[k]!==want[k]){r[k]=want[k];ch=true;}});
+ if(r.status!=='redeemed'&&r.status!==st){r.status=st;if(st==='blocked'){r.blocked_at=c.blockedAt||c.expiredAt||iso(now());r.blocked_reason=c.status==='expired'?'expired':c.status==='blocked'?(c.blockReason||'lost'):'not_printed';}else{r.blocked_at=null;delete r.blocked_reason;}ch=true;}
+ return ch;}
+function own_codeNorm(v){if(typeof prnCodeNorm==='function')return prnCodeNorm(v);return String(v==null?'':v).toUpperCase().replace(/[\s\-‐-―_.]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1');}
 function own_seedScopes(){if(S.sims.some(s=>s.sold_by_user_id||s.installed_by_user_id))return;
  S.sims.forEach((s,idx)=>{if(s.status==='stock')return;
   if(idx%6===1||[1,3,7].includes(idx))s.sold_by_user_id='u_p_dealer';
@@ -107,7 +123,7 @@ function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const a
  const last=S.sims[S.sims.length-1];if(last&&last.status==='stock'&&added.has(last.iccid))Object.assign(b.sims[last.iccid],{status:'deactivated',deactivated_reason:'lost'});
  // activation codes: issued → new, activated → redeemed (pinned to the device), void → blocked
  const imeiOf=ic=>{const s=ic&&own_sim(ic);return s?s.imei:null;};
- (S.codes||[]).forEach(c=>{if(b.codes[c.code])return;const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
+ (S.codes||[]).forEach(c=>{if(b.codes[c.code])return;if(own_isV14(c)){own_v14Sync(b,c,P);return;}const pc=parseCode(c.code);b.codes[c.code]={partner:P,serial:pc.serial||'',plan:c.plan,term:c.term,status:c.status==='activated'?'redeemed':c.status==='void'?'blocked':'new',
   device_id:c.status==='activated'?imeiOf(c.iccid):null,redeemed_at:c.activatedAt||null,blocked_at:c.status==='void'?(c.voidAt||ago(120)):null};});
  const st=own_st();const blk=(S.codes||[]).find(c=>c.reseller==='r1'&&c.status==='issued'&&b.codes[c.code]&&b.codes[c.code].status==='new');
  if(blk){blk.status='void';blk.voidAt=ago(30);blk.blockedAt=blk.voidAt;Object.assign(b.codes[blk.code],{status:'blocked',blocked_at:blk.voidAt,blocked_reason:'lost'});
@@ -199,7 +215,7 @@ function own_sync(){if(!S||!S.authed||!S.org||!Array.isArray(S.sims))return null
    S.sims.forEach(s=>{b.sims[s.iccid]=own_simRec(s);});b.bindings=b.bindings.concat(S.own.bindings);b.transfers=b.transfers.concat(S.own.transfers);b.requests=b.requests.concat(S.own.requests);b.seeded_partners.push(P);}
   else own_seedInto(b);dirty=true;}
  for(const s of S.sims){const r=b.sims[s.iccid];if(!r){b.sims[s.iccid]=own_simRec(s);dirty=true;}else if(r.partner===P&&(s.imei||null)!==r.imei){r.imei=s.imei||null;dirty=true;}}
- for(const c of S.codes||[]){const r=b.codes[c.code];if(!r){b.codes[c.code]={partner:P,serial:parseCode(c.code).serial||'',plan:c.plan,term:c.term,status:c.status==='void'?'blocked':c.status==='activated'?'redeemed':'new',device_id:null,redeemed_at:c.activatedAt||null,blocked_at:c.voidAt||null};dirty=true;}
+ for(const c of S.codes||[]){if(own_isV14(c)){if(own_v14Sync(b,c,P))dirty=true;continue;}const r=b.codes[c.code];if(!r){b.codes[c.code]={partner:P,serial:parseCode(c.code).serial||'',plan:c.plan,term:c.term,status:c.status==='void'?'blocked':c.status==='activated'?'redeemed':'new',device_id:null,redeemed_at:c.activatedAt||null,blocked_at:c.voidAt||null};dirty=true;}
   else if(c.status==='void'&&r.status==='new'){r.status='blocked';r.blocked_at=c.voidAt||iso(now());dirty=true;}}
  const ccOf=own_codeCcFn();for(const c of S.codes||[]){const r=b.codes[c.code];if(!r||(r.partner&&r.partner!==P))continue;const cc=ccOf(c);if(cc&&r.cc!==cc){r.cc=cc;dirty=true;}}   // country of issue for the portal (v12)
  const pc=own_partnerContacts();const old=b.partnerContacts.filter(x=>x.partner===P);
@@ -500,15 +516,17 @@ function own_integrations(ctx,items){const st=own_st();const role=S.ui.own_apiRo
  return apiCard+hookCard+scCard;}
 
 /* ===== Block an unredeemed activation code (4.4 p.5, criterion 17) ===== */
-function own_batchKey(c){return c.reseller+'|'+c.plan+'-'+c.term+'|'+String(c.createdAt||'').slice(0,10);}
-function own_codeState(c,b){const r=b.codes[c.code];if(r&&r.status==='redeemed'||c.status==='activated')return 'redeemed';if(r&&r.status==='blocked'||c.status==='void')return 'blocked';return 'new';}
+function own_batchKey(c){if(c.batchId)return 'v14|'+c.batchId;return c.reseller+'|'+c.plan+'-'+c.term+'|'+String(c.createdAt||'').slice(0,10);}
+function own_codeState(c,b){const r=b.codes[c.code];if(own_isV14(c)){if(c.status==='activated'||(r&&r.status==='redeemed'))return 'redeemed';return own_v14Status(c)==='new'?'new':'blocked';}if(r&&r.status==='redeemed'||c.status==='activated')return 'redeemed';if(r&&r.status==='blocked'||c.status==='void')return 'blocked';return 'new';}
 route('own-codes',{nav:'own-codes',render(){if(!own_canDo('block'))return own_noAccess(t('own.cb.title'));const b=own_b();const st=own_st();const q=S.ui.own_cq||'';
  let found=[];if(q){const cq=String(q).toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1').replace(/[^0-9A-Z]/g,'');
-  found=(S.codes||[]).filter(c=>cq.length>=16?c.code===cq.slice(0,16):parseCode(c.code).serial===cq.slice(-5)&&(cq.length<=5||c.code.indexOf(cq.slice(0,cq.length-5))===0)).slice(0,20);}
+  const n12=own_codeNorm(q);
+  found=(S.codes||[]).filter(c=>{if(own_isV14(c))return n12.length===12&&(c.code===n12||own_serial(c)===n12);   // v14: 12-char code or 12-digit serial (spaces, dashes, case ignored)
+   return cq.length>=16?c.code===cq.slice(0,16):cq.length<=11&&parseCode(c.code).serial===cq.slice(-5)&&(cq.length<=5||c.code.indexOf(cq.slice(0,cq.length-5))===0);}).slice(0,20);}
  const res=q?(found.length?ui.table([{label:t('own.cb.code')},{label:t('own.cb.serial')},{label:t('own.c.plan')},{label:t('own.cb.point')},{label:t('c.status')},{label:''}],found.map(c=>{const s=own_codeState(c,b);
-  return{cells:[`<span class="mono nowrap">${fmtCode(c.code)}</span>`,`<span class="mono">${esc(parseCode(c.code).serial)}</span>`,esc(pkgLabel(c.plan,c.term)),esc((S.resellers||[]).find(r=>r.id===c.reseller)?.name||'—'),ui.badge(t('own.cs.'+s),{new:'info',redeemed:'ok',blocked:'bad'}[s]),s==='new'?ui.btn(t('own.cb.block'),{size:'sm',kind:'danger',act:'own_blockAsk',arg:'code|'+c.code}):`<span class="xs faint">${t('own.cb.cant.'+s)}</span>`]};})):ui.note('warn',t('own.cb.nf'))):'';
+  return{cells:[`<span class="mono nowrap">${fmtCode(c.code)}</span>`,`<span class="mono nowrap">${esc(own_serialShow(c))}</span>`,esc(pkgLabel(c.plan,c.term)),esc((S.resellers||[]).find(r=>r.id===c.reseller)?.name||'—'),ui.badge(t('own.cs.'+s),{new:'info',redeemed:'ok',blocked:'bad'}[s]),s==='new'?ui.btn(t('own.cb.block'),{size:'sm',kind:'danger',act:'own_blockAsk',arg:'code|'+c.code}):`<span class="xs faint">${t('own.cb.cant.'+s)}</span>`]};})):ui.note('warn',t('own.cb.nf'))):'';
  const batches={};for(const c of S.codes||[]){if(own_codeState(c,b)!=='new')continue;const k=own_batchKey(c);batches[k]=(batches[k]||0)+1;}
- const bopts=Object.keys(batches).sort().reverse().map(k=>{const [rid,pk,d]=k.split('|');const r=(S.resellers||[]).find(x=>x.id===rid);const p=pkgSplit(pk);return [k,`${d} · ${r?r.name:'—'} · ${PLAN_NAME[p.plan]} ${termLabel(p.term)} · ${fmtNum(batches[k])}`];});
+ const bopts=Object.keys(batches).sort().reverse().map(k=>{if(k.startsWith('v14|')){const c0=(S.codes||[]).find(c=>own_batchKey(c)===k);return [k,`${own_v14Batch(c0)||k.slice(4)} · ${c0?esc(pkgLabel(c0.plan,c0.term)):''}${c0&&c0.cc?' · '+c0.cc:''} · ${fmtNum(batches[k])}`];}const [rid,pk,d]=k.split('|');const r=(S.resellers||[]).find(x=>x.id===rid);const p=pkgSplit(pk);return [k,`${d} · ${r?r.name:'—'} · ${PLAN_NAME[p.plan]} ${termLabel(p.term)} · ${fmtNum(batches[k])}`];});
  const findCard=ui.card({title:t('own.cb.bySerial'),body:`<form id="own_cbF" data-form="own_codeFind" class="row wrap g8 own_cbf" novalidate><label class="own_sr" for="own_cq">${t('own.cb.q')}</label><input class="inp mono grow" id="own_cq" name="own_cq" value="${esc(q)}" placeholder="${esc(t('own.cb.qPh'))}" autocomplete="off"><button class="btn primary" type="submit"><span>${t('own.cb.find')}</span></button></form>${res?`<div style="margin-top:12px">${res}</div>`:''}`});
  const batchCard=ui.card({title:t('own.cb.byBatch'),body:bopts.length?`<form id="own_cbB" data-form="own_batch" class="row wrap g8 own_cbf" novalidate><label class="own_sr" for="own_cbs">${t('own.cb.batch')}</label><select class="inp grow own_sel" id="own_cbs" name="own_cbs">${bopts.map(([v,l])=>own_opt(v,l,'')).join('')}</select><button class="btn danger" type="submit"><span>${t('own.cb.blockBatch')}</span></button></form><p class="xs faint">${t('own.cb.batchP')}</p>`:`<p class="muted small">${t('own.cb.noBatch')}</p>`});
  const bl=st.codes.blocked.slice().reverse().slice(0,50);
@@ -522,9 +540,10 @@ function own_blockAsk(arg){const i=String(arg).indexOf('|');const mode=arg.slice
   ${ui.field({id:'own_br',label:t('own.dc.reason'),type:'select',options:[['lost',t('own.cb.r.lost')],['stolen',t('own.cb.r.stolen')],['other',t('own.cb.r.other')]]})}${ui.note('warn',t('own.cb.irrev'))}</form>`,own_cancel()+own_submit(t('own.cb.block'),'own_bkF','danger'));}
 FORM.own_block=f=>{const d=formData(f);const i=d.arg.indexOf('|');const mode=d.arg.slice(0,i),val=d.arg.slice(i+1);const reason=['lost','stolen','other'].includes(d.own_br)?d.own_br:'other';const who=actorName();const st=own_st();
  const list=mode==='code'?(S.codes||[]).filter(c=>c.code===val):(S.codes||[]).filter(c=>own_batchKey(c)===val);let n=0;const at=iso(now());
- own_tx(b=>{list.forEach(c=>{if(own_codeState(c,b)!=='new')return;const pc=parseCode(c.code);const r=b.codes[c.code]||(b.codes[c.code]={partner:own_pc(),serial:pc.serial,plan:c.plan,term:c.term});
-  Object.assign(r,{status:'blocked',blocked_at:at,blocked_by:who,blocked_reason:reason});c.status='void';c.voidAt=at;c.blockedAt=at;
-  st.codes.blocked.push({code:c.code,serial:pc.serial,plan:c.plan,term:c.term,reseller:c.reseller,at,by:who,reason,mode});n++;});own_event(b,'code.blocked',{n,mode});});
+ own_tx(b=>{list.forEach(c=>{if(own_codeState(c,b)!=='new')return;const r=b.codes[c.code]||(b.codes[c.code]={partner:own_pc(),serial:own_serial(c),plan:c.plan,term:c.term});
+  Object.assign(r,{status:'blocked',blocked_at:at,blocked_by:who,blocked_reason:reason});
+  if(own_isV14(c)){c.status='blocked';c.voidAt=at;c.blockedAt=at;c.blockReason=reason;c.blockedBy=who;if(typeof prn_releaseKey==='function'){try{prn_releaseKey(c);}catch(e){}}}else{c.status='void';c.voidAt=at;c.blockedAt=at;}
+  st.codes.blocked.push({code:c.code,serial:own_serialShow(c),plan:c.plan,term:c.term,reseller:c.reseller,at,by:who,reason,mode});n++;});own_event(b,'code.blocked',{n,mode});});
  if(st.codes.blocked.length>2000)st.codes.blocked=st.codes.blocked.slice(-2000);
  audit('code.block',mode==='code'?val:val.split('|').slice(1).join(' '),{mode,n,reason});log(t('own.cb.log',{n}));closeOverlay();toast(t('own.cb.done',{n:fmtNum(n)}));rerender();};
 
@@ -685,7 +704,7 @@ uk:{
 'own.api.title':'API: що бачить роль','own.api.as':'Роль','own.api.p':'Відповідь API для пристрою — ті самі поля, що й в інтерфейсі. Місцезнаходження й події не повертаються для жодної ролі.','own.api.none':'У цієї ролі немає пристроїв.',
 'own.sc.title':'Перевірка: місцезнаходження й події не потрапляють до ролей партнера','own.sc.p':'Автоматична перевірка чотирьох каналів: інтерфейс, API, вивантаження, webhook.','own.sc.role':'Роль','own.sc.ui':'Інтерфейс','own.sc.export':'Вивантаження','own.sc.ok':'чисто','own.sc.na':'недоступно ролі','own.sc.scope':'пристроїв: {n}','own.sc.foot':'Інші розділи кабінету для дилера й монтажника закриті.',
 'own.cb.title':'Блокування кодів активації','own.cb.sub':'Заблокуйте втрачений чи викрадений непогашений код за серійним номером або всю партію.','own.cb.t7':'Покупець, який введе заблокований код, побачить:',
-'own.cb.bySerial':'За серійним номером','own.cb.q':'Серійний номер або код','own.cb.qPh':'Серійний номер (5 символів) або повний код','own.cb.find':'Знайти','own.cb.nf':'Код не знайдено.','own.cb.code':'Код','own.cb.serial':'Серійний №','own.cb.point':'Точка продажу','own.cb.block':'Заблокувати код',
+'own.cb.bySerial':'За серійним номером','own.cb.q':'Серійний номер або код','own.cb.qPh':'Код (12 або 16 символів) чи серійний номер (12 цифр або 5 символів)','own.cb.find':'Знайти','own.cb.nf':'Код не знайдено.','own.cb.code':'Код','own.cb.serial':'Серійний №','own.cb.point':'Точка продажу','own.cb.block':'Заблокувати код',
 'own.cb.cant.redeemed':'погашено — блокування неможливе','own.cb.cant.blocked':'уже заблоковано','own.cs.new':'Не погашено','own.cs.redeemed':'Погашено','own.cs.blocked':'Заблоковано',
 'own.cb.byBatch':'Усю партію','own.cb.batch':'Партія','own.cb.blockBatch':'Заблокувати партію','own.cb.batchP':'Блокуються лише непогашені коди партії. Погашені коди закріплені за пристроями й не змінюються.','own.cb.noBatch':'Немає партій із непогашеними кодами.',
 'own.cb.hist':'Заблоковані коди','own.cb.histNone':'Ще нічого не заблоковано.','own.cb.confirmT':'Заблокувати коди','own.cb.confirmP':'Буде заблоковано непогашених кодів: {n}.','own.cb.irrev':'Блокування не можна скасувати. Заміну видають за Документом 03, п. 4.2.','own.cb.nothing':'Немає непогашених кодів для блокування',
@@ -764,7 +783,7 @@ en:{
 'own.api.title':'API: what a role sees','own.api.as':'Role','own.api.p':'The API response for a device — the same fields as the interface. Location and events are never returned to any role.','own.api.none':'This role has no devices.',
 'own.sc.title':'Check: no location or events reach partner roles','own.sc.p':'Automatic check of four channels: interface, API, export, webhook.','own.sc.role':'Role','own.sc.ui':'Interface','own.sc.export':'Export','own.sc.ok':'clean','own.sc.na':'not available to role','own.sc.scope':'devices: {n}','own.sc.foot':'Other console sections are closed to Dealers and Installers.',
 'own.cb.title':'Block activation codes','own.cb.sub':'Block a lost or stolen unredeemed code by serial number, or a whole batch.','own.cb.t7':'A buyer who enters a blocked code will see:',
-'own.cb.bySerial':'By serial number','own.cb.q':'Serial number or code','own.cb.qPh':'Serial number (5 characters) or full code','own.cb.find':'Find','own.cb.nf':'Code not found.','own.cb.code':'Code','own.cb.serial':'Serial No.','own.cb.point':'Point of sale','own.cb.block':'Block code',
+'own.cb.bySerial':'By serial number','own.cb.q':'Serial number or code','own.cb.qPh':'Code (12 or 16 characters) or serial number (12 digits or 5 characters)','own.cb.find':'Find','own.cb.nf':'Code not found.','own.cb.code':'Code','own.cb.serial':'Serial No.','own.cb.point':'Point of sale','own.cb.block':'Block code',
 'own.cb.cant.redeemed':'redeemed — can’t be blocked','own.cb.cant.blocked':'already blocked','own.cs.new':'Not redeemed','own.cs.redeemed':'Redeemed','own.cs.blocked':'Blocked',
 'own.cb.byBatch':'Whole batch','own.cb.batch':'Batch','own.cb.blockBatch':'Block batch','own.cb.batchP':'Only unredeemed codes of the batch are blocked. Redeemed codes stay pinned to their devices.','own.cb.noBatch':'No batches with unredeemed codes.',
 'own.cb.hist':'Blocked codes','own.cb.histNone':'Nothing blocked yet.','own.cb.confirmT':'Block codes','own.cb.confirmP':'Unredeemed codes to block: {n}.','own.cb.irrev':'Blocking can’t be undone. Replacements are issued under Document 03, clause 4.2.','own.cb.nothing':'No unredeemed codes to block',
@@ -843,7 +862,7 @@ ru:{
 'own.api.title':'API: что видит роль','own.api.as':'Роль','own.api.p':'Ответ API по устройству — те же поля, что и в интерфейсе. Местоположение и события не возвращаются ни одной роли.','own.api.none':'У этой роли нет устройств.',
 'own.sc.title':'Проверка: местоположение и события не попадают к ролям партнёра','own.sc.p':'Автоматическая проверка четырёх каналов: интерфейс, API, выгрузка, webhook.','own.sc.role':'Роль','own.sc.ui':'Интерфейс','own.sc.export':'Выгрузка','own.sc.ok':'чисто','own.sc.na':'недоступно роли','own.sc.scope':'устройств: {n}','own.sc.foot':'Остальные разделы кабинета для дилера и монтажника закрыты.',
 'own.cb.title':'Блокировка кодов активации','own.cb.sub':'Заблокируйте утерянный или похищенный непогашенный код по серийному номеру или всю партию.','own.cb.t7':'Покупатель, который введёт заблокированный код, увидит:',
-'own.cb.bySerial':'По серийному номеру','own.cb.q':'Серийный номер или код','own.cb.qPh':'Серийный номер (5 символов) или полный код','own.cb.find':'Найти','own.cb.nf':'Код не найден.','own.cb.code':'Код','own.cb.serial':'Серийный №','own.cb.point':'Точка продаж','own.cb.block':'Заблокировать код',
+'own.cb.bySerial':'По серийному номеру','own.cb.q':'Серийный номер или код','own.cb.qPh':'Код (12 или 16 символов) или серийный номер (12 цифр или 5 символов)','own.cb.find':'Найти','own.cb.nf':'Код не найден.','own.cb.code':'Код','own.cb.serial':'Серийный №','own.cb.point':'Точка продаж','own.cb.block':'Заблокировать код',
 'own.cb.cant.redeemed':'погашен — блокировка невозможна','own.cb.cant.blocked':'уже заблокирован','own.cs.new':'Не погашен','own.cs.redeemed':'Погашен','own.cs.blocked':'Заблокирован',
 'own.cb.byBatch':'Всю партию','own.cb.batch':'Партия','own.cb.blockBatch':'Заблокировать партию','own.cb.batchP':'Блокируются только непогашенные коды партии. Погашенные коды закреплены за устройствами и не меняются.','own.cb.noBatch':'Нет партий с непогашенными кодами.',
 'own.cb.hist':'Заблокированные коды','own.cb.histNone':'Пока ничего не заблокировано.','own.cb.confirmT':'Заблокировать коды','own.cb.confirmP':'Будет заблокировано непогашенных кодов: {n}.','own.cb.irrev':'Блокировку нельзя отменить. Замену выдают по Документу 03, п. 4.2.','own.cb.nothing':'Нет непогашенных кодов для блокировки',

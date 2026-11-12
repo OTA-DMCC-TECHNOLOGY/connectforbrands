@@ -439,7 +439,15 @@ function addTokenLot(k,qty,o){o=o||{};S.tokenLots=S.tokenLots||[];const {plan,te
 // pass the device's country (cc) so a DE device uses DE (EUR) tokens; no cc = any lot (legacy callers)
 function consumeToken(k,cc){const lot=(S.tokenLots||[]).filter(l=>l.key===k&&(!cc||l.cc===cc)&&!l.revoked&&lotFree(l)>0&&!lotExpired(l)).sort((a,b)=>a.expiresAt<b.expiresAt?-1:a.expiresAt>b.expiresAt?1:0)[0];
  if(!lot)return null;lot.used++;return lot;}
-function keyStats(cc){const r={bought:0,used:0,avail:0,revoked:0};for(const l of S.keyLots||[]){if(cc&&l.cc!==cc)continue;r.bought+=l.qty;r.used+=l.used;if(l.revoked)r.revoked+=l.qty-l.used;else r.avail+=lotFree(l);}return r;}
+// avail excludes keys reserved for printed codes (lot.reserved, print ТЗ v1.4; the print share is lot.prnRes)
+function keyStats(cc){const r={bought:0,used:0,avail:0,revoked:0,reserved:0};for(const l of S.keyLots||[]){if(cc&&l.cc!==cc)continue;r.bought+=l.qty;r.used+=l.used;if(l.revoked)r.revoked+=l.qty-l.used;else{r.avail+=lotFree(l);r.reserved+=l.reserved||0;}}return r;}
+/* key reservations for printed codes (85_print, print ТЗ v1.4): each new 12-character code reserves ONE Activation Key of its country.
+   keyReserve(cc, n) → [[lotId, k], …] (oldest lots first; all-or-nothing, null when fewer than n are free); keyRelease(lotId, n=1) undoes one share.
+   Both move lot.reserved (honoured by lotFree / keysAvail) and lot.prnRes (the print share of it). */
+function keyReserve(cc,n){n=Math.max(0,n|0);const lots=(S.keyLots||[]).filter(l=>!l.revoked&&(!cc||l.cc===cc)).sort((a,b)=>a.issuedAt<b.issuedAt?-1:1);const take=[];let left=n;
+ for(const l of lots){if(left<=0)break;const k=Math.min(lotFree(l),left);if(k>0){l.reserved=(l.reserved||0)+k;l.prnRes=(l.prnRes||0)+k;take.push([l.id,k]);left-=k;}}
+ if(left>0){take.forEach(([id,k])=>keyRelease(id,k));return null;}return take;}
+function keyRelease(lotId,n){n=n==null?1:n|0;const l=(S.keyLots||[]).find(x=>x.id===lotId);if(!l||n<=0)return false;const k=Math.min(n,l.reserved||0);l.reserved=(l.reserved||0)-k;l.prnRes=Math.max(0,(l.prnRes||0)-k);return k>0;}
 function keysAvail(cc){return keyStats(cc).avail;}
 function addKeyLot(qty,o){o=o||{};S.keyLots=S.keyLots||[];const lot={id:uid('kl'),cc:o.cc||primaryCc(),qty,used:0,unit:o.unit||0,invoiceId:o.invoiceId||null,invoiceNo:o.invoiceNo||'',issuedAt:o.issuedAt||iso(now())};S.keyLots.push(lot);return lot;}
 // v12: Activation Keys are bought per Approved Country (one SIM per key for that country) → a device consumes a key of its SIM's country (cc); no cc = any lot (legacy)

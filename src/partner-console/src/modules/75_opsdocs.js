@@ -323,7 +323,9 @@ function ops_build(type,id){type=String(type||'').toLowerCase();try{
 function ops_nf(){return ui.page({title:t('ops.nf'),crumbs:[[t('ops.docs.title'),'#opsdocs']],body:ui.card({body:ui.empty('search',t('ops.nf'),t('ops.nf.p'),ui.btn(t('ops.docs.title'),{href:'#opsdocs'}))})});}
 const OPS_TYPE_TONE={INV:'accent',CN:'bad',RS:'info',CI:'violet',PF:'warn',SR:'ok',A2:'warn'};
 function ops_typeBadge(T){return ui.badge(t('ops.type.'+T),OPS_TYPE_TONE[T]);}
-route('opsdoc',{nav:'opsdocs',render(type,id){ops_ensure();const d=ops_build(type,id);if(!d)return ops_nf();const T=d.type.toUpperCase();
+// print ТЗ v1.4: the A2 box label belongs to 85_print (#prn-labels--id); old links #opsdoc--a2--id forward there
+route('opsdoc',{nav:'opsdocs',render(type,id){if(String(type||'').toLowerCase()==='a2'){setTimeout(()=>go('prn-labels',id),0);return ui.page({title:t('ops.type.A2'),body:ui.note('info',`<a href="#prn-labels--${esc(id)}">${esc(t('prn.lb.btn'))} →</a>`)});}
+ ops_ensure();const d=ops_build(type,id);if(!d)return ops_nf();const T=d.type.toUpperCase();
  const notes=[];
  if(d.inv&&!d.cn)notes.push(ui.note('info',t(+d.inv.vatRate>0?'ops.inv.vat5':'ops.inv.vat0',{cc:esc(ctyName(d.inv.cc))})));
  if(d.fallback&&S.admin)notes.push(ui.note('admin',t('ops.cn.fallback')));
@@ -342,7 +344,7 @@ HOOKS.afterRender.push((name,params)=>{try{
  let btns='';
  if(name==='invoice'){const i=invById(params[0]);if(i)btns=ops_pbtn('inv',i.id,t('ops.btn.inv'));}
  else if(name==='cnote'){const c=(S.creditNotes||[]).find(x=>x.id===params[0]);if(c)btns=ops_pbtn('cn',c.id,t('ops.btn.cn'));}
- else if(name==='shipment'){const h=(S.shipments||[]).find(x=>x.id===params[0]);if(h)btns=ops_pbtn('pf',h.id,t('ops.btn.pf'))+ops_pbtn('sr',h.id,t('ops.btn.sr'))+ops_pbtn('a2',h.id,t('ops.btn.a2'));}
+ else if(name==='shipment'){const h=(S.shipments||[]).find(x=>x.id===params[0]);if(h)btns=ops_pbtn('pf',h.id,t('ops.btn.pf'))+ops_pbtn('sr',h.id,t('ops.btn.sr'));}   // A2 box label: 85_print (#prn-labels--id, print ТЗ v1.4) — no second A2 layout here
  if(btns)ops_inject(btns);}catch(e){console.error(e);}});
 function ops_pbtn(type,id,label){return `<a class="btn ghost" data-ops-inj="1" href="${link('opsdoc',type,id)}"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">${ICONS.printer||''}</svg><span>${esc(label)}</span></a>`;}
 function ops_inject(html){const ph=$('#content .ph');if(!ph||ph.querySelector('[data-ops-inj],[data-ops-print]'))return;let box=ph.querySelector(':scope > .row.wrap');

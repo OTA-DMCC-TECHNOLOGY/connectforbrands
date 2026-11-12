@@ -369,7 +369,12 @@ async function bindIccid(iccid,opts){opts=opts||{};const a=acct();if(!a)return{c
  return r;}
 /* activation codes (ТЗ 4.4): redeemed once, pinned to the device; repeated / blocked / expired / unknown → one message T7 */
 function codeLookup(b,c){if(b.codes[c])return[c,b.codes[c]];const k=Object.keys(b.codes).find(k=>normCode(k)===c);return k?[k,b.codes[k]]:null;}
-const codeOk=rec=>!!rec&&rec.status==='new'&&!(rec.expires_at&&Date.parse(rec.expires_at)<=nowMs());
+// v14 printed codes carry deadline 'YYYY-MM-DD' (activate by, inclusive); past it the code is expired → T7 like any unusable code
+const codeOk=rec=>!!rec&&rec.status==='new'&&!(rec.expires_at&&Date.parse(rec.expires_at)<=nowMs())&&!(rec.deadline&&String(rec.deadline).slice(0,10)<today());
+/* print ТЗ v1.4 §5: 12-character package codes (Crockford Base32, last char = Luhn mod 32 over the first 11; same algorithm as console 85_print
+   prnCodeCheck) next to the old 16-character codes. Local format check before any request: null | 'c_len' | 'c_typo' */
+const code12Ok=c=>c.length===12&&luhn32(c.slice(0,11))===c[11];
+function codeFmtErr(c){if(c.length!==12&&c.length!==16)return 'c_len';if(c.length===12&&!code12Ok(c))return 'c_typo';return null;}
 function codePlan(c,rec){const m=rec&&(+rec.months||+rec.term);if(rec&&rec.plan&&m){const pn=String(rec.plan).toLowerCase();return{plan:pn.startsWith('st')?'std':pn.startsWith('l')?'light':pn,months:m};}const p=parseCode(c);return p.err?null:{plan:p.plan,months:p.months};}
 function codeValid(raw){const c=normCode(raw);const L=codeLookup(B(),c);return !!(L&&codeOk(L[1])&&codePlan(c,L[1]));}
 async function redeemCode(raw,devId){const a=acct();const c=normCode(raw);const bu=blockedUntil(a.id);if(bu)return{code:'BLOCK',until:bu};
@@ -548,7 +553,7 @@ function vSignin(){const act=SS.ret&&SS.ret.startsWith('/a/');const pk=SS.ret===
    that opens the "choose device" step with the code already filled in. */
 function vCode(){const v=SS.pk||{};
  return `${topbar({back:'home'})}<main class="stack s24 fade"><div class="stack s8"><h1>${t('pk_title')}</h1><p class="muted">${t('pk_sub')}</p></div>${blockedNote()}
- <form class="stack" data-form="pkg" novalidate><label class="f" for="pk">${t('c_label')}<input class="inp" id="pk" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" value="${esc(v.v||'')}" style="letter-spacing:.04em;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem;padding:0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" ${v.err?'aria-invalid="true" aria-describedby="pkres"':'aria-describedby="pkh"'}></label>
+ <form class="stack" data-form="pkg" novalidate><label class="f" for="pk">${t('c_label')}<input class="inp" id="pk" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" value="${esc(v.v||'')}" style="letter-spacing:.04em;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem;padding:0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" ${v.err?'aria-invalid="true" aria-describedby="pkres"':'aria-describedby="pkh"'}></label>
  ${v.err?`<div class="note bad" role="alert" id="pkres">${v.err}</div>`:`<span class="hint" id="pkh">${t('pk_hint')}</span>`}
  <button class="btn primary" type="submit" id="pkbtn">${t('pk_next')} ${ic('right')}</button><button class="btn plain small" type="button" data-act="pkdemo">${ic('flask','sm')} ${t('c_demo')}</button></form>
  <section class="card stack s8"><p class="small">${t('L_c41')}</p><p class="muted small">${t('L_c41_ref')}</p></section></main>`;}
@@ -784,7 +789,7 @@ function vPay(id){
  const cv=p.code||'';const pc=cv?parseCode(cv):null;const cerr=p.cerr;
  const dec=pc&&!pc.err?`<p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pc.plan],term:termTxt(pc.months)})}</p>`:'';
  const codeBlock=`<section class="card stack"><h2 style="font-size:1.1rem">${t('c_title')}</h2><form class="stack" data-form="actcode" novalidate>
-  <label class="f" for="ac">${t('c_label')}<input class="inp" id="ac" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" value="${esc(cv)}" style="letter-spacing:.04em;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem;padding:0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" ${cerr?'aria-invalid="true" aria-describedby="ach"':''}></label>
+  <label class="f" for="ac">${t('c_label')}<input class="inp" id="ac" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" value="${esc(cv)}" style="letter-spacing:.04em;font-weight:700;font-variant-numeric:tabular-nums;font-size:1.05rem;padding:0 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" ${cerr?'aria-invalid="true" aria-describedby="ach"':''}></label>
   <div id="acd">${cerr?`<span id="ach" class="err">${ic('alert','sm')}<span>${cerr}</span></span>`:dec}</div>
   <button class="btn primary" type="submit">${ic('key')} ${t('c_btn')}</button><button class="btn plain small" type="button" data-act="democode">${ic('flask','sm')} ${t('c_demo')}</button></form></section>
   <div class="row" style="gap:12px"><span style="flex:1;height:1px;background:var(--line)"></span><span class="muted small">${t('or_pay')}</span><span style="flex:1;height:1px;background:var(--line)"></span></div>`;
@@ -1108,9 +1113,10 @@ document.addEventListener('input',e=>{const id=e.target.id;
  if(id==='iccid'){const el=e.target;const v=digits(el.value).slice(0,20);el.value=fmtIccid(v);if(SS.add){SS.add.v=v;SS.add.res=null;}}
  if(id==='cn'){const v=digits(e.target.value).slice(0,16);e.target.value=v.replace(/(.{4})/g,'$1 ').trim();}
  if(id==='ce'){let v=digits(e.target.value).slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);e.target.value=v;}
- if(id==='pk'){const v=normCode(e.target.value).slice(0,16);e.target.value=v?fmtCode(v):'';SS.pk={v:e.target.value};}
+ if(id==='pk'){const v=normCode(e.target.value).slice(0,16);e.target.value=v?fmtCode(v):'';SS.pk={v:e.target.value};e.target.removeAttribute('aria-invalid');
+  const h=document.getElementById('pkh');if(h){const bad=v.length===12&&!code12Ok(v);h.className=bad?'err':'hint';h.setAttribute('role',bad?'alert':'status');h.innerHTML=bad?ic('alert','sm')+'<span>'+t('c_typo')+'</span>':t('pk_hint');}}
  if(id==='ac'){const v=normCode(e.target.value).slice(0,16);e.target.value=v?fmtCode(v):'';if(S.pay){S.pay.code=e.target.value;S.pay.cerr='';}
-  const box=document.getElementById('acd');e.target.removeAttribute('aria-invalid');if(box){const pc=v.length===16?parseCode(v):null;box.innerHTML=pc&&!pc.err?`<p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pc.plan],term:termTxt(pc.months)})}</p>`:(pc&&pc.err?`<span class="err">${ic('alert','sm')}<span>${t(pc.err)}</span></span>`:'');}}
+  const box=document.getElementById('acd');e.target.removeAttribute('aria-invalid');if(box){const pc=v.length===16?parseCode(v):null;box.innerHTML=v.length===12&&!code12Ok(v)?`<span class="err" role="alert">${ic('alert','sm')}<span>${t('c_typo')}</span></span>`:pc&&!pc.err?`<p class="small" style="color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center">${ic('check','sm')}${t('c_dec',{a:PLN[pc.plan],term:termTxt(pc.months)})}</p>`:(pc&&pc.err?`<span class="err">${ic('alert','sm')}<span>${t(pc.err)}</span></span>`:'');}}
 });
 document.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const k=f.dataset.form;
  if(k==='contacts'){const mode=f.dataset.mode;const em=f.querySelector('#em').value.trim();const rc=readContacts(f,'');const ms=rc.ms;const err={};
@@ -1142,6 +1148,7 @@ document.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const
  else if(k==='done'){S.name=f.querySelector('#nm').value.trim();S.justDone=false;go('home');}
  else if(k==='card'){const raw=f.querySelector('#cn').value;const arEl=f.querySelector('#ar');S.pay.ar=arEl?arEl.checked:false;S.pay.viaCard=true;S.pay.cnum=raw;S.pay.cexp=f.querySelector('#ce').value;if(digits(raw).length!==16){S.pay.err=true;S.pay.cn=raw;render(true);const c=app.querySelector('#cn');if(c)c.focus();return;}pay();}
  else if(k==='actcode'){const x=dev(S.pay.id);const raw=f.querySelector('#ac').value;S.pay.code=raw;
+  {const fe=codeFmtErr(normCode(raw));if(fe){S.pay.cerr=t(fe);rerender();const c=app.querySelector('#ac');if(c)c.focus();return;}}   // typo / length: caught locally, no request
   redeemCode(raw,x.id).then(r=>{if(r.code==='OK'){S.pay.res='code';S.pay.resTxt=t('c_ok',{a:PLN[r.pl.plan],term:termTxt(r.pl.months)});S.pay.step='ok';render(false);return;}
    S.pay.cerr=r.code==='BLOCK'?t('blocked_acct',{t:fdt(r.until)}):r.code==='CTRY'?t('c_ctry'):r.code==='ACTIVE'?payTxt(x):r.code==='TYPE'?t('c_type',{a:PLN[r.pl.plan],b:PLN[x.plan]}):t('T7');rerender();const c=app.querySelector('#ac');if(c)c.focus();});}
  else if(k==='rename'){const x=dev(f.dataset.id);const v=f.querySelector('#rn').value.trim();if(v&&v!==`${t('typ_'+x.type)} ${x.model}`)x.custom=v;else delete x.custom;closeOverlay();rerender();toast(t('d_renamed'));}
@@ -1158,7 +1165,7 @@ async function onOtp(code){const f=SS.flow;if(!f)return;if(!/^\d{6}$/.test(code)
  f.err=r.dead?t('otp_dead'):t('otp_wrong',{n:r.left});ssave();render(true);const el=app.querySelector('#otp');if(el)el.focus();}
 function onPkg(f){const raw=f.querySelector('#pk').value;const c=normCode(raw);const a=acct();const show=c?fmtCode(c):'';let err=null;
  const bu=a&&blockedUntil(a.id);
- if(bu)err=t('blocked_acct',{t:fdt(bu)});else if(c.length!==16)err=t('c_len');
+ if(bu)err=t('blocked_acct',{t:fdt(bu)});else if(codeFmtErr(c))err=t(codeFmtErr(c));   // length / check character (12-char v14): local, no request, not a failed attempt
  else if(codeValid(c)){SS.pk=null;SS.act=null;actDone=null;ssave();go('/a/'+c);return;}
  else if(!codeLookup(B(),c)&&parseCode(c).err)err=t('c_bad');   // checksum typo: not counted as a failed attempt
  else{err=t('T7');if(a)fail(a.id);}   // used / blocked / expired / unknown → one message T7 (ТЗ 4.4)

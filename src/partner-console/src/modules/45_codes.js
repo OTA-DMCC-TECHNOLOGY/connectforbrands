@@ -8,7 +8,8 @@ function cx_yShort(tm){return PLAN_NAME?(tm/12)+t('cx.yShort'):'';}
 function cx_short(k){const [p,tm]=k.split('-');return PLAN_NAME[p]+' '+cx_yShort(+tm);}
 function cx_plans(){const p={};allModels().forEach(x=>{if(x.model.planStatus==='approved'&&x.model.plan)p[x.model.plan]=1;});return PLANS.filter(x=>p[x]);}
 function cx_stats(){const r={},p={};
- for(const c of S.codes){const k=c.plan+'-'+c.term;const st=c.status;
+ for(const c of S.codes){if(c.batchId)continue;   // 12-character print codes (85_print) have their own statuses and statistics
+  const k=c.plan+'-'+c.term;const st=c.status;
   const rr=r[c.reseller]||(r[c.reseller]={issued:0,activated:0,void:0,last:null,pk:{}});rr[st]++;
   const rp=rr.pk[k]||(rr.pk[k]={issued:0,activated:0,void:0});rp[st]++;
   if(st==='activated'&&(!rr.last||c.activatedAt>rr.last))rr.last=c.activatedAt;
@@ -180,7 +181,7 @@ document.addEventListener('input',e=>{if(e.target&&e.target.id==='cx_rq'){cx_rf(
 /* ---------- route: one point of sale ---------- */
 function cx_cf(){if(!S.ui.cx_cf)S.ui.cx_cf={plan:'',term:'',st:'',q:''};return S.ui.cx_cf;}
 function cx_resCodes(id,f){const q=String(f.q||'').toUpperCase().replace(/[^0-9A-Z]/g,'');const out=[];
- for(const c of S.codes){if(c.reseller!==id)continue;if(f.plan&&c.plan!==f.plan)continue;if(f.term&&c.term!==+f.term)continue;if(f.st&&c.status!==f.st)continue;if(q&&c.code.indexOf(q)<0&&!(c.iccid&&c.iccid.indexOf(q)>=0))continue;out.push(c);}
+ for(const c of S.codes){if(c.reseller!==id||c.batchId)continue;if(f.plan&&c.plan!==f.plan)continue;if(f.term&&c.term!==+f.term)continue;if(f.st&&c.status!==f.st)continue;if(q&&c.code.indexOf(q)<0&&!(c.iccid&&c.iccid.indexOf(q)>=0))continue;out.push(c);}
  return out;}
 route('reseller',{nav:'resellers',render(id){const r=cx_res(id);
  if(!r)return ui.page({title:t('cod.r.notFound'),crumbs:[[t('cod.r.title'),'#resellers'],['—']],body:ui.card({body:ui.empty('store',t('cod.r.notFound'),'',ui.btn(t('cod.r.title'),{href:'#resellers'}))})});
@@ -269,13 +270,13 @@ Object.assign(ACT,{
  cx_resDel(id){const r=cx_res(id);if(!r)return;const x=cx_stats().r[id]||{issued:0,activated:0};const y=cx_simStats().r[id]||{total:0};
   if(x.activated||y.total){modal(t('cod.r.delT'),ui.note('warn',t('cx.r.delNo',{a:fmtNum(x.activated),s:fmtNum(y.total)})),ui.btn(t('c.close'),{act:'ovclose'}));return;}
   modal(t('cod.r.delT'),`<p>${t('cod.r.delP',{r:'<b>'+esc(r.name)+'</b>'})}</p>${x.issued?ui.note('info',t('cx.r.delCodes',{n:fmtNum(x.issued)})):''}`,cx_cancel()+ui.btn(t('c.delete'),{kind:'danger',icon:'trash',act:'cx_resDelDo',arg:id}));},
- cx_resDelDo(id){const r=cx_res(id);if(!r)return;S.codes=S.codes.filter(c=>c.reseller!==id);S.resellers=S.resellers.filter(x=>x.id!==id);log(t('cod.r.logDel',{n:r.name}));closeOverlay();toast(t('cod.r.deleted',{n:esc(r.name)}));go('resellers');},
+ cx_resDelDo(id){const r=cx_res(id);if(!r)return;S.codes=S.codes.filter(c=>c.reseller!==id||c.batchId);S.codes.forEach(c=>{if(c.batchId&&c.reseller===id)c.reseller=null;});/* print codes keep their key reservation and batch */S.resellers=S.resellers.filter(x=>x.id!==id);log(t('cod.r.logDel',{n:r.name}));closeOverlay();toast(t('cod.r.deleted',{n:esc(r.name)}));go('resellers');},
  cod_simAct(arg){const dm=$('.sim_demo');if(dm)dm.removeAttribute('open');cx_simActModal(arg||'');},
 });
 
 /* ---------- demo: customer activation (OTA mode) ---------- */
 function cx_simActModal(preIccid){const mm={};allModels().forEach(x=>{mm[x.model.id]=x;});
- const codes=[];for(const c of S.codes){if(c.status==='issued'){codes.push(c);if(codes.length>=300)break;}}
+ const codes=[];for(const c of S.codes){if(c.status==='issued'&&!c.batchId){codes.push(c);if(codes.length>=300)break;}}
  const sims=S.sims.filter(s=>s.status==='active'&&!s.plan);const shown=sims.slice(0,300);if(preIccid&&!shown.some(s=>s.iccid===preIccid)){const ps=sims.find(s=>s.iccid===preIccid);if(ps)shown.unshift(ps);}
  const simOpts=shown.map(s=>{const x=mm[s.modelId];return [s.iccid,'···'+s.iccid.slice(-6)+' · '+(x?x.model.name+' ('+(x.model.plan?PLAN_NAME[x.model.plan]:'—')+')':'—')];});
  modal(t('cod.a.title'),`<form id="cx_actF" data-form="cx_act" class="stack" novalidate>${ui.note('admin',t('cod.a.demoNote'))}
@@ -284,7 +285,19 @@ function cx_simActModal(preIccid){const mm={};allModels().forEach(x=>{mm[x.model
   ${ui.field({id:'cx_ap',label:t('cod.a.paste'),mono:true,placeholder:S.org?S.org.prefix+'4-XXXX-XXXX-XXXX':'',attrs:'autocomplete="off" spellcheck="false" maxlength="24"',hint:t('cod.a.pasteHint')})}
   ${simOpts.length?ui.field({id:'cx_as',label:t('cod.a.sim'),type:'select',value:preIccid||'',options:simOpts,hint:t('cod.a.simHint',{n:fmtNum(sims.length)})}):ui.note('warn',t('cod.a.noSims'))}
   <div id="cx_actRes" aria-live="polite"></div></form>`,cx_cancel()+(simOpts.length?cx_submit(t('cod.a.do'),'cx_actF'):''));}
+// print ТЗ v1.4 code (12 Crockford Base32, Luhn mod-32): only status 'printed' is redeemable; the shared rules run in prnRedeem (85_print),
+// which uses the key reserved for the code. Messages never reveal more than needed (used / blocked / expired / not yet printed).
+function cx_tryActivateV14(raw,iccid){const c0=typeof prnCodeNorm==='function'?prnCodeNorm(raw):'';
+ if(typeof prnCodeCheck!=='function'||!prnCodeCheck(c0))return{err:t('cod.e.invalid')};
+ const c=S.codes.find(x=>x.code===c0&&x.batchId);if(!c)return{err:t('cod.e.unknown')};
+ if(typeof prnRedeem!=='function')return{err:t('cod.e.invalid')};
+ const r=prnRedeem(c0,iccid);if(r.ok){log(t('cod.a.log',{c:'••••-••••-'+c0.slice(8),p:pkgLabel(r.c.plan,r.c.term),s:fmtIccid(r.s.iccid)}));return r;}
+ const e=r.err;if(e==='no_key')return{err:t('cx.e.noKey'),credits:true};if(e==='no_token')return{err:t('cod.e.credits',{p:esc(pkgLabel(c.plan,c.term))}),credits:true};
+ if(e==='nosim')return{err:t('cod.e.noSim')};if(e==='siminactive')return{err:t('cod.e.simInactive')};
+ const k='prn.rd.e.'+e;const msg=t(k,{d:r.deadline?fmtDate(r.deadline):''});return{err:msg&&msg!==k?msg:t('cod.e.invalid')};}
+function cx_isV14(raw){const n=typeof prnCodeNorm==='function'?prnCodeNorm(raw):String(raw||'').replace(/[\s-]/g,'');return n.length===12;}
 function cx_tryActivate(raw,iccid){
+ if(cx_isV14(raw))return cx_tryActivateV14(raw,iccid);
  const p=parseCode(raw);if(p.err)return{err:t('cod.e.invalid')};
  if(!S.org||p.prefix!==S.org.prefix)return{err:t('cod.e.prefix',{p:esc(p.prefix),m:esc(S.org?S.org.prefix:'—')})};
  const c=S.codes.find(x=>x.code===p.code);if(!c)return{err:t('cod.e.unknown')};
@@ -406,7 +419,8 @@ ru:{'cx.via':'Откуда тариф','cx.via.token':'Код активации
    are activated here with the same rules: 1 Service Token of the code's package + 1 Activation Key for a new device; no key / no token → stays pending. */
 function cx_bridgeSync(){if(!S||!S.authed||!S.codes||!S.codes.length)return 0;let b=null;try{b=JSON.parse(localStorage.getItem('cfb-demo-ownership')||'null');}catch(e){}
  if(!b||!b.codes)return 0;let n=0;const byCode={};for(const c of S.codes)byCode[c.code]=c;
- Object.keys(b.codes).forEach(code=>{const r=b.codes[code];if(!r||r.status!=='redeemed')return;const c=byCode[code];if(!c||c.status!=='issued')return;
+ // only the old 16-character codes: 12-character print codes (format 'v14', batchId) are activated by 85_print prn_fromPortal — never twice
+ Object.keys(b.codes).forEach(code=>{const r=b.codes[code];if(!r||r.status!=='redeemed'||r.format==='v14')return;const c=byCode[code];if(!c||c.batchId||c.status!=='issued')return;
   const dev=String(r.device_id||'');const bd=(b.bindings||[]).find(x=>x.device_id===dev&&x.status!=='ended');
   const s=S.sims.find(x=>x.imei===dev||x.iccid===dev||(bd&&x.iccid===bd.iccid));
   const fail=why=>{if(!c.bridgePending||c.bridgePending.reason!==why){c.bridgePending={reason:why,at:iso(now())};n++;}};
