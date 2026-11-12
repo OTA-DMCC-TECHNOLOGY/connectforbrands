@@ -135,7 +135,7 @@ function lg_tplTitle(type,lang){const b=lg_baseTpl(type);if(type==='CHG'&&!b)ret
  return b?(lang==='en'?b.title.en:(b.title[lang]||b.title.ru||b.title.en)):type;}
 // Notice of Change of Details = template E of the v10 pack. The template agent ships it as LEGAL_TPL.CHG; until it lands this
 // fallback carries the E wording verbatim (only the placeholders are replaced by variables).
-const LG_CHG_TPL={type:'CHG',docNo:'E',title:{en:'Notice of Change of Details',ru:'Уведомление об изменении реквизитов'},ver:'T-CHG-v10',effective:'2026-11-07',cls:'A',blocks:[
+const LG_CHG_TPL={type:'CHG',docNo:'E',title:{en:'Notice of Change of Details',ru:'Уведомление об изменении реквизитов'},ver:'T-CHG-v12',effective:'2026-09-01',cls:'A',blocks:[
  {id:'CHG-title',kind:'heading',en:'NOTICE OF CHANGE OF DETAILS',ru:'УВЕДОМЛЕНИЕ ОБ ИЗМЕНЕНИИ РЕКВИЗИТОВ'},
  {id:'CHG-ref',kind:'para',en:'Notice of Change of Details · Ref. {{DOC_NO}}\nThis document is made in English and {{LANG2_NAME_EN}}. In case of any discrepancy, the English version prevails.',ru:'Уведомление об изменении реквизитов · № {{DOC_NO}}\nДокумент составлен на английском и {{LANG2_NAME_L2}} языках. При расхождении текстов преимущественную силу имеет английский текст.'},
  {id:'CHG-p1',kind:'para',en:'Under clause 16.3 of the CONNECT FOR BRANDS Master Partner Agreement No. {{DOC_NO_MPA}} (the "Master Agreement"), {{CHG_PARTY_NAME}} notifies the other Party of the following change of its details, effective from {{CHG_EFFECTIVE_DATE}}:',
