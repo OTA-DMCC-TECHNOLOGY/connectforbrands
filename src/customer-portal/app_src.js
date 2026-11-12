@@ -1167,7 +1167,7 @@ function onPkg(f){const raw=f.querySelector('#pk').value;const c=normCode(raw);c
  const bu=a&&blockedUntil(a.id);
  if(bu)err=t('blocked_acct',{t:fdt(bu)});else if(codeFmtErr(c))err=t(codeFmtErr(c));   // length / check character (12-char v14): local, no request, not a failed attempt
  else if(codeValid(c)){SS.pk=null;SS.act=null;actDone=null;ssave();go('/a/'+c);return;}
- else if(!codeLookup(B(),c)&&parseCode(c).err)err=t('c_bad');   // checksum typo: not counted as a failed attempt
+ else if(c.length===16&&!codeLookup(B(),c)&&parseCode(c).err)err=t('c_bad');   // old 16-char checksum typo: not counted (12-char typos are caught by codeFmtErr above)
  else{err=t('T7');if(a)fail(a.id);}   // used / blocked / expired / unknown → one message T7 (ТЗ 4.4)
  SS.pk={v:show,err};ssave();render(true);const el=app.querySelector('#pk');if(el)el.focus();}
 async function onCancel(f){const mode=f.dataset.mode;const g=sel=>{const e=f.querySelector(sel);return e?e.value.trim():'';};

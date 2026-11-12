@@ -50,8 +50,10 @@
  .ops_langs{display:none}
  .ops_t{font-size:11.5px}
 }
+@page opsdoc{size:A4;margin:14mm 11mm 15mm;@bottom-right{content:"Page " counter(page) " / " counter(pages);font-size:8px;color:#5F6B7D}}
 @media print{
- @page{size:A4;margin:14mm 11mm 15mm;@bottom-right{content:"Page " counter(page) " / " counter(pages);font-size:8px;color:#5F6B7D}}
+ /* named page: applies only to an ops document being printed (never to 85_print's physical-size @page for cards / labels) */
+ body:has(.ops_wrapdoc) .ops_wrapdoc{page:opsdoc}
  html,body{background:#fff!important;height:auto}
  body:has(.ops_wrapdoc) .side,body:has(.ops_wrapdoc) .top,body:has(.ops_wrapdoc) .crumbs,body:has(.ops_wrapdoc) .ph,body:has(.ops_wrapdoc) .ops_noprint,body:has(.ops_wrapdoc) .copy,body:has(.ops_wrapdoc) #toasts,body:has(.ops_wrapdoc) #overlay,body:has(.ops_wrapdoc) #sidescrim{display:none!important}
  body:has(.ops_wrapdoc) .app{display:block}
