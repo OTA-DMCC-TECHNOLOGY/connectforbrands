@@ -52,7 +52,7 @@ def sanitize(t):
     return t
 OUT = os.path.join(ROOT, 'legal_src', 'templates')
 MODULE = os.path.join(ROOT, 'src', 'modules', '60_legal_templates.js')
-EFFECTIVE = '2026-11-12'
+EFFECTIVE = '2026-09-01'   # on/before the earliest demo v12 issue (3 Sep 2026) and signatures (4–5 Sep), before the demo clock (1 Nov)
 TPL_VER = 'v12'   # template version suffix: T-<TYPE>-v12 (legal pack v12 = first edition)
 CYR = re.compile('[Ѐ-ӿ]')
 

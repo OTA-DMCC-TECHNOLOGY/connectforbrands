@@ -435,8 +435,9 @@ function tokensAvail(k,cc){return tokenStats(k,cc).avail;}
 function addTokenLot(k,qty,o){o=o||{};S.tokenLots=S.tokenLots||[];const {plan,term}=pkgSplit(k);const issued=o.issuedAt||iso(now());
  const lot={id:uid('tl'),key:k,plan,term,cc:o.cc||primaryCc(),qty,used:0,reserved:0,unit:o.unit||0,invoiceId:o.invoiceId||null,invoiceNo:o.invoiceNo||'',issuedAt:issued,
   expiresAt:o.expiresAt||iso(addMonths(issued,TOKEN_VALID_MONTHS)),src:o.src||'invoice'};S.tokenLots.push(lot);return lot;}
-// consume one token of the exact package: soonest-expiring valid lot first
-function consumeToken(k){const lot=(S.tokenLots||[]).filter(l=>l.key===k&&!l.revoked&&lotFree(l)>0&&!lotExpired(l)).sort((a,b)=>a.expiresAt<b.expiresAt?-1:a.expiresAt>b.expiresAt?1:0)[0];
+// consume one token of the exact package: soonest-expiring valid lot first. v12: tokens are bought per country (in its currency) →
+// pass the device's country (cc) so a DE device uses DE (EUR) tokens; no cc = any lot (legacy callers)
+function consumeToken(k,cc){const lot=(S.tokenLots||[]).filter(l=>l.key===k&&(!cc||l.cc===cc)&&!l.revoked&&lotFree(l)>0&&!lotExpired(l)).sort((a,b)=>a.expiresAt<b.expiresAt?-1:a.expiresAt>b.expiresAt?1:0)[0];
  if(!lot)return null;lot.used++;return lot;}
 function keyStats(cc){const r={bought:0,used:0,avail:0,revoked:0};for(const l of S.keyLots||[]){if(cc&&l.cc!==cc)continue;r.bought+=l.qty;r.used+=l.used;if(l.revoked)r.revoked+=l.qty-l.used;else r.avail+=lotFree(l);}return r;}
 function keysAvail(cc){return keyStats(cc).avail;}

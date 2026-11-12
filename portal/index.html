@@ -244,7 +244,7 @@ const CTRY={K:'UA',P:'PL',Z:'ZA',D:'DE'};const HOME='K';
    → these demo defaults (fictional). Wholesale price lists (S.priceLists) are partner prices and are never shown to End Users. */
 // monthly figures = the console's DE demo (CC_META.DE.month / LEGAL_DEMO_VALUES.countries.DE: Light €3.99, Standard €4.99 incl. 19 % VAT)
 const PR_DE={std:{m:4.99,y:49.9,y2:89.9,y3:124.9,y5:189.9},light:{m:3.99,y:39.9,y2:72.9,y3:99.9,y5:149.9}};
-const CC_DEF={DE:{currency:'EUR',retail:PR_DE,vat_rate:19,oss:true,cancel_public:true,docs_de_published:true}};
+const CC_DEF={DE:{currency:'EUR',retail:PR_DE,vat_rate:19,oss:true,cancel_public:true}};   // QA12: DE stays closed until the console writes ownership_v10_enabled + docs_de_published
 const PKG={'1':['light',24],'2':['light',36],'3':['light',60],'4':['std',24],'5':['std',36],'6':['std',60],'7':['light',12],'8':['std',12]};
 const PLN={light:'Light',std:'Standard'};
 function normCode(v){return (v||'').toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1').replace(/U/g,'V').replace(/[^0-9A-Z]/g,'').split('').filter(c=>B32.includes(c)).join('');}
@@ -394,7 +394,7 @@ function seedBridge(){const n=Date.now();const sims={};
  sims[genIccid(9)]={partner:'ARV',status:'deactivated',imei:genImei(9),model:'T2',cc:'UA'};
  sims[genIccid(10)]={partner:null,status:'stock',imei:null,model:'H5',cc:'UA'};
  for(let i=21;i<=24;i++)sims[genIccid(i)]={partner:'ARV',status:'issued',imei:genImei(i),model:MODELS[i-21],cc:'UA',demo:'history'};
- const codes={};const c=(pkg,ser,sec,o)=>{codes[mkCode(pkg,ser,sec)]=Object.assign({serial:ser,status:'new',device_id:null},o||{});};
+ const codes={};const c=(pkg,ser,sec,o)=>{codes[mkCode(pkg,ser,sec)]=Object.assign({serial:ser,status:'new',device_id:null,cc:'UA'},o||{});};
  c('4','00101','K7PQ');c('7','00102','M2XR');c('8','00103','T9WZ');c('1','00104','H3NV');
  c('4','00105','B8DS',{status:'redeemed',device_id:genImei(23),iccid:genIccid(23),redeemed_at:isoMs(n-300*DAY),redeemed_by_account_id:'acc_demo_previous'});
  c('4','00106','Q4FJ',{status:'blocked',blocked_at:isoMs(n-2*DAY)});
@@ -522,7 +522,12 @@ function ccCfg(cc){const b=((B().settings||{}).countries||{})[cc]||{};const ps=p
  const psRet=ps&&ps.retail&&ps.retail[cc];
  return{currency:pick('currency')||null,retail_currency:pick('retail_currency')||null,retail:(has(b.retail)&&b.retail)||(has(p.retail)&&p.retail)||psRet||d.retail||null,
   vat_rate:+pick('vat_rate')||0,oss:!!pick('oss')||String(pick('currency')||'')==='EUR',oss_no:String(pick('oss_no')||'').trim(),
-  cancel_public:pick('cancel_public')!=null?!!pick('cancel_public'):false,docs_de_published:pick('docs_de_published')==null?true:!!pick('docs_de_published')};}
+  cancel_public:pick('cancel_public')!=null?!!pick('cancel_public'):false,docs_de_published:pick('docs_de_published')===true,ownership_v10_enabled:pick('ownership_v10_enabled'),written:Object.keys(b).length>0||Object.keys(p).length>0};}
+/* QA12: a country is open for binding only when the console's launch flag ownership_v10_enabled === true; DE also needs docs_de_published === true
+   (02-DE cl. 1.6). Standalone (console wrote nothing for the country): DE closed, other countries open so the portal still works alone. */
+function ccOpen(cc){const c=ccCfg(cc);if(cc==='DE')return c.ownership_v10_enabled===true&&c.docs_de_published;if(c.ownership_v10_enabled==null)return true;return c.ownership_v10_enabled===true;}
+// country of a package code: the bridge record's cc (written by the console / ownership agent); letter guess only for portal-seeded codes without cc
+function codeCc(k,rec){if(rec&&(rec.cc||rec.country))return rec.cc||rec.country;const c=normCode(k);return c.slice(1,5)==='ARV1'||(rec&&rec.src==='portal-demo')?CTRY[c[0]]||null:null;}
 // End User (retail) currency: the Order Form currency if it is EUR (Approved Countries in Europe, MPA 8.1); otherwise the legacy local demo currency (UAH)
 function retailCur(cc){const c=ccCfg(cc);return c.retail_currency||(c.currency==='EUR'?'EUR':'UAH');}
 function retail(cc){const c=ccCfg(cc);const base=retailCur(cc)==='EUR'?PR_DE:PR;const r=c.retail;const out={};
@@ -575,7 +580,7 @@ async function bindIccid(iccid,opts){opts=opts||{};const a=acct();if(!a)return{c
  const r=await bridgeTx(b=>{const sim=b.sims[iccid];
   if(!sim||!sim.partner||sim.status!=='issued')return{res:{code:'T3',unknown:!sim},write:false};
   // 02-DE cl. 1.6: the portal for Germany opens only after Documents 07 and 08 with the Germany Country Schedule are published in German
-  if(simCc(sim)==='DE'&&!ccCfg('DE').docs_de_published)return{res:{code:'DEGATE'},write:false};
+  if(!ccOpen(simCc(sim)))return{res:{code:simCc(sim)==='DE'?'DEGATE':'CCGATE'},write:false};
   const cur=b.bindings.find(z=>z.iccid===iccid&&liveB(z));
   if(cur)return{res:{code:cur.owner_account_id===a.id?'T4':'T2'},write:false};
   let link=null;if(opts.link){link=findLink(b,opts.link);if(!linkOpen(link)||link.iccid!==iccid)return{res:{code:'LINK'},write:false};}
@@ -599,7 +604,7 @@ async function redeemCode(raw,devId){const a=acct();const c=normCode(raw);const 
   if(!codeOk(rec)||!pl)return{res:{code:'T7'},write:false};
   const bd=b.bindings.find(z=>z.device_id===devId&&z.owner_account_id===a.id&&liveB(z));if(!bd)return{res:{code:'T7'},write:false};
   // v12: a Germany package code (EUR, OSS) applies only to a German device and vice versa; other countries keep the v10 behaviour
-  const kc=rec.cc||rec.country||CTRY[c[0]];const dc=devCc(x);if(kc&&(kc==='DE'||dc==='DE')&&kc!==dc)return{res:{code:'CTRY'},write:false};
+  const kc=codeCc(L[0],rec);const dc=devCc(x);if(kc&&(kc==='DE'||dc==='DE')&&kc!==dc)return{res:{code:'CTRY'},write:false};
   if(pl.plan!==x.plan)return{res:{code:'TYPE',pl},write:false};
   if(codePlanActive(x))return{res:{code:'ACTIVE'},write:false};
   Object.assign(rec,{status:'redeemed',device_id:devId,iccid:bd.iccid,redeemed_at:isoNow(),redeemed_by_account_id:a.id});
@@ -686,7 +691,7 @@ async function doCancel(v){const at=isoNow();const ref='CX-'+tok().slice(0,8);co
  if(v.mode==='account'){x=dev(v.dev);bd=x&&bnd(x);owner=acct();}
  else{const r=v.devref;bd=b.bindings.find(z=>liveB(z)&&(z.iccid===r||z.device_id===r||((b.sims[z.iccid]||{}).imei===r)))||null;
   owner=bd&&P.accts[bd.owner_account_id];if(!owner||!acctKeys(owner).includes(v.ck)){bd=null;owner=null;}   // the contact must be the sign-in contact of that account
-  x=bd&&P.devs[bd.device_id];if(bd&&!ccCfg(simCc(b.sims[bd.iccid])).cancel_public)return{res:'login'};}
+  x=bd&&P.devs[bd.device_id];if(bd&&!ccCfg(simCc(b.sims[bd.iccid])).cancel_public){bd=null;owner=null;x=null;}}   // non-public country: answered like no match (nothing confirmed)
  if(!(x&&subOf(x)))res=bd?'nosub':'nomatch';
  const cc=bd?simCc(b.sims[bd.iccid]):null;let end=null;
  if(res==='ok')end=stopSub(x,at,ref,v.mode==='account'?'account':'public_button');
@@ -1178,7 +1183,7 @@ function lab(){const ds=S.devices;if(!labDev||!dev(labDev))labDev=ds[0]?ds[0].id
  <form class="stack s8" data-form="delay" novalidate><label class="f" for="dl">${t('x_delay',{cc:'UA'})}<input class="inp" id="dl" inputmode="numeric" value="${delayHours(genIccid(1))}" style="height:52px"></label><span id="dlh"></span><button class="btn ghost" type="submit">${t('save')}</button></form>
  <span class="tag">${t('x_more')}</span>
  <span class="tag">${t('x_de')}</span>
- <div class="list"><button class="evbtn" type="button" data-act="labde" id="labde"><span class="ic">${ic('globe')}</span><span class="grow">${t(ccCfg('DE').docs_de_published?'x_de_close':'x_de_open')}</span></button></div>
+ <div class="list"><button class="evbtn" type="button" data-act="labde" id="labde"><span class="ic">${ic('globe')}</span><span class="grow">${t(ccOpen('DE')?'x_de_close':'x_de_open')}</span></button></div>
  <div class="list"><button class="evbtn" type="button" data-act="labadd"><span class="ic">${ic('plus')}</span><span class="grow">${t('x_add')}</span></button><button class="evbtn" type="button" data-act="labreset"><span class="ic">${ic('refresh')}</span><span class="grow">${t('x_reset')}</span></button></div>
  <button class="btn plain" type="button" data-act="closeov">${t('close')}</button>`);}
 function simulate(kind){const x=dev(labDev);if(!x){closeOverlay(true);return;}
@@ -1259,7 +1264,7 @@ const A={
  apoffq(id){const x=dev(id);sheet(t('ap_off'),`<p>${t('ap_offQ',{date:fdate(x.next)})}</p><button class="btn danger" type="button" data-act="apoff" data-arg="${id}">${t('ap_offY')}</button><button class="btn primary" type="button" data-act="closeov">${t('ap_keep')}</button>`);},
  apoff(id){const x=dev(id);x.mode='pkg';x.paidUntil=x.next;delete x.next;closeOverlay(true);rerender();toast(t('ap_done'));},
  async democode(){const x=dev(S.pay.id);const b=B();let k=Object.keys(b.codes).find(k=>{const c=normCode(k);const r=b.codes[k];const pl=codeOk(r)&&codePlan(c,r);return pl&&pl.plan===x.plan;});
-  if(!k){k=normCode(demoCode(x.plan));await bridgeTx(bb=>{bb.codes[k]={serial:k.slice(6,11),status:'new',device_id:null,src:'portal-demo'};return{};});}
+  if(!k){k=normCode(demoCode(x.plan));await bridgeTx(bb=>{bb.codes[k]={serial:k.slice(6,11),status:'new',device_id:null,src:'portal-demo',cc:devCc(x)};return{};});}
   S.pay.code=fmtCode(normCode(k));S.pay.cerr='';rerender();},
  plan(k){S.pay.plan=k;rerender();},
  tocard(){S.pay.step='card';S.pay.err=false;S.pay.cn=null;render(false);},
@@ -1280,12 +1285,12 @@ const A={
  doc(k){const q=k==='priv'?[['L_pn5','L_pn5_ref']]:[['L_c51','L_c51_ref'],['L_s7','L_s7_ref']];   // v12 changes quoted from Documents 07 / 08
   sheet(k==='priv'?t('doc_priv'):t('doc_terms'),`<p class="muted">${t('doc_demo')}</p>${q.map(([a,b])=>`<div class="stack s8" data-q="${a}"><p class="small">${t(a)}</p><p class="muted small">${t(b)}</p></div>`).join('')}<button class="btn primary" type="button" data-act="closeov">${t('close')}</button>`);},
  pkgsignin(){SS.ret='code';ssave();render(true);const el=app.querySelector('#si');if(el)el.focus();},
- async pkdemo(){const b=B();const ds=S.devices;const k=Object.keys(b.codes).find(k=>{const c=normCode(k);const r=b.codes[k];const pl=codeOk(r)&&codePlan(c,r);if(!pl)return false;const kc=r.cc||r.country||CTRY[c[0]];return ds.some(x=>x.plan===pl.plan&&(kc==='DE')===(devCc(x)==='DE'));})||Object.keys(b.codes).find(k=>codeOk(b.codes[k])&&codePlan(normCode(k),b.codes[k]));
+ async pkdemo(){const b=B();const ds=S.devices;const k=Object.keys(b.codes).find(k=>{const c=normCode(k);const r=b.codes[k];const pl=codeOk(r)&&codePlan(c,r);if(!pl)return false;const kc=codeCc(k,r);return ds.some(x=>x.plan===pl.plan&&(kc==='DE')===(devCc(x)==='DE'));})||Object.keys(b.codes).find(k=>codeOk(b.codes[k])&&codePlan(normCode(k),b.codes[k]));
   SS.pk={v:k?fmtCode(normCode(k)):''};ssave();rerender();},
  cxopen(){SS.cx=null;ssave();go('cancel');},
  cxprint(){try{window.print();}catch(e){}},
  cxsignin(){SS.cx=null;SS.ret='cancel';ssave();go('welcome');},
- async labde(){await bridgeTx(b=>{const c=b.settings.countries.DE=Object.assign({},b.settings.countries.DE);c.docs_de_published=!ccCfg('DE').docs_de_published;c.set_by='OTA (demo, portal lab)';return{};});closeOverlay(true);toast(t(ccCfg('DE').docs_de_published?'x_de_on':'x_de_off'));rerender();},
+ async labde(){await bridgeTx(b=>{const c=b.settings.countries.DE=Object.assign({},b.settings.countries.DE);const on=!ccOpen('DE');c.docs_de_published=on;c.ownership_v10_enabled=on;c.set_by='OTA (demo, portal lab)';return{};});closeOverlay(true);toast(t(ccOpen('DE')?'x_de_on':'x_de_off'));rerender();},
  receipt(i){const o=S.tx[+i];if(!o)return;const x=dev(o.dev)||P.devs[o.dev];const cur=o.cur||(x?curOf(x):'UAH');
   sheet(t('rc_title'),`<div class="stack s8" id="receipt"><p class="muted small">${fwhen(o.ts)}</p><p><span class="muted">${t('rc_seller')}</span> <b>${esc(o.seller||OTA_NAME())}</b></p>
    <p><span class="muted">${t('rc_item')}</span> ${t('rc_desc',{brand:esc(t('brand'))})}${o.desc?' · '+esc(o.desc):''}</p>${x?`<p class="muted small">${esc(dname(x))} · ICCID ${fmtIccid(x.iccid)}</p>`:''}

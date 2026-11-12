@@ -213,7 +213,7 @@ function onb_homeHtml(){
  // invoices to pay
  const invs=S.invoices.filter(i=>i.status==='open');
  const invCard=ui.card({title:t('onb.iv.title'),actions:ui.btn(t('onb.all'),{size:'sm',kind:'ghost',href:'#invoices'}),pad:false,
-  body:invs.length?ui.table([{label:t('onb.iv.inv')},{label:t('onb.iv.amount'),cls:'r'}],invs.map(i=>{const over=i.dueAt&&new Date(i.dueAt)<n;return{href:link('invoice',i.id),cells:[`<b class="mono onb-nw">${esc(i.number)}</b><div class="xs ${over?'':'faint'}">${t('onb.iv.due')} ${i.dueAt?fmtDate(i.dueAt):'—'}${over?' · '+t('onb.iv.over'):''}</div>`,`<b class="num onb-nw">${money(i.total,'USD')}</b>`]};})):S.invoices.length?`<div class="onb-mini">${icon('check','sm')} ${t('onb.iv.none')}</div>`:`<div class="onb-mini">${t('onb.iv.empty')}</div>`});
+  body:invs.length?ui.table([{label:t('onb.iv.inv')},{label:t('onb.iv.amount'),cls:'r'}],invs.map(i=>{const over=i.dueAt&&new Date(i.dueAt)<n;return{href:link('invoice',i.id),cells:[`<b class="mono onb-nw">${esc(i.number)}</b><div class="xs ${over?'':'faint'}">${t('onb.iv.due')} ${i.dueAt?fmtDate(i.dueAt):'—'}${over?' · '+t('onb.iv.over'):''}</div>`,`<b class="num onb-nw">${money(i.total,typeof docCcy==='function'?docCcy(i):(i.currency||'USD'))}</b>`]};})):S.invoices.length?`<div class="onb-mini">${icon('check','sm')} ${t('onb.iv.none')}</div>`:`<div class="onb-mini">${t('onb.iv.empty')}</div>`});
  // activity
  const acts=S.activity.slice(0,8);
  const actCard=ui.card({title:t('onb.ac.title'),body:acts.length?`<ul class="onb-feed">${acts.map(a=>`<li><span class="onb-dot" aria-hidden="true"></span><div class="grow"><div>${esc(a.text)}</div><div class="xs faint num">${fmtDateTime(a.ts)}</div></div></li>`).join('')}</ul>`:`<p class="muted small">${t('onb.ac.none')}</p>`});

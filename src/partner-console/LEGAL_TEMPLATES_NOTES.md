@@ -10,7 +10,7 @@
 - Module exports: `LEGAL_PACK_VER` ('v12'), `LEGAL_TPL`, `LEGAL_KEYS`, `LEGAL_DEMO_VALUES` (partner / status / ota / countries UA, KZ, DE /
   system / samples / roundtrip), `LEGAL_CN_REASONS`, `legalDerive(V)`, boot hook (seeds `S.templates`, REPLACES any stored template whose
   ver number is lower than the base — i.e. every stored `T-*-v10` / `T-*-v3` — and adds missing types).
-- Template versions: every type `ver:'T-<TYPE>-v12'`, `effective:'2026-11-12'`. v12 is the first edition; v10 JSON is in git history.
+- Template versions: every type `ver:'T-<TYPE>-v12'`, `effective:'2026-09-01'`. v12 is the first edition; v10 JSON is in git history.
 
 ## v12 KEY CHANGES (v10 → v12)
 

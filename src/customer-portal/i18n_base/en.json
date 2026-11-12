@@ -513,7 +513,7 @@
  "si_pkg": "Sign in, then enter your package code.",
  "cx_link": "Cancel contracts here",
  "cx_title": "Cancel a subscription",
- "cx_sub": "You don’t need to sign in. Tell us who you are and which device the subscription is for, then confirm. We send the confirmation at once.",
+ "cx_sub": "Enter your details and the device the subscription is for, then confirm. Where the law of your country requires it (Germany), a subscription can be cancelled here without signing in; otherwise please sign in to manage your subscription.",
  "cx_sub_acc": "Choose the subscription and confirm. We send the confirmation at once.",
  "cx_name": "Your name",
  "cx_contact": "Email or phone you sign in with",
@@ -554,5 +554,9 @@
  "x_de_close": "OTA: German Documents 07/08 not published (close the DE portal)",
  "x_de_open": "OTA: publish Documents 07/08 in German (open the DE portal)",
  "x_de_on": "Portal for Germany is open",
- "x_de_off": "Portal for Germany is closed"
+ "x_de_off": "Portal for Germany is closed",
+ "cx_neutral": "If a matching subscription exists in a country where online cancellation without login applies, it has been cancelled; otherwise please sign in to manage your subscription. [wording to be approved]",
+ "cx_neutral_t": "Request received",
+ "cx_conf_neutral": "Request {ref} received on {t}. If a matching subscription exists in a country where online cancellation without login applies, it has been cancelled; otherwise please sign in to manage your subscription. [wording to be approved]",
+ "CCGATE": "CONNECT is not open in this country yet. Please try again later or contact the seller."
 }

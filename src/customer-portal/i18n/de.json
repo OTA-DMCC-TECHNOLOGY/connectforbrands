@@ -362,7 +362,7 @@
  "si_pkg": "Melden Sie sich an und geben Sie dann Ihren Paketcode ein.",
  "cx_link": "Verträge hier kündigen",
  "cx_title": "Abonnement kündigen",
- "cx_sub": "Eine Anmeldung ist nicht erforderlich. Geben Sie an, wer Sie sind und für welches Gerät das Abonnement gilt, und bestätigen Sie. Die Bestätigung senden wir sofort.",
+ "cx_sub": "Geben Sie Ihre Daten und das Gerät an, für das das Abonnement gilt, und bestätigen Sie. Wo das Recht Ihres Landes es verlangt (Deutschland), können Sie ein Abonnement hier ohne Anmeldung kündigen; andernfalls melden Sie sich bitte an, um Ihr Abonnement zu verwalten.",
  "cx_sub_acc": "Wählen Sie das Abonnement und bestätigen Sie. Die Bestätigung senden wir sofort.",
  "cx_name": "Ihr Name",
  "cx_contact": "E-Mail-Adresse oder Telefonnummer Ihres Kontos",
@@ -398,5 +398,9 @@
  "cx_conf": "Kündigung {ref} eingegangen am {t}: Die automatische Verlängerung für „{d}“ ist beendet; der Dienst läuft bis zum {date}.",
  "cx_conf_pending": "Kündigung {ref} eingegangen am {t}. Wir prüfen sie und antworten an diese Adresse.",
  "cx_dev_note": "Abonnement gekündigt. Der Dienst läuft bis zum {date}.",
- "ev_cancel": "Abonnement gekündigt"
+ "ev_cancel": "Abonnement gekündigt",
+ "cx_neutral": "Falls ein passendes Abonnement in einem Land besteht, in dem die Online-Kündigung ohne Anmeldung gilt, wurde es gekündigt; andernfalls melden Sie sich bitte an, um Ihr Abonnement zu verwalten. [wording to be approved]",
+ "cx_neutral_t": "Anfrage eingegangen",
+ "cx_conf_neutral": "Anfrage {ref} eingegangen am {t}. Falls ein passendes Abonnement in einem Land besteht, in dem die Online-Kündigung ohne Anmeldung gilt, wurde es gekündigt; andernfalls melden Sie sich bitte an, um Ihr Abonnement zu verwalten. [wording to be approved]",
+ "CCGATE": "CONNECT ist in diesem Land noch nicht verfügbar. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Verkäufer."
 }

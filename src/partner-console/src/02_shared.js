@@ -120,8 +120,8 @@ function creditNote(inv,reason,o){o=o||{};if(!inv||inv.status==='cancelled')retu
 
 /* ---------- Service Token exchange: pay the difference if more expensive, no refund if cheaper ---------- */
 function exchangeQuote(from,to,cc){const a=pkgSplit(from),b=pkgSplit(to);return r2(tokenPrice(b.plan,b.term,cc)-tokenPrice(a.plan,a.term,cc));}
-function exchangeCreate(from,to,qty,cc){if(from===to||!(qty>0))return{err:'same'};if(tokensAvail(from)<qty)return{err:'avail'};
- const lots=(S.tokenLots||[]).filter(l=>l.key===from&&!l.revoked&&!lotExpired(l)&&lotFree(l)>0).sort((a,b)=>a.expiresAt<b.expiresAt?-1:1);
+function exchangeCreate(from,to,qty,cc){if(from===to||!(qty>0))return{err:'same'};if(tokensAvail(from,cc)<qty)return{err:'avail'};
+ const lots=(S.tokenLots||[]).filter(l=>l.key===from&&(!cc||l.cc===cc)&&!l.revoked&&!lotExpired(l)&&lotFree(l)>0).sort((a,b)=>a.expiresAt<b.expiresAt?-1:1);
  let left=qty;const res=[];for(const l of lots){if(!left)break;const n=Math.min(left,lotFree(l));l.reserved=(l.reserved||0)+n;res.push({lotId:l.id,n});left-=n;}
  const diff=exchangeQuote(from,to,cc);const x={id:uid('xc'),from,to,qty,cc,diffUnit:Math.max(0,diff),rawDiff:diff,res,invoiceId:null,status:'awaiting_payment',createdAt:iso(now()),doneAt:null};
  S.exchanges=S.exchanges||[];S.exchanges.unshift(x);audit('tokens.exchange.request',from+'→'+to,{qty,diff});
@@ -149,18 +149,19 @@ function nextIccidIndex(){let max=0;for(const s of S.sims){const n=iccidIndex(s.
    and these SIMs are shown in the cabinet as one batch." (MPA 7.1). "SIMs are shipped free of charge in the quantity of Activation Keys purchased for
    the country, in one or several shipments; a further shipment within that quantity is made when at least seventy per cent (70%) of the SIMs
    previously delivered to Partner for that country have been activated, unless OTA agrees otherwise." (MPA 8.1)
-   Demo reading: purchased = key lots issued from paid invoices (not revoked by a credit note); previously delivered = every earlier shipment of the
-   country (received quantity once received, otherwise the shipped quantity — in transit counts, conservative); activated = SIM status 'active'.
+   Demo reading: purchased = key lots issued from paid invoices (not revoked by a credit note); previously delivered = SIMs of the country's shipments
+   that have actually been delivered (status delivered / received; received quantity once acknowledged) — SIMs in transit do not count;
+   activated = activated in CONNECT with an Activation Key (the SIM holds keyLotId), not merely installed.
    The quantity cap is hard; the 70% rule may be waived by OTA ("unless OTA agrees otherwise") with a recorded note. */
 const SIM_NEXT_PCT=0.70;
 // keys bought for a country = SIMs OTA owes for that country
 function simEntitled(cc){return (S.keyLots||[]).filter(l=>l.cc===cc&&!l.revoked).reduce((a,l)=>a+l.qty,0);}
 // quota of a country: {cc, entitled, shipped, delivered, transit, activated, stock, pct, left, ok70, need, canShip, reason:''|'no_keys'|'quota'|'70'}
 function simQuota(cc){const ent=simEntitled(cc);const ids=new Set();let shipped=0,delivered=0,transit=0;
- (S.shipments||[]).forEach(h=>{if(h.cc!==cc||h.status==='cancelled')return;ids.add(h.id);const n=h.receipt?h.receipt.received:h.qty;shipped+=n;if(h.status==='received'||h.status==='delivered')delivered+=n;else transit+=n;});
- let activated=0,stock=0;for(const x of S.sims){if(!ids.has(x.shipmentId))continue;if(x.status==='active')activated++;else if(x.status==='stock')stock++;}
- const pct=shipped?activated/shipped:0;const ok70=shipped===0||activated>=Math.ceil(shipped*SIM_NEXT_PCT-1e-9);const left=Math.max(0,ent-shipped);
- const need=shipped?Math.max(0,Math.ceil(shipped*SIM_NEXT_PCT-1e-9)-activated):0;
+ (S.shipments||[]).forEach(h=>{if(h.cc!==cc||h.status==='cancelled')return;const n=h.receipt?h.receipt.received:h.qty;shipped+=n;if(h.status==='received'||h.status==='delivered'){delivered+=n;ids.add(h.id);}else transit+=n;});
+ let activated=0,stock=0;for(const x of S.sims){if(!ids.has(x.shipmentId))continue;if(x.keyLotId)activated++;else if(x.status==='stock')stock++;}
+ const pct=delivered?activated/delivered:0;const ok70=delivered===0||activated>=Math.ceil(delivered*SIM_NEXT_PCT-1e-9);const left=Math.max(0,ent-shipped);
+ const need=delivered?Math.max(0,Math.ceil(delivered*SIM_NEXT_PCT-1e-9)-activated):0;
  const reason=left<=0?(ent?'quota':'no_keys'):(!ok70?'70':'');return{cc,entitled:ent,shipped,delivered,transit,activated,stock,pct,left,ok70,need,canShip:!reason,reason};}
 // check a new shipment: '' | 'no_keys' | 'quota' (qty above the keys bought) | '70' (fewer than 70% activated, OTA has not agreed otherwise)
 function shipCheck(cc,qty,override){const q=simQuota(cc);if(!q.entitled)return 'no_keys';if(qty>q.left)return 'quota';if(!q.ok70&&!(override&&String(override.note||'').trim()))return '70';return '';}
@@ -178,8 +179,8 @@ function shipCreate(o){if(!o.force){const e=shipCheck(o.cc,o.qty,o.override);if(
   ship_from:{name:sf.name,addr:sf.addr,country:sf.country},ship_from_country:sf.country,exporter:{name:ex.name,eori:String(ex.eori||'').replace(/\s/g,'').toUpperCase()},
   dap:Object.assign({},o.dap),importer:o.importer||'',cartons:o.cartons||'',gross:o.gross||'',netw:o.net||'',carrier:'',waybill:'',
   status:'prepared',events:[['prepared',ts]],createdAt:ts,by:actorName(),receipt:null,
-  rule:{entitled:q0.entitled,before:q0.shipped,activated:q0.activated,pct:q0.pct,ok70:q0.ok70,override:o.override&&String(o.override.note||'').trim()?{note:String(o.override.note).trim(),by:o.override.by||actorName(),at:ts}:null}};
- S.shipments=S.shipments||[];S.shipments.unshift(h);audit('shipment.create',pf,{qty:h.qty,cc:h.cc,sr:h.sr,ship_from:h.ship_from_country,eori:h.exporter.eori,entitled:q0.entitled,shippedBefore:q0.shipped,activatedPct:Math.round(q0.pct*1000)/10,override70:!!h.rule.override});return h;}
+  rule:{entitled:q0.entitled,before:q0.delivered,transit:q0.transit,activated:q0.activated,pct:q0.pct,ok70:q0.ok70,override:o.override&&String(o.override.note||'').trim()?{note:String(o.override.note).trim(),by:o.override.by||actorName(),at:ts}:null}};
+ S.shipments=S.shipments||[];S.shipments.unshift(h);audit('shipment.create',pf,{qty:h.qty,cc:h.cc,sr:h.sr,ship_from:h.ship_from_country,eori:h.exporter.eori,entitled:q0.entitled,shippedBefore:q0.shipped,deliveredBefore:q0.delivered,activatedBefore:q0.activated,activatedPct:Math.round(q0.pct*1000)/10,override70:!!h.rule.override,overrideReason:h.rule.override?h.rule.override.note:''});return h;}
 function shipAdvance(h,status,extra,at){const ts=at||iso(now());Object.assign(h,extra||{});h.status=status;h.events.push([status,ts]);audit('shipment.'+status,h.pf,extra||{});}
 // partner confirms receipt & condition (SR) → SIMs enter inventory, in custody until installed
 function shipReceive(h,r,at){const ts=at||iso(now());const n=clamp(r.received|0,0,h.qty);
@@ -200,8 +201,8 @@ function deviceActivate(s,o){o=o||{};if(!s)return{err:'no_sim'};const needKey=!s
   s.plan=sub.plan;s.term=1;s.sub=sub.id;s.paidUntil=sub.paidUntil;s.code=null;s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'subscription']);
   audit('activation',s.iccid,{iccid:s.iccid,imei:s.imei,via:'subscription',sub:sub.id,key:needKey});return{ok:true,key:needKey,sub};}
  const c=o.code;if(!c)return{err:'no_code'};const k=pkgKey(c.plan,c.term);
- if(tokensAvail(k)<=0)return{err:'no_token'};
- lot=consumeToken(k);c.lotId=lot?lot.id:null;if(needKey){const kl=consumeKey(kcc);s.keyLotId=kl?kl.id:null;}c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
+ if(tokensAvail(k,kcc)<=0)return{err:'no_token'};
+ lot=consumeToken(k,kcc);c.lotId=lot?lot.id:null;if(needKey){const kl=consumeKey(kcc);s.keyLotId=kl?kl.id:null;}c.keyLotId=s.keyLotId||null;c.status='activated';c.activatedAt=iso(ts);c.iccid=s.iccid;
  audit('activation',fmtCode(c.code),{iccid:s.iccid,imei:s.imei,via:'token',token:k,key:needKey});
  s.plan=c.plan;s.term=c.term;s.code=c.code;const until=new Date(ts.getTime());until.setMonth(until.getMonth()+c.term);s.paidUntil=iso(until);s.lastSeen=iso(ts);s.events=s.events||[];s.events.push([iso(ts),'package']);
  return{ok:true,key:needKey,lot};}
@@ -336,13 +337,14 @@ function seedDemo(){
  // activations: each consumes 1 Service Token of the exact package and 1 Activation Key per device
  const activate=(plan,term,count)=>{let k=0;const sims=S.sims.filter(s=>s.status==='active'&&!s.code);for(const c of S.codes){if(k>=count)break;if(c.plan===plan&&c.term===term&&c.status==='issued'){const sim=sims.find(s=>findModel(s.modelId)&&findModel(s.modelId).model.plan===plan&&!s.code);if(!sim)break;
   c.status='activated';c.activatedAt=daysAgo(40-(k*37/count|0));c.iccid=sim.iccid;sim.code=c.code;sim.plan=plan;sim.term=term;const d=new Date(c.activatedAt);d.setMonth(d.getMonth()+term);sim.paidUntil=iso(d);sim.events.push([c.activatedAt,'package']);
-  const lot=consumeToken(pkgKey(plan,term));c.lotId=lot?lot.id:null;const kl=consumeKey('UA');sim.keyLotId=kl?kl.id:null;c.keyLotId=sim.keyLotId;k++;}}};
+  const lot=consumeToken(pkgKey(plan,term),'UA');c.lotId=lot?lot.id:null;const kl=consumeKey('UA');sim.keyLotId=kl?kl.id:null;c.keyLotId=sim.keyLotId;k++;}}};
  activate('std',24,118);activate('light',24,61);activate('std',36,22);
  // Direct Subscriptions: end users paid by card on the portal — these devices activate without a Service Token (the key is still consumed)
  S.sims.filter(s=>s.status==='active'&&!s.code&&findModel(s.modelId)&&findModel(s.modelId).model.planStatus==='approved').slice(0,25).forEach((s,i)=>{const pl=findModel(s.modelId).model.plan;
   const sub=subCreate(s,pl,{at:daysAgo(20-(i%15))});sub.paidUntil=iso(addMonths(daysAgo(20-(i%15)),2));deviceActivate(s,{via:'subscription',sub});});
  // the rule snapshot of shipment 2 as it was when OTA agreed (statuses of shipment 1 are seeded above)
- {const a=S.sims.filter(s=>s.shipmentId===sh1.id&&s.status==='active').length;Object.assign(sh2.rule,{activated:a,pct:a/1000,ok70:a>=700});}
+ {const a=S.sims.filter(s=>s.shipmentId===sh1.id&&s.keyLotId).length;Object.assign(sh2.rule,{before:1000,transit:0,activated:a,pct:a/1000,ok70:a>=700});
+  const au=S.audit.filter(x=>x.action==='shipment.create'&&x.object===sh2.pf).pop();if(au)Object.assign(au.details,{deliveredBefore:1000,activatedBefore:a,activatedPct:Math.round(a/10*10)/10});}
  seedDE(n,daysAgo,placeOrders,tac);
  // deactivate the last 15 unused Standard·3y codes of r2
  let left=15;for(let i=S.codes.length-1;i>=0&&left>0;i--){const c=S.codes[i];if(c.reseller==='r2'&&c.status==='issued'){c.status='void';c.voidAt=daysAgo(5);left--;}}
@@ -362,16 +364,16 @@ function seedDE(n,daysAgo,placeOrders,tac){if(!S.org||!orgCountries().includes('
  const sims=S.sims.filter(s=>s.shipmentId===sh.id);const mods=[['m1',tac.inv,500000,'std'],['m3',tac.trk,600000,'light']];
  sims.forEach((s,i)=>{if(i>=150)return;const mm=mods[i%3===2?1:0];s.status='active';s.modelId=mm[0];s.imei=genImei(mm[1],mm[2]+i);s.reseller='r5';s.linked=i%2===0;
   s.lastSeen=iso(new Date(n.getTime()-((i*11)%240)*60000));const inst=daysAgo(30-(i%28));s.events.push([daysAgo(31),'toReseller','Funk & Technik Hamburg'],[inst,'installed']);});
- // Service Token codes for the German installer; 50 Standard·24 and 30 Light·12 devices activated with them (1 key + 1 token each)
+ // Service Token codes for the German installer (DE tokens, EUR); 55 Standard·24 and 35 Light·12 devices activated with them (1 key + 1 token each)
  for(let i=0;i<60;i++)S.codes.push({code:genCode('std',24),plan:'std',term:24,reseller:'r5',status:'issued',createdAt:daysAgo(31),activatedAt:null,iccid:null,voidAt:null});
  for(let i=0;i<40;i++)S.codes.push({code:genCode('light',12),plan:'light',term:12,reseller:'r5',status:'issued',createdAt:daysAgo(31),activatedAt:null,iccid:null,voidAt:null});
  const act=(plan,term,count)=>{let k=0;for(const c of S.codes){if(k>=count)break;if(c.reseller!=='r5'||c.plan!==plan||c.term!==term||c.status!=='issued')continue;
   const s=sims.find(x=>x.status==='active'&&!x.code&&!x.keyLotId&&findModel(x.modelId).model.plan===plan);if(!s)break;const at=daysAgo(29-(k%25));
-  const lot=consumeToken(pkgKey(plan,term));const kl=consumeKey('DE');c.status='activated';c.activatedAt=at;c.iccid=s.iccid;c.lotId=lot?lot.id:null;c.keyLotId=kl?kl.id:null;
+  const lot=consumeToken(pkgKey(plan,term),'DE');const kl=consumeKey('DE');c.status='activated';c.activatedAt=at;c.iccid=s.iccid;c.lotId=lot?lot.id:null;c.keyLotId=kl?kl.id:null;
   s.code=c.code;s.plan=plan;s.term=term;s.keyLotId=c.keyLotId;s.paidUntil=iso(addMonths(at,term));s.events.push([at,'package']);k++;}};
- act('std',24,50);act('light',12,30);
- // Direct Subscriptions in Germany (card payment on the portal, EUR): the key is consumed, no token
- sims.filter(s=>s.status==='active'&&!s.code&&!s.keyLotId).slice(0,40).forEach((s,i)=>{const pl=findModel(s.modelId).model.plan;const at=daysAgo(25-(i%20));
+ act('std',24,55);act('light',12,35);
+ // Direct Subscriptions in Germany (card payment on the portal, EUR): the key is consumed, no token → 90 + 60 = 150 keys used of 200 delivered (75%)
+ sims.filter(s=>s.status==='active'&&!s.code&&!s.keyLotId).slice(0,60).forEach((s,i)=>{const pl=findModel(s.modelId).model.plan;const at=daysAgo(25-(i%20));
   const sub=subCreate(s,pl,{at});sub.paidUntil=iso(addMonths(at,2));deviceActivate(s,{via:'subscription',sub});});}
 I18N.add({uk:{'c.demoLoaded':'Демо-дані завантажено','c.ofTermBlock':'Замовлення (Order Form) для країни {c} розірвано {d}. Нові замовлення для цієї країни недоступні.'},
  en:{'c.demoLoaded':'Demo data loaded','c.ofTermBlock':'The Order Form for {c} was terminated on {d}. New orders for this country are not available.'},

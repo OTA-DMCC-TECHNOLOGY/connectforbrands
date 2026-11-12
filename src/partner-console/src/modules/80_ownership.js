@@ -141,6 +141,14 @@ function own_seedInto(b){const P=own_pc();own_seedScopes();const n=now();const a
 function own_seedBridge(){const b=own_bNorm(own_bRead()||{sims:{}});own_seedInto(b);own_process(b);own_bWrite(b);}
 HOOKS.seedDemo.push(()=>{own__b=null;S.own=undefined;own_st();own_seedBridge();});
 
+/* ---------- country an activation code was issued for: code → activated SIM → point of sale (own country, delivery city, its SIMs) → primary ---------- */
+function own_codeCcFn(){const ok=cc=>/^[A-Z]{2}$/.test(String(cc||''));const del=(S.org&&S.org.delivery)||{};const resCc={};const votes={};
+ for(const s of S.sims){if(!s.reseller)continue;const cc=own_simCc(s);const v=votes[s.reseller]||(votes[s.reseller]={});v[cc]=(v[cc]||0)+1;}
+ (S.resellers||[]).forEach(r=>{let cc=ok(r.cc)?r.cc:ok(r.country)?r.country:null;
+  if(!cc&&r.city){const m=Object.keys(del).find(k=>del[k]&&String(del[k].city||'').toLowerCase()===String(r.city).toLowerCase());if(m)cc=m;}
+  if(!cc&&votes[r.id]){cc=Object.keys(votes[r.id]).sort((a,c)=>votes[r.id][c]-votes[r.id][a])[0];}resCc[r.id]=cc||null;});
+ const def=primaryCc();
+ return c=>{if(ok(c.cc))return c.cc;if(c.iccid){const s=own_sim(c.iccid);if(s)return own_simCc(s);}return (c.reseller&&resCc[c.reseller])||def;};}
 /* ---------- partner contacts for the self-binding ban (T12, 4.9 p.3) ---------- */
 function own_partnerContacts(){const P=own_pc();const out=[];const seen=new Set();
  const add=(u,v)=>{const n=own_normContact(v);if(!n||seen.has(n))return;seen.add(n);out.push({partner:P,user_id:u.id,role:u.role,contact:n});};
@@ -193,6 +201,7 @@ function own_sync(){if(!S||!S.authed||!S.org||!Array.isArray(S.sims))return null
  for(const s of S.sims){const r=b.sims[s.iccid];if(!r){b.sims[s.iccid]=own_simRec(s);dirty=true;}else if(r.partner===P&&(s.imei||null)!==r.imei){r.imei=s.imei||null;dirty=true;}}
  for(const c of S.codes||[]){const r=b.codes[c.code];if(!r){b.codes[c.code]={partner:P,serial:parseCode(c.code).serial||'',plan:c.plan,term:c.term,status:c.status==='void'?'blocked':c.status==='activated'?'redeemed':'new',device_id:null,redeemed_at:c.activatedAt||null,blocked_at:c.voidAt||null};dirty=true;}
   else if(c.status==='void'&&r.status==='new'){r.status='blocked';r.blocked_at=c.voidAt||iso(now());dirty=true;}}
+ const ccOf=own_codeCcFn();for(const c of S.codes||[]){const r=b.codes[c.code];if(!r||(r.partner&&r.partner!==P))continue;const cc=ccOf(c);if(cc&&r.cc!==cc){r.cc=cc;dirty=true;}}   // country of issue for the portal (v12)
  const pc=own_partnerContacts();const old=b.partnerContacts.filter(x=>x.partner===P);
  if(JSON.stringify(pc)!==JSON.stringify(old)){b.partnerContacts=b.partnerContacts.filter(x=>x.partner!==P).concat(pc);dirty=true;}
  if(own_settings(b))dirty=true;
