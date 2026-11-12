@@ -6,6 +6,7 @@ js=''.join('\n/* ---- '+os.path.basename(f)+' ---- */\n'+open(f).read() for f in
 # on-demand UI languages: i18n/<code>.json (uk/en/ru are built in); version = content hash for cache-busting
 import hashlib,json
 langs=sorted(os.path.basename(f)[:-5] for f in glob.glob(R+'/i18n/*.json'))
+if os.environ.get('CFB_I18N_LANGS') is not None: langs=[l for l in langs if l in os.environ['CFB_I18N_LANGS'].split()]  # set by tools/publish.py (only validated files are published)
 h=hashlib.sha1(b''.join(open(R+'/i18n/'+l+'.json','rb').read() for l in langs)).hexdigest()[:10]
 js=js.replace("'__I18N_VER__'",json.dumps(h)).replace('__I18N_AVAIL__',json.dumps(langs))
 html=f'''<meta charset="utf-8">
