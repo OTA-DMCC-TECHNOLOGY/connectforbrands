@@ -19,6 +19,8 @@ def valid_langs(d):
         r=subprocess.run(['node',os.path.join(d,'tools','i18n_check.js'),'check',f[:-5]],capture_output=True,text=True,cwd=d)
         bad=[l for l in r.stdout.splitlines() if l.strip().startswith('✗') and 'missing:' not in l]
         if bad: print('skipped',f,'(',len(bad),'errors, e.g.',bad[0].strip()[:80],')');continue
+        import re;m=re.search(r'keys=(\d+)/(\d+)',r.stdout)
+        if m and int(m.group(1))<0.75*int(m.group(2)): print('skipped',f,'(only',m.group(1)+'/'+m.group(2),'keys translated)');continue
         ok.append(f[:-5])
     return ok
 for app,out,lang in (('partner-console','partner','uk'),('customer-portal','portal','uk')):
