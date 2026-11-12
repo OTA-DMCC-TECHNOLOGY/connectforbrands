@@ -98,7 +98,8 @@ route('orders',{nav:'orders',render(){
  const all=ord_allOrders().sort((a,b)=>b.o.createdAt.localeCompare(a.o.createdAt)||b.o.no.localeCompare(a.o.no));
  if(!all.length)return ui.page({title:t('ord.title'),sub:t('ord.sub'),actions:newBtn,body:ui.card({body:ui.empty('cart',t('ord.empty.t'),t('ord.empty.p'),newBtn)})});
  const open=S.invoices.filter(i=>i.status==='open');const toPay=moneyByCcy(open.map(i=>[i.total,docCcy(i)]));
- const ks=keyStats();let tk=0;PLANS.forEach(p=>TERMS.forEach(tm=>{tk+=tokensAvail(pkgKey(p,tm));}));
+ const ks=keyStats();let tk=0;const tkc={};orgCountries().forEach(cc=>{tkc[cc]=0;PLANS.forEach(p=>TERMS.forEach(tm=>{tkc[cc]+=tokensAvail(pkgKey(p,tm),cc);}));tk+=tkc[cc];});
+ const ksc=orgCountries().map(cc=>cc+' '+fmtNum(keysAvail(cc))).join(' · '),tks=orgCountries().map(cc=>cc+' '+fmtNum(tkc[cc])).join(' · ');   // v12: stock per country
  const transit=(S.shipments||[]).filter(h=>h.status!=='received').reduce((a,h)=>a+h.qty,0);
  const kpis=`<div class="grid4" style="margin-bottom:16px">${ui.kpi(t('ord.kpi.topay'),toPay,t('ord.kpi.topay.s',{n:open.length}),{href:'#invoices'})}${ui.kpi(t('ord.kpi.keys'),fmtNum(ks.avail),t('ord.kpi.keys.s',{n:fmtNum(ks.used)}),{href:'#codes'})}${ui.kpi(t('ord.kpi.toks'),fmtNum(tk),t('ord.kpi.toks.s'),{href:'#codes'})}${ui.kpi(t('ord.kpi.transit'),fmtNum(transit),t('ord.kpi.transit.s'),{href:'#shipments'})}</div>`;
  const rows=all.map(x=>{const inv=x.o.invoiceId&&invById(x.o.invoiceId);return{href:link('order',x.o.id),cells:[`<b class="mono ord_nw">${esc(x.o.no)}</b><br><span class="xs muted ord_nw">${t('ord.type.'+x.type)}</span>`,`<span style="white-space:nowrap">${fmtDate(x.o.createdAt)}</span>`,esc(ctyName(x.o.cc)),ord_summary(x),`<span class="num ord_nw">${ord_m(ord_amountOf(x),x.o.cc)}</span>`,inv?`<a class="mono ord_nw small" href="${link('invoice',inv.id)}">${esc(inv.number)}</a>`:'<span class="faint">—</span>',ord_stBadge(x.o)]};});
@@ -134,7 +135,7 @@ route('order-new',{nav:'orders',render(){
  const models=allModels().filter(x=>x.model.planStatus==='approved');
  const grp=p=>{const ms=models.filter(x=>x.model.plan===p).map(x=>x.model.name);
   return `<div class="ord_grp"><div class="ord_grph"><b>${PLAN_NAME[p]}</b><span class="xs faint">${esc(t('ord.f.tok.models',{m:ms.slice(0,3).join(', ')+(ms.length>3?' +'+(ms.length-3):'')}))}</span></div>
-  ${TERMS.map(tm=>{const k=pkgKey(p,tm);const v=d.tk[k]||'';const av=tokensAvail(k);
+  ${TERMS.map(tm=>{const k=pkgKey(p,tm);const v=d.tk[k]||'';const av=tokensAvail(k,d.cc);
    return `<div class="ord_crrow ${ord_qty(v)>0?'on':''}" id="ord_row_${k}"><label for="ord_t_${k}" class="grow"><span class="ord_crt">${termLabel(tm)}${TERM_DISC[tm]?` <span class="badge xs">−${pct(TERM_DISC[tm])}</span>`:''}</span><span class="xs faint">${t('ord.f.tok.unit',{p:ord_m(pl.tokens[p][tm],d.cc)})}${av>0?' · '+t('ord.f.tok.avail',{n:fmtNum(av)}):''}</span></label><input class="inp num ord_crq" id="ord_t_${k}" name="ord_t_${k}" inputmode="numeric" autocomplete="off" placeholder="0" value="${esc(v)}" aria-label="${esc(t('ord.tokT')+' '+pkgLabel(p,tm))}"></div>`;}).join('')}</div>`;};
  const tp=ord_tokPlans();
  const tokCard=ui.card({title:num(base+2)+t('ord.f.tok.h')+` <span class="faint small" style="font-weight:500">· ${t('c.optional')}</span>`,body:tp.length?`<p class="muted small" style="margin-bottom:14px">${t('ord.f.tok.d')}</p><div class="${tp.length>1?'grid2':''}" style="align-items:start">${tp.map(grp).join('')}</div>`:ui.note('warn',`${t('ord.f.tok.locked')} <a href="#catalog">${t('ord.f.tok.toCatalog')} →</a>`)});

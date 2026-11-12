@@ -78,11 +78,13 @@ route('codes',{nav:'codes',render(){
  // pack v12 (MPA 7.1): the keys bought for a country and the same number of SIM cards are shown as ONE batch
  const batchCard=typeof ord_batchTable==='function'?ui.card({title:t('cx.k.batches'),actions:`<a class="small" href="#shipments">${t('cx.k.toShip')} →</a>`,pad:false,body:ord_batchTable()}):'';
  // Service Tokens
+ // v12: tokens are bought per country (in its currency) and used only by devices of that country → stock shown per country
+ const byCc=k=>{const ccs=orgCountries().filter(cc=>tokenStats(k,cc).bought);return ccs.length>1||(ccs.length===1&&orgCountries().length>1)?`<div class="xs muted">${ccs.map(cc=>`${esc(cc)} <b class="num">${fmtNum(tokenStats(k,cc).avail)}</b>`).join(' · ')}</div>`:'';};
  const cards=keys.map(k=>{const c=tokenStats(k);const out=(st.p[k]||{}).issued||0;const tone=c.avail<=0?'bad':c.avail<Math.max(10,c.bought*0.1)?'warn':'';
   return `<div class="card cx_cr"><div class="row between g8"><b>${esc(cx_short(k))}</b>${c.bought?(c.avail<=0?ui.badge(t('cx.cr.empty'),'bad'):tone==='warn'?ui.badge(t('cx.cr.low'),'warn'):''):ui.badge(t('cx.cr.none'),'')}</div>
    <div class="cx_crv"><span class="num">${fmtNum(c.avail)}</span><span class="small faint">${t('cx.cr.avail')}</span></div>${ui.bar(c.bought?c.used/c.bought:0,tone)}
    <div class="row between xs muted"><span>${t('cx.cr.bought')} <b class="num">${fmtNum(c.bought)}</b></span><span>${t('cx.cr.used')} <b class="num">${fmtNum(c.used)}</b></span></div>
-   ${c.reserved?`<div class="xs muted">${t('cx.t.reserved',{n:fmtNum(c.reserved)})}</div>`:''}${c.expired?`<div class="xs cx_warn">${t('cx.t.expired',{n:fmtNum(c.expired)})}</div>`:''}
+   ${byCc(k)}${c.reserved?`<div class="xs muted">${t('cx.t.reserved',{n:fmtNum(c.reserved)})}</div>`:''}${c.expired?`<div class="xs cx_warn">${t('cx.t.expired',{n:fmtNum(c.expired)})}</div>`:''}
    ${out>c.avail?`<div class="xs cx_warn">${t('cx.cr.over',{n:fmtNum(out),a:fmtNum(c.avail)})}</div>`:''}</div>`;}).join('');
  const tokActs=ui.btn(t('cx.x.exchange'),{size:'sm',icon:'layers',act:'cx_xchg',disabled:!keys.some(k=>tokensAvail(k)>0)||!can('p.orders')})+ui.btn(t('cx.cr.buy'),{size:'sm',icon:'cart',href:'#order-new'});
  const credits=ui.card({title:t('cx.cr.title'),actions:tokActs,body:keys.length?`<div class="cx_crgrid">${cards}</div><p class="xs faint" style="margin-top:10px">${t('cx.t.valid')}</p>`:ui.empty('layers',t('cx.cr.emptyT'),t('cx.cr.emptyP'),ui.btn(t('cx.cr.buy'),{kind:'primary',href:'#order-new'}))});
@@ -116,9 +118,9 @@ function cx_xchgModal(){const from=PLANS.flatMap(p=>TERMS.map(tm=>pkgKey(p,tm)))
   <div id="cx_xcQ" aria-live="polite">${cx_xcQuoteHtml(f0,to0,10,ccs[0])}</div></form>`,cx_cancel()+cx_submit(t('cx.xc.do'),'cx_xcF'));}
 function cx_xcQuoteHtml(from,to,qty,cc){if(from===to)return ui.note('warn',t('cx.xc.same'));const d=exchangeQuote(from,to,cc);
  if(d>0.004)return ui.note('info',t('cx.xc.pay',{u:moneyCc(d,cc),n:fmtNum(qty||0),tot:moneyCc(r2(d*(qty||0)),cc)}));return ui.note('warn',t('cx.xc.cheaper',{u:moneyCc(-d,cc)}));}
-function cx_xcRead(){const g=id=>{const e=$('#'+id);return e?e.value:'';};return{from:g('xc_from'),to:g('xc_to'),qty:Number(g('xc_qty')),cc:g('xc_cc')};}
+function cx_xcRead(){const g=id=>{const e=$('#'+id);return e?e.value:'';};return{from:g('xc_from'),to:g('xc_to'),qty:Number(g('xc_qty')),cc:g('xc_cc')||orgCountries()[0]};}   // v12: tokens are exchanged within one country (its currency)
 FORM.cx_xchg=f=>{clearErrs(f);if(!can('p.orders'))return;const d=cx_xcRead();
- if(d.from===d.to){setErr(f,'xc_to',t('cx.xc.same'));return;}if(!Number.isInteger(d.qty)||d.qty<1||d.qty>tokensAvail(d.from)){setErr(f,'xc_qty',t('cx.xc.qtyErr',{n:fmtNum(tokensAvail(d.from))}));return;}
+ if(d.from===d.to){setErr(f,'xc_to',t('cx.xc.same'));return;}if(!Number.isInteger(d.qty)||d.qty<1||d.qty>tokensAvail(d.from,d.cc)){setErr(f,'xc_qty',t('cx.xc.qtyErr',{n:fmtNum(tokensAvail(d.from,d.cc))}));return;}
  const r=exchangeCreate(d.from,d.to,d.qty,d.cc);if(r.err){toast(t('cx.xc.fail'),'bad');return;}const x=r.x;
  if(x.invoiceId){const inv=invById(x.invoiceId);const msg=t('cx.xc.invoiced',{i:inv.number});log(msg);closeOverlay();toast(msg);go('invoice',inv.id);}
  else{const msg=t('cx.xc.doneMsg',{n:fmtNum(x.qty),a:cx_short(x.from),b:cx_short(x.to)});log(msg);closeOverlay();toast(msg);rerender();}};
