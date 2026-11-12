@@ -3,7 +3,8 @@
    Actual = what really happened: devices connected (SIM installed; cost = Activation Key), packages activated (retail price from
    the plan assumptions, cost = USD price of the Service Token lot actually used × FX), and direct subscriptions of connected
    devices without a package (revenue = retail after deductions, cost = OTA Retained Amount → the difference is the commission).
-   Amounts in the calculator's local currency. */
+   Amounts in the calculator's local currency. Pack v12: one country at a time (the calculator's country) — devices, codes and lots of that
+   country only, so amounts never mix USD and EUR price lists. */
 nav({key:'actual',label:()=>t('act.nav'),icon:'chart',href:'#actual',order:72,section:()=>t('prc.sec')});
 function act_cur(){return calc_state().cur;}
 function act_ym(d){d=typeof d==='string'?new Date(d):d;return d.getFullYear()*12+d.getMonth();}
@@ -17,9 +18,10 @@ function act_plan(c,M0,M1){const wh=calc_wh(c);const N=Math.max(1,M1-M0+1);const
  return out;}
 function act_actual(c,M0,M1){const N=Math.max(1,M1-M0+1);const out=[];for(let i=0;i<N;i++)out.push({dev:0,pkg:0,subs:0,revPkg:0,revSub:0,cost:0,rev:0});
  const wh=calc_wh(c);const retail={light:c.rLight,std:c.rStd,prem:c.rStd*1.5};const disc={12:10,24:c.d24,36:c.d36,48:35,60:c.d60};
+ const shc={};(S.shipments||[]).forEach(h=>{shc[h.id]=h.cc;});const ccOf=s=>shc[s.shipmentId]||primaryCc();const simCcBy={};for(const s of S.sims)simCcBy[s.iccid]=ccOf(s);
  const lots={};(S.tokenLots||[]).forEach(l=>{lots[l.id]=l;});const klots={};(S.keyLots||[]).forEach(l=>{klots[l.id]=l;});const mm={};allModels().forEach(x=>{mm[x.model.id]=x.model;});
  const nowYm=act_ym(now());
- for(const s of S.sims){if(s.status!=='active')continue;const ev=(s.events||[]).find(e=>e[1]==='installed'||e[1]==='whitelisted');if(!ev)continue;
+ for(const s of S.sims){if(s.status!=='active'||ccOf(s)!==c.cc)continue;const ev=(s.events||[]).find(e=>e[1]==='installed'||e[1]==='whitelisted');if(!ev)continue;
   const i0=act_ym(ev[0])-M0;if(i0>=N)continue;const md=mm[s.modelId];const plan=s.plan||(md&&md.plan)||'std';
   if(i0>=0){out[i0].dev++;const kl=s.keyLotId&&klots[s.keyLotId];out[i0].cost+=kl?kl.unit*c.fx:wh.key;}
   // package or subscription months
@@ -28,7 +30,7 @@ function act_actual(c,M0,M1){const N=Math.max(1,M1-M0+1);const out=[];for(let i=
   for(let m=Math.max(0,i0);m<N;m++){const ym=M0+m;if(ym>nowYm)break;
    if(pkgStart!=null&&ym>=pkgStart&&ym<pkgEnd)continue; // covered by package
    out[m].subs++;out[m].revSub+=retail[plan]*(1-wh.ded);out[m].cost+=(wh.month[plan]!=null?wh.month[plan]:retainedAmt(plan,c.cc)*c.fx);}}
- for(const c2 of S.codes){if(c2.status!=='activated'||!c2.activatedAt)continue;const i=act_ym(c2.activatedAt)-M0;if(i<0||i>=N)continue;
+ for(const c2 of S.codes){if(c2.status!=='activated'||!c2.activatedAt||(c2.iccid&&simCcBy[c2.iccid]&&simCcBy[c2.iccid]!==c.cc))continue;const i=act_ym(c2.activatedAt)-M0;if(i<0||i>=N)continue;
   const r=retail[c2.plan]*c2.term*(1-(disc[c2.term]||0)/100);const lot=c2.lotId&&lots[c2.lotId];const cost=(lot?lot.unit:tokenPrice(c2.plan,c2.term,c.cc))*c.fx;
   out[i].pkg++;out[i].revPkg+=r;out[i].cost+=cost;}
  out.forEach(o=>{o.rev=o.revPkg+o.revSub;});return out;}
@@ -58,7 +60,8 @@ route('actual',{nav:'actual',render(){
  const table=ui.card({title:t('act.byMonth'),pad:false,body:ui.table([{label:t('act.month')},{label:t('act.c.dev'),cls:'r'},{label:t('act.c.pkg'),cls:'r'},{label:t('act.c.subs'),cls:'r'},{label:t('act.c.pRev'),cls:'r'},{label:t('act.c.aRev'),cls:'r'},{label:t('act.c.dRev')},{label:t('act.c.aMar'),cls:'r'},{label:t('act.c.dMar')}],rows)});
  const chart=ui.card({title:t('act.chartT'),body:act_chart(lbl,P.map(o=>o.rev),A.map(o=>o.rev))});
  const how=ui.note('info',`${t('act.how',{s:act_mLabel(M0)})} <a href="#calculator">${t('act.toCalc')} →</a>`);
- return ui.page({title:t('act.title'),sub:t('act.sub'),actions:ui.btn(t('act.toCalc'),{icon:'calc',href:'#calculator'}),body:`<div class="stack">${kpis}${chart}${table}${how}</div>`});}});
+ const ccs=orgCountries();const seg=ccs.length>1?`<div class="row wrap g8" style="align-items:center"><span class="small muted">${t('prc.country')}</span>${ui.seg('act_ccseg',ccs.map(x=>[x,esc(ctyName(x))]),c.cc,'calc_cc')}<span class="xs faint">${esc(c.cur)}</span></div>`:'';
+ return ui.page({title:t('act.title'),sub:t('act.sub'),actions:ui.btn(t('act.toCalc'),{icon:'calc',href:'#calculator'}),body:`<div class="stack">${seg}${kpis}${chart}${table}${how}</div>`});}});
 I18N.add({
 uk:{'act.nav':'Фактичний дохід','act.title':'Фактичний дохід','act.sub':'Що ви реально заробили і наскільки це відрізняється від плану.','act.plan':'План','act.fact':'Факт','act.vsPlan':'план {p}','act.k.rev':'Виручка','act.k.margin':'Ваша маржа','act.k.dev':'Підключено пристроїв','act.k.pkg':'Продано пакетів','act.k.pkgS':'{p} від підключених','act.partial':'(поточний)','act.byMonth':'План і факт по місяцях','act.month':'Місяць','act.c.dev':'Пристрої план / факт','act.c.pkg':'Пакети','act.c.subs':'Прямі підписки','act.c.pRev':'Виручка план','act.c.aRev':'Виручка факт','act.c.dRev':'Відхилення','act.c.aMar':'Маржа факт','act.c.dMar':'Відхилення маржі','act.chartT':'Виручка: план і факт','act.toCalc':'Змінити план','act.how':'План — це ваш калькулятор доходу з початку програми ({s}). Факт рахуємо з реальних підключень (витрата — ключ активації), активацій пакетів (собівартість — ціна в USD партії токенів, з якої списано, × курс) і прямих підписок: виручка після утримань мінус сума, що утримує OTA, — це ваша комісія.'},
 en:{'act.nav':'Actual revenue','act.title':'Actual revenue','act.sub':'What you actually earned and how far it is from the plan.','act.plan':'Plan','act.fact':'Actual','act.vsPlan':'plan {p}','act.k.rev':'Revenue','act.k.margin':'Your margin','act.k.dev':'Devices connected','act.k.pkg':'Packages sold','act.k.pkgS':'{p} of connected','act.partial':'(current)','act.byMonth':'Plan vs actual by month','act.month':'Month','act.c.dev':'Devices plan / actual','act.c.pkg':'Packages','act.c.subs':'Direct subscriptions','act.c.pRev':'Revenue plan','act.c.aRev':'Revenue actual','act.c.dRev':'Deviation','act.c.aMar':'Margin actual','act.c.dMar':'Margin deviation','act.chartT':'Revenue: plan vs actual','act.toCalc':'Change plan','act.how':'The plan is your revenue calculator from the programme start ({s}). Actuals come from real connections (cost = Activation Key), package activations (cost = USD price of the token lot used × rate) and direct subscriptions: revenue after deductions minus the OTA Retained Amount — that is your commission.'},

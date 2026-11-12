@@ -42,7 +42,7 @@ function lg_taxStatus(){const o=S.org||{};const fv=k=>{try{return lg_fval(k);}ca
  const fe=fv('P_UAE_FE');const uaeFe=fe!=null?fe==='yes':(o.uaeFe===true?true:o.uaeFe===false?false:null);
  return{inc,tax,vatRegs:regs,vatRegsSet:vrSet,uaeFe,complete:!!(inc&&tax&&vrSet&&uaeFe!=null)};}
 // rate rule of MPA 2.6 (the commercial agent's vatRateFor(org) is the source for invoices; this mirrors it for the UI)
-function lg_vatRule(ts){ts=ts||lg_taxStatus();return (ts.tax==='AE'||ts.vatRegs.includes('AE')||ts.uaeFe===true)?0.05:0;}
+function lg_vatRule(ts){ts=ts||lg_taxStatus();return (ts.inc==='AE'||ts.tax==='AE'||ts.vatRegs.includes('AE')||ts.uaeFe===true)?0.05:0;}
 function lg_vatRate(){if(typeof vatRateFor==='function'){try{const r=vatRateFor(S.org);if(r!=null&&isFinite(+r))return +r>1?+r/100:+r;}catch(e){}}return lg_vatRule();}
 // v12 wording of the VAT treatment (Document 13 VAT line, MPA 2.6) — legal text, EN / RU only
 const LG_VAT_TXT={
@@ -57,7 +57,7 @@ function lg_vatLang(){return S.lang==='en'?'en':'ru';}
 function lg_vatBox(tsIn){const ts=tsIn||lg_taxStatus();const L=lg_vatLang();
  if(!ts.complete)return ui.note('info',`<b>${t('lg.vat.title')}</b> · ${esc(t('lg.vat.incomplete'))}`);
  const r=tsIn?lg_vatRule(ts):lg_vatRate();const five=r>=0.05;
- const why=five?[ts.tax==='AE'?t('lg.vat.whyRes'):'',ts.vatRegs.includes('AE')?t('lg.vat.whyReg'):'',ts.uaeFe?t('lg.vat.whyFe'):''].filter(Boolean).join(' · '):'';
+ const why=five?[ts.inc==='AE'?t('lg.vat.whyInc'):'',ts.tax==='AE'?t('lg.vat.whyRes'):'',ts.vatRegs.includes('AE')?t('lg.vat.whyReg'):'',ts.uaeFe?t('lg.vat.whyFe'):''].filter(Boolean).join(' · '):'';
  const other=!five&&(lg_isGcc(ts.inc)||lg_isGcc(ts.tax))&&ts.inc!=='AE';
  return `<div class="lg-vat ${five?'lg-vat5':''}" data-vat="${five?5:0}"><div class="row between wrap g8"><b>${t('lg.vat.title')}</b>${ui.badge(five?'5%':'0%',five?'warn':'ok',true)}</div>
   <div class="lg-vat-line">${esc(five?LG_VAT_TXT.uae[L]:LG_VAT_TXT.zero[L])}</div>${why?`<div class="xs muted">${esc(why)}</div>`:''}
@@ -152,7 +152,7 @@ const LG_CHG_TPL={type:'CHG',docNo:'E',title:{en:'Notice of Change of Details',r
   [{en:'Title',ru:'Должность',bi:true},{en:'{{CHG_SIG_TITLE_EN}}',ru:'{{CHG_SIG_TITLE_L2}}',bi:true}],[{en:'Signature',ru:'Подпись',bi:true},{en:'',ru:''}],[{en:'Date',ru:'Дата',bi:true},{en:'____ / ____ / 20__',ru:'____ / ____ / 20__'}],[{en:'Stamp (if any)',ru:'Печать (при наличии)',bi:true},{en:'',ru:''}]]}]};
 function lg_tplFor(type,ver){return type==='CHG'?(lg_baseTpl('CHG')?lg_tpl('CHG',ver):LG_CHG_TPL):lg_tpl(type,ver);}
 // v12: a country may have its own Order Form text (02-DE). If the template agent ships it as a separate type (OF_DE / OF-DE) it is
-// used for that country; otherwise the shared OF template (with CC_DE / CUR_EUR flags) is rendered. Documents keep type 'OF'.
+// used for that country; otherwise the shared OF template (with CC_DE / CCY_EUR flags) is rendered. Documents keep type 'OF'.
 function lg_tplType(type,cc){if(type==='OF'&&cc){for(const k of ['OF_'+cc,'OF-'+cc])if(lg_baseTpl(k))return k;}return type;}
 // edition of the legal pack a template comes from (template agent: optional `pack` field); the signing package is assembled only from v10
 function lg_tplEdition(type){const b=lg_baseTpl(type);if(!b)return null;return b.pack||b.edition||null;}
@@ -172,7 +172,7 @@ function lg_fmtUtc(v){const d=new Date(v);return d.getUTCFullYear()+'-'+pad(d.ge
 // put KEY (EN form) and KEY_L2 (LANG2 form, only when different) into V
 function lg_put(V,k,raw,fmt,l2){if(raw==null||raw==='')return;let en=raw,ll=raw;
  if(fmt==='int'&&isFinite(+raw)&&String(raw).trim()!==''){en=lg_fmtInt(raw,'en');ll=lg_fmtInt(raw,l2);}
- else if(fmt==='usd'&&isFinite(+raw)&&String(raw).trim()!==''){en=lg_fmtUsd(raw,'en');ll=lg_fmtUsd(raw,l2);}
+ else if((fmt==='usd'||fmt==='money')&&isFinite(+raw)&&String(raw).trim()!==''){en=lg_fmtUsd(raw,'en');ll=lg_fmtUsd(raw,l2);}
  else if(fmt==='date'&&/^\d{4}-\d{2}-\d{2}/.test(String(raw))){en=lg_fmtDate(raw,'en');ll=lg_fmtDate(raw,l2);}
  else if(fmt==='pct'&&isFinite(+raw)){en=String(+(+raw).toFixed(2));ll=en;}
  V[k]=en;if(ll!==en&&!/_(EN|L2)$/.test(k))V[k+'_L2']=ll;}
@@ -204,7 +204,6 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
   const m=lg_meta(k);if(Array.isArray(v))V[k]=v.map(it=>Object.assign({},it));else lg_put(V,k,v,m&&m.format,l2);});
  // v12 tax status (MPA 2.6): P_COUNTRY alias, VAT rate for templates that print the 0% / 5% line
  if(V.P_INC_COUNTRY&&!V.P_COUNTRY)V.P_COUNTRY=V.P_INC_COUNTRY;
- {const ts=lg_taxStatus();if(ts.complete){const r=lg_vatRate();V.VAT_RATE=String(Math.round(r*100));if(r>=0.05)V.VAT_UAE=true;else V.VAT_ZERO=true;}}
  // derived flags
  const tm=V.P_TM_OWNER_IS_PARTNER;if(tm==='yes'||tm===true)V.BRAND_DOC_05A=true;if(tm==='no'||tm===false)V.BRAND_DOC_05B=true;
  if(V.P_AUTHORITY==='director')V.P_AUTHORITY='Director (articles of association)';
@@ -227,8 +226,8 @@ function lg_values(ctx){ctx=ctx||{};const V={};const NA=new Set();const cc=ctx.c
   const oc=((S.ota&&S.ota.countries)||{})[cc]||{};let dc={};try{dc=(LEGAL_DEMO_VALUES.countries||{})[cc]||{};}catch(e){}
   [['OTA_VAT_LOCAL','vat_local'],['OTA_REP_LOCAL','rep_local']].forEach(([k,f])=>{const ne=x=>x!=null&&String(x).trim()!=='';const v=ne(oc[f])?oc[f]:(ne(oc[k])?oc[k]:dc[k]);if(v!=null&&String(v).trim())V[k]=String(v).trim();else NA.add(k);});
   // v12: Order Form currency (MPA 8.1) and, for Germany, OTA's EU OSS registration (02-DE 1.6) — a missing OSS number blocks issue
-  const cy=lg_ccy(cc);V.CURRENCY=cy;V.CUR=cy;V['CUR_'+cy]=true;V['CC_'+cc]=true;
-  const oss=lg_ossNo(cc);if(oss)V.OTA_OSS_NO=oss;else if(cc!=='DE')NA.add('OTA_OSS_NO');
+  const cy=lg_ccy(cc);V.CCY=cy;V['CCY_'+cy]=true;V['CC_'+cc]=true;
+  const oss=lg_ossNo(cc)||(String(dc.OTA_OSS_NO||'').trim()||null);if(oss)V.OTA_OSS_NO=oss;else if(cc!=='DE')NA.add('OTA_OSS_NO');
  }else{NA.add('OTA_VAT_LOCAL');NA.add('OTA_REP_LOCAL');NA.add('OTA_OSS_NO');}
  // system keys
  const date=ctx.date||iso(now());lg_put(V,'DATE',date,'date',l2);
@@ -643,7 +642,7 @@ const LG_GROUPS=[
  {id:'tax',ic:'card',fields:['P_TAX_COUNTRY','P_VAT_REGS','P_UAE_FE']},
  {id:'sign',ic:'lg_pen',fields:['P_SIGNATORY','P_TITLE_EN','P_TITLE_L2','P_TITLE_L2_GEN','P_AUTHORITY','P_AUTHORITY_FILE']},
  {id:'lang',ic:'globe',fields:['LANG2']},
- {id:'brand',ic:'tag',fields:['P_BRAND','P_PROGRAMME','P_TM_OWNER_IS_PARTNER','P_TM_LIST','P_BRAND_CONTACT','P_BRAND_RULES','P_TM_OWNER_NAME','P_TM_OWNER_COUNTRY_EN','P_TM_OWNER_COUNTRY_L2','P_TM_OWNER_REGNO','P_TM_OWNER_ADDR','P_TM_OWNER_RELATION_EN','P_TM_OWNER_RELATION_L2','P_TM_OWNER_TERRITORY_EN','P_TM_OWNER_TERRITORY_L2','P_TM_OWNER_SIGNATORY','P_TM_OWNER_TITLE']},
+ {id:'brand',ic:'tag',fields:['P_BRAND','P_PROGRAMME','P_TM_OWNER_IS_PARTNER','P_TM_LIST','P_BRAND_RULES','P_TM_OWNER_NAME','P_TM_OWNER_COUNTRY_EN','P_TM_OWNER_COUNTRY_L2','P_TM_OWNER_REGNO','P_TM_OWNER_ADDR','P_TM_OWNER_RELATION_EN','P_TM_OWNER_RELATION_L2','P_TM_OWNER_TERRITORY_EN','P_TM_OWNER_TERRITORY_L2','P_TM_OWNER_SIGNATORY','P_TM_OWNER_TITLE']},
  {id:'domain',ic:'globe',fields:['P_DOMAIN','P_DNS_CONTACT','P_LOGO','P_BRANDBOOK']},
  {id:'contacts',ic:'mail',fields:['P_EMAIL_OPS','P_EMAIL_LEGAL','P_EMAIL_FIN','P_EMAIL_SUPPORT','P_PHONE']},
  {id:'bank',ic:'card',fields:['P_BANK_BENEFICIARY','P_BANK_IBAN','P_BANK_NAME','P_BANK_ADDR','P_BANK_SWIFT','P_BANK_INTERMEDIARY','P_BANK_IBAN_EUR']}];
@@ -655,7 +654,7 @@ const LG_ISO=['GB','UA','KZ','PL','MD','GE','RO','DE','CY','EE','LT','LV','CZ','
 // VAT registrations offered as toggles (+ any code already stored)
 function lg_vatRegOpts(cur){return [...new Set(LG_ISO.concat(lg_vatRegsArr(cur)))];}
 function lg_tmOwner(){return lg_fval('P_TM_OWNER_IS_PARTNER');}
-function lg_fieldOn(k){const tm=lg_tmOwner();if(k.startsWith('P_TM_OWNER_')&&k!=='P_TM_OWNER_IS_PARTNER')return tm==='no';if(k==='P_BRAND_CONTACT'||k==='P_BRAND_RULES')return tm!=='no';
+function lg_fieldOn(k){const tm=lg_tmOwner();if(k.startsWith('P_TM_OWNER_')&&k!=='P_TM_OWNER_IS_PARTNER')return tm==='no';if(k==='P_BRAND_RULES')return tm!=='no';
  if(k==='P_AUTHORITY_FILE')return lg_fval('P_AUTHORITY')==='poa';if(k==='P_BANK_IBAN_EUR')return lg_hasEur();return true;}
 const LG_TAX_KEYS=['P_INC_COUNTRY','P_TAX_COUNTRY','P_VAT_REGS','P_UAE_FE'];
 function lg_req(k){if(!lg_fieldOn(k))return false;const base=k.split('@')[0];if(base==='P_TAXNO')return false;if(LG_TAX_KEYS.includes(base)||base==='P_BANK_IBAN_EUR')return true; // v12 Data Form / MPA 2.6
@@ -732,7 +731,7 @@ function lg_formHtml(){lg_st();lg_formInit();const L=lg_st();const edit=lg_canEd
  const grp=(g)=>{let body='';const lockedGrp=issued&&g.fields.some(k=>lg_locked(k));
   if(g.id==='brand'){body=['P_BRAND','P_PROGRAMME'].map(k=>lg_inp(k,{edit,locked:lg_locked(k)})).join('')+lg_inp('P_TM_OWNER_IS_PARTNER',{edit,locked:lg_locked('P_TM_OWNER_IS_PARTNER'),wide:true})+lg_tmTable(edit&&!lg_locked('P_TM_LIST'));
    const tm=lg_tmOwner();if(tm==='no')body+=`<div class="lg-wide lg-subh">${t('lg.tm.ownerH')}</div>`+g.fields.filter(k=>k.startsWith('P_TM_OWNER_')&&k!=='P_TM_OWNER_IS_PARTNER').map(k=>lg_inp(k,{edit,locked:lg_locked(k)})).join('');
-   else body+=['P_BRAND_CONTACT','P_BRAND_RULES'].map(k=>lg_inp(k,{edit,locked:lg_locked(k),wide:k==='P_BRAND_RULES'})).join('');}
+   else body+=['P_BRAND_RULES'].map(k=>lg_inp(k,{edit,locked:lg_locked(k),wide:true})).join('');}
   else body=g.fields.filter(lg_fieldOn).map(k=>lg_inp(k,{edit,locked:lg_locked(k),wide:['P_ADDR_EN','P_ADDR_L2','LANG2','P_VAT_REGS','P_UAE_FE','P_BANK_IBAN_EUR'].includes(k)})).join('');
   if(g.id==='tax')body+=`<div class="lg-wide" id="lg-vatbox">${lg_vatBox()}</div>`;
   const req=['company','tax','sign','bank'].includes(g.id)&&issued&&edit?ui.btn(t('lg.chg.req'),{size:'sm',icon:'edit',act:'lg_chgReq',arg:g.id}):'';
@@ -1306,7 +1305,7 @@ function lg_seed(){const D=lg_demo();lg_st();const L=lg_st();const n=now();const
  set('P_TM_LIST',tml.map((x,i)=>({TM_MARK:x.TM_MARK,TM_REGNO:x.TM_REGNO||(tmNo[i]||tmNo[0])+' (UKIPO)',TM_COUNTRIES:x.TM_COUNTRIES||'United Kingdom; Ukraine; Kazakhstan',TM_CLASSES:x.TM_CLASSES||'9, 38, 42'})),{demo:true});
  set('P_BRAND_RULES','Logo on white or #1F6FEB only, clear space = height of “A”; colours #1F6FEB / #101828; font Onest',{demo:true});
  S.ota.OTA_SUBPROC_EMAIL='Amazon Web Services EMEA SARL (Amazon SES)';S.ota.OTA_SUBPROC_EMAIL_LOC='Luxembourg (EU) / Люксембург (ЕС)';
- set('P_DNS_CONTACT','it@arvelo.example');set('P_LOGO','arvelo_logo_v1.svg');set('P_BRANDBOOK','arvelo_brandbook_2026.pdf');set('P_BRAND_CONTACT','marketing@arvelo.example');
+ set('P_DNS_CONTACT','it@arvelo.example');set('P_LOGO','arvelo_logo_v1.svg');set('P_BRANDBOOK','arvelo_brandbook_2026.pdf');
  set('P_EMAIL_OPS','ops@arvelo.example');set('P_EMAIL_LEGAL','legal@arvelo.example');set('P_EMAIL_FIN','finance@arvelo.example');set('P_EMAIL_SUPPORT','support@arvelo.example');set('P_PHONE','+44 20 7946 0000'); // fictional (Ofcom drama range)
  const devs=allModels().filter(x=>x.model.plan&&x.model.planStatus==='approved').map(x=>({DEV_BRAND:x.brand.name,DEV_MODEL:x.model.name,DEV_HW:'rev. A',DEV_FW:'1.0',DEV_PLAN:PLAN_EN[x.model.plan],DEV_MB:x.model.plan==='light'?'5':'50',DEV_SIM:'Industrial IoT SIM (2FF/3FF/4FF)',ok:true}));
  orgCountries().forEach(cc=>{const C=lg_ccDemo(cc);const dv=(S.org.delivery||{})[cc]||{};
@@ -1635,7 +1634,7 @@ I18N.add({"uk": {"lg.act.doc.sign.partner": "Підписано партнеро
 ['vat.none','Немає реєстрацій платником ПДВ','No VAT registration','Нет регистраций плательщиком НДС'],
 ['vat.title','ПДВ у рахунках OTA','VAT on OTA invoices','НДС в счетах OTA'],
 ['vat.incomplete','Заповніть податковий статус — портал покаже, яка ставка ПДВ застосовується (0% або 5% ОАЕ).','Fill in the tax status — the portal then shows which VAT rate applies (0% or 5% UAE).','Заполните налоговый статус — портал покажет, какая ставка НДС применяется (0% или 5% ОАЭ).'],
-['vat.whyRes','податковий резидент ОАЕ','tax resident in the UAE','налоговый резидент ОАЭ'],['vat.whyReg','зареєстрований платником ПДВ в ОАЕ','VAT-registered in the UAE','зарегистрирован плательщиком НДС в ОАЭ'],['vat.whyFe','постійне представництво в ОАЕ','fixed establishment in the UAE','постоянное представительство в ОАЭ'],
+['vat.whyInc','зареєстрований в ОАЕ','incorporated in the UAE','учреждён в ОАЭ'],['vat.whyRes','податковий резидент ОАЕ','tax resident in the UAE','налоговый резидент ОАЭ'],['vat.whyReg','зареєстрований платником ПДВ в ОАЕ','VAT-registered in the UAE','зарегистрирован плательщиком НДС в ОАЭ'],['vat.whyFe','постійне представництво в ОАЕ','fixed establishment in the UAE','постоянное представительство в ОАЭ'],
 ['vat.src','Рамкова угода, п. 2.6','Master Agreement, clause 2.6','Рамочное соглашение, п. 2.6'],
 ['e.vatregs','Вкажіть коди країн ISO через кому або NONE','Enter ISO country codes separated by commas, or NONE','Укажите коды стран ISO через запятую или NONE'],
 ['chg.tax','Зміни податкового статусу повідомляються OTA без затримки (п. 2.6 Рамкової угоди); ставка ПДВ у нових рахунках зміниться після підписання повідомлення.','Changes of tax status are notified to OTA without delay (Master Agreement, clause 2.6); the VAT rate on new invoices changes once the notice is signed.','Изменения налогового статуса сообщаются OTA без промедления (п. 2.6 Рамочного соглашения); ставка НДС в новых счетах изменится после подписания уведомления.'],

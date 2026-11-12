@@ -270,7 +270,7 @@ function seedDemo(){
  S.actor='u_p_admin';S.ota=otaSeed();fxSeed();
  otaCountrySet('UA',Object.assign(otaCountryDemo('UA'),{delay_hours:24,ownership_v10_enabled:true,currency:'USD'}));otaCountrySet('KZ',Object.assign(otaCountryDemo('KZ'),{delay_hours:24,ownership_v10_enabled:false,currency:'USD'}));
  // v12: Germany — Order Form in EUR; OTA's EU OSS registration for German VAT on Direct Subscriptions (fictional demo number)
- otaCountrySet('DE',Object.assign(otaCountryDemo('DE'),{delay_hours:24,ownership_v10_enabled:false,currency:'EUR',oss_no:DE_OSS_DEMO}));subprocDir();
+ otaCountrySet('DE',Object.assign({oss_no:DE_OSS_DEMO},otaCountryDemo('DE'),{delay_hours:24,ownership_v10_enabled:false,currency:'EUR'}));subprocDir();
  // questionnaire values from the Partner Data Form (legal module owns editing & review)
  const F=(v)=>({value:v,status:v?'filled':'empty',comment:'',by:'Maria Lind',at:daysAgo(58)});
  if(legalDemo()&&legalDemo().partner){const P=legalDemo().partner,ST=legalDemo().status||{};S.form={};Object.keys(P).forEach(k=>{S.form[k]={value:P[k],status:ST[k]||(P[k]==null?'empty':'filled'),comment:'',by:'Maria Lind',at:daysAgo(58)};});}else
@@ -352,7 +352,7 @@ function seedDemo(){
 /* v12 demo: Germany (DE) — third country. EUR price list (seedPL), a paid key + token order (one batch: 300 Activation Keys + 300 SIMs),
    one SIM shipment from the EU warehouse (200 received in Hamburg), 150 of them activated (75% ≥ 70% → a further shipment of up to 100 is allowed),
    activations by Service Token codes and by Direct Subscriptions (EUR, OTA = merchant of record, German VAT under OSS). Statements for DE are in EUR. */
-const DE_OSS_DEMO='EU276900001';   // fictional non-Union OSS number shape (EU + 9 digits)
+const DE_OSS_DEMO='EU276DEMO01';   // fictional (same as LEGAL_DEMO_VALUES.countries.DE.OTA_OSS_NO, which wins when present)
 function seedDE(n,daysAgo,placeOrders,tac){if(!S.org||!orgCountries().includes('DE'))return;
  placeOrders('DE',300,[['std',24,60],['light',12,40]],'combined',38,37);
  const sh=shipCreate({cc:'DE',qty:200,iccidFrom:1501,simType:'Industrial IoT SIM, 2FF/3FF/4FF',unitValue:0.4,dap:S.org.delivery.DE,importer:S.org.delivery.DE.importer,cartons:'1',gross:'1.6',net:'1.2',created:daysAgo(36)});

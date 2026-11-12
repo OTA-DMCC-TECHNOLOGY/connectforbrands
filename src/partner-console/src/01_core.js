@@ -111,8 +111,8 @@ const LANG2_AVAILABLE=['ru','kk'];         // approved second document languages
 const CC_META={
  UA:{cur:'UAH',fx:45.0564,vat:0.20,key:9.85,month:{light:75,std:99}},
  KZ:{cur:'KZT',fx:441.77,vat:0.16,key:9.40,month:{light:990,std:1290}},
- // v12 demo: Germany, price list in EUR (retail €2.99 / €3.99 incl. 19% VAT; fx 1 = retail and wholesale both in EUR); key €9.90
- DE:{cur:'EUR',fx:1,vat:0.19,key:9.90,month:{light:2.99,std:3.99}}};
+ // v12 demo: Germany, price list in EUR (retail €3.99 / €4.99 incl. 19% VAT; fx 1 = retail and wholesale both in EUR); key €8.90 — same figures as LEGAL_DEMO_VALUES.countries.DE
+ DE:{cur:'EUR',fx:1,vat:0.19,key:8.90,month:{light:3.99,std:4.99}}};
 /* ---------- invoice currency per country (MPA 8.1 v12): S.ota.countries[CC].currency = 'USD' | 'EUR' ----------
    The currency of the Order Form applies to all prices, invoices, credit notes, Statements, commission and payments for that country.
    ccy(cc) / cur(cc) → 'USD' | 'EUR'; default: EUR for EU member states (Approved Countries in Europe; demo DE), USD otherwise (UA, KZ by OTA decision). */
@@ -237,7 +237,7 @@ function otaCountry(cc){const c=(S.ota&&S.ota.countries&&S.ota.countries[cc])||{
  const d=parseInt(c.delay_hours,10);return{vat_local:s(c.vat_local),rep_local:s(c.rep_local),delay_hours:d>=OTA_DELAY_MIN&&d<=OTA_DELAY_MAX?d:OTA_DELAY_DEFAULT,ownership_v10_enabled:!!c.ownership_v10_enabled,
   currency:CCY_LIST.includes(c.currency)?c.currency:ccyDefault(cc),oss_no:s(c.oss_no)};}
 // OSS registration: non-Union scheme "EU" + 9 digits, or an EU VAT number (Union scheme); empty = not registered (N/A)
-const validOss=x=>!x||/^(EU\d{9}|[A-Z]{2}[0-9A-Z]{8,12})$/.test(String(x).replace(/\s/g,'').toUpperCase());
+const validOss=x=>!x||/^(EU[0-9A-Z]{9}|[A-Z]{2}[0-9A-Z]{8,12})$/.test(String(x).replace(/\s/g,'').toUpperCase());
 // the currency may change only while the country has no price list versions in use, invoices or statements (MPA 8.1: fixed by the Order Form)
 function ccyLocked(cc){return (S.invoices||[]).some(i=>i.cc===cc)||(S.statements||[]).some(x=>x.cc===cc);}
 // validate + save; returns '' or an error code: 'delay' (not an integer 1–24) | 'currency' (not USD/EUR, or changed while locked) | 'oss' (format)
@@ -251,7 +251,7 @@ function otaOss(cc){const o=otaCountry(cc).oss_no;return o&&o.toUpperCase()!=='N
 // template values for ONE country: only keys that are set (N/A → absent, never printed)
 function otaLocal(cc){const c=otaCountry(cc);const o={};const na=x=>!x||x.toUpperCase()==='N/A';if(!na(c.vat_local))o.OTA_VAT_LOCAL=c.vat_local;if(!na(c.rep_local))o.OTA_REP_LOCAL=c.rep_local;return o;}
 // demo per-country values shipped by the template agent (LEGAL_DEMO_VALUES.countries[CC].OTA_VAT_LOCAL / OTA_REP_LOCAL), fictional
-function otaCountryDemo(cc){const D=legalDemo();const c=D&&D.countries&&D.countries[cc]||{};return{vat_local:c.OTA_VAT_LOCAL||'',rep_local:c.OTA_REP_LOCAL||''};}
+function otaCountryDemo(cc){const D=legalDemo();const c=D&&D.countries&&D.countries[cc]||{};const o={vat_local:c.OTA_VAT_LOCAL||'',rep_local:c.OTA_REP_LOCAL||''};if(c.OTA_OSS_NO)o.oss_no=c.OTA_OSS_NO;if(c.CCY)o.currency=c.CCY;return o;}
 function otaDelayHours(cc){return otaCountry(cc).delay_hours;}
 function ownershipEnabled(cc){return otaCountry(cc).ownership_v10_enabled;}
 

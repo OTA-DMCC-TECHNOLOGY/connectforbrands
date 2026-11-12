@@ -10,43 +10,43 @@ function prc_vBadge(v){const s=prc_vStatus(v);return ui.badge(t('prc.v.'+s),s===
 nav({key:'prices',label:()=>t('prc.nav'),icon:'price',href:'#prices',order:70,section:prc_sec});
 nav({key:'calculator',label:()=>t('calc.nav'),icon:'calc',href:'#calculator',order:71,section:prc_sec});
 
-function prc_table(v,prev){const cols=[{label:t('prc.plan')}].concat(TERMS.map(m=>({label:termLabel(m),cls:'r'})));
- const rows=PLANS.map(p=>({cells:[`<div class="col g4 prc_pcol"><b>${PLAN_NAME[p]}</b><span class="xs faint">${t('prc.ret')} ${money(v.retained[p],'USD')}${t('prc.perMoShort')}</span></div>`].concat(TERMS.map(tm=>{const x=v.tokens[p][tm];const o=prev&&prev.tokens[p][tm];const ch=o!=null&&Math.abs(x-o)>0.004;
-  return `<div class="col g4 prc_cell"><span class="num"><b>${money(x,'USD')}</b></span>${ch?ui.badge((x>o?'+':'−')+pct(Math.abs(x-o)/o,1),x>o?'warn':'ok'):''}<span class="xs faint">${money(r2(x/tm),'USD')} ${t('prc.perMo')}</span></div>`;}))}));
+function prc_table(v,prev){const vc=v.currency||ccy(prc_curCc);const cols=[{label:t('prc.plan')}].concat(TERMS.map(m=>({label:termLabel(m),cls:'r'})));
+ const rows=PLANS.map(p=>({cells:[`<div class="col g4 prc_pcol"><b>${PLAN_NAME[p]}</b><span class="xs faint">${t('prc.ret')} ${money(v.retained[p],vc)}${t('prc.perMoShort')}</span></div>`].concat(TERMS.map(tm=>{const x=v.tokens[p][tm];const o=prev&&prev.tokens[p][tm];const ch=o!=null&&Math.abs(x-o)>0.004;
+  return `<div class="col g4 prc_cell"><span class="num"><b>${money(x,vc)}</b></span>${ch?ui.badge((x>o?'+':'−')+pct(Math.abs(x-o)/o,1),x>o?'warn':'ok'):''}<span class="xs faint">${money(r2(x/tm),vc)} ${t('prc.perMo')}</span></div>`;}))}));
  return ui.table(cols,rows);}
 route('prices',{nav:'prices',render(){
  const ccs=orgCountries();const cc=prc_cc();prc_curCc=cc;const v=priceList(cc);const pend=plPending(cc);
  const seg=ccs.length>1?`<div class="col g4"><span class="small muted">${t('prc.country')}</span>${ui.seg('prc_ccseg',ccs.map(c=>[c,esc(ctyName(c))]),cc,'prc_cc')}</div>`:'';
  if(!v)return ui.page({title:t('prc.title'),sub:t('prc.sub'),body:`<div class="stack">${seg}${ui.card({body:ui.empty('price',t('prc.noPl'),t('prc.noPlP'),'')})}${S.admin?prc_adminCard(cc):''}</div>`});
- const head=`<div class="row between wrap g12">${seg}<span class="xs faint">${t('prc.verLine',{v:v.ver,d:fmtDate(v.from)})} · ${t('prc.usdNet')}</span></div>`;
+ const head=`<div class="row between wrap g12">${seg}<span class="xs faint">${t('prc.verLine',{v:v.ver,d:fmtDate(v.from)})} · ${t('prc.ccyNet',{c:ccy(cc)})}</span></div>`;
  const termNote=typeof ord_ofTermNote==='function'?ord_ofTermNote(cc):'';
  const pendNote=termNote+pend.filter(p=>!(termNote&&p.increase)).map(p=>ui.note('warn',`<b>${t(plAwaitingSign(p)?'prc.pendSign':'prc.pendT',{d:fmtDate(p.from),v:p.ver})}</b> ${t(p.increase?'prc.pendInc':'prc.pendDec')} <a href="#" data-act="prc_showVer" data-arg="${esc(cc+'|'+p.ver)}">${t('prc.seeChanges')}</a>`,'clock')).join('');
  const keyCard=`<section class="card prc_sim"><div class="bd row g16 wrap"><span class="prc_ic">${icon('key','lg')}</span>
   <div class="grow col g4"><h2 class="prc_h2">${t('prc.keyTitle')}</h2><p class="muted small">${t('prc.keyText')}</p></div>
-  <div class="col g4 prc_simv"><span class="prc_big num">${money(v.key,'USD')}</span><span class="xs faint">${t('prc.perKey')}</span></div></div></section>`;
+  <div class="col g4 prc_simv"><span class="prc_big num">${money(v.key,ccy(cc))}</span><span class="xs faint">${t('prc.perKey')}</span></div></div></section>`;
  const tokCard=ui.card({title:t('prc.tokTitle'),actions:`<span class="xs faint">${t('prc.tokValid')}</span>`,pad:false,body:prc_table(v)+`<div class="bd prc_expl grid3"><div class="col g4"><b>Light</b><p class="muted small">${t('prc.desc.light')}</p></div><div class="col g4"><b>Standard</b><p class="muted small">${t('prc.desc.std')}</p></div><div class="col g4"><b>Premium</b><p class="muted small">${t('prc.desc.prem')}</p></div></div>`});
- const fee=v.fee||0;const ret=PLANS.map(p=>`<dt>${PLAN_NAME[p]}</dt><dd class="num">${money(v.retained[p],'USD')} ${t('prc.perPaidMo')}</dd>`).join('');
+ const fee=v.fee||0;const ret=PLANS.map(p=>`<dt>${PLAN_NAME[p]}</dt><dd class="num">${money(v.retained[p],ccy(cc))} ${t('prc.perPaidMo')}</dd>`).join('');
  const comCard=ui.card({title:t('prc.comTitle'),body:`<div class="stack"><p class="small muted">${t('prc.comP')}</p>
   <div class="prc_formula">${t('prc.formula')}</div>
   <div class="grid2" style="align-items:start"><dl class="dl ord_dl"><dt class="small"><b>${t('prc.retTitle')}</b></dt><dd></dd>${ret}</dl><dl class="dl ord_dl"><dt>${t('prc.fee')}</dt><dd class="num">${pct(fee,1)}</dd><dt>${t('prc.rs')}</dt><dd>${t('prc.rsD')}</dd></dl></div>
-  ${ui.note('info',t('prc.comEx',{r:money(retainedAmt('std',cc),'USD')}))}</div>`});
+  ${ui.note('info',t('prc.comEx',{r:money(retainedAmt('std',cc),ccy(cc))}))}</div>`});
  const hist=plVersions(cc).slice().reverse().concat(((S.priceLists||{})[cc]||[]).filter(x=>x.status==='withdrawn'));
  const histCard=ui.card({title:t('prc.hist.title'),pad:false,body:ui.table([{label:t('prc.v.col')},{label:t('prc.v.from')},{label:t('prc.keyShort'),cls:'r'},{label:'Standard · '+termLabel(24),cls:'r'},{label:t('c.status')},{label:''}],
-  hist.map(x=>({cells:[`<b class="num">v${x.ver}</b>${x.increase?' '+ui.badge(t('prc.inc'),'warn'):''}`,`<span class="ord_nw">${fmtDate(x.from)}</span>`,`<span class="num">${money(x.key,'USD')}</span>`,`<span class="num">${money(x.tokens.std[24],'USD')}</span>`,prc_vBadge(x),ui.btn(t('prc.view'),{size:'sm',kind:'ghost',act:'prc_showVer',arg:cc+'|'+x.ver})]})))});
+  hist.map(x=>({cells:[`<b class="num">v${x.ver}</b>${x.increase?' '+ui.badge(t('prc.inc'),'warn'):''}`,`<span class="ord_nw">${fmtDate(x.from)}</span>`,`<span class="num">${money(x.key,x.currency||ccy(cc))}</span>`,`<span class="num">${money(x.tokens.std[24],x.currency||ccy(cc))}</span>`,prc_vBadge(x),ui.btn(t('prc.view'),{size:'sm',kind:'ghost',act:'prc_showVer',arg:cc+'|'+x.ver})]})))});
  const ms=allModels();
- const mrows=ms.map(({brand,model})=>({href:link('model',model.id),cells:[`<b>${esc(brand.name)}</b> <span class="faint">·</span> ${esc(model.name)}`,model.planStatus==='approved'&&model.plan?ui.badge(PLAN_NAME[model.plan],model.plan==='std'?'accent':'info',true):ui.badge(t('prc.review'),'warn',true),model.planStatus==='approved'&&model.plan?`<span class="num">${money(v.tokens[model.plan][24],'USD')}</span> <span class="xs faint">/ ${termLabel(24)}</span>`:'<span class="faint">—</span>']}));
+ const mrows=ms.map(({brand,model})=>({href:link('model',model.id),cells:[`<b>${esc(brand.name)}</b> <span class="faint">·</span> ${esc(model.name)}`,model.planStatus==='approved'&&model.plan?ui.badge(PLAN_NAME[model.plan],model.plan==='std'?'accent':'info',true):ui.badge(t('prc.review'),'warn',true),model.planStatus==='approved'&&model.plan?`<span class="num">${money(v.tokens[model.plan][24],ccy(cc))}</span> <span class="xs faint">/ ${termLabel(24)}</span>`:'<span class="faint">—</span>']}));
  const modelsCard=ui.card({title:t('prc.models'),pad:false,body:ms.length?ui.table([{label:t('prc.model')},{label:t('prc.plan')},{label:t('prc.from24'),cls:'r'}],mrows):ui.empty('box',t('prc.noModels'),t('prc.noModelsT'),ui.btn(t('prc.addModel'),{kind:'primary',href:'#catalog',icon:'plus'}))});
  return ui.page({title:t('prc.title'),sub:t('prc.sub'),actions:ui.btn(t('prc.toCalc'),{href:'#calculator',icon:'calc'}),
   body:`<div class="stack">${head}${pendNote}${S.admin?prc_adminCard(cc):''}${keyCard}${tokCard}${comCard}${histCard}${modelsCard}</div>`});}});
 
 /* ---------- OTA: price list editor (new version) ---------- */
-function prc_adminCard(cc){const base=plLatest(cc)||Object.assign({ver:0},plSeed(cc));const mn=orgMin();const ed=can('ota.prices');
+function prc_adminCard(cc){const base=plLatest(cc)||Object.assign({ver:0},plSeed(cc));const cy=ccy(cc),sym=CUR_SYM[cy]||cy;const mn=orgMin();const ed=can('ota.prices');
  const inp=(id,val,unit,lbl)=>`<div class="prc_inw"><input class="inp num" id="${id}" name="${id}" type="text" inputmode="decimal" value="${esc(val)}" aria-label="${esc(lbl)}" ${ed?'':'disabled'}><span class="prc_unit" aria-hidden="true">${unit}</span></div>`;
- const rows=PLANS.map(p=>`<tr><th scope="row"><b>${PLAN_NAME[p]}</b></th>${TERMS.map(tm=>`<td>${inp('pl_t_'+p+'_'+tm,base.tokens[p][tm],'$',PLAN_NAME[p]+' '+termLabel(tm))}</td>`).join('')}<td>${inp('pl_r_'+p,base.retained[p],'$',t('prc.ret')+' '+PLAN_NAME[p])}</td></tr>`).join('');
+ const rows=PLANS.map(p=>`<tr><th scope="row"><b>${PLAN_NAME[p]}</b></th>${TERMS.map(tm=>`<td>${inp('pl_t_'+p+'_'+tm,base.tokens[p][tm],sym,PLAN_NAME[p]+' '+termLabel(tm))}</td>`).join('')}<td>${inp('pl_r_'+p,base.retained[p],sym,t('prc.ret')+' '+PLAN_NAME[p])}</td></tr>`).join('');
  return `<section class="card prc_admin"><form data-form="prc_pl" novalidate><input type="hidden" name="cc" value="${esc(cc)}">
   <div class="hd"><h2 class="row g8">${icon('shield','sm')}${t('prc.adm.title',{c:esc(ctyName(cc))})}</h2>${ui.badge('OTA','violet')}</div>
   <div class="bd stack">${ui.note('admin',t('prc.adm.note3',{v:base.ver}))}${ed?'':ord_noPerm('ota.prices')+' '+ord_asBtn('ota_admin')}
-   <div class="grid3">${ui.field({id:'pl_key',label:t('prc.keyShort')+', USD',value:base.key,attrs:ed?'inputmode="decimal"':'disabled'})}${ui.field({id:'pl_fee',label:t('prc.fee')+', %',value:r2((base.fee||0)*100),attrs:ed?'inputmode="decimal"':'disabled',hint:'0–3%'})}${ui.field({id:'pl_from',label:t('prc.v.from'),type:'date',value:iso(now()).slice(0,10),attrs:ed?'':'disabled',hint:t('prc.adm.fromH')})}</div>
+   <div class="grid3">${ui.field({id:'pl_key',label:t('prc.keyShort')+', '+cy,value:base.key,attrs:ed?'inputmode="decimal"':'disabled'})}${ui.field({id:'pl_fee',label:t('prc.fee')+', %',value:r2((base.fee||0)*100),attrs:ed?'inputmode="decimal"':'disabled',hint:'0–3%'})}${ui.field({id:'pl_from',label:t('prc.v.from'),type:'date',value:iso(now()).slice(0,10),attrs:ed?'':'disabled',hint:t('prc.adm.fromH')})}</div>
    <div class="tblwrap"><table class="tbl prc_atbl"><thead><tr><th scope="col">${t('prc.plan')}</th>${TERMS.map(tm=>`<th scope="col">${termLabel(tm)}</th>`).join('')}<th scope="col">${t('prc.ret')}</th></tr></thead><tbody>${rows}</tbody></table></div>
    ${ui.field({id:'pl_note',label:t('prc.adm.noteF'),hint:t('c.optional'),attrs:ed?'maxlength="160"':'disabled'})}
    <fieldset class="stack" style="border:0;padding:0;margin:0"><legend class="small" style="margin-bottom:6px"><b>${t('prc.inc.h')}</b></legend><p class="xs faint" style="margin:0 0 6px">${t('prc.inc.rules',{d:PRICE_NOTICE_DAYS,p:Math.round(PRICE_CAP*100)})}</p>
@@ -66,7 +66,7 @@ FORM.prc_pl=f=>{if(!can('ota.prices'))return;clearErrs(f);const d=formData(f);co
  if(!same){const want=d.pl_from?iso(new Date(d.pl_from+'T10:00:00')):null;const minFrom=plMinFrom(cc,data);const box=$('#prc_plMsg');if(box)box.innerHTML='';
   // ТЗ v10 3.2: ≤ 10% in any rolling 12 months (blocked), ≥ 90 days notice (date clamped), mandatory justification + document link
   const chk=plIncreaseCheck(cc,data,want&&want>minFrom?want:minFrom);
-  if(chk.cap.length){if(box)box.innerHTML=ui.note('bad',`<b>${t('prc.cap.h',{p:Math.round(PRICE_CAP*100)})}</b><br>${chk.cap.slice(0,6).map(x=>esc(x.label)+': '+money(x.base,'USD')+' → '+money(x.val,'USD')+' (+'+pct(x.pct,1)+')').join('<br>')}${chk.cap.length>6?'<br>…':''}`);toast(t('prc.cap.toast'),'bad');return;}
+  if(chk.cap.length){if(box)box.innerHTML=ui.note('bad',`<b>${t('prc.cap.h',{p:Math.round(PRICE_CAP*100)})}</b><br>${chk.cap.slice(0,6).map(x=>esc(x.label)+': '+moneyCc(x.base,cc)+' → '+moneyCc(x.val,cc)+' (+'+pct(x.pct,1)+')').join('<br>')}${chk.cap.length>6?'<br>…':''}`);toast(t('prc.cap.toast'),'bad');return;}
   const just=String(d.pl_just||'').trim(),doc=String(d.pl_doc||'').trim();
   if(chk.increase){let e=false;if(just.length<10){setErr(f,'pl_just',t('prc.inc.justE'));e=true;}if(!/^https?:\/\/\S+\.\S+/.test(doc)){setErr(f,'pl_doc',t('prc.inc.docE'));e=true;}if(e){toast(t('prc.err.fix'),'bad');return;}}
   const v=plAdd(cc,data,{from:want,note:String(d.pl_note||'').trim(),justification:just,docLink:doc,strict:true});if(v.err){toast(t(v.err==='cap'?'prc.cap.toast':'prc.inc.justE'),'bad');return;}
@@ -77,13 +77,13 @@ Object.assign(ACT,{
  prc_seedFill(){const f=$('form[data-form="prc_pl"]');if(!f)return;const sd=plSeed(f.elements.cc.value);f.elements.pl_key.value=sd.key;f.elements.pl_fee.value=0;PLANS.forEach(p=>{TERMS.forEach(tm=>{f.elements['pl_t_'+p+'_'+tm].value=sd.tokens[p][tm];});f.elements['pl_r_'+p].value=sd.retained[p];});toast(t('prc.adm.seeded'));},
  prc_showVer(arg){const [cc,ver]=String(arg).split('|');prc_curCc=cc;const all=(S.priceLists||{})[cc]||[];const v=all.find(x=>x.ver===+ver);if(!v)return;const prev=plVersions(cc).filter(x=>x.ver<v.ver).pop();
   modal(t('prc.verT',{c:esc(ctyName(cc)),v:v.ver}),`<div class="stack"><div class="row wrap g8">${prc_vBadge(v)}<span class="small muted">${t('prc.verLine',{v:v.ver,d:fmtDate(v.from)})}${v.by?' · '+esc(v.by):''}</span></div>${v.note?`<p class="small">${esc(v.note)}</p>`:''}${v.increase?`<dl class="dl ord_dl"><dt>${t('prc.inc.just')}</dt><dd class="small">${esc(v.justification||'—')}</dd><dt>${t('prc.inc.doc')}</dt><dd class="small">${v.docLink?`<a href="${esc(v.docLink)}" target="_blank" rel="noopener noreferrer">${esc(v.docLink)}</a>`:'—'}</dd></dl>${v.justMissing?ui.note('warn',t('prc.inc.missing')):''}`:''}
-   <dl class="dl ord_dl"><dt>${t('prc.keyShort')}</dt><dd class="num">${money(v.key,'USD')}${prev&&prev.key!==v.key?` <span class="faint">(${money(prev.key,'USD')})</span>`:''}</dd><dt>${t('prc.fee')}</dt><dd class="num">${pct(v.fee||0,1)}</dd></dl>${prc_table(v,prev)}</div>`,ui.btn(t('c.close'),{kind:'primary',act:'ovclose'}),{wide:true});},
+   <dl class="dl ord_dl"><dt>${t('prc.keyShort')}</dt><dd class="num">${moneyCc(v.key,cc)}${prev&&prev.key!==v.key?` <span class="faint">(${moneyCc(prev.key,cc)})</span>`:''}</dd><dt>${t('prc.fee')}</dt><dd class="num">${pct(v.fee||0,1)}</dd></dl>${prc_table(v,prev)}</div>`,ui.btn(t('c.close'),{kind:'primary',act:'ovclose'}),{wide:true});},
 });
 
 /* ---------- calculator ---------- */
 const CALC_DEF={dev:3000,growth:0,std:70,rLight:149,rStd:299,pk:30,mix24:30,mix36:40,mix60:30,d24:20,d36:30,d60:40,churn:10,ded:19,h:5,fx:FX};
 const CALC_PLANS=['light','std'];       // the calculator models Light and Standard; Premium prices are on the price list
-const CALC_CC_DEF={UA:{rLight:149,rStd:299,ded:19},KZ:{rLight:1490,rStd:2990,ded:16}};
+const CALC_CC_DEF={UA:{rLight:149,rStd:299,ded:19},KZ:{rLight:1490,rStd:2990,ded:16},DE:{rLight:4.99,rStd:6.99,ded:19}};   // DE: retail in EUR = price-list currency (v12)
 function calc_cc(){const ccs=orgCountries();const c=(S.ui.calc||{}).cc;return ccs.includes(c)?c:ccs[0];}
 function calc_cur(cc){return (CC_META[cc]||CC_META.UA).cur;}
 const CALC_FIELDS={ // [min,max,integer]
@@ -145,12 +145,13 @@ function calc_inputs(c){
    <div class="calc_lbl small"><b>${t('calc.mix')}</b></div><div class="calc_3">${CALC_PTERMS.map(m=>f('mix'+m,termLabel(m),'%')).join('')}</div>
    <span class="err calc_mixerr" id="calc_mixerr" role="alert"></span>
    <div class="calc_lbl small"><b>${t('calc.disc')}</b></div><div class="calc_3">${CALC_PTERMS.map(m=>f('d'+m,termLabel(m),'%')).join('')}</div>`)
-  +grp(t('calc.g.direct'),`${f('ded',t('calc.ded'),'%',t('calc.dedH'))}<p class="xs faint">${t('calc.directH',{r:money(retainedAmt('std',c.cc),'USD')})}</p>`)
+  +grp(t('calc.g.direct'),`${f('ded',t('calc.ded'),'%',t('calc.dedH'))}<p class="xs faint">${t('calc.directH',{r:moneyCc(retainedAmt('std',c.cc),c.cc)})}</p>`)
   +grp(t('calc.g.other'),`${f('churn',t('calc.churn'),'%',t('calc.churnH'))}
    <div class="field"><span class="lbl" id="calc_hL">${t('calc.horizon')}</span><div aria-labelledby="calc_hL">${ui.seg('calc_hseg',[[3,termLabel(36)],[5,termLabel(60)]],c.h,'calc_h')}</div></div>
-   ${f('fx',t('calc.fx'),cur+'/$',t('calc.fxH2',{fx:fmtNum((CC_META[c.cc]||CC_META.UA).fx,2)}))}`);}
+   ${c.cur!==ccy(c.cc)?f('fx',t('calc.fx'),cur+'/'+(CUR_SYM[ccy(c.cc)]||ccy(c.cc)),t('calc.fxH2',{fx:fmtNum((CC_META[c.cc]||CC_META.UA).fx,2)})):''}`);}
 
-function calc_usd(n,c){return '≈ '+money(n/c.fx,'USD',0);}
+// the same amount in the price-list currency of the country (USD / EUR); nothing when retail is already in that currency (DE)
+function calc_usd(n,c){const w=ccy(c.cc);return c.cur===w?'':'≈ '+money(n/c.fx,w,0);}
 function calc_results(c){
  const R=calc_run(c);const T=R.tot;const H=c.h;const mp=T.rev>0?T.margin/T.rev:0;
  const pbTxt=v=>v==null?'—':fmtNum(v,1);
@@ -158,7 +159,7 @@ function calc_results(c){
  const kpis=`<div class="calc_kpis">
   ${ui.kpi(t('calc.k.rev',{h:termLabel(H*12)}),`<span class="num">${money(T.rev,c.cur)}</span>`,calc_usd(T.rev,c))}
   ${ui.kpi(t('calc.k.margin'),`<span class="num calc_pos">${money(T.margin,c.cur)}</span>`,calc_usd(T.margin,c))}
-  ${ui.kpi(t('calc.k.mp'),`<span class="num">${pct(mp,1)}</span>`,t('calc.k.mpS',{c:money(T.cost,c.cur),u:money(T.cost/c.fx,'USD',0)}))}
+  ${ui.kpi(t('calc.k.mp'),`<span class="num">${pct(mp,1)}</span>`,t('calc.k.mpS',{c:money(T.cost,c.cur),u:c.cur===ccy(c.cc)?money(T.cost,c.cur):money(T.cost/c.fx,ccy(c.cc),0)}))}
   ${ui.kpi(t('calc.k.pb'),`<span class="num">${R.pb.blend==null?t('calc.never'):fmtNum(R.pb.blend,1)+' '+t('calc.u.months')}</span>`,`Light ${pbTxt(R.pb.light)} · Standard ${pbTxt(R.pb.std)} ${t('calc.u.months')} · ${t('calc.k.pbS',{s:money(R.wh.sim,c.cur)})}`)}
  </div>`;
  // per-year table
@@ -345,7 +346,7 @@ ru:{'prc.adm.note2':'Цены именно для этого партнёра. �
 /* ---------- v09 strings (price lists per country, USD) ---------- */
 (function(){const R=[
 ['prc.nav','Ціни','Prices','Цены'],['prc.title','Ціни по країнах','Prices by country','Цены по странам'],['prc.sub','Ваш поточний прайс-лист OTA для кожної країни: ключі активації, сервісні токени й умови прямих підписок. Усе в USD без ПДВ.','Your current OTA price list for each country: Activation Keys, Service Tokens and direct subscription terms. All in USD, net.','Ваш текущий прайс-лист OTA для каждой страны: ключи активации, сервисные токены и условия прямых подписок. Всё в USD без НДС.'],
-['prc.country','Країна','Country','Страна'],['prc.verLine','Версія {v} · діє з {d}','Version {v} · effective {d}','Версия {v} · действует с {d}'],['prc.usdNet','USD без ПДВ','USD, net','USD без НДС'],
+['prc.country','Країна','Country','Страна'],['prc.verLine','Версія {v} · діє з {d}','Version {v} · effective {d}','Версия {v} · действует с {d}'],['prc.usdNet','USD без ПДВ','USD, net','USD без НДС'],['prc.ccyNet','{c} без ПДВ','{c}, net','{c} без НДС'],
 ['prc.noPl','Прайс-листа ще немає','No price list yet','Прайс-листа пока нет'],['prc.noPlP','OTA додасть ціни для цієї країни після погодження умов.','OTA adds prices for this country once terms are agreed.','OTA добавит цены для этой страны после согласования условий.'],
 ['prc.pendT','З {d} діятиме версія {v}.','Version {v} takes effect on {d}.','С {d} будет действовать версия {v}.'],['prc.pendInc','Ціни зростають — ми повідомляємо щонайменше за 90 днів, як передбачено угодою.','Prices go up — we give at least 90 days’ notice, as the agreement requires.','Цены растут — мы предупреждаем минимум за 90 дней, как предусмотрено соглашением.'],['prc.pendDec','Ціни знижуються.','Prices go down.','Цены снижаются.'],['prc.seeChanges','Що змінюється','See changes','Что меняется'],
 ['prc.keyTitle','Ключ активації','Activation Key','Ключ активации'],['prc.keyText','Ліцензійний ключ програми CONNECT — один на пристрій, назавжди. Не прив’язаний до відвантажень SIM.','Licence key for the CONNECT program — one per device, for life. Not tied to SIM shipments.','Лицензионный ключ программы CONNECT — один на устройство, навсегда. Не привязан к отгрузкам SIM.'],['prc.perKey','за ключ · USD без ПДВ','per key · USD, net','за ключ · USD без НДС'],['prc.keyShort','Ключ активації','Activation Key','Ключ активации'],
