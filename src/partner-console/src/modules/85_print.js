@@ -379,7 +379,7 @@ const PRN_TPL={B1:prn_tB1,B2:prn_tB2,C1:prn_tC1,C2:prn_tC2,C3:prn_tC3,A1:prn_tA1
 // physical sheet: page = trim + 2 mm bleed on each side; art scaled to mm; optional CutContour layer (spot colour simulated)
 function prn_sheet(type,d,o){o=o||{};const art=PRN_TPL[type](d);if(type==='0')return `<div class="prn-sheet0 ${d.zones?'prn-zones':''}" data-mat="0">${art}</div>`;
  const z=PRN_SZ[type];const k=PRN_PX_MM/z.ppm;const W=Math.round(z.w*100)/100,H=Math.round(z.h*100)/100;
- return `<div class="prn-sheet${o.print?' print':''}" data-mat="${type}" style="width:${W+4}mm;height:${H+4}mm"><div class="prn-trim" data-trim style="width:${W}mm;height:${H}mm">
+ return `<div class="prn-sheet${o.print?' print':''}" data-mat="${type}" style="width:${W+4}mm;height:${o.print?'calc('+(H+4)+'mm - 0.3mm)':(H+4)+'mm'}"><div class="prn-trim" data-trim style="width:${W}mm;height:${H}mm">
 <div class="prn-art ${d.zones?'prn-zones':''}" style="transform:scale(${k})">${art}</div>${o.cut?`<div class="prn-cut" data-layer="CutContour" style="border-radius:${z.r}mm"></div>`:''}</div></div>`;}
 
 /* ---------- datasets: profile, stress (ТЗ 7.2.2) ---------- */
