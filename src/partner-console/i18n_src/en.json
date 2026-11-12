@@ -2746,7 +2746,7 @@
  "own.rt.release": "Release legal hold",
  "own.rt.res": "Result",
  "own.rt.resTxt": "erased {e} · legal hold {h} · files {f} · anonymised {a}",
- "own.rt.rules": "Rules (ТЗ 4.10)",
+ "own.rt.rules": "Rules (spec 4.10)",
  "own.rt.run": "Run now",
  "own.rt.runs": "Job runs",
  "own.rt.st.erased": "Erased",
