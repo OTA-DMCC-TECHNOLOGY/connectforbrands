@@ -217,6 +217,7 @@ function own_reconcile(b){const P=own_pc();const ts=iso(now());let ch=false;cons
 function own_settings(b){if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.settings.countries||typeof b.settings.countries!=='object')b.settings.countries={};let ch=false;
  const ccs=Array.from(new Set(orgCountries().concat(Object.keys((S.ota&&S.ota.countries)||{}))));
  ccs.forEach(cc=>{const cur=b.settings.countries[cc]||{};const oc=(S.ota&&S.ota.countries&&S.ota.countries[cc])||{};const want={delay_hours:own_delay(cc),ownership_v10_enabled:!!own_ctyCfg(cc).ownership_v10_enabled,currency:(typeof ccy==='function'?ccy(cc):oc.currency)||'USD',oss_no:oc.oss_no||'',vat_local:oc.vat_local||''};
+  if(typeof lg_pubCountryDone==='function'){want.docs_published=!!lg_pubCountryDone(cc);if(cc==='DE')want.docs_de_published=want.docs_published;}
   if(Object.keys(want).some(k=>cur[k]!==want[k])){b.settings.countries[cc]=Object.assign({},cur,want,{set_at:iso(now()),set_by:'partner-console (OTA data)'});ch=true;}});return ch;}
 function own_mirror(b){const P=own_pc();const st=own_st();
  st.bindings=b.bindings.filter(x=>x.partner_id===P);const ids=new Set(st.bindings.map(x=>x.id));

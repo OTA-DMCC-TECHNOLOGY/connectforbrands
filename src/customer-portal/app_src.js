@@ -16,7 +16,8 @@ const CTRY={K:'UA',P:'PL',Z:'ZA',D:'DE'};const HOME='K';
 /* v12: per-country retail (Direct Subscription) prices. UA keeps the legacy demo prices in UAH; Germany (Order Form 02-DE, clause 1.6 / 3.1)
    is priced in EUR, including taxes. Source order: bridge settings.countries[CC].retail → partner console S.ota.countries[CC].retail / S.retail[CC]
    → these demo defaults (fictional). Wholesale price lists (S.priceLists) are partner prices and are never shown to End Users. */
-const PR_DE={std:{m:4.99,y:49.9,y2:89.9,y3:124.9,y5:189.9},light:{m:2.99,y:29.9,y2:54.9,y3:74.9,y5:109.9}};
+// monthly figures = the console's DE demo (CC_META.DE.month / LEGAL_DEMO_VALUES.countries.DE: Light €3.99, Standard €4.99 incl. 19 % VAT)
+const PR_DE={std:{m:4.99,y:49.9,y2:89.9,y3:124.9,y5:189.9},light:{m:3.99,y:39.9,y2:72.9,y3:99.9,y5:149.9}};
 const CC_DEF={DE:{currency:'EUR',retail:PR_DE,vat_rate:19,oss:true,cancel_public:true,docs_de_published:true}};
 const PKG={'1':['light',24],'2':['light',36],'3':['light',60],'4':['std',24],'5':['std',36],'6':['std',60],'7':['light',12],'8':['std',12]};
 const PLN={light:'Light',std:'Standard'};
