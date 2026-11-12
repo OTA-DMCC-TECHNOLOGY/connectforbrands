@@ -534,8 +534,8 @@ CN_REASON_TXT = collections.OrderedDict([
     ('error', ('Correction of an error', 'Исправление ошибки')),
     ('refund', ('Refund under clause 4.3 of Document 03 or clause 10.3 of the Master Agreement', 'Возврат по п. 4.3 Документа 03 или п. 10.3 Рамочного соглашения')),
 ])
-VAT0_EN = 'VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)'
-VAT0_RU = 'НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)'
+VAT0_EN = 'VAT 0% – zero-rated export of services'   # v12 review (09.11.2026): legal citation dropped
+VAT0_RU = 'НДС 0% – экспорт услуг'
 VAT_CELL = {'en': '[[VAT_ZERO|%s]][[VAT_AE|VAT 5%%]]' % VAT0_EN, 'ru': '[[VAT_ZERO|%s]][[VAT_AE|НДС 5%%]]' % VAT0_RU, 'bi': True}
 CELL_OVERRIDES = {
     # v12 VAT line variants (MPA 2.6): 0% zero-rated export, or 5% for a Partner in the UAE (flag VAT_AE; VAT_ZERO = not VAT_AE)
