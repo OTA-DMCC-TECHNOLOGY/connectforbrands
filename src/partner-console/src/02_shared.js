@@ -38,8 +38,8 @@ function docRef(type,cc){if(typeof lg_docRef==='function'){try{return lg_docRef(
 /* ---------- OTA Tax Invoices (USD, or EUR for Approved Countries in Europe — pack v12) ---------- */
 // Pack v12 (MPA 2.6, template 13): every OTA invoice and credit note has ONE VAT line — 0% (zero-rated export of services) or, for a Partner
 // in the UAE (resident / VAT-registered / fixed establishment), 5% (vatRateFor). The AED line is always printed, with the real AED VAT amount.
-const VAT0_EN='VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)';
-const VAT0_L2={ru:'НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)',uk:'ПДВ 0% – експорт послуг (ст. 31 Виконавчого регламенту Федерального декрету-закону № 8 від 2017 р. про ПДВ)'};
+const VAT0_EN='VAT 0% – zero-rated export of services';
+const VAT0_L2={ru:'НДС 0% – экспорт услуг',uk:'ПДВ 0% – експорт послуг'};
 // template 13 v12: "… – or, for a Partner in the UAE: VAT 5% / … или для Партнёра в ОАЭ: НДС 5%"
 const VAT5_EN='VAT 5%';
 const VAT5_L2={ru:'НДС 5%',uk:'ПДВ 5%'};
