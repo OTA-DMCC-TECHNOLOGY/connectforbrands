@@ -80,7 +80,6 @@
  "add_title": "Dispositiu nou",
  "add_sub": "On has posat la targeta SIM nova?",
  "s_step": "Pas {n} de 2",
- "c_title": "Tens un codi d’activació?",
  "c_edit": "Contactes",
  "email": "Correu electrònic",
  "email_hint": "Aquí rebràs el codi per entrar.",
@@ -248,10 +247,8 @@
  "p_back": "Torna al dispositiu",
  "p_home": "Torna a l’inici",
  "p_cardErr": "Calen 16 xifres.",
- "c_label": "Codi de la caixa o del venedor",
  "c_btn": "Activa",
  "c_demo": "Enganxa un codi de demo",
- "c_len": "El codi té 16 caràcters.",
  "c_bad": "Aquest codi no és vàlid: revisa els caràcters.",
  "c_ctry": "Aquest codi és per a un altre país.",
  "c_type": "Aquest codi és per al paquet {a}, però aquest dispositiu necessita {b}.",
@@ -341,5 +338,9 @@
  "pr_logoutQ": "Vols sortir? Continuaràs rebent avisos.",
  "pr_logoutY": "Sí, surt",
  "cur": "UAH",
- "day_forms": {"one": "dia", "many": "dies", "other": "dies"}
+ "day_forms": {
+  "one": "dia",
+  "many": "dies",
+  "other": "dies"
+ }
 }

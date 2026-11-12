@@ -80,7 +80,6 @@
  "add_title": "Naujas įrenginys",
  "add_sub": "Kur įdėjote naują SIM kortelę?",
  "s_step": "{n} žingsnis iš 2",
- "c_title": "Turite aktyvinimo kodą?",
  "c_edit": "Kontaktai",
  "email": "El. paštas",
  "email_hint": "Čia gausite prisijungimo kodą.",
@@ -248,10 +247,8 @@
  "p_back": "Grįžti prie įrenginio",
  "p_home": "Į pradžią",
  "p_cardErr": "Reikia 16 skaitmenų.",
- "c_label": "Kodas iš dėžutės arba iš pardavėjo",
  "c_btn": "Aktyvinti",
  "c_demo": "Įklijuoti demo kodą",
- "c_len": "Kodą sudaro 16 simbolių.",
  "c_bad": "Šis kodas negalioja — patikrinkite simbolius.",
  "c_ctry": "Šis kodas skirtas kitai šaliai.",
  "c_type": "Šis kodas skirtas planui {a}, o šiam įrenginiui reikia {b}.",
@@ -341,5 +338,10 @@
  "pr_logoutQ": "Atsijungti? Pranešimai ir toliau bus siunčiami.",
  "pr_logoutY": "Taip, atsijungti",
  "cur": "UAH",
- "day_forms": { "one": "diena", "few": "dienos", "many": "dienos", "other": "dienų" }
+ "day_forms": {
+  "one": "diena",
+  "few": "dienos",
+  "many": "dienos",
+  "other": "dienų"
+ }
 }

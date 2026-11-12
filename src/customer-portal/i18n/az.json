@@ -80,7 +80,6 @@
  "add_title": "Yeni cihaz",
  "add_sub": "Yeni SIM kartı hara taxdınız?",
  "s_step": "Addım {n} / 2",
- "c_title": "Aktivləşdirmə kodunuz var?",
  "c_edit": "Əlaqə məlumatları",
  "email": "E-poçt",
  "email_hint": "Giriş kodunuz bura gələcək.",
@@ -248,10 +247,8 @@
  "p_back": "Cihaza qayıt",
  "p_home": "Ana səhifəyə",
  "p_cardErr": "16 rəqəm lazımdır.",
- "c_label": "Qutudakı və ya satıcıdan alınan kod",
  "c_btn": "Aktivləşdir",
  "c_demo": "Demo kodu yapışdır",
- "c_len": "Kod 16 simvoldan ibarətdir.",
  "c_bad": "Bu kod yanlışdır — simvolları yoxlayın.",
  "c_ctry": "Bu kod başqa ölkə üçündür.",
  "c_type": "Bu kod {a} paketi üçündür, bu cihaza isə {b} lazımdır.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Çıxış edilsin? Bildirişlər gəlməyə davam edəcək.",
  "pr_logoutY": "Bəli, çıx",
  "cur": "UAH",
- "day_forms": {"one": "gün", "other": "gün"}
+ "day_forms": {
+  "one": "gün",
+  "other": "gün"
+ }
 }

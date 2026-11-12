@@ -80,7 +80,6 @@
  "add_title": "Nýtt tæki",
  "add_sub": "Hvar settirðu nýja SIM-kortið í?",
  "s_step": "Skref {n} af 2",
- "c_title": "Ertu með virkjunarkóða?",
  "c_edit": "Tengiliðir",
  "email": "Netfang",
  "email_hint": "Innskráningarkóðinn kemur hingað.",
@@ -248,10 +247,8 @@
  "p_back": "Aftur í tækið",
  "p_home": "Á forsíðu",
  "p_cardErr": "Það þarf 16 tölustafi.",
- "c_label": "Kóði af kassanum eða frá seljanda",
  "c_btn": "Virkja",
  "c_demo": "Líma prufukóða",
- "c_len": "Kóðinn er 16 stafir.",
  "c_bad": "Kóðinn er ekki gildur – athugaðu stafina.",
  "c_ctry": "Þessi kóði er fyrir annað land.",
  "c_type": "Þessi kóði er fyrir pakkann {a}, en tækið þarf {b}.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Skrá út? Tilkynningarnar halda áfram að berast.",
  "pr_logoutY": "Já, skrá út",
  "cur": "UAH",
- "day_forms": {"one": "dag", "other": "daga"}
+ "day_forms": {
+  "one": "dag",
+  "other": "daga"
+ }
 }

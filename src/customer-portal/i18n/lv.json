@@ -80,7 +80,6 @@
  "add_title": "Jauna ierīce",
  "add_sub": "Kur ievietojāt jauno SIM karti?",
  "s_step": "{n}. solis no 2",
- "c_title": "Vai jums ir aktivizācijas kods?",
  "c_edit": "Kontakti",
  "email": "E-pasts",
  "email_hint": "Šeit saņemsiet pieteikšanās kodu.",
@@ -248,10 +247,8 @@
  "p_back": "Atpakaļ uz ierīci",
  "p_home": "Uz sākumu",
  "p_cardErr": "Vajag 16 ciparus.",
- "c_label": "Kods no kastītes vai no pārdevēja",
  "c_btn": "Aktivizēt",
  "c_demo": "Ielīmēt demo kodu",
- "c_len": "Kodā ir 16 rakstzīmes.",
  "c_bad": "Šis kods nav derīgs — pārbaudiet rakstzīmes.",
  "c_ctry": "Šis kods ir paredzēts citai valstij.",
  "c_type": "Šis kods ir plānam {a}, bet šai ierīcei vajag {b}.",
@@ -341,5 +338,9 @@
  "pr_logoutQ": "Iziet? Paziņojumi turpinās pienākt.",
  "pr_logoutY": "Jā, iziet",
  "cur": "UAH",
- "day_forms": { "zero": "dienu", "one": "diena", "other": "dienas" }
+ "day_forms": {
+  "zero": "dienu",
+  "one": "diena",
+  "other": "dienas"
+ }
 }

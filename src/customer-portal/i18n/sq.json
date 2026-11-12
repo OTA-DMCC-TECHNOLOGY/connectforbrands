@@ -80,7 +80,6 @@
  "add_title": "Pajisje e re",
  "add_sub": "Ku e vendosët kartën e re SIM?",
  "s_step": "Hapi {n} nga 2",
- "c_title": "Keni një kod aktivizimi?",
  "c_edit": "Kontaktet",
  "email": "Email",
  "email_hint": "Këtu do të vijë kodi për hyrje.",
@@ -248,10 +247,8 @@
  "p_back": "Kthehu te pajisja",
  "p_home": "Në faqen kryesore",
  "p_cardErr": "Duhen 16 shifra.",
- "c_label": "Kodi nga kutia ose nga shitësi",
  "c_btn": "Aktivizo",
  "c_demo": "Vendos një kod demo",
- "c_len": "Kodi ka 16 karaktere.",
  "c_bad": "Ky kod nuk është i vlefshëm — kontrolloni karakteret.",
  "c_ctry": "Ky kod është për një vend tjetër.",
  "c_type": "Ky kod është për planin {a}, por kjo pajisje ka nevojë për {b}.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Të dilni? Njoftimet do të vazhdojnë të vijnë.",
  "pr_logoutY": "Po, dil",
  "cur": "UAH",
- "day_forms": { "one": "ditë", "other": "ditë" }
+ "day_forms": {
+  "one": "ditë",
+  "other": "ditë"
+ }
 }

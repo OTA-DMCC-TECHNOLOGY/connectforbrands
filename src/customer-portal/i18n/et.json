@@ -80,7 +80,6 @@
  "add_title": "Uus seade",
  "add_sub": "Kuhu te uue SIM-kaardi panite?",
  "s_step": "Samm {n}/2",
- "c_title": "Kas teil on aktiveerimiskood?",
  "c_edit": "Kontaktid",
  "email": "E-post",
  "email_hint": "Siia tuleb teie sisselogimiskood.",
@@ -248,10 +247,8 @@
  "p_back": "Tagasi seadme juurde",
  "p_home": "Avalehele",
  "p_cardErr": "Vaja on 16 numbrit.",
- "c_label": "Kood karbilt või müüjalt",
  "c_btn": "Aktiveeri",
  "c_demo": "Kleebi demokood",
- "c_len": "Koodis on 16 märki.",
  "c_bad": "See kood ei kehti — kontrollige märke.",
  "c_ctry": "See kood on mõeldud teise riigi jaoks.",
  "c_type": "See kood on paketile {a}, aga sellele seadmele on vaja {b}.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Kas logida välja? Teated tulevad edasi.",
  "pr_logoutY": "Jah, logi välja",
  "cur": "UAH",
- "day_forms": { "one": "päev", "other": "päeva" }
+ "day_forms": {
+  "one": "päev",
+  "other": "päeva"
+ }
 }

@@ -80,7 +80,6 @@
  "add_title": "Yangi qurilma",
  "add_sub": "Yangi SIM-kartani qayerga qo‘ydingiz?",
  "s_step": "{n}-qadam, jami 2",
- "c_title": "Faollashtirish kodi bormi?",
  "c_edit": "Kontaktlar",
  "email": "Email",
  "email_hint": "Kirish kodi shu yerga keladi.",
@@ -248,10 +247,8 @@
  "p_back": "Qurilmaga qaytish",
  "p_home": "Bosh sahifaga",
  "p_cardErr": "16 ta raqam kerak.",
- "c_label": "Qutidagi yoki sotuvchidan olingan kod",
  "c_btn": "Faollashtirish",
  "c_demo": "Demo kodni qo‘yish",
- "c_len": "Kod 16 ta belgidan iborat.",
  "c_bad": "Kod noto‘g‘ri — belgilarni tekshiring.",
  "c_ctry": "Bu kod boshqa mamlakat uchun.",
  "c_type": "Bu kod {a} tarifi uchun, bu qurilmaga esa {b} kerak.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Chiqasizmi? Xabarlar kelishda davom etadi.",
  "pr_logoutY": "Ha, chiqish",
  "cur": "UAH",
- "day_forms": { "one": "kun", "other": "kun" }
+ "day_forms": {
+  "one": "kun",
+  "other": "kun"
+ }
 }

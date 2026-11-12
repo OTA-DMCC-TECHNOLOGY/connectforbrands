@@ -80,7 +80,6 @@
  "add_title": "Apparat ġdid",
  "add_sub": "Fejn poġġejt il-karta SIM il-ġdida?",
  "s_step": "Pass {n} minn 2",
- "c_title": "Għandek kodiċi ta’ attivazzjoni?",
  "c_edit": "Kuntatti",
  "email": "Email",
  "email_hint": "Il-kodiċi biex tidħol jasal hawn.",
@@ -248,10 +247,8 @@
  "p_back": "Lura għall-apparat",
  "p_home": "Lura d-dar",
  "p_cardErr": "Hemm bżonn 16-il ċifra.",
- "c_label": "Kodiċi mill-kaxxa jew mill-bejjiegħ",
  "c_btn": "Attiva",
  "c_demo": "Waħħal kodiċi demo",
- "c_len": "Il-kodiċi għandu 16-il karattru.",
  "c_bad": "Dan il-kodiċi mhuwiex validu – iċċekkja l-karattri.",
  "c_ctry": "Dan il-kodiċi huwa għal pajjiż ieħor.",
  "c_type": "Dan il-kodiċi huwa għall-pakkett {a}, iżda dan l-apparat jeħtieġ {b}.",
@@ -341,5 +338,11 @@
  "pr_logoutQ": "Toħroġ? It-twissijiet jibqgħu jaslu.",
  "pr_logoutY": "Iva, oħroġ",
  "cur": "UAH",
- "day_forms": {"one": "jum", "two": "jiem", "few": "jiem", "many": "jum", "other": "jum"}
+ "day_forms": {
+  "one": "jum",
+  "two": "jiem",
+  "few": "jiem",
+  "many": "jum",
+  "other": "jum"
+ }
 }

@@ -80,7 +80,6 @@
  "add_title": "Ny enhet",
  "add_sub": "Hvor satte du inn det nye SIM-kortet?",
  "s_step": "Trinn {n} av 2",
- "c_title": "Har du en aktiveringskode?",
  "c_edit": "Kontakter",
  "email": "E-post",
  "email_hint": "Innloggingskoden din kommer hit.",
@@ -248,10 +247,8 @@
  "p_back": "Tilbake til enheten",
  "p_home": "Til forsiden",
  "p_cardErr": "Det trengs 16 sifre.",
- "c_label": "Kode fra esken eller forhandleren",
  "c_btn": "Aktiver",
  "c_demo": "Lim inn demokode",
- "c_len": "Koden har 16 tegn.",
  "c_bad": "Koden er ikke gyldig – sjekk tegnene.",
  "c_ctry": "Denne koden gjelder et annet land.",
  "c_type": "Denne koden gjelder pakken {a}, men enheten trenger {b}.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Logge ut? Du får fortsatt varsler.",
  "pr_logoutY": "Ja, logg ut",
  "cur": "UAH",
- "day_forms": {"one": "dag", "other": "dager"}
+ "day_forms": {
+  "one": "dag",
+  "other": "dager"
+ }
 }

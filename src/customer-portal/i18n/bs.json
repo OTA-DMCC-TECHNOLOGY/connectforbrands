@@ -80,7 +80,6 @@
  "add_title": "Novi uređaj",
  "add_sub": "Gdje ste stavili novu SIM karticu?",
  "s_step": "Korak {n} od 2",
- "c_title": "Imate aktivacijski kod?",
  "c_edit": "Kontakti",
  "email": "E-mail",
  "email_hint": "Ovdje će stići kod za prijavu.",
@@ -248,10 +247,8 @@
  "p_back": "Nazad na uređaj",
  "p_home": "Na početnu",
  "p_cardErr": "Potrebno je 16 cifara.",
- "c_label": "Kod s kutije ili od prodavača",
  "c_btn": "Aktiviraj",
  "c_demo": "Umetni demo kod",
- "c_len": "Kod ima 16 znakova.",
  "c_bad": "Ovaj kod nije važeći — provjerite znakove.",
  "c_ctry": "Ovaj kod je za drugu zemlju.",
  "c_type": "Ovaj kod je za paket {a}, a ovom uređaju treba {b}.",
@@ -341,5 +338,9 @@
  "pr_logoutQ": "Odjaviti se? Obavještenja će i dalje stizati.",
  "pr_logoutY": "Da, odjavi me",
  "cur": "UAH",
- "day_forms": { "one": "dan", "few": "dana", "other": "dana" }
+ "day_forms": {
+  "one": "dan",
+  "few": "dana",
+  "other": "dana"
+ }
 }

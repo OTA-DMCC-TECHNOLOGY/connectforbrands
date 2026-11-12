@@ -80,7 +80,6 @@
  "add_title": "Gléas nua",
  "add_sub": "Cár chuir tú an cárta SIM nua?",
  "s_step": "Céim {n} as 2",
- "c_title": "An bhfuil cód gníomhachtaithe agat?",
  "c_edit": "Teagmhálacha",
  "email": "Ríomhphost",
  "email_hint": "Tiocfaidh do chód síniú isteach anseo.",
@@ -248,10 +247,8 @@
  "p_back": "Ar ais chuig an ngléas",
  "p_home": "Abhaile",
  "p_cardErr": "Teastaíonn 16 dhigit.",
- "c_label": "Cód ón mbosca nó ón díoltóir",
  "c_btn": "Gníomhachtaigh",
  "c_demo": "Greamaigh cód taispeántais",
- "c_len": "Tá 16 charachtar sa chód.",
  "c_bad": "Níl an cód seo bailí – seiceáil na carachtair.",
  "c_ctry": "Is do thír eile an cód seo.",
  "c_type": "Is don phacáiste {a} an cód seo, ach teastaíonn {b} ón ngléas.",
@@ -341,5 +338,11 @@
  "pr_logoutQ": "Síniú amach? Leanfaidh na foláirimh ag teacht.",
  "pr_logoutY": "Sínigh amach",
  "cur": "UAH",
- "day_forms": {"one": "lá", "two": "lá", "few": "lá", "many": "lá", "other": "lá"}
+ "day_forms": {
+  "one": "lá",
+  "two": "lá",
+  "few": "lá",
+  "many": "lá",
+  "other": "lá"
+ }
 }

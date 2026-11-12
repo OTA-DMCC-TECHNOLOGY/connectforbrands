@@ -80,7 +80,6 @@
  "add_title": "Täze enjam",
  "add_sub": "Täze SIM-karty nirä goýduňyz?",
  "s_step": "{n}-nji ädim, jemi 2",
- "c_title": "Işjeňleşdiriş kodyňyz barmy?",
  "c_edit": "Kontaktlar",
  "email": "Email",
  "email_hint": "Giriş kody şu ýere geler.",
@@ -248,10 +247,8 @@
  "p_back": "Enjama gaýtmak",
  "p_home": "Baş sahypa",
  "p_cardErr": "16 san gerek.",
- "c_label": "Gutudaky ýa-da satyjydan alnan kod",
  "c_btn": "Işjeňleşdirmek",
  "c_demo": "Demo kody goýmak",
- "c_len": "Kod 16 nyşandan ybarat.",
  "c_bad": "Kod nädogry — nyşanlary barlaň.",
  "c_ctry": "Bu kod başga ýurt üçin.",
  "c_type": "Bu kod {a} tarifi üçin, emma bu enjama {b} gerek.",
@@ -341,5 +338,8 @@
  "pr_logoutQ": "Çykýarsyňyzmy? Habarlar gelmegini dowam eder.",
  "pr_logoutY": "Hawa, çykmak",
  "cur": "UAH",
- "day_forms": { "one": "gün", "other": "gün" }
+ "day_forms": {
+  "one": "gün",
+  "other": "gün"
+ }
 }
