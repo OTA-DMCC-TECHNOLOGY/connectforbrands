@@ -968,7 +968,7 @@ mark.lgd-v{background:var(--lg-hl);color:inherit;padding:0 1px;border-radius:2px
 /* ===== 85_print: print materials ===== */
 /* physical sheets: page = trim + 2 mm bleed; the art is designed in template px and scaled to mm */
 .prn-sheet{position:relative;background:#fff;flex:none;box-shadow:0 0 0 1px var(--line),var(--shadow);color:#22262C;font-family:Inter,Arial,Helvetica,sans-serif}
-.prn-sheet.print{box-shadow:none}
+.prn-sheet.print{box-shadow:none;overflow:hidden}
 .prn-trim{position:absolute;left:2mm;top:2mm;overflow:visible}
 .prn-art{position:absolute;left:0;top:0;transform-origin:0 0}
 .prn-root{box-sizing:border-box;background:#fff;font-family:Inter,Arial,Helvetica,sans-serif;position:relative;text-align:left;letter-spacing:normal;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -1029,7 +1029,9 @@ label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
  html.prn-printing body>*:not(#prn-print){display:none!important}
  html.prn-printing #prn-print{display:block}
  html.prn-printing body{margin:0;background:#fff}
- #prn-print .prn-sheet{box-shadow:none;break-after:page;page-break-after:always;zoom:1}
+ #prn-print .prn-sheet{box-shadow:none;break-after:page;page-break-after:always;break-inside:avoid;zoom:1;overflow:hidden;contain:size layout paint}
+ #prn-print .prn-sheet .prn-trim{overflow:hidden}
+ #prn-print .prn-sheet0{box-shadow:none;zoom:1}
  #prn-print .prn-sheet:last-child{break-after:auto;page-break-after:auto}
 }
 </style>
@@ -8662,7 +8664,7 @@ const PRN_TPL={B1:prn_tB1,B2:prn_tB2,C1:prn_tC1,C2:prn_tC2,C3:prn_tC3,A1:prn_tA1
 // physical sheet: page = trim + 2 mm bleed on each side; art scaled to mm; optional CutContour layer (spot colour simulated)
 function prn_sheet(type,d,o){o=o||{};const art=PRN_TPL[type](d);if(type==='0')return `<div class="prn-sheet0 ${d.zones?'prn-zones':''}" data-mat="0">${art}</div>`;
  const z=PRN_SZ[type];const k=PRN_PX_MM/z.ppm;const W=Math.round(z.w*100)/100,H=Math.round(z.h*100)/100;
- return `<div class="prn-sheet${o.print?' print':''}" data-mat="${type}" style="width:${W+4}mm;height:${H+4}mm"><div class="prn-trim" data-trim style="width:${W}mm;height:${H}mm">
+ return `<div class="prn-sheet${o.print?' print':''}" data-mat="${type}" style="width:${W+4}mm;height:${o.print?'calc('+(H+4)+'mm - 0.3mm)':(H+4)+'mm'}"><div class="prn-trim" data-trim style="width:${W}mm;height:${H}mm">
 <div class="prn-art ${d.zones?'prn-zones':''}" style="transform:scale(${k})">${art}</div>${o.cut?`<div class="prn-cut" data-layer="CutContour" style="border-radius:${z.r}mm"></div>`:''}</div></div>`;}
 
 /* ---------- datasets: profile, stress (ТЗ 7.2.2) ---------- */
@@ -8973,7 +8975,9 @@ route('prn-mat',{nav:'prn',render(){if(!prn_canView())return prn_noAccess();prn_
 ACT.prn_setMat=v=>{prn_ui().mat=v;rerender();};
 ACT.prn_setU=(v,el)=>{const u=prn_ui();u[el.dataset.arg]=v;if(el.dataset.arg==='cc'){u.plan='';}rerender();};
 ACT.prn_tog=(v,el)=>{prn_ui()[el.dataset.arg]=!!v;rerender();};
-ACT.prn_printCur=()=>{const u=prn_ui();const bv=prn_srcBrand(u);const m=prn_matData(u,bv);const type=u.mat;if(type==='0'){prn_print(prn_sheet('0',Object.assign({},m.d,{zones:false}),{}),297,420);return;}
+ACT.prn_printCur=()=>{const u=prn_ui();const bv=prn_srcBrand(u);const m=prn_matData(u,bv);const type=u.mat;if(type==='0'){const html=prn_sheet('0',Object.assign({},m.d,{zones:false}),{});const host=prn_host();host.innerHTML=html;const r=host.firstElementChild.getBoundingClientRect();host.innerHTML='';
+  /* the rules sheet is one page sized to its content (960 px wide), +2 mm safety so rounding never adds a page */
+  prn_print(html,Math.ceil(prn_mm(r.width)*10)/10,Math.ceil(prn_mm(r.height)*10)/10+2);return;}
  const z=PRN_SZ[type];prn_print(prn_sheet(type,Object.assign({},m.d,{zones:false}),{cut:true,print:true}),z.w+4,z.h+4);audit('print.proof',type,{cc:m.cc,lang:m.d.lang,dataset:u.ds});};
 ACT.prn_releaseAsk=()=>{const u=prn_ui();const type=u.mat;const bv=prn_approved();if(!bv){toast(t('prn.t.noApproved'),'bad');return;}const m=prn_matData(Object.assign({},u,{src:'approved'}),bv);
  const o={type,cc:['B1','B2'].includes(type)?m.cc:'',lang:['C1','C2'].includes(type)?m.d.lang:'',planId:type==='B1'&&m.pl?m.pl.id:''};

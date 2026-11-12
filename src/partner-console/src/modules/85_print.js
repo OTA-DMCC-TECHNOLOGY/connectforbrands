@@ -690,7 +690,9 @@ route('prn-mat',{nav:'prn',render(){if(!prn_canView())return prn_noAccess();prn_
 ACT.prn_setMat=v=>{prn_ui().mat=v;rerender();};
 ACT.prn_setU=(v,el)=>{const u=prn_ui();u[el.dataset.arg]=v;if(el.dataset.arg==='cc'){u.plan='';}rerender();};
 ACT.prn_tog=(v,el)=>{prn_ui()[el.dataset.arg]=!!v;rerender();};
-ACT.prn_printCur=()=>{const u=prn_ui();const bv=prn_srcBrand(u);const m=prn_matData(u,bv);const type=u.mat;if(type==='0'){prn_print(prn_sheet('0',Object.assign({},m.d,{zones:false}),{}),297,420);return;}
+ACT.prn_printCur=()=>{const u=prn_ui();const bv=prn_srcBrand(u);const m=prn_matData(u,bv);const type=u.mat;if(type==='0'){const html=prn_sheet('0',Object.assign({},m.d,{zones:false}),{});const host=prn_host();host.innerHTML=html;const r=host.firstElementChild.getBoundingClientRect();host.innerHTML='';
+  /* the rules sheet is one page sized to its content (960 px wide), +2 mm safety so rounding never adds a page */
+  prn_print(html,Math.ceil(prn_mm(r.width)*10)/10,Math.ceil(prn_mm(r.height)*10)/10+2);return;}
  const z=PRN_SZ[type];prn_print(prn_sheet(type,Object.assign({},m.d,{zones:false}),{cut:true,print:true}),z.w+4,z.h+4);audit('print.proof',type,{cc:m.cc,lang:m.d.lang,dataset:u.ds});};
 ACT.prn_releaseAsk=()=>{const u=prn_ui();const type=u.mat;const bv=prn_approved();if(!bv){toast(t('prn.t.noApproved'),'bad');return;}const m=prn_matData(Object.assign({},u,{src:'approved'}),bv);
  const o={type,cc:['B1','B2'].includes(type)?m.cc:'',lang:['C1','C2'].includes(type)?m.d.lang:'',planId:type==='B1'&&m.pl?m.pl.id:''};
