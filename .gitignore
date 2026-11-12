@@ -4,3 +4,4 @@ src/customer-portal/app_built.js
 __pycache__/
 src/partner-console/i18n_work/
 src/partner-console/legal_src/private_values.json
+src/customer-portal/i18n_work/
