@@ -1,5 +1,6 @@
 // Translation tools for the partner console UI.
 //   node tools/i18n_check.js split            → i18n_src/parts/part1..6.json (English source, ~410 keys each)
+//   (part7.json = keys added/changed after the first split — legal pack v10; later parts follow the same pattern)
 //   node tools/i18n_check.js merge <code>     → i18n_work/<code>/part*.json → i18n/<code>.json, then check
 //   node tools/i18n_check.js check [<code>…]  → validate i18n/<code>.json against i18n_src/en.json (all files if none given)
 // Checks: every key present, no extra keys, non-empty strings, identical {placeholder} sets,
@@ -29,7 +30,7 @@ if(cmd==='split'){const ks=Object.keys(EN);const n=6,sz=Math.ceil(ks.length/n);f
  for(let i=0;i<n;i++){const o={};ks.slice(i*sz,(i+1)*sz).forEach(k=>o[k]=EN[k]);fs.writeFileSync(`${dir}/i18n_src/parts/part${i+1}.json`,JSON.stringify(o,null,1)+'\n');console.log('part'+(i+1),Object.keys(o).length);}}
 else if(cmd==='merge'){const code=args[0];const wd=dir+'/i18n_work/'+code;const o={};
  for(const f of fs.readdirSync(wd).filter(f=>/^part\d+\.json$/.test(f)).sort()){try{Object.assign(o,JSON.parse(fs.readFileSync(wd+'/'+f,'utf8')));}catch(e){console.log('✗ '+f+': '+e.message);process.exit(1);}}
- const out={};for(const k of Object.keys(EN))if(k in o)out[k]=o[k];for(const k in o)if(!(k in out))out[k]=o[k];
+ const out={};for(const k of Object.keys(EN))if(k in o)out[k]=o[k]; // keys no longer in the English source are dropped
  fs.mkdirSync(dir+'/i18n',{recursive:true});fs.writeFileSync(dir+'/i18n/'+code+'.json',JSON.stringify(out,null,0)+'\n');
  const r=check(code);report(r);process.exit(r.errs.length?1:0);}
 else if(cmd==='check'){const codes=args.length?args:fs.readdirSync(dir+'/i18n').filter(f=>f.endsWith('.json')).map(f=>f.slice(0,-5)).sort();

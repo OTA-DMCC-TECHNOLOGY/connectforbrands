@@ -6,10 +6,10 @@ the register of a modern business web app in that language (e.g. formal "you" wh
 Sie, vous, Вы, Siz, etc.). Keep button labels short.
 
 ## Files
-- Source (English, authoritative): `i18n_src/parts/part1.json` … `part6.json` (~408 keys each; together = `i18n_src/en.json`).
+- Source (English, authoritative): `i18n_src/parts/part1.json` … `part6.json` (~408 keys each) plus `part7.json` (633 keys added/changed with legal pack v10); together = `i18n_src/en.json`. If a part1–6 key is no longer in en.json it is simply dropped at merge.
 - Context only: `i18n_src/uk.json` (Ukrainian) and `i18n_src/ru.json` (Russian) — the reviewed human-quality versions; use them to
   disambiguate meaning (same keys). Translate from English; when English is ambiguous, follow the meaning of uk/ru.
-- Output: `i18n_work/<code>/part1.json` … `part6.json` — same keys as the source part, values translated. Valid JSON (UTF-8,
+- Output: `i18n_work/<code>/part1.json` … `part7.json` — same keys as the source part, values translated. Valid JSON (UTF-8,
   no comments, no trailing commas). Then run `node tools/i18n_check.js merge <code>` from `src/partner-console`.
   It writes `i18n/<code>.json` and validates. Fix every ✗ error and re-run until it prints `OK`.
 
