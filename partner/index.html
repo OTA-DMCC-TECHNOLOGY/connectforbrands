@@ -976,7 +976,7 @@ const LANG_META={
  tg:['Тоҷикӣ','tg-TJ','asia'],tk:['Türkmençe','tk-TM','asia'],uz:['O‘zbekcha','uz-UZ','asia']};
 const LANG_GROUPS=['main','eu','eur','asia'];
 const I18N_EMBED=['uk','en','ru'];
-const I18N_VER="11ded4929a";const I18N_AVAIL=["bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "ga", "hr", "hu", "it", "kk", "ky", "lt", "lv", "nl", "pl", "pt", "ro", "sk", "sl", "sv", "uz"]; // replaced by build.py
+const I18N_VER="42436abc5e";const I18N_AVAIL=["bg", "ca", "cs", "da", "de", "el", "es", "et", "fi", "fr", "ga", "hr", "hu", "it", "kk", "ky", "lt", "lv", "mt", "nl", "pl", "pt", "ro", "sk", "sl", "sv", "uz"]; // replaced by build.py
 const LANGS=Object.keys(LANG_META).filter(l=>I18N_EMBED.includes(l)||I18N_AVAIL.includes(l));
 const LANG_NAMES={},LOCALES={};for(const l in LANG_META){LANG_NAMES[l]=LANG_META[l][0];LOCALES[l]=LANG_META[l][1];}
 const I18N={d:{uk:{},en:{},ru:{}},add(o){for(const l in o){this.d[l]=Object.assign(this.d[l]||{},o[l]);}}};
