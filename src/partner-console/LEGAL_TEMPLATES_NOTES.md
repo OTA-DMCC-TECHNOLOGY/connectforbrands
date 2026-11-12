@@ -52,6 +52,7 @@ Clause 1.6 keeps "euro (EUR)" literal. The 02-DE Ref placeholder `{{[OTA-{PARTNE
 Round trip per country is exact; the fidelity script renders each country file EN and RU.
 
 ## INV / CN VAT lines (MPA 2.6)
+- Source = owner's "v12 review" pack (09.11.2026): the 0 % wording is now just "VAT 0% – zero-rated export of services / НДС 0% – экспорт услуг" (citation of Article 31 of the Executive Regulation dropped).
 - INV VAT cell (bi): `[[VAT_ZERO|VAT 0% – zero-rated export of services (Article 31, …)]][[VAT_AE|VAT 5%]]` / RU `[[VAT_ZERO|НДС 0% – экспорт услуг (…)]][[VAT_AE|НДС 5%]]`;
   amount `[[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AMOUNT}}]]`; AED line unchanged text + `AED [[VAT_ZERO|0.00]][[VAT_AE|{{INV_VAT_AED}}]]` (always printed).
 - CN: same VAT cell; amount `[[VAT_ZERO|0.00]][[VAT_AE|–{{CN_VAT_AMOUNT}}]]`; `AED –[[VAT_ZERO|0.00]][[VAT_AE|{{CN_VAT_AED}}]]`. The 13A DOCX has only the

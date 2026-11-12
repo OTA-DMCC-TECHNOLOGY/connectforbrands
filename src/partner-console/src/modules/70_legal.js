@@ -46,13 +46,15 @@ function lg_vatRule(ts){ts=ts||lg_taxStatus();return (ts.inc==='AE'||ts.tax==='A
 function lg_vatRate(){if(typeof vatRateFor==='function'){try{const r=vatRateFor(S.org);if(r!=null&&isFinite(+r))return +r>1?+r/100:+r;}catch(e){}}return lg_vatRule();}
 // v12 wording of the VAT treatment (Document 13 VAT line, MPA 2.6) — legal text, EN / RU only
 const LG_VAT_TXT={
- zero:{en:'VAT 0% – zero-rated export of services (Article 31, Executive Regulation of Federal Decree-Law No. 8 of 2017 on VAT)',ru:'НДС 0% – экспорт услуг (ст. 31 Исполнительного регламента Федерального декрета-закона № 8 от 2017 г. о НДС)'},
+ zero:{en:'VAT 0% – zero-rated export of services',ru:'НДС 0% – экспорт услуг',uk:'ПДВ 0% – експорт послуг'},
  uae:{en:'VAT 5%',ru:'НДС 5%'},
  rule:{en:'OTA charges UAE VAT where UAE law requires it: at the standard rate (currently 5%) if Partner is resident, registered for VAT or has a fixed establishment in the United Arab Emirates, and at the zero rate on exports of services where the conditions of UAE VAT law are met.',
   ru:'OTA начисляет НДС ОАЭ, когда этого требует закон ОАЭ: по стандартной ставке (в настоящее время 5%), если Партнёр является резидентом, зарегистрирован плательщиком НДС или имеет постоянное представительство в Объединённых Арабских Эмиратах, и по нулевой ставке при экспорте услуг, если соблюдены условия законодательства ОАЭ об НДС.'},
  gcc:{en:'A Partner established in another member state of the Gulf Cooperation Council accounts for any VAT or other indirect tax due in its own state under the law of that state.',
   ru:'Партнёр, учреждённый в другом государстве – члене Совета сотрудничества стран Персидского залива, сам исчисляет и уплачивает НДС или иные косвенные налоги, подлежащие уплате в его государстве по его законодательству.'}};
 function lg_vatLang(){return S.lang==='en'?'en':'ru';}
+// VAT line text: uk version only for the VAT lines that have one (LG_VAT_TXT.zero.uk)
+function lg_vatTxt(o){return (S.lang==='uk'&&o.uk)?o.uk:o[lg_vatLang()];}
 // VAT treatment box (questionnaire, signup, settings): which v12 line applies — exact template wording, no own legal text
 function lg_vatBox(tsIn){const ts=tsIn||lg_taxStatus();const L=lg_vatLang();
  if(!ts.complete)return ui.note('info',`<b>${t('lg.vat.title')}</b> · ${esc(t('lg.vat.incomplete'))}`);
@@ -60,7 +62,7 @@ function lg_vatBox(tsIn){const ts=tsIn||lg_taxStatus();const L=lg_vatLang();
  const why=five?[ts.inc==='AE'?t('lg.vat.whyInc'):'',ts.tax==='AE'?t('lg.vat.whyRes'):'',ts.vatRegs.includes('AE')?t('lg.vat.whyReg'):'',ts.uaeFe?t('lg.vat.whyFe'):''].filter(Boolean).join(' · '):'';
  const other=!five&&(lg_isGcc(ts.inc)||lg_isGcc(ts.tax))&&ts.inc!=='AE';
  return `<div class="lg-vat ${five?'lg-vat5':''}" data-vat="${five?5:0}"><div class="row between wrap g8"><b>${t('lg.vat.title')}</b>${ui.badge(five?'5%':'0%',five?'warn':'ok',true)}</div>
-  <div class="lg-vat-line">${esc(five?LG_VAT_TXT.uae[L]:LG_VAT_TXT.zero[L])}</div>${why?`<div class="xs muted">${esc(why)}</div>`:''}
+  <div class="lg-vat-line">${esc(five?LG_VAT_TXT.uae[L]:lg_vatTxt(LG_VAT_TXT.zero))}</div>${why?`<div class="xs muted">${esc(why)}</div>`:''}
   <div class="xs muted lg-vat-src">${t('lg.vat.src')}: “${esc(LG_VAT_TXT.rule[L])}”${other?` “${esc(LG_VAT_TXT.gcc[L])}”`:''}</div></div>`;}
 // v10 (ТЗ 3.4 / part 6) + v12: mandatory publication languages of Documents 07/08 per country; other countries → English.
 // DE (Order Form 02-DE, 1.6): the German portal opens only after 07 and 08 with the Germany Country Schedule are published in German.

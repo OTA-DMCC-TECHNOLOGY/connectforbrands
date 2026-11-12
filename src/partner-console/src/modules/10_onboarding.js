@@ -193,14 +193,19 @@ function onb_homeHtml(){
  let stock=0,active=0;for(const s of S.sims){if(s.status==='stock')stock++;else if(s.status==='active')active++;}
  const n=now(),ym=n.getFullYear()*12+n.getMonth();let actM=0;
  for(const c of S.codes){if(c.status==='activated'&&c.activatedAt){const d=new Date(c.activatedAt);if(d.getFullYear()*12+d.getMonth()===ym)actM++;}}
- const tk={};let avail=0;PLANS.forEach(p=>TERMS.forEach(tm=>{const k=pkgKey(p,tm);const st=tokenStats(k);if(st.bought){tk[k]=st;avail+=st.avail;}}));const ks=keyStats();
- const kpis=`<div class="grid4">${ui.kpi(t('onb.k.stock'),fmtNum(stock),t('onb.k.stockS'),{href:'#sims'})}${ui.kpi(t('onb.k.active'),fmtNum(active),t('onb.k.activeS'),{href:'#sims'})}${ui.kpi(t('onb.k.act'),fmtNum(actM),fmtDate(n,{month:'long',year:'numeric'}),{href:'#codes'})}${ui.kpi(t('onb.k.cred'),fmtNum(avail),t('onb.k.credS',{k:fmtNum(ks.avail)}),{href:'#codes'})}</div>`;
- // Service Tokens & Activation Keys
- const credRows=Object.keys(tk).map(k=>{const c=tk[k];const {plan:p,term:tm}=pkgSplit(k);const low=c.avail<c.bought*0.1;
-  return{cells:[`<b>${pkgLabel(p,tm)}</b>`,`<span class="num">${fmtNum(c.bought)}</span>`,`<span class="num">${fmtNum(c.used)}</span>`,
-   `<div class="onb-avail"><span class="num"><b>${fmtNum(c.avail)}</b></span>${low?ui.badge(t('onb.cr.low'),'warn',true):''}</div>`,
-   `<div class="onb-barcell">${ui.bar(c.bought?c.used/c.bought:0,low?'warn':'')}</div>`]};});
- if(ks.bought)credRows.unshift({cells:[`<b>${t('onb.cr.keys')}</b>`,`<span class="num">${fmtNum(ks.bought)}</span>`,`<span class="num">${fmtNum(ks.used)}</span>`,`<div class="onb-avail"><span class="num"><b>${fmtNum(ks.avail)}</b></span></div>`,`<div class="onb-barcell">${ui.bar(ks.bought?ks.used/ks.bought:0)}</div>`]});
+ // v12: token and key stock is kept per country (tokenStats(k,cc) / keyStats(cc)) — shown per country, never pooled
+ const ccs=orgCountries();const perCc=ccs.map(cc=>{const tk={};let avail=0;PLANS.forEach(p=>TERMS.forEach(tm=>{const k=pkgKey(p,tm);const st=tokenStats(k,cc);if(st.bought){tk[k]=st;avail+=st.avail;}}));return{cc,tk,avail,ks:keyStats(cc)};});
+ const avail=perCc.reduce((a,x)=>a+x.avail,0);const ksAvail=perCc.reduce((a,x)=>a+x.ks.avail,0);
+ const ccLine=perCc.filter(x=>x.avail||x.ks.avail).map(x=>t('onb.k.ccAvail',{n:fmtNum(x.avail),k:fmtNum(x.ks.avail),c:ctyName(x.cc)})).join(' · ');
+ const kpis=`<div class="grid4">${ui.kpi(t('onb.k.stock'),fmtNum(stock),t('onb.k.stockS'),{href:'#sims'})}${ui.kpi(t('onb.k.active'),fmtNum(active),t('onb.k.activeS'),{href:'#sims'})}${ui.kpi(t('onb.k.act'),fmtNum(actM),fmtDate(n,{month:'long',year:'numeric'}),{href:'#codes'})}${ui.kpi(t('onb.k.cred'),fmtNum(avail),ccLine||t('onb.k.credS',{k:fmtNum(ksAvail)}),{href:'#codes'})}</div>`;
+ // Service Tokens & Activation Keys — one block of rows per country
+ const credRows=[];const multi=perCc.length>1;
+ perCc.forEach(({cc,tk,ks})=>{const cl=multi?`<div class="xs faint">${esc(ctyName(cc))}</div>`:'';
+  if(ks.bought)credRows.push({cells:[`<b>${t('onb.cr.keys')}</b>${cl}`,`<span class="num">${fmtNum(ks.bought)}</span>`,`<span class="num">${fmtNum(ks.used)}</span>`,`<div class="onb-avail"><span class="num"><b>${fmtNum(ks.avail)}</b></span></div>`,`<div class="onb-barcell">${ui.bar(ks.bought?ks.used/ks.bought:0)}</div>`]});
+  Object.keys(tk).forEach(k=>{const c=tk[k];const {plan:p,term:tm}=pkgSplit(k);const low=c.avail<c.bought*0.1;
+   credRows.push({cells:[`<b>${pkgLabel(p,tm)}</b>${cl}`,`<span class="num">${fmtNum(c.bought)}</span>`,`<span class="num">${fmtNum(c.used)}</span>`,
+    `<div class="onb-avail"><span class="num"><b>${fmtNum(c.avail)}</b></span>${low?ui.badge(t('onb.cr.low'),'warn',true):''}</div>`,
+    `<div class="onb-barcell">${ui.bar(c.bought?c.used/c.bought:0,low?'warn':'')}</div>`]});});});
  const credCard=ui.card({title:t('onb.cr.title'),actions:credRows.length?ui.btn(t('onb.cr.buy'),{size:'sm',href:'#order-new',icon:'plus'}):'',pad:false,
   body:credRows.length?ui.table([{label:t('onb.cr.pkg')},{label:t('onb.cr.bought'),cls:'r'},{label:t('onb.cr.used'),cls:'r'},{label:t('onb.cr.avail'),cls:'r'},{label:t('onb.cr.usage')}],credRows):ui.empty('layers',t('onb.cr.empty'),t('onb.cr.emptyD'),ui.btn(t('onb.cr.buy0'),{href:'#order-new',icon:'plus'}))});
  // in progress: orders awaiting payment + SIM shipments on the way
@@ -251,7 +256,7 @@ function onb_entityDl(){const v=k=>otaVal(k);
  return `<dl class="dl small"><dt>${t('onb.b.seller')}</dt><dd><b>${esc(v('OTA_NAME')||'')}</b></dd>${v('OTA_REGNO')?`<dt>${t('onb.b.reg')}</dt><dd>${esc(v('OTA_REGNO'))}${v('OTA_LICENCE')?' · '+esc(v('OTA_LICENCE')):''}</dd>`:''}${v('OTA_TRN')?`<dt>TRN</dt><dd class="mono">${esc(v('OTA_TRN'))}</dd>`:''}<dt>${t('onb.b.addr')}</dt><dd>${esc(v('OTA_ADDR_EN')||'')}</dd>${v('OTA_BANK_IBAN')?`<dt>IBAN</dt><dd class="mono">${esc(v('OTA_BANK_IBAN'))}</dd>`:''}${v('OTA_BANK_NAME')?`<dt>${t('onb.b.bankName')}</dt><dd>${esc(v('OTA_BANK_NAME'))}${v('OTA_BANK_SWIFT')?' · <span class="mono">'+esc(v('OTA_BANK_SWIFT'))+'</span>':''}</dd>`:''}<dt>${t('onb.b.vat')}</dt><dd>${onb_vatLine()}</dd></dl>`;}
 // v12: the VAT line that applies to this partner (Document 13 wording; rate from vatRateFor / MPA 2.6 rule)
 function onb_vatLine(){if(typeof lg_vatRate!=='function'||typeof LG_VAT_TXT==='undefined')return t('onb.b.vat0');const ts=lg_taxStatus();if(!ts.complete)return esc(t('lg.vat.incomplete'));
- const five=lg_vatRate()>=0.05;const L=S.lang==='en'?'en':'ru';return `${ui.badge(five?'5%':'0%',five?'warn':'ok')} ${esc(five?LG_VAT_TXT.uae[L]:LG_VAT_TXT.zero[L])}`;}
+ const five=lg_vatRate()>=0.05;const L=S.lang==='en'?'en':'ru';return `${ui.badge(five?'5%':'0%',five?'warn':'ok')} ${esc(five?LG_VAT_TXT.uae[L]:(typeof lg_vatTxt==='function'?lg_vatTxt(LG_VAT_TXT.zero):LG_VAT_TXT.zero[L]))}`;}
 function onb_tabBilling(){const o=S.org;
  const ordered=onb_ordersLastYear();const frac=o.commit?ordered/o.commit:0;const cs=codeAvailable(o.code,o.code);
  const admin=S.admin?ui.card({title:`${t('onb.ad.title')} ${ui.badge('OTA','violet')}`,body:`<div class="col g12">${ui.note('admin',t('onb.ad.note'))}
@@ -487,7 +492,7 @@ ru:{'onb.logo.t':'Логотип компании','onb.logo.d':'Показыв�
 ['ck.order','Замовте ключі й токени','Order keys & tokens','Закажите ключи и токены'],['ck.order.d','Ключ активації — один на пристрій; токени — пакети зв’язку. Перше замовлення — від 1 000 ключів.','An Activation Key per device; tokens are connectivity packages. First order: at least 1,000 keys.','Ключ активации — один на устройство; токены — пакеты связи. Первый заказ — от 1 000 ключей.'],['ck.order.b','Замовити','Order','Заказать'],
 ['ck.pay.d','Ключі й токени видаються автоматично після оплати.','Keys and tokens are issued automatically after payment.','Ключи и токены выдаются автоматически после оплаты.'],
 ['ck.ship','Прийміть SIM-карти на зберігання','Receive SIM cards into custody','Примите SIM-карты на хранение'],['ck.ship.d','OTA безкоштовно надсилає SIM-карти; підтвердьте отримання й стан.','OTA ships SIM cards free of charge; confirm receipt and condition.','OTA бесплатно отправляет SIM-карты; подтвердите получение и состояние.'],['ck.ship.b','До відвантажень','To shipments','К отгрузкам'],
-['k.stock','SIM на зберіганні','SIMs in custody','SIM на хранении'],['k.cred','Сервісні токени','Service Tokens','Сервисные токены'],['k.credS','і {k} ключів активації','and {k} Activation Keys','и {k} ключей активации'],
+['k.stock','SIM на зберіганні','SIMs in custody','SIM на хранении'],['k.ccAvail','{c}: {n} токенів і {k} ключів на складі','{n} tokens and {k} keys on hand for {c}','{c}: {n} токенов и {k} ключей на складе'],['k.cred','Сервісні токени','Service Tokens','Сервисные токены'],['k.credS','і {k} ключів активації','and {k} Activation Keys','и {k} ключей активации'],
 ['cr.title','Токени й ключі','Tokens & keys','Токены и ключи'],['cr.keys','Ключі активації','Activation Keys','Ключи активации'],['cr.pkg','Що','Item','Что'],['cr.buy','Докупити','Buy more','Докупить'],['cr.buy0','Замовити','Order','Заказать'],
 ['cr.empty','Токенів і ключів ще немає','No tokens or keys yet','Токенов и ключей пока нет'],['cr.emptyD','Замовте ключі активації й сервісні токени — вони з’являться тут після оплати.','Order Activation Keys and Service Tokens — they show up here after payment.','Закажите ключи активации и сервисные токены — они появятся здесь после оплаты.'],
 ['or.title','У роботі','In progress','В работе'],['or.order','Документ','Document','Документ'],['or.sims','{n} SIM','{n} SIMs','{n} SIM'],['or.none','Нічого не очікує на вас.','Nothing is waiting for you.','Ничего не ждёт вас.'],
