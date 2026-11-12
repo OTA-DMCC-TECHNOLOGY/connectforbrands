@@ -6,10 +6,10 @@ the register of a modern business web app in that language (e.g. formal "you" wh
 Sie, vous, Вы, Siz, etc.). Keep button labels short.
 
 ## Files
-- Source (English, authoritative): `i18n_src/parts/part1.json` … `part6.json` (~408 keys each) plus `part7.json` (633 keys added/changed with legal pack v10); together = `i18n_src/en.json`. If a part1–6 key is no longer in en.json it is simply dropped at merge.
+- Source (English, authoritative): `i18n_src/parts/part1.json` … `part6.json` (~408 keys each) plus `part7.json` (633 keys added/changed with legal pack v10) and `part8.json` (keys added/changed with legal pack v12 and the print-materials module `prn.*`); together = `i18n_src/en.json`. If a part1–6 key is no longer in en.json it is simply dropped at merge.
 - Context only: `i18n_src/uk.json` (Ukrainian) and `i18n_src/ru.json` (Russian) — the reviewed human-quality versions; use them to
   disambiguate meaning (same keys). Translate from English; when English is ambiguous, follow the meaning of uk/ru.
-- Output: `i18n_work/<code>/part1.json` … `part7.json` — same keys as the source part, values translated. Valid JSON (UTF-8,
+- Output: `i18n_work/<code>/part1.json` … `part8.json` — same keys as the source part, values translated. Valid JSON (UTF-8,
   no comments, no trailing commas). Then run `node tools/i18n_check.js merge <code>` from `src/partner-console`.
   It writes `i18n/<code>.json` and validates. Fix every ✗ error and re-run until it prints `OK`.
 
@@ -39,3 +39,19 @@ Sie, vous, Вы, Siz, etc.). Keep button labels short.
    meaning, keep the brackets. Keep typographic quotes natural for the language („…“, «…», “…”).
 9. Keep the same capitalisation style as the source (sentence case for labels; CAPS only where the source uses CAPS).
 10. Don't shorten meaning, don't add explanations. Keep strings roughly the same length where possible (UI space).
+
+## Legal pack v12 / print materials (part8)
+- New country Germany (DE), currency EUR (never translate EUR, OSS, VAT registration numbers, "§ 312k BGB").
+- `prn.*` = print materials: scratch card (front/back), SIM sleeve, pad print, pack/carton labels, brand profile, card batch,
+  variable-print file, CutContour, bleed, trim. Use the printing-industry terms customary in your language. Material codes
+  A1, A2, B1, B2, C1, C2, C3 and numbers like `OTA-ARV-PRN-…` are not translated. "Package code" (the code under the scratch
+  layer) — translate consistently.
+
+## Customer (end-user) portal — second task in the same language
+Files: `src/customer-portal/i18n_work/<code>/portal_src.json` (English strings missing in your language) →
+write `src/customer-portal/i18n_work/<code>/portal.json` (same keys, translated), then from `src/customer-portal` run
+`node tools/i18n_check.js merge <code>` until it prints OK with missing=0. Context: `src/customer-portal/i18n_base/uk.json`
+and `src/customer-portal/i18n/ru.json` (same keys) and your language's existing `i18n/<code>.json` (keep its terminology and
+form of address). Users are consumers (device owners) — friendly, clear, polite. Keys T1…T12 are approved legal/system
+messages: translate exactly and completely, no paraphrase. `{brand}` is the partner brand. Nested objects (e.g. `day_forms`)
+keep their shape with your language's plural categories.

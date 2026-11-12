@@ -3100,6 +3100,8 @@
  "prn.bt.deadlineH": "Default: print date + 36 months (Document 03, 4.1).",
  "prn.bt.dlBad": "The deadline must be after the print date.",
  "prn.bt.dlMax": "No later than print date + 36 months.",
+ "prn.bt.dlPast": "The deadline is already in the past — pick a date no earlier than {d}.",
+ "prn.bt.dlSoon": "The deadline is less than a month away — the cards may not sell in time. Press “Generate codes” again to confirm.",
  "prn.bt.dsub": "{p} · {n} cards · {c}",
  "prn.bt.emptyP": "Create a batch for a plan and country — codes are generated from your Activation Keys for that country.",
  "prn.bt.emptyT": "No batches yet",
