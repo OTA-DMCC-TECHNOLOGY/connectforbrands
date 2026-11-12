@@ -216,8 +216,8 @@ function own_reconcile(b){const P=own_pc();const ts=iso(now());let ch=false;cons
 // the console is the authority for per-country settings in the bridge (OTA edits them on the OTA data page)
 function own_settings(b){if(!b.settings||typeof b.settings!=='object')b.settings={};if(!b.settings.countries||typeof b.settings.countries!=='object')b.settings.countries={};let ch=false;
  const ccs=Array.from(new Set(orgCountries().concat(Object.keys((S.ota&&S.ota.countries)||{}))));
- ccs.forEach(cc=>{const cur=b.settings.countries[cc]||{};const want={delay_hours:own_delay(cc),ownership_v10_enabled:!!own_ctyCfg(cc).ownership_v10_enabled};
-  if(cur.delay_hours!==want.delay_hours||cur.ownership_v10_enabled!==want.ownership_v10_enabled){b.settings.countries[cc]=Object.assign({},cur,want,{set_at:iso(now()),set_by:'partner-console (OTA data)'});ch=true;}});return ch;}
+ ccs.forEach(cc=>{const cur=b.settings.countries[cc]||{};const oc=(S.ota&&S.ota.countries&&S.ota.countries[cc])||{};const want={delay_hours:own_delay(cc),ownership_v10_enabled:!!own_ctyCfg(cc).ownership_v10_enabled,currency:(typeof ccy==='function'?ccy(cc):oc.currency)||'USD',oss_no:oc.oss_no||'',vat_local:oc.vat_local||''};
+  if(Object.keys(want).some(k=>cur[k]!==want[k])){b.settings.countries[cc]=Object.assign({},cur,want,{set_at:iso(now()),set_by:'partner-console (OTA data)'});ch=true;}});return ch;}
 function own_mirror(b){const P=own_pc();const st=own_st();
  st.bindings=b.bindings.filter(x=>x.partner_id===P);const ids=new Set(st.bindings.map(x=>x.id));
  st.transfers=b.transfers.filter(x=>ids.has(x.binding_id));st.requests=b.requests.filter(x=>x.partner_id===P);

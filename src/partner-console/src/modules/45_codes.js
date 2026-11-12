@@ -74,8 +74,9 @@ route('codes',{nav:'codes',render(){
  const ks=keyStats();const kTone=ks.avail<=0?'bad':ks.avail<Math.max(20,ks.bought*0.1)?'warn':'';
  const keyCard=ui.card({title:t('cx.k.title'),actions:ui.btn(t('cx.k.buy'),{size:'sm',icon:'cart',href:'#order-new'}),body:`<div class="row wrap g16" style="align-items:center"><div class="cx_crv"><span class="num">${fmtNum(ks.avail)}</span><span class="small faint">${t('cx.k.avail')}</span></div>
   <div class="grow" style="min-width:180px">${ui.bar(ks.bought?ks.used/ks.bought:0,kTone)}<div class="row between xs muted" style="margin-top:4px"><span>${t('cx.cr.bought')} <b class="num">${fmtNum(ks.bought)}</b></span><span>${t('cx.k.used')} <b class="num">${fmtNum(ks.used)}</b></span></div></div>
-  ${ks.avail<=0?ui.badge(t('cx.cr.empty'),'bad'):kTone==='warn'?ui.badge(t('cx.cr.low'),'warn'):''}</div><p class="xs faint" style="margin-top:10px">${t('cx.k.p')}</p>
-  ${typeof ord_batchTable==='function'?`<div class="row between wrap g8" style="margin-top:14px"><b class="small">${t('cx.k.batches')}</b><a class="small" href="#shipments">${t('cx.k.toShip')} →</a></div><div style="margin-top:8px">${ord_batchTable()}</div>`:''}`});
+  ${ks.avail<=0?ui.badge(t('cx.cr.empty'),'bad'):kTone==='warn'?ui.badge(t('cx.cr.low'),'warn'):''}</div><p class="xs faint" style="margin-top:10px">${t('cx.k.p')}</p>`});
+ // pack v12 (MPA 7.1): the keys bought for a country and the same number of SIM cards are shown as ONE batch
+ const batchCard=typeof ord_batchTable==='function'?ui.card({title:t('cx.k.batches'),actions:`<a class="small" href="#shipments">${t('cx.k.toShip')} →</a>`,pad:false,body:ord_batchTable()}):'';
  // Service Tokens
  const cards=keys.map(k=>{const c=tokenStats(k);const out=(st.p[k]||{}).issued||0;const tone=c.avail<=0?'bad':c.avail<Math.max(10,c.bought*0.1)?'warn':'';
   return `<div class="card cx_cr"><div class="row between g8"><b>${esc(cx_short(k))}</b>${c.bought?(c.avail<=0?ui.badge(t('cx.cr.empty'),'bad'):tone==='warn'?ui.badge(t('cx.cr.low'),'warn'):''):ui.badge(t('cx.cr.none'),'')}</div>
@@ -104,7 +105,7 @@ route('codes',{nav:'codes',render(){
  const explain=ui.note('info',t('cx.explain'));
  const pfx=S.org?S.org.prefix:'';const prof=ui.card({title:t('cx.pf.title'),body:`<div class="row wrap g16" style="align-items:flex-start"><div class="col g4" style="min-width:200px"><span class="small muted">${t('cx.pf.prefix')}</span><span class="row g8"><b class="mono" style="font-size:22px">${esc(pfx)}</b>${ui.iconbtn('copy',t('ord.doc.copy'),{act:'copy',arg:pfx})}</span><span class="xs faint">${t('cx.pf.p')}</span></div>
   <div class="grow">${ui.table([{label:t('cx.pf.digit')},{label:t('cx.x.pkg')}],Object.keys(PKG_DIGIT).sort((a,b)=>B32.indexOf(PKG_DIGIT[a])-B32.indexOf(PKG_DIGIT[b])).map(k=>{const [p,tm]=k.split('-');return{cells:[`<b class="mono">${PKG_DIGIT[k]}</b>`,esc(pkgLabel(p,+tm))]};}))}</div></div>`});
- return ui.page({title:t('cx.title'),sub:t('cx.sub'),actions,body:`<div class="stack">${explain}<div class="grid2" style="align-items:start">${keyCard}${ui.card({title:t('cx.how.title'),body:`<ol class="small muted cx_how"><li>${t('cx.how.1')}</li><li>${t('cx.how.2')}</li><li>${t('cx.how.3')}</li></ol>`})}</div>${credits}${xCard}${resCard}${lotsCard}${prof}</div>`});}});
+ return ui.page({title:t('cx.title'),sub:t('cx.sub'),actions,body:`<div class="stack">${explain}<div class="grid2" style="align-items:start">${keyCard}${ui.card({title:t('cx.how.title'),body:`<ol class="small muted cx_how"><li>${t('cx.how.1')}</li><li>${t('cx.how.2')}</li><li>${t('cx.how.3')}</li></ol>`})}</div>${batchCard}${credits}${xCard}${resCard}${lotsCard}${prof}</div>`});}});
 
 /* ---------- Service Token exchange ---------- */
 function cx_xchgModal(){const from=PLANS.flatMap(p=>TERMS.map(tm=>pkgKey(p,tm))).filter(k=>tokensAvail(k)>0);if(!from.length)return;
