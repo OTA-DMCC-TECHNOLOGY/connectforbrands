@@ -1,0 +1,67 @@
+/* ===== 85_print: print materials ===== */
+/* physical sheets: page = trim + 2 mm bleed; the art is designed in template px and scaled to mm */
+.prn-sheet{position:relative;background:#fff;flex:none;box-shadow:0 0 0 1px var(--line),var(--shadow);color:#22262C;font-family:Inter,Arial,Helvetica,sans-serif}
+.prn-sheet.print{box-shadow:none}
+.prn-trim{position:absolute;left:2mm;top:2mm;overflow:visible}
+.prn-art{position:absolute;left:0;top:0;transform-origin:0 0}
+.prn-root{box-sizing:border-box;background:#fff;font-family:Inter,Arial,Helvetica,sans-serif;position:relative;text-align:left;letter-spacing:normal;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.prn-root *{box-sizing:border-box}
+.prn-cut{position:absolute;inset:0;border:.25mm solid #E0218A;pointer-events:none}           /* CutContour layer (spot colour, simulated) */
+.prn-sheet0{background:#fff;width:960px;box-shadow:0 0 0 1px var(--line),var(--shadow);flex:none}
+.prn-mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.prn-step{color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.prn-foil{background:repeating-linear-gradient(45deg,#A6A6A6 0,#A6A6A6 7px,#BFBFBF 7px,#BFBFBF 14px)}   /* scratch layer (separate layer) */
+.prn-scratch{overflow:hidden}
+.prn-sup{position:absolute;height:34px;background:repeating-linear-gradient(90deg,#B3B3B3 0,#B3B3B3 2px,#fff 2px,#fff 4px,#B3B3B3 4px,#B3B3B3 5px,#fff 5px,#fff 8px)}
+.prn-logof{position:relative;flex:none;display:flex;align-items:center;justify-content:flex-start}
+.prn-logo{display:block;flex:none;object-fit:contain}
+.prn-qr{position:relative;flex:none}.prn-qr svg{display:block}
+/* zones: partner modules (blue), die line (pink) — proof only, never printed */
+.prn-zl{display:none;position:absolute;left:-3px;top:-24px;font:700 11px/16px Inter,Arial,sans-serif;color:#fff;background:#0B5CAD;padding:1px 6px;white-space:nowrap;letter-spacing:normal;text-align:left;z-index:2}
+.prn-zl.r{left:auto;right:-3px}
+.prn-zsq{display:none;position:absolute;left:0;top:0;outline:1px dotted #0B5CAD;pointer-events:none}
+.prn-zones .prn-zl,.prn-zones .prn-zsq{display:block}
+.prn-zones .prn-z{outline:1.5px dashed #0B5CAD;outline-offset:3px}
+.prn-zones>.prn-root:not(.prn-a):not(.prn-rules){outline:1px dashed #E0218A;outline-offset:-1px}
+.prn-scratch{position:relative}
+/* preview stage */
+.prn-stage{overflow:auto;max-width:100%;padding:16px;background:var(--sunk);border-radius:var(--r,10px);display:flex;flex-direction:column;align-items:flex-start;gap:16px;-webkit-overflow-scrolling:touch}
+.prn-stage>.prn-sheet,.prn-stage>.prn-sheet0{zoom:var(--z,1)}
+.prn-stage.mini{padding:10px;max-width:100%}
+.prn-mini{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-bottom:8px}
+.prn-mini .prn-stage{flex:none;max-width:100%}
+.prn-cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1100px){.prn-cols{grid-template-columns:minmax(0,1fr)}}
+.prn-cols>*{min-width:0}
+.prn-ctls{align-items:flex-end}
+.prn-ctl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink2);min-width:0}
+.prn-ctl .inp{min-width:120px;max-width:100%}
+.prn-segwrap{overflow-x:auto;max-width:100%}
+.prn-segwrap .seg{flex-wrap:nowrap}
+/* logo preview cells */
+.prn-lp{display:flex;flex-wrap:wrap;gap:12px;padding:12px;background:var(--sunk);border-radius:8px;margin:4px 0 8px}
+.prn-lp.empty{color:var(--ink3);font-size:13px}
+.prn-lpc{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prn-lpf{position:relative;background:#fff;outline:1px dashed #0B5CAD;display:flex;align-items:center}
+.prn-lpf img{display:block}.prn-lpf i{position:absolute;left:0;top:0;outline:1px dotted #0B5CAD}
+.prn-ck{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.prn-ck li{display:flex;gap:6px;align-items:flex-start}.prn-ck li.ok{color:var(--ok)}.prn-ck li.warn{color:var(--warn)}.prn-ck li.bad{color:var(--bad)}
+.prn-ck li span{color:var(--ink)}
+.prn-sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;box-shadow:0 0 0 1px var(--line)}
+.prn-color{width:42px;height:38px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--surface);flex:none;cursor:pointer}
+.prn-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+label.btn{position:relative;cursor:pointer}
+label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.prn-det{border-top:1px solid var(--line);padding:8px 0}.prn-det:first-child{border-top:0}
+.prn-det summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 0}
+.prn-ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+/* off-screen host for auto-checks, print container */
+#prn-host{position:fixed;left:-30000px;top:0;visibility:hidden;pointer-events:none;contain:layout}
+#prn-print{display:none}
+@media print{
+ html.prn-printing body>*:not(#prn-print){display:none!important}
+ html.prn-printing #prn-print{display:block}
+ html.prn-printing body{margin:0;background:#fff}
+ #prn-print .prn-sheet{box-shadow:none;break-after:page;page-break-after:always;zoom:1}
+ #prn-print .prn-sheet:last-child{break-after:auto;page-break-after:auto}
+}
