@@ -294,6 +294,8 @@ function cx_tryActivateV14(raw,iccid){const c0=typeof prnCodeNorm==='function'?p
  const r=prnRedeem(c0,iccid);if(r.ok){log(t('cod.a.log',{c:'••••-••••-'+c0.slice(8),p:pkgLabel(r.c.plan,r.c.term),s:fmtIccid(r.s.iccid)}));return r;}
  const e=r.err;if(e==='no_key')return{err:t('cx.e.noKey'),credits:true};if(e==='no_token')return{err:t('cod.e.credits',{p:esc(pkgLabel(c.plan,c.term))}),credits:true};
  if(e==='nosim')return{err:t('cod.e.noSim')};if(e==='siminactive')return{err:t('cod.e.simInactive')};
+ // ТЗ v10 4.12 T7 (same text as the customer portal) for a used or blocked code — the approved key own.T7 of 80_ownership
+ if(e==='used'||e==='blocked'){const m=t('own.T7');return{err:m&&m!=='own.T7'?m:'This code cannot be used. Check the code or contact the seller.'};}
  const k='prn.rd.e.'+e;const msg=t(k,{d:r.deadline?fmtDate(r.deadline):''});return{err:msg&&msg!==k?msg:t('cod.e.invalid')};}
 function cx_isV14(raw){const n=typeof prnCodeNorm==='function'?prnCodeNorm(raw):String(raw||'').replace(/[\s-]/g,'');return n.length===12;}
 function cx_tryActivate(raw,iccid){

@@ -516,8 +516,8 @@ function prnRedeem(raw,iccid){const c0=prnCodeNorm(raw);if(c0.length!==12)return
  const s=(S.sims||[]).find(x=>x.iccid===iccid);if(!s)return{err:'nosim'};if(s.status!=='active')return{err:'siminactive'};if(s.plan)return{err:'simhas'};
  const m=findModel(s.modelId);if(!m||m.model.planStatus!=='approved'||m.model.plan!==c.plan)return{err:'plan'};
  let simC=null;try{simC=simCc(s);}catch(e){}if(simC&&c.cc&&simC!==c.cc)return{err:'country'};
- const lot=c.keyResLotId;prn_releaseKey(c);const r=deviceActivate(s,{via:'token',code:c});
- if(r.err){if(lot){const l=(S.keyLots||[]).find(x=>x.id===lot);if(l&&Math.max(0,l.qty-l.used-(l.reserved||0))>0){l.reserved=(l.reserved||0)+1;l.prnRes=(l.prnRes||0)+1;c.keyResLotId=lot;}}return{err:r.err};}
+ // deviceActivate spends the key reserved for this card (c.keyResLotId); on failure the reservation stays in place
+ const r=deviceActivate(s,{via:'token',code:c});if(r.err)return{err:r.err};
  audit('print.code.redeem',prn_mask(c.code),{serial:c.serial,iccid:s.iccid,batch:(prn_batch(c.batchId)||{}).no||''});prn_bridgePush();return{ok:true,c,s};}
 function prn_expire(){const ts=iso(now()).slice(0,10);let n=0;(S.codes||[]).forEach(c=>{if(!prn_isNewCode(c))return;if(['generated','exported_for_print','printed'].includes(c.status)&&c.deadline&&c.deadline<ts){c.status='expired';c.expiredAt=iso(now());prn_releaseKey(c);n++;}
   else if(['activated','blocked','expired'].includes(c.status)&&c.keyResLotId)prn_releaseKey(c);});
@@ -538,8 +538,8 @@ function prn_bridgePush(){if(!S||!S.authed||!S.org)return false;let b=null;try{b
 // a printed code redeemed in the portal → activate here with the shared rules (45_codes handles only the old 16-char codes)
 function prn_fromPortal(c,r){const dev=String(r.device_id||'');let b=null;try{b=JSON.parse(localStorage.getItem(PRN_BRIDGE)||'null');}catch(e){}
  const bd=b&&(b.bindings||[]).find(x=>x.device_id===dev&&x.status!=='ended');const s=(S.sims||[]).find(x=>x.imei===dev||x.iccid===dev||(bd&&x.iccid===bd.iccid));
- if(!s||s.plan){c.bridgePending={reason:s?'has_plan':'no_sim',at:iso(now())};return;}const lot=c.keyResLotId;prn_releaseKey(c);const res=deviceActivate(s,{via:'token',code:c});
- if(res.err){if(lot){const l=(S.keyLots||[]).find(x=>x.id===lot);if(l){l.reserved=(l.reserved||0)+1;l.prnRes=(l.prnRes||0)+1;c.keyResLotId=lot;}}c.bridgePending={reason:res.err,at:iso(now())};return;}
+ if(!s||s.plan){c.bridgePending={reason:s?'has_plan':'no_sim',at:iso(now())};return;}const res=deviceActivate(s,{via:'token',code:c});   // spends the reserved key (c.keyResLotId)
+ if(res.err){c.bridgePending={reason:res.err,at:iso(now())};return;}
  delete c.bridgePending;c.redeemedIn='portal';audit('print.code.redeem',prn_mask(c.code),{serial:c.serial,iccid:s.iccid,via:'portal'});}
 
 /* ---------- shipment labels (A1 per pack, A2 per carton) ---------- */
@@ -845,11 +845,6 @@ ACT.prn_setLbl=v=>{prn_ui().lbl=v;rerender();};
 ACT.prn_printLabels=id=>{const h=(S.shipments||[]).find(x=>x.id===id);if(!h)return;const u=prn_ui();const bv=prn_approved()||prn_latest();const size=+u.packSize||500;const which=u.lbl==='A2'?'A2':'A1';
  const d=o=>prn_data(bv,Object.assign({cc:h.cc,zones:false},o));const html=which==='A1'?prn_packs(h,size).map(pk=>prn_sheet('A1',d({pack:pk}),{print:true})).join(''):prn_cartons(h,size).map(c=>prn_sheet('A2',d({carton:c}),{print:true})).join('');
  prn_print(html,214,301);audit('print.labels',h.pf,{type:which,pages:which==='A1'?prn_packs(h,size).length:prn_cartons(h,size).length,packSize:size,brandVersion:bv.version});};
-// "Print labels" on the shipment record (owner of #shipment is 30_orders → button injected after render)
-HOOKS.afterRender.push(name=>{if(name!=='shipment'||!S.authed||!prn_canView())return;const id=parseHash().params[0];const ph=document.querySelector('#content .ph');if(!ph||ph.querySelector('[data-prn-lbl]'))return;
- let box=ph.querySelector(':scope > .row');if(!box){box=document.createElement('div');box.className='row wrap g8';ph.appendChild(box);}
- const a=document.createElement('a');a.className='btn';a.href='#prn-labels--'+id;a.setAttribute('data-prn-lbl','1');a.innerHTML=icon('printer','sm')+`<span>${esc(t('prn.lb.btn'))}</span>`;box.appendChild(a);});
-
 /* ---------- reconcile: expiry, reservations, bridge (each render) ---------- */
 let prn_syncBusy=false;
 HOOKS.afterRender.push(()=>{if(prn_syncBusy||!S||!S.authed||!S.org||!S.prn)return;prn_syncBusy=true;try{const before=JSON.stringify([(S.codes||[]).filter(prn_isNewCode).map(c=>c.status).join(''),(S.keyLots||[]).map(l=>l.reserved||0).join(',')]);
